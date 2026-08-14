@@ -190,6 +190,16 @@
     return "US";
   }
 
+  function fmtExpenseRatio(n) {
+    // Yahoo's annualReportExpenseRatio/netExpenseRatio come back already
+    // in percentage points (0.03 means "0.03%", not a 0.0003 fraction) —
+    // confirmed against known real expense ratios (SPY≈0.09%, VOO≈0.03%).
+    // Do NOT run this through fmtPct(), which assumes a fraction and
+    // would multiply by 100 again, showing 100x too high.
+    if (n == null) return "—";
+    return n.toFixed(2) + "%";
+  }
+
   function fmtCap(n) {
     if (n == null) return "—";
     if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
@@ -718,7 +728,7 @@
       <div class="detail-row"><span>Atividade insiders</span><span>${insider}</span></div>
       <div class="detail-row"><span>Market cap</span><span>${fmtCap(r.market_cap)}</span></div>
       <div class="detail-row"><span>Preço atual</span><span>${r.current_price ?? "—"} ${r.currency || ""}</span></div>
-      ${r.quote_type === "ETF" ? `<div class="detail-row"><span>Expense ratio</span><span>${fmtPct(r.expense_ratio)}</span></div><div class="detail-row"><span>Exposição AI</span><span>${r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "—"}</span></div>` : ""}
+      ${r.quote_type === "ETF" ? `<div class="detail-row"><span>Expense ratio</span><span>${fmtExpenseRatio(r.expense_ratio)}</span></div><div class="detail-row"><span>Exposição AI</span><span>${r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "—"}</span></div>` : ""}
       <p class="detail-note">O verdict é uma classificação quantitativa explicável e relativa ao universo analisado. Não constitui previsão de retorno nem aconselhamento financeiro.</p>
     `;
     els.detail.hidden = false;
@@ -937,7 +947,7 @@
         <div class="summary-item"><span class="summary-label">posições marcadas</span><span class="summary-value">${rows.length}</span></div>
         <div class="summary-item"><span class="summary-label">score médio (ações)</span><span class="summary-value">${avgScore}</span></div>
         <div class="summary-item"><span class="summary-label">zombies na carteira</span><span class="summary-value ${zombieCount > 0 ? 'alert' : ''}">${zombieCount}</span></div>
-        <div class="summary-item"><span class="summary-label">expense ratio médio (ETFs)</span><span class="summary-value">${avgFee != null ? fmtPct(avgFee) : "sem dados"}</span></div>
+        <div class="summary-item"><span class="summary-label">expense ratio médio (ETFs)</span><span class="summary-value">${avgFee != null ? fmtExpenseRatio(avgFee) : "sem dados"}</span></div>
         <div class="summary-item"><span class="summary-label">exposição AI média (ETFs)</span><span class="summary-value">${avgAi != null ? avgAi.toFixed(1) + "%" : "sem dados"}</span></div>
       </div>
       <p class="detail-note">Cálculo simples (não ponderado por quantidade — o Finscanner não pede número de unidades, só se possuis ou não).</p>
@@ -1082,7 +1092,7 @@
     const cards = picks.map(r => {
       const isEtf = r.quote_type === "ETF";
       const rows = isEtf ? [
-        ["Expense ratio", r.expense_ratio != null ? fmtPct(r.expense_ratio) : "—"],
+        ["Expense ratio", r.expense_ratio != null ? fmtExpenseRatio(r.expense_ratio) : "—"],
         ["Exposição AI", r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "sem dados"],
         ["Setor", r.sector || "—"],
         ["Preço", r.current_price != null ? r.current_price : "—"],
