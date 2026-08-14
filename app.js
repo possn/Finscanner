@@ -11,6 +11,7 @@
     zombieOnly: document.getElementById("zombie-only"),
     watchlistOnly: document.getElementById("watchlist-only"),
     generatedAt: document.getElementById("generated-at"),
+    startupStatus: document.getElementById("startup-status"),
     detail: document.getElementById("detail"),
     detailContent: document.getElementById("detail-content"),
     detailClose: document.getElementById("detail-close"),
@@ -93,19 +94,15 @@
   }
 
   function switchView(view) {
+    if (!VIEW_META[view]) return;
     state.activeView = view;
     els.sidenavItems.forEach(btn => btn.classList.toggle("sidebar__item--ativo", btn.dataset.view === view));
     els.views.forEach(sec => sec.classList.toggle("is-active", sec.id === `view-${view}`));
-    els.viewTitle.textContent = VIEW_META[view].title;
-    els.viewSub.textContent = VIEW_META[view].sub;
-    els.mobileTitle.textContent = VIEW_META[view].title;
+    if (els.viewTitle) els.viewTitle.textContent = VIEW_META[view].title;
+    if (els.viewSub) els.viewSub.textContent = VIEW_META[view].sub;
+    if (els.mobileTitle) els.mobileTitle.textContent = VIEW_META[view].title;
     updateGeneratedAt();
-    if (view === "portfolio") renderPortfolio();
-    if (view === "funds") renderFunds();
-    if (view === "news") renderNews();
-    if (view === "smartmoney") renderSmartMoney();
-    if (view === "theses") renderTheses();
-    if (view === "compare") renderCompare();
+    renderActiveView();
     closeMobileSidebar();
   }
 
@@ -149,11 +146,32 @@
   initTheme();
 
   function updateGeneratedAt() {
-    const src = state.activeView === "metals" ? state.metals : state.data;
     if (!els.generatedAt) return;
-    els.generatedAt.textContent = src
-      ? "atualizado " + new Date(src.generated_at).toLocaleString("pt-PT")
-      : "a carregar…";
+    const src = state.activeView === "metals" ? state.metals : state.data;
+    if (!src?.generated_at) {
+      els.generatedAt.textContent = state.activeView === "metals" ? "metais a carregar…" : "dados a carregar…";
+      return;
+    }
+    const d = new Date(src.generated_at);
+    els.generatedAt.textContent = Number.isNaN(d.getTime()) ? "dados carregados" : "atualizado " + d.toLocaleString("pt-PT");
+  }
+
+  function setStartupStatus(message = "", isError = false) {
+    if (!els.startupStatus) return;
+    els.startupStatus.hidden = !message;
+    els.startupStatus.textContent = message;
+    els.startupStatus.classList.toggle("startup-status--error", !!isError);
+  }
+
+  function renderActiveView() {
+    const v = state.activeView;
+    if (v === "stocks") { renderMarketOverview(); applyFilters(); }
+    else if (v === "portfolio") renderPortfolio();
+    else if (v === "funds") renderFunds();
+    else if (v === "news") renderNews();
+    else if (v === "smartmoney") renderSmartMoney();
+    else if (v === "theses") renderTheses();
+    else if (v === "compare") renderCompare();
   }
 
   els.sidenavItems.forEach(btn => {
@@ -272,76 +290,65 @@
     return {label:"Fraco", cls:"weak", text:"O conjunto atual de métricas apresenta mais fragilidades do que vantagens relativas."};
   }
 
-  async function fetchJson(path) {
+  async function fetchJson(path, timeoutMs = 15000) {
     const url = new URL(path, document.baseURI);
     url.searchParams.set("_", String(Date.now()));
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const res = await fetch(url.href, { cache: "no-store", signal: controller.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status} · ${url.pathname}`);
       return await res.json();
+    } catch (e) {
+      if (e?.name === "AbortError") throw new Error(`timeout ao carregar ${path}`);
+      throw e;
     } finally { clearTimeout(timer); }
   }
 
   async function load() {
+    setStartupStatus("A carregar universo…");
     try {
-      state.data = await fetchJson("data/stocks.json");
-      if (state.activeView === "stocks") updateGeneratedAt();
-      renderMarketOverview();
-      applyFilters();
+      const payload = await fetchJson("data/stocks.json", 20000);
+      if (!payload || !Array.isArray(payload.stocks)) throw new Error("data/stocks.json não contém um array stocks válido");
+      state.data = payload;
+      updateGeneratedAt();
+      setStartupStatus("");
+      renderActiveView();
     } catch (e) {
-      if (els.list) els.list.innerHTML = `<div class="load-error"><strong>Falha ao carregar os dados.</strong><p>O ficheiro <code>data/stocks.json</code> não está acessível nesta publicação do GitHub Pages.</p><button id="retry-data" class="import-btn import-btn--secondary">Tentar novamente</button><small>${escapeHtml(e?.message || e)}</small></div>`;
+      state.data = null;
+      if (els.list) els.list.innerHTML = `<div class="load-error"><strong>Falha ao carregar os dados.</strong><p>O ficheiro <code>data/stocks.json</code> não está acessível ou é inválido nesta publicação.</p><button id="retry-data" class="import-btn import-btn--secondary">Tentar novamente</button><small>${escapeHtml(e?.message || e)}</small></div>`;
       if (els.generatedAt) els.generatedAt.textContent = "dados indisponíveis";
+      setStartupStatus("Falha no carregamento dos dados", true);
       document.getElementById("retry-data")?.addEventListener("click", load);
-      console.error(e);
+      console.error("stocks load failed", e);
     }
   }
 
   async function loadMetals() {
     try {
-      const res = await fetch("data/metals.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      state.metals = await res.json();
+      state.metals = await fetchJson("data/metals.json", 15000);
       if (state.activeView === "metals") updateGeneratedAt();
       renderMetals();
     } catch (e) {
-      els.metalsList.innerHTML = `<p class="empty-state">Não foi possível carregar data/metals.json.<br>Corre o pipeline (scripts/run.py) pelo menos uma vez.</p>`;
-      console.error(e);
+      state.metals = null;
+      if (els.metalsList) els.metalsList.innerHTML = `<p class="empty-state">Não foi possível carregar <code>data/metals.json</code>.</p>`;
+      console.warn("metals.json unavailable", e);
     }
   }
 
   async function loadHistory() {
-    try {
-      const res = await fetch("data/history.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      state.history = await res.json();
-    } catch (e) {
-      state.history = {};
-      console.warn("history.json unavailable yet", e);
-    }
+    try { state.history = await fetchJson("data/history.json", 10000); }
+    catch (e) { state.history = {}; console.warn("history.json unavailable yet", e); }
   }
 
   async function loadValuationHistory() {
-    try {
-      const res = await fetch("data/valuation_history.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      state.valuationHistory = await res.json();
-    } catch (e) {
-      state.valuationHistory = {};
-      console.warn("valuation_history.json unavailable yet", e);
-    }
+    try { state.valuationHistory = await fetchJson("data/valuation_history.json", 10000); }
+    catch (e) { state.valuationHistory = {}; console.warn("valuation_history.json unavailable yet", e); }
   }
 
   async function loadThesisHistory() {
-    try {
-      const res = await fetch("data/thesis_history.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      state.thesisHistory = await res.json();
-    } catch (e) {
-      state.thesisHistory = {};
-      console.warn("thesis_history.json unavailable yet", e);
-    }
+    try { state.thesisHistory = await fetchJson("data/thesis_history.json", 10000); }
+    catch (e) { state.thesisHistory = {}; console.warn("thesis_history.json unavailable yet", e); }
   }
 
   function renderMetals() {
@@ -1013,7 +1020,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.8.3").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.8.1">
+<link rel="stylesheet" href="style.css?v=0.8.3">
 </head>
 <body>
 
@@ -68,7 +68,7 @@
           <h1 id="view-title">Ações</h1>
           <p class="page-header__sub" id="view-sub">dossiê diário · fontes gratuitas</p>
         </div>
-        <div class="page-header__meta" id="generated-at">a carregar…</div>
+        <div class="page-header__status"><div class="page-header__meta" id="generated-at">a carregar…</div><div id="startup-status" class="startup-status" hidden></div></div>
       </div>
     </header>
 
@@ -87,6 +87,14 @@
       </section>
 
       <section class="insight-strip" id="insight-strip" aria-label="Ideias em destaque"></section>
+
+      <section class="opportunity-zone" aria-label="Zona de oportunidade">
+        <div class="section-heading">
+          <div><span class="eyebrow">QUALITY × VALUE</span><h3>Zona de oportunidade</h3></div>
+          <span class="section-count">qualidade + valuation</span>
+        </div>
+        <div id="opportunity-grid" class="opportunity-grid"></div>
+      </section>
 
       <div class="section-heading">
         <div><span class="eyebrow">SCREENER</span><h3>Explorar empresas</h3></div>
@@ -168,6 +176,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.8.1"></script>
+<script src="app.js?v=0.8.3"></script>
 </body>
 </html>

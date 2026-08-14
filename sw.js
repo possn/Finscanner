@@ -1,14 +1,33 @@
-const CACHE_VERSION = "finscanner-v12-shell-repair-081";
-const SHELL_FILES = ["./", "./index.html", "./style.css?v=0.8.1", "./app.js?v=0.8.1", "./manifest.json"];
+const CACHE_VERSION = "finscanner-v13-integrity-083";
+const SHELL_FILES = [
+  "./",
+  "./index.html",
+  "./style.css?v=0.8.3",
+  "./app.js?v=0.8.3",
+  "./manifest.json",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png"
+];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_VERSION).then(cache => cache.addAll(SHELL_FILES)));
-  self.skipWaiting();
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_VERSION);
+    await Promise.all(SHELL_FILES.map(async url => {
+      try {
+        const response = await fetch(url, { cache: "reload" });
+        if (response.ok) await cache.put(url, response);
+      } catch (_) { /* one optional shell asset must not abort SW install */ }
+    }));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))));
-  self.clients.claim();
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener("fetch", event => {
@@ -16,26 +35,33 @@ self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  const isData = url.pathname.includes("/data/") && url.pathname.endsWith(".json");
-  const isNavigation = event.request.mode === "navigate" || url.pathname.endsWith("/index.html") || url.pathname.endsWith("/");
-  const isShellAsset = url.pathname.endsWith("/app.js") || url.pathname.endsWith("/style.css") || url.pathname.endsWith("/manifest.json");
+  const isData = url.pathname.includes("/data/") && (url.pathname.endsWith(".json") || url.pathname.endsWith(".txt"));
+  const isNavigation = event.request.mode === "navigate";
+  const isShell = /\/(?:index\.html|app\.js|style\.css|manifest\.json)$/.test(url.pathname);
 
-  // Network-first avoids serving an old HTML shell with a new JS bundle (or the reverse).
-  if (isNavigation || isShellAsset || isData) {
+  if (isNavigation || isShell || isData) {
     event.respondWith((async () => {
       try {
         const fresh = await fetch(event.request, { cache: "no-store" });
-        if (fresh && fresh.ok) {
-          const clone = fresh.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put(event.request, clone));
+        if (fresh.ok) {
+          const cache = await caches.open(CACHE_VERSION);
+          await cache.put(event.request, fresh.clone());
         }
         return fresh;
-      } catch (err) {
-        return (await caches.match(event.request)) || Response.error();
+      } catch (_) {
+        const cached = await caches.match(event.request, { ignoreSearch: isShell || isNavigation });
+        if (cached) return cached;
+        if (isNavigation) return (await caches.match("./index.html", { ignoreSearch: true })) || Response.error();
+        return Response.error();
       }
     })());
     return;
   }
 
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    if (cached) return cached;
+    try { return await fetch(event.request); }
+    catch (_) { return Response.error(); }
+  })());
 });
