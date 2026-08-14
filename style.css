@@ -586,6 +586,14 @@ a { color: inherit; }
 
 .exposure-title { font-weight: 600; font-size: 0.9rem; margin: 0 0 0.6rem; }
 
+.donut-row { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+.donut-canvas { flex-shrink: 0; }
+.donut-legend { display: flex; flex-direction: column; gap: 0.35rem; flex: 1 1 160px; min-width: 140px; }
+.donut-legend-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; }
+.donut-swatch { width: 0.7rem; height: 0.7rem; border-radius: 3px; flex-shrink: 0; }
+.donut-legend-label { flex: 1; color: var(--ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.donut-legend-pct { font-family: var(--font-mono, monospace); font-weight: 600; }
+
 .exposure-row {
   display: flex;
   align-items: center;

@@ -599,7 +599,15 @@
     if (isOwned(r.ticker)) flags.push(`<span class="badge owned">na carteira</span>`);
     const starred = isWatched(r.ticker);
     const verdict = investmentVerdict(r);
-    const metrics = [
+    const isEtf = r.quote_type === "ETF";
+    const metrics = isEtf ? [
+      ["Expense ratio", r.expense_ratio != null ? r.expense_ratio.toFixed(2) + "%" : null],
+      ["Exposição IA", r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : null],
+      ["Setor", r.sector || null],
+      ["Região", r.region ? regionLabel(r.region) : null],
+      ["Preço", r.current_price ?? null],
+      ["Categoria", r.kind === "etf_proxy" ? "proxy" : "ETF"],
+    ] : [
       ["Qualidade", r.quality_pct ?? r.profitability_pct],
       ["Crescimento", r.growth_pct],
       ["Balanço", r.balance_pct ?? r.leverage_pct],
@@ -617,10 +625,10 @@
             <div class="card-sector">${r.sector || "Sem setor"}${r.industry ? " · " + r.industry : ""} · ${r.region ? regionLabel(r.region) : marketOf(r.ticker)}</div>
           </div>
         </div>
-        <div class="metric-ribbon">${metrics.map(([label,val]) => `<div><span>${label}</span><strong>${val == null ? "—" : Math.round(val)}</strong></div>`).join("")}</div>
+        <div class="metric-ribbon">${metrics.map(([label,val]) => `<div><span>${label}</span><strong>${val == null ? "—" : (typeof val === "number" ? Math.round(val) : val)}</strong></div>`).join("")}</div>
         <div class="stock-card__verdict">
-          <span class="score-pill ${verdict.cls}">${r.score == null ? "—" : Math.round(r.score)}</span>
-          <strong>${verdict.label}</strong>
+          <span class="score-pill ${verdict.cls}">${r.score == null ? (isEtf ? "ETF" : "—") : Math.round(r.score)}</span>
+          <strong>${isEtf ? (r.name || r.ticker) : verdict.label}</strong>
           <small>${r.current_price != null ? r.current_price + (r.currency ? " " + r.currency : "") : fmtCap(r.market_cap)}</small>
           <div class="card-flags">${flags.join("")}</div>
         </div>
@@ -927,6 +935,58 @@
     return null;
   }
 
+  // ---------- donut chart (plain <canvas>, no chart library) ----------
+  const DONUT_COLORS = ["#86977c","#a15c2f","#6b5b95","#c9a063","#5c8a99","#a15c8f","#7c9c5c","#b08968","#5c7c99","#8f6b5c","#6b8f5c","#996b5c"];
+  function drawDonut(canvas, entries, totalValue) {
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width, h = canvas.height;
+    const cx = w / 2, cy = h / 2;
+    const rOuter = Math.min(w, h) / 2 - 2;
+    const rInner = rOuter * 0.58;
+    ctx.clearRect(0, 0, w, h);
+    let angle = -Math.PI / 2;
+    entries.forEach(([, val], i) => {
+      const frac = val / totalValue;
+      const next = angle + frac * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, rOuter, angle, next);
+      ctx.closePath();
+      ctx.fillStyle = DONUT_COLORS[i % DONUT_COLORS.length];
+      ctx.fill();
+      angle = next;
+    });
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  function donutBlockHtml(id, title, entries, totalValue) {
+    const legend = entries.map(([label, val], i) => {
+      const pct = (val / totalValue) * 100;
+      return `<div class="donut-legend-row">
+        <span class="donut-swatch" style="background:${DONUT_COLORS[i % DONUT_COLORS.length]}"></span>
+        <span class="donut-legend-label">${escapeHtml(label)}</span>
+        <span class="donut-legend-pct">${pct.toFixed(1)}%</span>
+      </div>`;
+    }).join("");
+    return `
+      <div class="exposure-block donut-block">
+        <h3 class="exposure-title">${escapeHtml(title)}</h3>
+        <div class="donut-row">
+          <canvas id="${id}" width="140" height="140" class="donut-canvas"></canvas>
+          <div class="donut-legend">${legend}</div>
+        </div>
+      </div>`;
+  }
+
+  function paintDonut(id, entries, totalValue) {
+    const canvas = document.getElementById(id);
+    if (canvas) drawDonut(canvas, entries, totalValue);
+  }
+
   function renderExposure(portfolio, matchedRows) {
     if (!Object.keys(portfolio).length) {
       els.exposurePanel.innerHTML = "";
@@ -998,12 +1058,14 @@
     };
 
     els.exposurePanel.innerHTML = `
+      ${donutBlockHtml("donut-sector", "Exposição por setor", sectorRows, totalValue)}
+      ${donutBlockHtml("donut-region", "Exposição geográfica", regionRows, totalValue)}
       <div class="exposure-block">
-        <h3 class="exposure-title">Exposição por setor (ponderada por valor)</h3>
+        <h3 class="exposure-title">Exposição por setor — detalhe</h3>
         ${sectorRows.map(([sector, val]) => barRow(sector, val)).join("")}
       </div>
       <div class="exposure-block">
-        <h3 class="exposure-title">Exposição geográfica (ponderada por valor)</h3>
+        <h3 class="exposure-title">Exposição geográfica — detalhe</h3>
         ${regionRows.map(([region, val]) => barRow(region, val, "ai")).join("")}
       </div>
       <div class="exposure-block">
@@ -1020,6 +1082,9 @@
         </p>
       </div>
       ${unmatchedListHtml}`;
+
+    paintDonut("donut-sector", sectorRows, totalValue);
+    paintDonut("donut-region", regionRows, totalValue);
   }
 
   // ---------- Portfolio view ----------

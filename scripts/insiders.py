@@ -33,6 +33,7 @@ SEC_USER_AGENT = os.getenv("SEC_USER_AGENT") or "Finscanner research-tool finsca
 HEADERS = {
     "User-Agent": SEC_USER_AGENT,
     "Accept-Encoding": "gzip, deflate",
+    "Accept": "application/json, application/xml, text/xml, */*",
 }
 TICKER_CIK_URL = "https://www.sec.gov/files/company_tickers.json"
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
@@ -139,6 +140,26 @@ def _parse_ownership_xml(content: bytes, ticker: str, accession: str) -> list[di
     return out
 
 
+def _parse_ownership_xml_diag(content: bytes, ticker: str, accession: str) -> tuple[list[dict], int]:
+    """Same parse as _parse_ownership_xml, but also returns the raw count
+    of <nonDerivativeTransaction> elements found before the P/S filter —
+    lets us tell apart 'fetch/parse is broken' (raw_count would be 0 even
+    though the filing definitely has transactions) from 'this filing
+    genuinely has no open-market P/S transactions' (raw_count > 0 but all
+    codes are grants/vesting/tax-withholding, e.g. A/F/M — legitimate)."""
+    try:
+        root = ET.fromstring(content)
+    except Exception as e:
+        log.info("%s: XML parse failed for accession %s (%s: %s)", ticker, accession, type(e).__name__, e)
+        return [], 0
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+    raw = root.findall("./nonDerivativeTable/nonDerivativeTransaction")
+    parsed = _parse_ownership_xml(content, ticker, accession)
+    return parsed, len(raw)
+
+
 def _recent_form4_rows(cik: str, days: int) -> list[dict]:
     data = _get(SUBMISSIONS_URL.format(cik=cik)).json()
     recent = (data.get("filings") or {}).get("recent") or {}
@@ -181,6 +202,9 @@ def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 6) -
 
     transactions: list[dict] = []
     cik_int = str(int(cik))
+    fetch_errors = 0
+    fetch_ok = 0
+    raw_tx_seen = 0
     for filing in filings[:max_detail_filings]:
         accession_no_dash = filing["accession"].replace("-", "")
         primary = filing["primary_document"]
@@ -190,11 +214,21 @@ def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 6) -
             primary_document=primary,
         )
         try:
-            content = _get(url).content
-            transactions.extend(_parse_ownership_xml(content, ticker, filing["accession"]))
+            resp = _get(url)
+            fetch_ok += 1
+            parsed, raw_count = _parse_ownership_xml_diag(resp.content, ticker, filing["accession"])
+            raw_tx_seen += raw_count
+            transactions.extend(parsed)
         except Exception as e:
-            log.debug("%s: filing %s parse failed (%s)", ticker, filing["accession"], e)
+            fetch_errors += 1
+            log.info("%s: filing fetch failed for %s (%s: %s)", ticker, url, type(e).__name__, e)
         time.sleep(0.12)
+
+    if fetch_errors or (fetch_ok and not transactions):
+        log.info(
+            "%s: insider detail diagnostics — filings_tried=%d fetch_ok=%d fetch_errors=%d raw_nonderiv_tx=%d parsed_ps_tx=%d",
+            ticker, len(filings[:max_detail_filings]), fetch_ok, fetch_errors, raw_tx_seen, len(transactions),
+        )
 
     buys = [x for x in transactions if x["type"] == "buy"]
     sells = [x for x in transactions if x["type"] == "sell"]
