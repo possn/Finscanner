@@ -156,6 +156,37 @@
     return (n * 100).toFixed(1) + "%";
   }
 
+  function fmtRawPct(n) {
+    if (n == null || !Number.isFinite(Number(n))) return "—";
+    return (Number(n) * 100).toFixed(1) + "%";
+  }
+
+  function fmtRatio(n, digits = 1) {
+    if (n == null || !Number.isFinite(Number(n))) return "—";
+    return Number(n).toFixed(digits) + "×";
+  }
+
+  function fmtMoney(n, currency = "") {
+    if (n == null || !Number.isFinite(Number(n))) return "—";
+    const abs = Math.abs(Number(n));
+    const sign = Number(n) < 0 ? "−" : "";
+    const suffix = abs >= 1e9 ? (abs/1e9).toFixed(1)+"B" : abs >= 1e6 ? (abs/1e6).toFixed(1)+"M" : abs.toLocaleString("pt-PT", {maximumFractionDigits:0});
+    return `${sign}${suffix}${currency ? " " + currency : ""}`;
+  }
+
+  function investmentVerdict(r) {
+    if (r.quote_type === "ETF") return {label:"ETF", cls:"neutral", text:"Avaliação por métricas de fundo."};
+    if (r.zombie === "yes") return {label:"Evitar / investigar", cls:"weak", text:"Cobertura de juros inferior a 1× limita qualquer conclusão positiva do score."};
+    const s = Number(r.score);
+    const cov = Number(r.data_coverage_pct);
+    if (!Number.isFinite(s)) return {label:"Sem conclusão", cls:"neutral", text:"Dados insuficientes para um verdict quantitativo."};
+    if (Number.isFinite(cov) && cov < 40) return {label:"Dados insuficientes", cls:"neutral", text:"A cobertura de dados é demasiado baixa para sustentar a classificação."};
+    if (s >= 75) return {label:"Candidato forte", cls:"excellent", text:"Perfil multifator de topo; merece análise fundamental completa antes de qualquer decisão."};
+    if (s >= 65) return {label:"Interessante", cls:"good", text:"Combinação favorável de qualidade, crescimento, balanço, cash flow e valuation."};
+    if (s >= 50) return {label:"Neutro", cls:"neutral", text:"Não existe vantagem multifator suficientemente forte neste universo."};
+    return {label:"Fraco", cls:"weak", text:"O conjunto atual de métricas apresenta mais fragilidades do que vantagens relativas."};
+  }
+
   async function load() {
     try {
       const res = await fetch("data/stocks.json", { cache: "no-store" });
@@ -329,10 +360,12 @@
     if (r.data_confidence === "low") flags.push(`<span class="badge low-confidence">dados limitados</span>`);
     if (isOwned(r.ticker)) flags.push(`<span class="badge owned">na carteira</span>`);
     const starred = isWatched(r.ticker);
-    const band = scoreBand(r.score);
+    const verdict = investmentVerdict(r);
     const metrics = [
-      ["Qualidade", r.profitability_pct],
-      ["Balanço", r.leverage_pct],
+      ["Qualidade", r.quality_pct ?? r.profitability_pct],
+      ["Crescimento", r.growth_pct],
+      ["Balanço", r.balance_pct ?? r.leverage_pct],
+      ["Cash flow", r.cashflow_pct],
       ["Valor", r.value_pct],
       ["Estabilidade", r.stability_pct],
     ];
@@ -343,14 +376,14 @@
           <div class="card-main">
             <div class="card-ticker">${r.ticker} <button class="star-btn ${starred ? 'is-active' : ''}" data-ticker="${r.ticker}" aria-label="Watchlist">${starred ? "★" : "☆"}</button></div>
             <div class="card-name">${r.name || "—"}</div>
-            <div class="card-sector">${r.sector || "Sem setor"} · ${marketOf(r.ticker)}</div>
+            <div class="card-sector">${r.sector || "Sem setor"}${r.industry ? " · " + r.industry : ""} · ${marketOf(r.ticker)}</div>
           </div>
         </div>
         <div class="metric-ribbon">${metrics.map(([label,val]) => `<div><span>${label}</span><strong>${val == null ? "—" : Math.round(val)}</strong></div>`).join("")}</div>
         <div class="stock-card__verdict">
-          <span class="score-pill ${band.cls}">${r.score == null ? "—" : Math.round(r.score)}</span>
-          <strong>${band.label}</strong>
-          <small>${fmtCap(r.market_cap)}</small>
+          <span class="score-pill ${verdict.cls}">${r.score == null ? "—" : Math.round(r.score)}</span>
+          <strong>${verdict.label}</strong>
+          <small>${r.current_price != null ? r.current_price + (r.currency ? " " + r.currency : "") : fmtCap(r.market_cap)}</small>
           <div class="card-flags">${flags.join("")}</div>
         </div>
       </article>`;
@@ -381,38 +414,67 @@
     const r = state.data.stocks.find(s => s.ticker === ticker);
     if (!r) return;
 
-    const zombieLabel = { yes: "SIM — cobertura de juros < 1×", no: "não", unknown: "desconhecido (dados em falta)" }[r.zombie];
+    const zombieLabel = { yes: "SIM — cobertura de juros < 1×", no: "não", unknown: "desconhecido" }[r.zombie];
     const insider = typeof r.insider_form4_count_30d === "number"
       ? `${r.insider_form4_count_30d} filings Form 4 (30 dias)`
-      : "não disponível (mercado fora dos EUA — EDGAR é só SEC/EUA)";
-
+      : "não disponível";
     const owned = isOwned(r.ticker);
     const series = (state.history && state.history[r.ticker]) || {};
     const hasHistory = Object.keys(series).length >= 2;
+    const verdict = investmentVerdict(r);
+    const dimensions = [
+      ["Qualidade", r.quality_pct ?? r.profitability_pct],
+      ["Crescimento", r.growth_pct],
+      ["Balanço", r.balance_pct ?? r.leverage_pct],
+      ["Cash flow", r.cashflow_pct],
+      ["Valor", r.value_pct],
+      ["Estabilidade", r.stability_pct],
+    ];
+    const dimHtml = dimensions.map(([label,val]) => `<div class="dimension"><span>${label}</span><strong>${val == null ? "—" : Math.round(val)}</strong><i><b style="width:${Math.max(0,Math.min(100,Number(val)||0))}%"></b></i></div>`).join("");
 
     els.detailContent.innerHTML = `
-      <h2 style="font-family:var(--font-display);margin:0 0 0.9rem;">${r.ticker} <span style="color:var(--ink-muted);font-weight:400;font-size:0.85rem;">${r.name || ""}</span></h2>
-      <label class="owned-toggle">
-        <input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}>
-        <span>Tenho esta posição (guardado só neste dispositivo)</span>
-      </label>
+      <div class="detail-hero">
+        <div><span class="eyebrow">INVESTMENT DOSSIER</span><h2>${r.ticker}</h2><p>${r.name || ""}</p><small>${r.sector || "—"}${r.industry ? " · " + r.industry : ""}</small></div>
+        <div class="detail-score ${verdict.cls}"><strong>${r.score ?? "—"}</strong><span>${verdict.label}</span></div>
+      </div>
+      <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
+      <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
       ${hasHistory ? `<canvas id="sparkline" width="300" height="48" class="sparkline"></canvas><p class="detail-note" style="margin-top:0.2rem;">tendência do score, últimos ${Object.keys(series).length} dias com dados</p>` : ""}
-      <div class="detail-row"><span>Score composto</span><span>${r.score ?? "N/A"}</span></div>
-      <div class="detail-row"><span>Confiança dos dados</span><span>${r.data_confidence}</span></div>
-      <div class="detail-row"><span>Setor</span><span>${r.sector || "—"}</span></div>
-      <div class="detail-row"><span>Market cap</span><span>${fmtCap(r.market_cap)}</span></div>
-      <div class="detail-row"><span>Rentabilidade (percentil)</span><span>${r.profitability_pct ?? "—"}</span></div>
-      <div class="detail-row"><span>Alavancagem (percentil)</span><span>${r.leverage_pct ?? "—"}</span></div>
-      <div class="detail-row"><span>Valorização (percentil)</span><span>${r.value_pct ?? "—"}</span></div>
-      <div class="detail-row"><span>Estabilidade (percentil)</span><span>${r.stability_pct ?? "—"}</span></div>
+
+      <h3 class="dossier-title">Score por dimensão</h3>
+      <div class="dimension-grid">${dimHtml}</div>
+
+      <h3 class="dossier-title">Qualidade & crescimento</h3>
+      <div class="dossier-grid">
+        <div><span>ROE</span><strong>${fmtRawPct(r.roe)}</strong></div><div><span>ROA</span><strong>${fmtRawPct(r.roa)}</strong></div>
+        <div><span>Margem líquida</span><strong>${fmtRawPct(r.profit_margin)}</strong></div><div><span>Margem operacional</span><strong>${fmtRawPct(r.operating_margin)}</strong></div>
+        <div><span>Margem bruta</span><strong>${fmtRawPct(r.gross_margin)}</strong></div><div><span>Crescimento receita</span><strong>${fmtRawPct(r.revenue_growth)}</strong></div>
+        <div><span>Crescimento lucros</span><strong>${fmtRawPct(r.earnings_growth)}</strong></div><div><span>Crescimento EPS trimestral</span><strong>${fmtRawPct(r.earnings_quarterly_growth)}</strong></div>
+      </div>
+
+      <h3 class="dossier-title">Cash flow & balanço</h3>
+      <div class="dossier-grid">
+        <div><span>Free cash flow</span><strong>${fmtMoney(r.free_cash_flow, r.currency)}</strong></div><div><span>FCF yield</span><strong>${fmtRawPct(r.fcf_yield)}</strong></div>
+        <div><span>Operating cash flow</span><strong>${fmtMoney(r.operating_cash_flow, r.currency)}</strong></div><div><span>Net cash</span><strong>${fmtMoney(r.net_cash, r.currency)}</strong></div>
+        <div><span>Current ratio</span><strong>${fmtRatio(r.current_ratio)}</strong></div><div><span>Quick ratio</span><strong>${fmtRatio(r.quick_ratio)}</strong></div>
+        <div><span>Dívida / equity</span><strong>${r.debt_to_equity == null ? "—" : Number(r.debt_to_equity).toFixed(1)}</strong></div><div><span>Cobertura de juros</span><strong>${fmtRatio(r.interest_coverage)}</strong></div>
+      </div>
+
+      <h3 class="dossier-title">Valuation & retorno ao acionista</h3>
+      <div class="dossier-grid">
+        <div><span>P/E trailing</span><strong>${fmtRatio(r.trailing_pe)}</strong></div><div><span>P/E forward</span><strong>${fmtRatio(r.forward_pe)}</strong></div>
+        <div><span>Price / book</span><strong>${fmtRatio(r.price_to_book)}</strong></div><div><span>EV / EBITDA</span><strong>${fmtRatio(r.enterprise_to_ebitda)}</strong></div>
+        <div><span>PEG</span><strong>${r.peg_ratio == null ? "—" : Number(r.peg_ratio).toFixed(2)}</strong></div><div><span>Dividend yield</span><strong>${fmtRawPct(r.dividend_yield)}</strong></div>
+        <div><span>Payout ratio</span><strong>${fmtRawPct(r.payout_ratio)}</strong></div><div><span>Beta</span><strong>${r.beta == null ? "—" : Number(r.beta).toFixed(2)}</strong></div>
+      </div>
+
+      <h3 class="dossier-title">Risco & contexto</h3>
       <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
-      <div class="detail-row"><span>Cobertura de juros (EBIT/juros)</span><span>${r.interest_coverage ?? "—"}</span></div>
       <div class="detail-row"><span>Atividade insiders</span><span>${insider}</span></div>
-      ${r.quote_type === "ETF" ? `
-        <div class="detail-row"><span>Expense ratio</span><span>${fmtPct(r.expense_ratio)}</span></div>
-        <div class="detail-row"><span>Exposição AI (top holdings)</span><span>${r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "sem dados"}</span></div>
-      ` : ""}
-      <p class="detail-note">Score não validado nem sujeito a backtest — resumo estruturado de fundamentais públicos, não é aconselhamento financeiro. Metodologia completa em scripts/score.py.</p>
+      <div class="detail-row"><span>Market cap</span><span>${fmtCap(r.market_cap)}</span></div>
+      <div class="detail-row"><span>Preço atual</span><span>${r.current_price ?? "—"} ${r.currency || ""}</span></div>
+      ${r.quote_type === "ETF" ? `<div class="detail-row"><span>Expense ratio</span><span>${fmtPct(r.expense_ratio)}</span></div><div class="detail-row"><span>Exposição AI</span><span>${r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "—"}</span></div>` : ""}
+      <p class="detail-note">O verdict é uma classificação quantitativa explicável e relativa ao universo analisado. Não constitui previsão de retorno nem aconselhamento financeiro.</p>
     `;
     els.detail.hidden = false;
 
@@ -420,11 +482,7 @@
       toggleOwned(r.ticker);
       if (state.activeView === "stocks") applyFilters();
     });
-
-    if (hasHistory) {
-      const canvas = document.getElementById("sparkline");
-      drawSparkline(canvas, series);
-    }
+    if (hasHistory) drawSparkline(document.getElementById("sparkline"), series);
   }
 
   // ---------- Portfolio import (CSV/JSON) ----------
