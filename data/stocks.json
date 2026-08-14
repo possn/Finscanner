@@ -1,0 +1,7 @@
+{
+  "generated_at": "1970-01-01T00:00:00Z",
+  "universe_counts": {},
+  "category_benchmarks": {},
+  "methodology_note": "Placeholder — corre `python scripts/run.py` localmente ou aciona o workflow do GitHub Actions para gerar dados reais.",
+  "stocks": []
+}

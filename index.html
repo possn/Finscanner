@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Finscanner — dossiê diário do mercado</title>
+<meta name="description" content="Scanner de ações, ETFs e metais com dados fundamentais gratuitos: score composto, deteção de zombie stocks, atividade de insiders, auditoria de comissões e preços de metais.">
+<meta name="theme-color" content="#14171C">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="sidenav" aria-label="Secções">
+    <div class="sidenav-mark">FS</div>
+    <button class="sidenav-item is-active" data-view="stocks" aria-label="Ações">
+      <span class="sidenav-icon">≣</span>
+      <span class="sidenav-label">Ações</span>
+    </button>
+    <button class="sidenav-item" data-view="metals" aria-label="Metais">
+      <span class="sidenav-icon">◆</span>
+      <span class="sidenav-label">Metais</span>
+    </button>
+  </nav>
+
+  <div class="content-col">
+
+    <header class="masthead">
+      <div class="masthead-inner">
+        <div class="masthead-title">
+          <h1 id="view-title">Ações</h1>
+          <p class="masthead-sub" id="view-sub">dossiê diário · fontes gratuitas</p>
+        </div>
+        <div class="masthead-meta" id="generated-at">a carregar…</div>
+      </div>
+    </header>
+
+    <section id="view-stocks" class="view is-active">
+      <div class="commandbar">
+        <input id="search" type="text" placeholder="ticker ou nome…" autocomplete="off" spellcheck="false">
+        <select id="market-filter">
+          <option value="">todos os mercados</option>
+          <option value="US">EUA</option>
+          <option value="AU">Austrália</option>
+          <option value="PL">Polónia</option>
+          <option value="UK">Reino Unido</option>
+        </select>
+        <select id="sort-by">
+          <option value="score-desc">score ↓</option>
+          <option value="score-asc">score ↑</option>
+          <option value="ticker-asc">ticker A–Z</option>
+          <option value="cap-desc">market cap ↓</option>
+        </select>
+        <label class="toggle">
+          <input type="checkbox" id="zombie-only">
+          <span>só zombies</span>
+        </label>
+      </div>
+
+      <main id="list" class="dossier">
+        <p class="empty-state">A carregar dados…</p>
+      </main>
+    </section>
+
+    <section id="view-metals" class="view">
+      <main id="metals-list" class="dossier metals-grid">
+        <p class="empty-state">A carregar dados…</p>
+      </main>
+      <p class="metals-note" id="metals-note"></p>
+    </section>
+
+    <footer class="foot-note">
+      <p>Ferramenta pessoal de pesquisa. Não é aconselhamento financeiro. Score não validado/backtested — ver metodologia no repositório.</p>
+    </footer>
+
+  </div>
+</div>
+
+<div id="detail" class="detail-overlay" hidden>
+  <div class="detail-card">
+    <button class="detail-close" id="detail-close" aria-label="Fechar">×</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
