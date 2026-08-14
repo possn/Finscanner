@@ -1,45 +1,43 @@
 """
-insiders.py — insider activity signal from SEC EDGAR (free, official, no key).
+insiders.py — US insider transactions from SEC EDGAR (official, free, no API key).
 
-LIMITATION, stated plainly: this is a US-only signal. EDGAR is the SEC's
-filing system; Australia (ASIC), Poland (KNF) and the UK (FCA) have their
-own separate disclosure regimes with no free unified API. AU/PL/UK
-tickers will always show insider_signal = "not_available" — this is not
-a bug, it's a coverage gap. Do not present it to the user as "no insider
-activity"; that would misrepresent absence of data as a negative signal.
+v0.6 corrects an important methodological flaw in the earlier implementation:
+"30 days" now really means filings whose filingDate is within the trailing 30 days.
+It also parses recent ownership XML and separates open-market purchase (P) from
+sale (S). Option exercises, awards, gifts and other transaction codes are NOT
+mislabelled as purchases/sales.
 
-What this measures: count of Form 4 (change in beneficial ownership)
-filings for the issuer in the trailing N days, via EDGAR's browse-edgar
-company search, filtered to type=4. This is an ACTIVITY-LEVEL proxy —
-it does not parse individual transaction codes (buy vs. sell, open-market
-vs. option exercise), which would require parsing each filing's XML.
-That's a real limitation: a burst of Form 4s can mean insiders are
-buying, selling, or just exercising options on a routine vesting
-schedule. Treat this as "insiders are transacting" not "insiders are
-bullish".
+Coverage remains US-only. Missing SEC coverage is emitted as not_available,
+never as zero activity.
 """
 from __future__ import annotations
 
+import datetime as dt
 import logging
+import os
 import time
-from xml.etree import ElementTree
+from xml.etree import ElementTree as ET
 
 import requests
 
 log = logging.getLogger("insiders")
 
+SEC_USER_AGENT = os.getenv("SEC_USER_AGENT") or "Finscanner/0.6 research app contact: finscanner@users.noreply.github.com"
 HEADERS = {
-    # SEC's fair-access policy requires a specific format: "<App/Company>
-    # <contact email>" — no parentheses, must be a real reachable
-    # contact. Requests with generic/placeholder User-Agents get a 403.
-    # >>> EDIT THIS to a real email before relying on insider signals. <<<
-    "User-Agent": "Finscanner research-tool contact@example.com",
+    "User-Agent": SEC_USER_AGENT,
     "Accept-Encoding": "gzip, deflate",
-    "Host": "www.sec.gov",
 }
 TICKER_CIK_URL = "https://www.sec.gov/files/company_tickers.json"
+SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
+ARCHIVE_URL = "https://www.sec.gov/Archives/edgar/data/{cik_int}/{accession}/{primary_document}"
 
 _ticker_to_cik: dict[str, str] | None = None
+
+
+def _get(url: str, timeout: int = 20):
+    r = requests.get(url, headers=HEADERS, timeout=timeout)
+    r.raise_for_status()
+    return r
 
 
 def _load_ticker_cik_map() -> dict[str, str]:
@@ -47,9 +45,7 @@ def _load_ticker_cik_map() -> dict[str, str]:
     if _ticker_to_cik is not None:
         return _ticker_to_cik
     try:
-        resp = requests.get(TICKER_CIK_URL, headers=HEADERS, timeout=20)
-        resp.raise_for_status()
-        data = resp.json()
+        data = _get(TICKER_CIK_URL).json()
         _ticker_to_cik = {
             row["ticker"].upper(): str(row["cik_str"]).zfill(10)
             for row in data.values()
@@ -60,47 +56,169 @@ def _load_ticker_cik_map() -> dict[str, str]:
     return _ticker_to_cik
 
 
-def form4_activity(ticker: str, days: int = 30) -> str | int:
-    """Returns 'not_available' for non-US tickers, or an integer count of
-    Form 4 filings in the trailing `days` for US tickers."""
-    if "." in ticker:  # any suffixed (non-US) ticker
-        return "not_available"
+def _text(node, path: str):
+    x = node.find(path)
+    if x is None or x.text is None:
+        return None
+    return x.text.strip()
 
-    cik_map = _load_ticker_cik_map()
-    cik = cik_map.get(ticker.upper())
-    if not cik:
-        return "not_available"
 
-    url = (
-        "https://www.sec.gov/cgi-bin/browse-edgar"
-        f"?action=getcompany&CIK={cik}&type=4&dateb=&owner=include&count=40&output=atom"
-    )
+def _float(node, path: str):
+    v = _text(node, path)
+    if v in (None, ""):
+        return None
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=20)
-        resp.raise_for_status()
-        root = ElementTree.fromstring(resp.content)
-        ns = {"a": "http://www.w3.org/2005/Atom"}
-        entries = root.findall("a:entry", ns)
-        return len(entries)  # entries returned are already the most recent `count`
+        return float(v.replace(",", ""))
+    except (TypeError, ValueError):
+        return None
+
+
+def _bool_text(root, path: str) -> bool:
+    v = (_text(root, path) or "").strip().lower()
+    return v in {"1", "true", "yes", "x"}
+
+
+def _parse_ownership_xml(content: bytes, ticker: str, accession: str) -> list[dict]:
+    """Return only economically interpretable P/S transactions.
+
+    SEC ownership XML has no namespace in most Form 4 filings; if one exists,
+    strip it locally so the parser remains resilient.
+    """
+    try:
+        root = ET.fromstring(content)
+    except Exception:
+        return []
+
+    for elem in root.iter():
+        if "}" in elem.tag:
+            elem.tag = elem.tag.split("}", 1)[1]
+
+    owner = _text(root, "./reportingOwner/reportingOwnerId/rptOwnerName")
+    rel = root.find("./reportingOwner/reportingOwnerRelationship")
+    roles = []
+    if rel is not None:
+        if _bool_text(rel, "./isDirector"):
+            roles.append("Director")
+        if _bool_text(rel, "./isOfficer"):
+            roles.append(_text(rel, "./officerTitle") or "Officer")
+        if _bool_text(rel, "./isTenPercentOwner"):
+            roles.append("10% owner")
+        if _bool_text(rel, "./isOther"):
+            roles.append("Other")
+
+    out = []
+    for tx in root.findall("./nonDerivativeTable/nonDerivativeTransaction"):
+        code = _text(tx, "./transactionCoding/transactionCode")
+        if code not in {"P", "S"}:
+            continue
+        shares = _float(tx, "./transactionAmounts/transactionShares/value")
+        price = _float(tx, "./transactionAmounts/transactionPricePerShare/value")
+        acq_disp = _text(tx, "./transactionAmounts/transactionAcquiredDisposedCode/value")
+        date = _text(tx, "./transactionDate/value")
+        value = shares * price if shares is not None and price is not None else None
+        out.append({
+            "ticker": ticker,
+            "accession": accession,
+            "date": date,
+            "owner": owner,
+            "role": ", ".join(r for r in roles if r) or None,
+            "type": "buy" if code == "P" else "sell",
+            "code": code,
+            "shares": shares,
+            "price": price,
+            "value": value,
+            "acquired_disposed": acq_disp,
+        })
+    return out
+
+
+def _recent_form4_rows(cik: str, days: int) -> list[dict]:
+    data = _get(SUBMISSIONS_URL.format(cik=cik)).json()
+    recent = (data.get("filings") or {}).get("recent") or {}
+    forms = recent.get("form") or []
+    dates = recent.get("filingDate") or []
+    accessions = recent.get("accessionNumber") or []
+    docs = recent.get("primaryDocument") or []
+    cutoff = dt.date.today() - dt.timedelta(days=days)
+    rows = []
+    for form, date_s, acc, doc in zip(forms, dates, accessions, docs):
+        if form not in {"4", "4/A"}:
+            continue
+        try:
+            filing_date = dt.date.fromisoformat(date_s)
+        except Exception:
+            continue
+        if filing_date < cutoff:
+            continue
+        rows.append({
+            "filing_date": date_s,
+            "accession": acc,
+            "primary_document": doc,
+        })
+    return rows
+
+
+def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 6) -> dict:
+    if "." in ticker:
+        return {"status": "not_available"}
+
+    cik = _load_ticker_cik_map().get(ticker.upper())
+    if not cik:
+        return {"status": "not_available"}
+
+    try:
+        filings = _recent_form4_rows(cik, days)
     except Exception as e:
-        log.debug("%s: EDGAR fetch failed (%s)", ticker, e)
-        return "not_available"
+        log.debug("%s: submissions fetch failed (%s)", ticker, e)
+        return {"status": "not_available"}
+
+    transactions: list[dict] = []
+    cik_int = str(int(cik))
+    for filing in filings[:max_detail_filings]:
+        accession_no_dash = filing["accession"].replace("-", "")
+        primary = filing["primary_document"]
+        url = ARCHIVE_URL.format(
+            cik_int=cik_int,
+            accession=accession_no_dash,
+            primary_document=primary,
+        )
+        try:
+            content = _get(url).content
+            transactions.extend(_parse_ownership_xml(content, ticker, filing["accession"]))
+        except Exception as e:
+            log.debug("%s: filing %s parse failed (%s)", ticker, filing["accession"], e)
+        time.sleep(0.12)
+
+    buys = [x for x in transactions if x["type"] == "buy"]
+    sells = [x for x in transactions if x["type"] == "sell"]
+
+    def sum_known(items):
+        vals = [x["value"] for x in items if x.get("value") is not None]
+        return sum(vals) if vals else 0.0
+
+    buy_value = sum_known(buys)
+    sell_value = sum_known(sells)
+    transactions.sort(key=lambda x: x.get("date") or "", reverse=True)
+    return {
+        "status": "ok",
+        "form4_count_30d": len(filings),
+        "buy_count_30d": len(buys),
+        "sell_count_30d": len(sells),
+        "buy_value_30d": buy_value,
+        "sell_value_30d": sell_value,
+        "net_value_30d": buy_value - sell_value,
+        "transactions": transactions[:8],
+        "detail_filings_parsed": min(len(filings), max_detail_filings),
+    }
 
 
-def annotate(tickers: list[str], pause: float = 0.15) -> dict[str, str | int]:
-    """SEC asks for <=10 req/s from a single source; we go far slower to
-    stay a good citizen on a free, shared resource."""
+def annotate(tickers: list[str], pause: float = 0.18) -> dict[str, dict]:
     cik_map = _load_ticker_cik_map()
     log.info("SEC ticker->CIK map loaded with %d entries", len(cik_map))
-
-    out = {}
-    resolved = 0
+    out: dict[str, dict] = {}
     for i, tk in enumerate(tickers):
-        out[tk] = form4_activity(tk)
-        if out[tk] != "not_available":
-            resolved += 1
+        out[tk] = insider_activity(tk)
         time.sleep(pause)
-        if (i + 1) % 50 == 0:
-            log.info("insider check %d/%d (resolved so far: %d)", i + 1, len(tickers), resolved)
-    log.info("insider annotate done: %d/%d tickers resolved to a CIK+filing count", resolved, len(tickers))
+        if (i + 1) % 25 == 0:
+            log.info("insider intelligence %d/%d", i + 1, len(tickers))
     return out

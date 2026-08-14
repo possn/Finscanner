@@ -37,6 +37,17 @@ class RawMetrics:
     earnings_growth: float | None = None
     earnings_quarterly_growth: float | None = None
 
+    # quarterly growth / shareholder structure intelligence
+    quarterly_revenue: list[dict] = field(default_factory=list)
+    quarterly_net_income: list[dict] = field(default_factory=list)
+    quarterly_diluted_shares: list[dict] = field(default_factory=list)
+    revenue_yoy_latest: float | None = None
+    net_income_yoy_latest: float | None = None
+    diluted_shares_yoy: float | None = None
+    net_margin_latest: float | None = None
+    net_margin_yoy_change_pp: float | None = None
+    repurchases_last_quarter: float | None = None
+
     # cash flow
     free_cash_flow: float | None = None
     operating_cash_flow: float | None = None
@@ -152,6 +163,61 @@ def fetch_one(ticker: str) -> RawMetrics:
             except Exception as e:
                 log.debug("%s: no holdings data (%s)", ticker, e)
         else:
+            # Quarterly trajectory: latest five quarters allow a like-for-like YoY
+            # comparison (Q0 vs Q4) without pretending sequential seasonality is growth.
+            try:
+                qfin = t.quarterly_financials
+                if qfin is not None and not qfin.empty:
+                    cols = list(qfin.columns)[:5]
+
+                    def series_for(labels):
+                        for label in labels:
+                            if label in qfin.index:
+                                vals = []
+                                for c in cols:
+                                    v = _as_float(qfin.loc[label, c])
+                                    if v is not None:
+                                        vals.append({"date": str(getattr(c, "date", lambda: c)()), "value": v})
+                                return vals
+                        return []
+
+                    m.quarterly_revenue = series_for(("Total Revenue", "Operating Revenue"))
+                    m.quarterly_net_income = series_for(("Net Income", "Net Income Common Stockholders"))
+                    m.quarterly_diluted_shares = series_for(("Diluted Average Shares", "Basic Average Shares"))
+
+                    def yoy(series):
+                        if len(series) >= 5 and series[4]["value"] not in (None, 0):
+                            return series[0]["value"] / series[4]["value"] - 1.0
+                        return None
+
+                    m.revenue_yoy_latest = yoy(m.quarterly_revenue)
+                    m.net_income_yoy_latest = yoy(m.quarterly_net_income)
+                    m.diluted_shares_yoy = yoy(m.quarterly_diluted_shares)
+
+                    if m.quarterly_revenue and m.quarterly_net_income and m.quarterly_revenue[0]["value"]:
+                        m.net_margin_latest = m.quarterly_net_income[0]["value"] / m.quarterly_revenue[0]["value"]
+                    if len(m.quarterly_revenue) >= 5 and len(m.quarterly_net_income) >= 5 and m.quarterly_revenue[4]["value"]:
+                        old_margin = m.quarterly_net_income[4]["value"] / m.quarterly_revenue[4]["value"]
+                        if m.net_margin_latest is not None:
+                            m.net_margin_yoy_change_pp = (m.net_margin_latest - old_margin) * 100.0
+            except Exception as e:
+                log.debug("%s: quarterly financials unavailable (%s)", ticker, e)
+
+            # Latest quarterly repurchases are read from the cash-flow statement.
+            # Yahoo commonly stores repurchases as a negative financing cash flow;
+            # expose a positive absolute amount to the UI for readability.
+            try:
+                qcf = t.quarterly_cashflow
+                if qcf is not None and not qcf.empty:
+                    for label in ("Repurchase Of Capital Stock", "Repurchase Of Stock"):
+                        if label in qcf.index:
+                            v = _as_float(qcf.loc[label].iloc[0])
+                            if v is not None:
+                                m.repurchases_last_quarter = abs(v)
+                            break
+            except Exception as e:
+                log.debug("%s: quarterly cashflow unavailable (%s)", ticker, e)
+
             # Interest coverage is derived from the latest income statement.
             try:
                 fin = t.financials

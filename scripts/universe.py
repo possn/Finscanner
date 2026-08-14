@@ -42,6 +42,7 @@ MARKETS = {
     "AU": Market("Australia", ".AX"),
     "PL": Market("Poland", ".WA"),
     "UK": Market("United Kingdom", ".L"),
+    "EU": Market("Europe", "multi"),
 }
 
 
@@ -159,6 +160,24 @@ def ftse_constituents() -> list[str]:
     return [f"{s}.L" for s in raw]
 
 
+
+def europe_constituents() -> list[str]:
+    """Pragmatic European large-cap universe from major national indices."""
+    specs = [
+        ("https://en.wikipedia.org/wiki/DAX", ["Ticker", "Symbol"], ".DE"),
+        ("https://en.wikipedia.org/wiki/CAC_40", ["Ticker", "Symbol"], ".PA"),
+        ("https://en.wikipedia.org/wiki/AEX_index", ["Ticker", "Symbol"], ".AS"),
+        ("https://en.wikipedia.org/wiki/IBEX_35", ["Ticker", "Symbol"], ".MC"),
+        ("https://en.wikipedia.org/wiki/FTSE_MIB", ["Ticker", "Symbol"], ".MI"),
+        ("https://en.wikipedia.org/wiki/Swiss_Market_Index", ["Ticker", "Symbol"], ".SW"),
+    ]
+    out=[]
+    for url, cols, suffix in specs:
+        raw=_wikipedia_table(url, match="Ticker", symbol_col_candidates=cols)
+        out.extend(f"{x.split()[0].replace('.', '-').strip()}{suffix}" for x in raw if x)
+        time.sleep(0.4)
+    return sorted(set(out))
+
 def build_universe() -> dict[str, list[str]]:
     """Returns {market_code: [tickers]}. Each leg is independent — one
     source failing does not block the others."""
@@ -171,6 +190,8 @@ def build_universe() -> dict[str, list[str]]:
     universe["PL"] = wig_constituents()
     time.sleep(1)
     universe["UK"] = ftse_constituents()
+    time.sleep(1)
+    universe["EU"] = europe_constituents()
 
     for market, tickers in universe.items():
         log.info("%s: %d tickers", market, len(tickers))

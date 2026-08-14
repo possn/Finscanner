@@ -78,6 +78,18 @@ class ScoredTicker:
     ai_exposure_pct: float | None = None
     current_price: float | None = None
 
+    # peer-relative valuation context
+    peer_count: int | None = None
+    sector_trailing_pe_median: float | None = None
+    trailing_pe_vs_sector_pct: float | None = None
+    sector_forward_pe_median: float | None = None
+    forward_pe_vs_sector_pct: float | None = None
+    sector_pb_median: float | None = None
+    pb_vs_sector_pct: float | None = None
+    sector_ev_ebitda_median: float | None = None
+    ev_ebitda_vs_sector_pct: float | None = None
+    quality_value_score: float | None = None
+
 
 def _percentile_rank(value: float | None, all_values: list[float | None], invert: bool = False) -> float | None:
     clean = sorted(v for v in all_values if v is not None)
@@ -91,6 +103,21 @@ def _percentile_rank(value: float | None, all_values: list[float | None], invert
 def _avg(values):
     vals = [v for v in values if v is not None]
     return sum(vals) / len(vals) if vals else None
+
+
+def _median_positive(values):
+    clean = sorted(float(v) for v in values if v is not None and v > 0)
+    if not clean:
+        return None
+    n = len(clean)
+    mid = n // 2
+    return clean[mid] if n % 2 else (clean[mid - 1] + clean[mid]) / 2
+
+
+def _relative_pct(value, benchmark):
+    if value is None or benchmark is None or value <= 0 or benchmark <= 0:
+        return None
+    return (value / benchmark - 1.0) * 100.0
 
 
 def _positive_score(value: float | None) -> float | None:
@@ -206,6 +233,18 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
         metric_coverage = sum(v is not None for v in metric_values) / len(metric_values) * 100
         confidence = "high" if metric_coverage >= 70 else "medium" if metric_coverage >= 40 else "low"
 
+        # Peer-relative valuation context. We deliberately compare within sector,
+        # not across the full market, because structurally different sectors trade
+        # at different multiples. A minimum of 4 peers avoids pretending that a
+        # tiny sample is a meaningful benchmark.
+        peers = [x for x in equities if x.ticker != r.ticker and x.sector and x.sector == r.sector]
+        peer_count = len(peers)
+        sector_pe = _median_positive([x.trailing_pe for x in peers]) if peer_count >= 4 else None
+        sector_fpe = _median_positive([x.forward_pe for x in peers]) if peer_count >= 4 else None
+        sector_pb = _median_positive([x.price_to_book for x in peers]) if peer_count >= 4 else None
+        sector_ev = _median_positive([x.enterprise_to_ebitda for x in peers]) if peer_count >= 4 else None
+        quality_value = _avg([quality, value])
+
         net_cash = net_cash_values[idx]
         out.append(ScoredTicker(
             ticker=r.ticker, name=r.name, sector=r.sector, industry=r.industry,
@@ -233,6 +272,16 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             price_to_book=r.price_to_book, enterprise_to_ebitda=r.enterprise_to_ebitda,
             peg_ratio=r.peg_ratio, dividend_yield=r.dividend_yield,
             payout_ratio=r.payout_ratio, beta=r.beta, current_price=r.current_price,
+            peer_count=peer_count,
+            sector_trailing_pe_median=round(sector_pe, 2) if sector_pe is not None else None,
+            trailing_pe_vs_sector_pct=round(_relative_pct(r.trailing_pe, sector_pe), 1) if _relative_pct(r.trailing_pe, sector_pe) is not None else None,
+            sector_forward_pe_median=round(sector_fpe, 2) if sector_fpe is not None else None,
+            forward_pe_vs_sector_pct=round(_relative_pct(r.forward_pe, sector_fpe), 1) if _relative_pct(r.forward_pe, sector_fpe) is not None else None,
+            sector_pb_median=round(sector_pb, 2) if sector_pb is not None else None,
+            pb_vs_sector_pct=round(_relative_pct(r.price_to_book, sector_pb), 1) if _relative_pct(r.price_to_book, sector_pb) is not None else None,
+            sector_ev_ebitda_median=round(sector_ev, 2) if sector_ev is not None else None,
+            ev_ebitda_vs_sector_pct=round(_relative_pct(r.enterprise_to_ebitda, sector_ev), 1) if _relative_pct(r.enterprise_to_ebitda, sector_ev) is not None else None,
+            quality_value_score=round(quality_value, 1) if quality_value is not None else None,
         ))
 
     for r in etfs:

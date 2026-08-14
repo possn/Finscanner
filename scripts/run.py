@@ -21,6 +21,7 @@ import traceback
 
 from fundamentals import fetch_many
 import history as history_mod
+import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
 from score import score_universe
@@ -29,6 +30,7 @@ from universe import build_universe
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
 HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "history.json")
+VALUATION_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "valuation_history.json")
 ERROR_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "last_error.log")
 PIPELINE_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "pipeline_log.txt")
 
@@ -45,7 +47,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "insiders", "score", "metals", "history"):
+for _name in ("run", "universe", "fundamentals", "insiders", "score", "metals", "history", "valuation_history"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -104,11 +106,32 @@ def main():
 
     us_tickers = [s.ticker for s in scored if "." not in s.ticker]
     insider_map = annotate_insiders(us_tickers)
+    raw_by_ticker = {r.ticker: r for r in raw}
 
     rows = []
     for s in scored:
         row = dataclasses.asdict(s)
-        row["insider_form4_count_30d"] = insider_map.get(s.ticker, "not_available")
+        insider = insider_map.get(s.ticker, {"status": "not_available"})
+        row["insider_status"] = insider.get("status", "not_available")
+        row["insider_form4_count_30d"] = insider.get("form4_count_30d", "not_available")
+        row["insider_buy_count_30d"] = insider.get("buy_count_30d")
+        row["insider_sell_count_30d"] = insider.get("sell_count_30d")
+        row["insider_buy_value_30d"] = insider.get("buy_value_30d")
+        row["insider_sell_value_30d"] = insider.get("sell_value_30d")
+        row["insider_net_value_30d"] = insider.get("net_value_30d")
+        row["insider_transactions"] = insider.get("transactions", [])
+
+        rm = raw_by_ticker.get(s.ticker)
+        if rm is not None:
+            row["quarterly_revenue"] = rm.quarterly_revenue
+            row["quarterly_net_income"] = rm.quarterly_net_income
+            row["quarterly_diluted_shares"] = rm.quarterly_diluted_shares
+            row["revenue_yoy_latest"] = rm.revenue_yoy_latest
+            row["net_income_yoy_latest"] = rm.net_income_yoy_latest
+            row["diluted_shares_yoy"] = rm.diluted_shares_yoy
+            row["net_margin_latest"] = rm.net_margin_latest
+            row["net_margin_yoy_change_pp"] = rm.net_margin_yoy_change_pp
+            row["repurchases_last_quarter"] = rm.repurchases_last_quarter
         rows.append(row)
 
     payload = {
@@ -118,9 +141,13 @@ def main():
         "methodology_note": (
             "Composite score is an unvalidated, explainable multi-factor blend of public "
             "fundamentals (quality, growth, balance sheet, cash flow, valuation and stability). "
+            "Valuation context compares positive multiples with same-sector medians and also "
+            "accumulates the scanner's own daily valuation observations over time. "
             "Not investment advice. See scripts/score.py for the exact "
             "formula and scripts/insiders.py + scripts/fundamentals.py "
-            "for documented data limitations."
+            "for documented data limitations. Insider P/S signals are limited to "
+            "open-market Form 4 transaction codes and quarterly growth/dilution "
+            "uses the latest five Yahoo Finance quarters when available."
         ),
         "stocks": rows,
     }
@@ -140,6 +167,10 @@ def main():
     history = history_mod.load(HISTORY_PATH)
     history = history_mod.update(history, rows, today)
     history_mod.save(history, HISTORY_PATH)
+
+    valuation_history = valuation_history_mod.load(VALUATION_HISTORY_PATH)
+    valuation_history = valuation_history_mod.update(valuation_history, rows, today)
+    valuation_history_mod.save(valuation_history, VALUATION_HISTORY_PATH)
 
 
 if __name__ == "__main__":
