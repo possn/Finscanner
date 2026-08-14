@@ -38,6 +38,7 @@ jobs:
           git add data/metals.json 2>/dev/null || true
           git add data/history.json 2>/dev/null || true
           git add data/valuation_history.json 2>/dev/null || true
+          git add data/thesis_history.json 2>/dev/null || true
           git add data/last_error.log 2>/dev/null || true
           git add data/pipeline_log.txt 2>/dev/null || true
           git diff --quiet --cached || git commit -m "chore: daily data update $(date -u +%Y-%m-%d)"
