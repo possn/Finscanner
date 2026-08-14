@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14T12:14:51.753078Z",
+  "generated_at": "2026-08-14T12:37:41.971457Z",
   "note": "Pre\u00e7os de futuros (n\u00e3o spot) para ouro/prata/cobre/platina/pal\u00e1dio. Ur\u00e2nio \u00e9 um proxy via ETF de mineradoras (URA), n\u00e3o o pre\u00e7o do metal \u2014 n\u00e3o existe fonte gratuita de pre\u00e7o spot de ur\u00e2nio. Sem indicador de stress/tens\u00e3o de mercado: exigiria dados de invent\u00e1rio/lease rates que n\u00e3o est\u00e3o dispon\u00edveis gratuitamente; nenhum n\u00famero \u00e9 inventado.",
   "instruments": [
     {
@@ -8,8 +8,8 @@
       "kind": "futures",
       "unit": "USD/oz",
       "data": {
-        "price": 4430.9,
-        "day_change_pct": 1.54,
+        "price": 4434.4,
+        "day_change_pct": 1.62,
         "range_90d_low": 3985.6,
         "range_90d_high": 4720.4,
         "volatility_annualized_pct": 24.3
@@ -21,8 +21,8 @@
       "kind": "futures",
       "unit": "USD/oz",
       "data": {
-        "price": 65.14,
-        "day_change_pct": 0.41,
+        "price": 65.065,
+        "day_change_pct": 0.3,
         "range_90d_low": 55.898,
         "range_90d_high": 88.888,
         "volatility_annualized_pct": 48.2
@@ -34,8 +34,8 @@
       "kind": "futures",
       "unit": "USD/lb",
       "data": {
-        "price": 6.585,
-        "day_change_pct": -0.11,
+        "price": 6.598,
+        "day_change_pct": 0.08,
         "range_90d_low": 5.795,
         "range_90d_high": 6.703,
         "volatility_annualized_pct": 26.5
@@ -47,8 +47,8 @@
       "kind": "futures",
       "unit": "USD/oz",
       "data": {
-        "price": 1747.2,
-        "day_change_pct": 1.28,
+        "price": 1746.8,
+        "day_change_pct": 1.25,
         "range_90d_low": 1550.2,
         "range_90d_high": 2187.1,
         "volatility_annualized_pct": 39.2
