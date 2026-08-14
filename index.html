@@ -4,44 +4,65 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Finscanner — dossiê diário do mercado</title>
-<meta name="description" content="Scanner de ações, ETFs e metais com dados fundamentais gratuitos: score composto, deteção de zombie stocks, atividade de insiders, auditoria de comissões e preços de metais.">
-<meta name="theme-color" content="#14171C">
+<meta name="description" content="Scanner de ações, ETFs e metais com dados fundamentais gratuitos: score composto, deteção de zombie stocks, atividade de insiders, auditoria de comissões e análise de exposição do portfolio.">
+<meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="shell">
+<div class="app-shell" id="app-shell">
 
-  <nav class="sidenav" aria-label="Secções">
-    <div class="sidenav-mark">FS</div>
-    <button class="sidenav-item is-active" data-view="stocks" aria-label="Ações">
-      <span class="sidenav-icon">≣</span>
-      <span class="sidenav-label">Ações</span>
-    </button>
-    <button class="sidenav-item" data-view="metals" aria-label="Metais">
-      <span class="sidenav-icon">◆</span>
-      <span class="sidenav-label">Metais</span>
-    </button>
-    <button class="sidenav-item" data-view="portfolio" aria-label="Portfolio">
-      <span class="sidenav-icon">★</span>
-      <span class="sidenav-label">Meu</span>
-    </button>
+  <div class="sidebar__backdrop" id="sidebar-backdrop" hidden></div>
+
+  <nav class="sidebar" id="sidebar" aria-label="Secções">
+    <button class="sidebar__fechar" id="sidebar-close" aria-label="Fechar menu">✕</button>
+
+    <div class="sidebar__brand">
+      <img src="icons/icon-192.png" alt="" class="sidebar__brand-mark">
+      <span class="sidebar__brand-name">Finscanner</span>
+    </div>
+
+    <div class="sidebar__nav">
+      <div class="sidebar__grupo">
+        <span class="sidebar__grupo-titulo">Mercados</span>
+        <button class="sidebar__item sidebar__item--ativo" data-view="stocks">
+          <span class="sidebar__icon">📊</span> Ações
+        </button>
+        <button class="sidebar__item" data-view="metals">
+          <span class="sidebar__icon">◆</span> Metais
+        </button>
+      </div>
+      <div class="sidebar__grupo">
+        <span class="sidebar__grupo-titulo">Pessoal</span>
+        <button class="sidebar__item" data-view="portfolio">
+          <span class="sidebar__icon">★</span> O meu portfolio
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar__footer">
+      <button class="sidebar__item sidebar__item--secundario" id="theme-toggle">
+        <span class="sidebar__icon" id="theme-icon">☾</span> <span id="theme-label">Modo escuro</span>
+      </button>
+    </div>
   </nav>
 
-  <div class="content-col">
+  <div class="app-shell__mobile-header">
+    <button class="app-shell__menu-btn" id="menu-btn" aria-label="Abrir menu">☰</button>
+    <span class="app-shell__mobile-title" id="mobile-title">Finscanner</span>
+  </div>
 
-    <header class="masthead">
-      <div class="masthead-inner">
-        <div class="masthead-title">
+  <main class="app-shell__content">
+
+    <header class="page-header">
+      <div class="page-header__inner">
+        <div>
           <h1 id="view-title">Ações</h1>
-          <p class="masthead-sub" id="view-sub">dossiê diário · fontes gratuitas</p>
+          <p class="page-header__sub" id="view-sub">dossiê diário · fontes gratuitas</p>
         </div>
-        <div class="masthead-meta" id="generated-at">a carregar…</div>
+        <div class="page-header__meta" id="generated-at">a carregar…</div>
       </div>
     </header>
 
@@ -71,15 +92,15 @@
         </label>
       </div>
 
-      <main id="list" class="dossier">
+      <div id="list" class="dossier">
         <p class="empty-state">A carregar dados…</p>
-      </main>
+      </div>
     </section>
 
     <section id="view-metals" class="view">
-      <main id="metals-list" class="dossier metals-grid">
+      <div id="metals-list" class="dossier metals-grid">
         <p class="empty-state">A carregar dados…</p>
-      </main>
+      </div>
       <p class="metals-note" id="metals-note"></p>
     </section>
 
@@ -89,21 +110,21 @@
           Importar portfolio (CSV/JSON)
           <input type="file" id="portfolio-file" accept=".csv,.json" hidden>
         </label>
-        <button class="import-btn secondary" id="portfolio-clear">Limpar portfolio</button>
+        <button class="import-btn import-btn--secondary" id="portfolio-clear">Limpar portfolio</button>
       </div>
       <p class="import-hint">CSV: colunas <code>ticker,quantity</code> ou <code>ticker,value</code> (cabeçalho obrigatório). JSON: array de <code>{"ticker": "AAPL", "quantity": 10}</code> ou objeto <code>{"AAPL": 10}</code>.</p>
       <div id="exposure-panel" class="exposure-panel"></div>
       <div id="portfolio-summary" class="portfolio-summary"></div>
-      <main id="portfolio-list" class="dossier">
+      <div id="portfolio-list" class="dossier">
         <p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Ações e toca em "Tenho esta posição".</p>
-      </main>
+      </div>
     </section>
 
     <footer class="foot-note">
       <p>Ferramenta pessoal de pesquisa. Não é aconselhamento financeiro. Score não validado/backtested — ver metodologia no repositório.</p>
     </footer>
 
-  </div>
+  </main>
 </div>
 
 <div id="detail" class="detail-overlay" hidden>

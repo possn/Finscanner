@@ -73,6 +73,23 @@ CATEGORY_BENCHMARKS = {
 }
 
 
+def _json_safe(obj):
+    """Recursively replaces NaN/Infinity floats with None. Python's json
+    module happily writes the literal tokens NaN/Infinity by default
+    (allow_nan=True) — those are NOT valid JSON per the spec, and
+    browsers' JSON.parse rejects the entire file when it hits one. This
+    is a last-line-of-defense sweep so a single bad float anywhere in
+    the pipeline can't silently corrupt the whole stocks.json for every
+    user, the way it did before this function existed."""
+    if isinstance(obj, float):
+        return obj if (obj == obj and obj not in (float("inf"), float("-inf"))) else None
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_json_safe(v) for v in obj]
+    return obj
+
+
 def main():
     universe = build_universe()
     all_tickers = sorted({t for tickers in universe.values() for t in tickers})
@@ -110,13 +127,13 @@ def main():
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w") as f:
-        json.dump(payload, f, indent=2)
+        json.dump(_json_safe(payload), f, indent=2)
 
     log.info("Wrote %d rows to %s", len(rows), OUT_PATH)
 
     metals_payload = build_metals_payload()
     with open(METALS_OUT_PATH, "w") as f:
-        json.dump(metals_payload, f, indent=2)
+        json.dump(_json_safe(metals_payload), f, indent=2)
     log.info("Wrote metals data to %s", METALS_OUT_PATH)
 
     today = datetime.date.today().isoformat()

@@ -23,8 +23,16 @@
     exposurePanel: document.getElementById("exposure-panel"),
     portfolioFile: document.getElementById("portfolio-file"),
     portfolioClear: document.getElementById("portfolio-clear"),
-    sidenavItems: document.querySelectorAll(".sidenav-item"),
+    sidenavItems: document.querySelectorAll(".sidebar__item[data-view]"),
     views: document.querySelectorAll(".view"),
+    sidebar: document.getElementById("sidebar"),
+    sidebarBackdrop: document.getElementById("sidebar-backdrop"),
+    menuBtn: document.getElementById("menu-btn"),
+    sidebarClose: document.getElementById("sidebar-close"),
+    mobileTitle: document.getElementById("mobile-title"),
+    themeToggle: document.getElementById("theme-toggle"),
+    themeIcon: document.getElementById("theme-icon"),
+    themeLabel: document.getElementById("theme-label"),
   };
 
   const VIEW_META = {
@@ -66,13 +74,54 @@
 
   function switchView(view) {
     state.activeView = view;
-    els.sidenavItems.forEach(btn => btn.classList.toggle("is-active", btn.dataset.view === view));
+    els.sidenavItems.forEach(btn => btn.classList.toggle("sidebar__item--ativo", btn.dataset.view === view));
     els.views.forEach(sec => sec.classList.toggle("is-active", sec.id === `view-${view}`));
     els.viewTitle.textContent = VIEW_META[view].title;
     els.viewSub.textContent = VIEW_META[view].sub;
+    els.mobileTitle.textContent = VIEW_META[view].title;
     updateGeneratedAt();
     if (view === "portfolio") renderPortfolio();
+    closeMobileSidebar();
   }
+
+  function openMobileSidebar() {
+    els.sidebar.classList.add("sidebar--aberta");
+    els.sidebarBackdrop.hidden = false;
+  }
+  function closeMobileSidebar() {
+    els.sidebar.classList.remove("sidebar--aberta");
+    els.sidebarBackdrop.hidden = true;
+  }
+  els.menuBtn.addEventListener("click", openMobileSidebar);
+  els.sidebarClose.addEventListener("click", closeMobileSidebar);
+  els.sidebarBackdrop.addEventListener("click", closeMobileSidebar);
+
+  // ---------- Theme (light/dark), persisted ----------
+  const LS_THEME = "finscanner:theme";
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      els.themeIcon.textContent = "☀";
+      els.themeLabel.textContent = "Modo claro";
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      els.themeIcon.textContent = "☾";
+      els.themeLabel.textContent = "Modo escuro";
+    }
+  }
+  function initTheme() {
+    const saved = localStorage.getItem(LS_THEME);
+    if (saved) { applyTheme(saved); return; }
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(prefersDark ? "dark" : "light");
+  }
+  els.themeToggle.addEventListener("click", () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const next = isDark ? "light" : "dark";
+    applyTheme(next);
+    try { localStorage.setItem(LS_THEME, next); } catch (e) { /* ignore */ }
+  });
+  initTheme();
 
   function updateGeneratedAt() {
     const src = state.activeView === "metals" ? state.metals : state.data;
@@ -424,6 +473,10 @@
   }
 
   function renderExposure(portfolio, matchedRows) {
+    if (!Object.keys(portfolio).length) {
+      els.exposurePanel.innerHTML = "";
+      return;
+    }
     const rowByTicker = Object.fromEntries(matchedRows.map(r => [r.ticker, r]));
     const entries = Object.entries(portfolio).map(([ticker, entry]) => {
       const row = rowByTicker[ticker];
@@ -452,7 +505,7 @@
     // Consumer Cyclical, Financial Services, Basic Materials, etc.)
     const bySector = {};
     for (const e of valued) {
-      const sector = e.row.sector || "Sem setor / ETF";
+      const sector = e.row ? (e.row.sector || "Sem setor / ETF") : "Fora do universo rastreado";
       bySector[sector] = (bySector[sector] || 0) + e.val;
     }
     const sectorRows = Object.entries(bySector).sort((a, b) => b[1] - a[1]);
@@ -460,7 +513,7 @@
     // AI exposure: direct AI-flagged equities + weighted ETF ai_exposure_pct
     const aiValue = valued.reduce((sum, e) => {
       if (AI_EXPOSED_TICKERS.has(e.ticker)) return sum + e.val;
-      if (e.row.quote_type === "ETF" && e.row.ai_exposure_pct != null) {
+      if (e.row?.quote_type === "ETF" && e.row.ai_exposure_pct != null) {
         return sum + e.val * (e.row.ai_exposure_pct / 100);
       }
       return sum;

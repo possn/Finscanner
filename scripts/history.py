@@ -44,7 +44,7 @@ def update(history: dict, rows: list[dict], today: str) -> dict:
     written to stocks.json). Mutates and returns `history`."""
     for row in rows:
         score = row.get("score")
-        if score is None:
+        if score is None or (isinstance(score, float) and score != score):  # None or NaN
             continue
         ticker = row["ticker"]
         series = history.setdefault(ticker, {})

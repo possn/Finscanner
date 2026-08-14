@@ -122,12 +122,12 @@ def fetch_one(ticker: str) -> RawMetrics:
                 if fin is not None and not fin.empty:
                     for label in ("EBIT", "Operating Income"):
                         if label in fin.index:
-                            m.ebit = float(fin.loc[label].iloc[0])
+                            m.ebit = _as_float(fin.loc[label].iloc[0])
                             break
                     for label in ("Interest Expense", "Interest Expense Non Operating"):
                         if label in fin.index:
-                            val = fin.loc[label].iloc[0]
-                            m.interest_expense = abs(float(val)) if val is not None else None
+                            val = _as_float(fin.loc[label].iloc[0])
+                            m.interest_expense = abs(val) if val is not None else None
                             break
             except Exception as e:
                 log.debug("%s: financials unavailable (%s)", ticker, e)
