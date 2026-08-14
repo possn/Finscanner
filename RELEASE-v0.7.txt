@@ -1,0 +1,15 @@
+Finscanner v0.7 — Explainable Investment Theses
+
+New:
+- Intelligence > Teses workspace.
+- Deterministic thesis engine with explainable evidence and risks.
+- Quality Compounder, GARP, Deep Value, Turnaround, Insider Accumulation,
+  Balanced Candidate, High Growth / High Dilution, Leveraged Growth,
+  Value Trap Risk, Watch / No Edge.
+- Thesis section inside every company dossier.
+- Confidence level based on data coverage.
+- Visible copy of the GitHub workflow at repository root for mobile inspection.
+
+Important:
+The real GitHub Actions workflow remains .github/workflows/update-data.yml.
+The root WORKFLOW-update-data.yml is only a visible copy.

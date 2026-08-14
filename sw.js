@@ -1,5 +1,5 @@
 // Increment this on every deploy that changes cached files.
-const CACHE_VERSION = "finscanner-v9-growth-smart-money";
+const CACHE_VERSION = "finscanner-v10-thesis-engine";
 
 const SHELL_FILES = [
   "./",

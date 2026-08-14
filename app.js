@@ -41,6 +41,7 @@
     fundsCount: document.getElementById("funds-count"),
     newsList: document.getElementById("news-list"),
     smartmoneyList: document.getElementById("smartmoney-list"),
+    thesesList: document.getElementById("theses-list"),
     compareInput: document.getElementById("compare-input"),
     compareList: document.getElementById("compare-list"),
   };
@@ -52,6 +53,7 @@
     funds: { title: "ETFs", sub: "fundos cotados no universo rastreado" },
     news: { title: "Notícias", sub: "notícias das posições que possuis" },
     smartmoney: { title: "Smart Money", sub: "atividade de insiders · SEC Form 4" },
+    theses: { title: "Teses", sub: "arquétipos quantitativos · hipóteses explicáveis" },
     compare: { title: "Comparar", sub: "comparação multifator lado a lado" },
   };
 
@@ -98,6 +100,7 @@
     if (view === "funds") renderFunds();
     if (view === "news") renderNews();
     if (view === "smartmoney") renderSmartMoney();
+    if (view === "theses") renderTheses();
     if (view === "compare") renderCompare();
     closeMobileSidebar();
   }
@@ -221,6 +224,22 @@
     const mid = Math.floor(vals.length/2);
     const median = vals.length % 2 ? vals[mid] : (vals[mid-1] + vals[mid]) / 2;
     return {days:vals.length, median, rel:(Number(current)/median - 1)*100};
+  }
+
+  function thesisBadge(r) {
+    const label = r.thesis_type || "Sem tese";
+    const slug = r.thesis_slug || "watch";
+    return `<span class="thesis-chip thesis-${slug}">${label}</span>`;
+  }
+
+  function thesisPanelHtml(r) {
+    if (!r.thesis_type) return "";
+    const evidence = (r.thesis_evidence || []).map(x => `<li>${x}</li>`).join("") || "<li>Sem evidência suficiente para destacar.</li>";
+    const risks = (r.thesis_risks || []).map(x => `<li>${x}</li>`).join("") || "<li>Sem risco quantitativo dominante identificado nos campos disponíveis.</li>";
+    return `<div class="thesis-panel thesis-${r.thesis_slug || "watch"}">
+      <div class="thesis-panel__head"><div>${thesisBadge(r)}<strong>${r.thesis_summary || ""}</strong></div><span>confiança ${r.thesis_confidence || "—"}</span></div>
+      <div class="thesis-panel__cols"><div><em>A favor</em><ul>${evidence}</ul></div><div><em>O que pode invalidar</em><ul>${risks}</ul></div></div>
+    </div>`;
   }
 
   function investmentVerdict(r) {
@@ -549,6 +568,8 @@
         <div class="detail-score ${verdict.cls}"><strong>${r.score ?? "—"}</strong><span>${verdict.label}</span></div>
       </div>
       <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
+      <h3 class="dossier-title">Tese quantitativa</h3>
+      ${thesisPanelHtml(r)}
       <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
       ${hasHistory ? `<canvas id="sparkline" width="300" height="48" class="sparkline"></canvas><p class="detail-note" style="margin-top:0.2rem;">tendência do score, últimos ${Object.keys(series).length} dias com dados</p>` : ""}
 
@@ -897,6 +918,20 @@
         box.innerHTML=`<h3>${escapeHtml(ticker)}</h3><p>O feed direto não está disponível neste browser.</p><div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Pesquisar notícias</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
       }
     }));
+  }
+
+  function renderTheses() {
+    if (!els.thesesList) return;
+    const rows = (state.data?.stocks || []).filter(r => r.quote_type !== "ETF" && r.thesis_type);
+    if (!rows.length) { els.thesesList.innerHTML = `<p class="empty-state">As teses serão geradas na próxima execução do pipeline.</p>`; return; }
+    const order = ["Quality Compounder","GARP","Deep Value","Turnaround","Insider Accumulation","Balanced Candidate","High Growth / High Dilution","Leveraged Growth","Value Trap Risk","Watch / No Edge"];
+    const groups = new Map();
+    rows.forEach(r => { if (!groups.has(r.thesis_type)) groups.set(r.thesis_type, []); groups.get(r.thesis_type).push(r); });
+    els.thesesList.innerHTML = order.filter(k => groups.has(k)).map(k => {
+      const items = groups.get(k).sort((a,b)=>(b.score ?? -1)-(a.score ?? -1));
+      return `<section class="thesis-group"><div class="section-heading"><div>${thesisBadge(items[0])}<h3>${k}</h3></div><span class="section-count">${items.length}</span></div><div class="thesis-cards">${items.slice(0,12).map(r => `<button class="thesis-card" data-ticker="${r.ticker}"><div><strong>${r.ticker}</strong><small>${r.name || ""}</small></div><span>${r.score ?? "—"}</span><p>${r.thesis_summary || ""}</p></button>`).join("")}</div></section>`;
+    }).join("");
+    els.thesesList.querySelectorAll("[data-ticker]").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
   }
 
   function renderCompare() {
