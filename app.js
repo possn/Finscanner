@@ -378,6 +378,9 @@
     }
     els.metalsNote.textContent = state.metals.note || "";
     els.metalsList.innerHTML = state.metals.instruments.map(metalCardHtml).join("");
+    els.metalsList.querySelectorAll(".metal-card[data-ticker]").forEach(card => {
+      card.addEventListener("click", () => openMetalDetail(card.dataset.ticker));
+    });
   }
 
   function metalCardHtml(inst) {
@@ -392,7 +395,7 @@
     const changeClass = d.day_change_pct == null ? "" : d.day_change_pct >= 0 ? "up" : "down";
     const changeSign = d.day_change_pct == null ? "" : d.day_change_pct >= 0 ? "+" : "";
     return `
-      <div class="metal-card">
+      <div class="metal-card" data-ticker="${escapeHtml(inst.ticker)}" tabindex="0" role="button">
         <div class="metal-head">
           <span class="metal-label">${inst.label}</span>
           <span>
@@ -405,7 +408,32 @@
           <span>vol. anualizada: ${d.volatility_annualized_pct ?? "—"}%</span>
         </div>
         ${inst.kind === "etf_proxy" ? `<span class="metal-proxy-tag">proxy ETF, não é preço spot</span>` : ""}
+        <span class="metal-expand-hint">toca para mais detalhe →</span>
       </div>`;
+  }
+
+  function openMetalDetail(ticker) {
+    const inst = state.metals?.instruments?.find(i => i.ticker === ticker);
+    if (!inst || !inst.data) return;
+    const d = inst.data;
+    const yChange = (v, label) => v != null
+      ? `<div class="detail-row"><span>${label}</span><span>${v >= 0 ? "+" : ""}${v}%</span></div>` : "";
+
+    els.detailContent.innerHTML = `
+      <h2 style="font-family:var(--font-display, inherit);margin:0 0 0.9rem;">${inst.label}</h2>
+      <div class="detail-row"><span>Preço</span><span>${d.price} ${inst.unit}</span></div>
+      <div class="detail-row"><span>Variação diária</span><span>${d.day_change_pct != null ? (d.day_change_pct >= 0 ? "+" : "") + d.day_change_pct + "%" : "—"}</span></div>
+      ${yChange(d.change_ytd_pct, "Variação no ano (YTD)")}
+      ${yChange(d.change_1y_pct, "Variação em 12 meses")}
+      <div class="detail-row"><span>Intervalo 90 dias</span><span>${d.range_90d_low}–${d.range_90d_high}</span></div>
+      ${d.range_1y_low != null && d.range_1y_high != null ? `<div class="detail-row"><span>Intervalo 12 meses</span><span>${d.range_1y_low}–${d.range_1y_high}</span></div>` : ""}
+      <div class="detail-row"><span>Volatilidade anualizada</span><span>${d.volatility_annualized_pct ?? "—"}%</span></div>
+      ${inst.kind === "etf_proxy" ? `<p class="detail-note">Proxy via ETF de mineradoras — não é o preço spot do metal. Não existe fonte gratuita de preço spot de urânio.</p>` : ""}
+      ${inst.context ? `<p class="detail-note" style="margin-top:0.9rem;">${escapeHtml(inst.context)}</p>` : ""}
+      ${inst.context_links ? `<div class="news-actions" style="margin-top:0.6rem;">${inst.context_links.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>`).join("")}</div>` : ""}
+      <p class="detail-note" style="margin-top:0.9rem;">Preço de futuros (não spot). Sem indicador de stress de mercado calculado — exigiria dados de inventário/lease rates que não estão disponíveis gratuitamente.</p>
+    `;
+    els.detail.hidden = false;
   }
 
 

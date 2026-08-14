@@ -33,7 +33,22 @@ import yfinance as yf
 log = logging.getLogger("metals")
 
 INSTRUMENTS = [
-    {"ticker": "GC=F", "label": "Ouro", "kind": "futures", "unit": "USD/oz"},
+    {
+        "ticker": "GC=F", "label": "Ouro", "kind": "futures", "unit": "USD/oz",
+        "context": (
+            "Os bancos centrais têm sido compradores líquidos de ouro de forma "
+            "consistente desde cerca de 2010, com China, Turquia, Índia e Polónia "
+            "entre os maiores compradores da última década — uma tendência "
+            "estrutural bem documentada, não um evento pontual. O Finscanner não "
+            "calcula estes números (exigem dados do FMI/IFS sem API gratuita "
+            "fiável); para os números trimestrais mais recentes, consulta as "
+            "fontes oficiais abaixo."
+        ),
+        "context_links": [
+            {"label": "World Gold Council — Gold Reserves by Country", "url": "https://www.gold.org/goldhub/data/gold-reserves-by-country"},
+            {"label": "World Gold Council — Central Bank Gold Reserves Survey", "url": "https://www.gold.org/goldhub/data/central-bank-gold-reserves-survey-2025"},
+        ],
+    },
     {"ticker": "SI=F", "label": "Prata", "kind": "futures", "unit": "USD/oz"},
     {"ticker": "HG=F", "label": "Cobre", "kind": "futures", "unit": "USD/lb"},
     {"ticker": "PL=F", "label": "Platina", "kind": "futures", "unit": "USD/oz"},
@@ -42,7 +57,7 @@ INSTRUMENTS = [
 ]
 
 
-def fetch_metal(ticker: str, days: int = 90):
+def fetch_metal(ticker: str, days: int = 365):
     try:
         hist = yf.Ticker(ticker).history(period=f"{days}d")
         if hist.empty:
@@ -59,11 +74,20 @@ def fetch_metal(ticker: str, days: int = 90):
         # annualized realized volatility from daily returns in the window
         vol_annualized_pct = float(returns.std() * (252 ** 0.5) * 100) if len(returns) > 5 else None
 
+        closes_90d = closes.tail(90)
+        first_of_year = closes[closes.index.year == closes.index[-1].year]
+        change_ytd_pct = ((last - float(first_of_year.iloc[0])) / float(first_of_year.iloc[0]) * 100) if len(first_of_year) > 1 else None
+        change_1y_pct = ((last - float(closes.iloc[0])) / float(closes.iloc[0]) * 100) if len(closes) > 200 else None
+
         return {
             "price": round(last, 3),
             "day_change_pct": round(day_change_pct, 2) if day_change_pct is not None else None,
-            "range_90d_low": round(float(closes.min()), 3),
-            "range_90d_high": round(float(closes.max()), 3),
+            "range_90d_low": round(float(closes_90d.min()), 3),
+            "range_90d_high": round(float(closes_90d.max()), 3),
+            "range_1y_low": round(float(closes.min()), 3),
+            "range_1y_high": round(float(closes.max()), 3),
+            "change_ytd_pct": round(change_ytd_pct, 1) if change_ytd_pct is not None else None,
+            "change_1y_pct": round(change_1y_pct, 1) if change_1y_pct is not None else None,
             "volatility_annualized_pct": round(vol_annualized_pct, 1) if vol_annualized_pct is not None else None,
         }
     except Exception as e:
