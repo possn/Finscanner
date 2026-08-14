@@ -42,7 +42,7 @@ _handler_console = logging.StreamHandler(sys.stdout)
 _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
-logging.basicConfig(level=logging.INFO, handlers=[_handler_stream, _handler_console])
+logging.basicConfig(level=logging.INFO, handlers=[_handler_stream, _handler_console], force=True)
 log = logging.getLogger("run")
 
 
