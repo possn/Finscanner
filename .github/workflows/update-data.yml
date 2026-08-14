@@ -24,11 +24,20 @@ jobs:
 
       - name: Run pipeline
         run: python scripts/run.py
+        continue-on-error: true
+        id: pipeline
 
       - name: Commit updated data
+        if: always()
         run: |
           git config user.name "finscanner-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/stocks.json data/metals.json
+          git add data/stocks.json 2>/dev/null || true
+          git add data/metals.json 2>/dev/null || true
+          git add data/last_error.log 2>/dev/null || true
           git diff --quiet --cached || git commit -m "chore: daily data update $(date -u +%Y-%m-%d)"
           git push
+
+      - name: Fail job if pipeline failed
+        if: steps.pipeline.outcome == 'failure'
+        run: exit 1

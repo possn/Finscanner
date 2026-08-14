@@ -15,6 +15,8 @@ import datetime
 import json
 import logging
 import os
+import sys
+import traceback
 
 from fundamentals import fetch_many
 from insiders import annotate as annotate_insiders
@@ -27,6 +29,7 @@ log = logging.getLogger("run")
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
+ERROR_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "last_error.log")
 
 # Reference expense-ratio benchmarks by broad category, used only for the
 # fee-audit "vs. category average" comparison. Figures are illustrative
@@ -91,4 +94,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+        # Clear any stale error log from a previous failed run so success
+        # is unambiguous in the repo state.
+        if os.path.exists(ERROR_LOG_PATH):
+            os.remove(ERROR_LOG_PATH)
+    except Exception:
+        os.makedirs(os.path.dirname(ERROR_LOG_PATH), exist_ok=True)
+        with open(ERROR_LOG_PATH, "w") as f:
+            f.write(f"Failed at {datetime.datetime.utcnow().isoformat()}Z\n\n")
+            f.write(traceback.format_exc())
+        traceback.print_exc()
+        sys.exit(1)
