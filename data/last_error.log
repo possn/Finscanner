@@ -1,0 +1,15 @@
+Failed at 2026-08-14T10:54:53.955316Z
+
+Traceback (most recent call last):
+  File "/home/runner/work/Finscanner/Finscanner/scripts/run.py", line 98, in <module>
+    main()
+  File "/home/runner/work/Finscanner/Finscanner/scripts/run.py", line 59, in main
+    scored = score_universe(raw)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Finscanner/Finscanner/scripts/score.py", line 116, in score_universe
+    _percentile_rank(r.trailing_pe, pes, invert=True) if r.trailing_pe and r.trailing_pe > 0 else None,
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Finscanner/Finscanner/scripts/score.py", line 74, in _percentile_rank
+    clean_sorted = sorted(clean)
+                   ^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'float' and 'str'
