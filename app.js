@@ -42,6 +42,7 @@
     fundsCount: document.getElementById("funds-count"),
     fundsSearch: document.getElementById("funds-search"),
     fundsSectorFilter: document.getElementById("funds-sector-filter"),
+    fundsRegionFilter: document.getElementById("funds-region-filter"),
     newsList: document.getElementById("news-list"),
     newsSearch: document.getElementById("news-search"),
     smartmoneyList: document.getElementById("smartmoney-list"),
@@ -448,15 +449,46 @@
     }
   }
 
+  const REGION_LABELS_PT = {
+    "United States": "Estados Unidos",
+    "United Kingdom": "Reino Unido",
+    "Australia": "Austrália",
+    "Germany": "Alemanha",
+    "France": "França",
+    "Netherlands": "Países Baixos",
+    "Spain": "Espanha",
+    "Italy": "Itália",
+    "Switzerland": "Suíça",
+    "International Developed": "Internacional Desenvolvido",
+    "Emerging Markets": "Mercados Emergentes",
+    "Japan": "Japão",
+    "Global": "Global",
+  };
+  function regionLabel(region) { return REGION_LABELS_PT[region] || region; }
+
+  let stocksRegionsPopulated = false;
+  function populateRegionFilter(selectEl, rows, populatedFlagSetter) {
+    if (!selectEl) return;
+    const regions = [...new Set(rows.map(r => r.region).filter(Boolean))]
+      .sort((a, b) => regionLabel(a).localeCompare(regionLabel(b), "pt"));
+    selectEl.innerHTML = `<option value="">todas as regiões</option>` +
+      regions.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(regionLabel(r))}</option>`).join("");
+    populatedFlagSetter();
+  }
+
   function applyFilters() {
     if (!state.data) return;
+    if (!stocksRegionsPopulated) {
+      populateRegionFilter(els.marketFilter, state.data.stocks.filter(r => r.quote_type !== "ETF"), () => { stocksRegionsPopulated = true; });
+    }
     const q = els.search.value.trim().toUpperCase();
-    const market = els.marketFilter.value;
+    const region = els.marketFilter.value;
     const zombieOnly = els.zombieOnly.checked;
     const watchlistOnly = els.watchlistOnly.checked;
 
     let rows = state.data.stocks.filter(r => {
-      if (market && marketOf(r.ticker) !== market) return false;
+      if (r.quote_type === "ETF") return false;
+      if (region && r.region !== region) return false;
       if (zombieOnly && r.zombie !== "yes") return false;
       if (watchlistOnly && !isWatched(r.ticker)) return false;
       if (q && !(r.ticker.toUpperCase().includes(q) || (r.name || "").toUpperCase().includes(q))) return false;
@@ -523,7 +555,7 @@
           <div class="card-main">
             <div class="card-ticker">${r.ticker} <button class="star-btn ${starred ? 'is-active' : ''}" data-ticker="${r.ticker}" aria-label="Watchlist">${starred ? "★" : "☆"}</button></div>
             <div class="card-name">${r.name || "—"}</div>
-            <div class="card-sector">${r.sector || "Sem setor"}${r.industry ? " · " + r.industry : ""} · ${marketOf(r.ticker)}</div>
+            <div class="card-sector">${r.sector || "Sem setor"}${r.industry ? " · " + r.industry : ""} · ${r.region ? regionLabel(r.region) : marketOf(r.ticker)}</div>
           </div>
         </div>
         <div class="metric-ribbon">${metrics.map(([label,val]) => `<div><span>${label}</span><strong>${val == null ? "—" : Math.round(val)}</strong></div>`).join("")}</div>
@@ -926,13 +958,16 @@
       const sectors = [...new Set(allFunds.map(r => r.sector).filter(Boolean))].sort();
       els.fundsSectorFilter.innerHTML = `<option value="">todos os setores</option>` +
         sectors.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+      populateRegionFilter(els.fundsRegionFilter, allFunds, () => {});
       fundsSectorsPopulated = true;
     }
 
     const q = (els.fundsSearch?.value || "").trim().toUpperCase();
     const sector = els.fundsSectorFilter?.value || "";
+    const region = els.fundsRegionFilter?.value || "";
     const rows = allFunds.filter(r => {
       if (sector && r.sector !== sector) return false;
+      if (region && r.region !== region) return false;
       if (q && !(r.ticker.toUpperCase().includes(q) || (r.name || "").toUpperCase().includes(q))) return false;
       return true;
     });
@@ -1092,7 +1127,7 @@
 
   els.compareInput?.addEventListener("input", renderCompare);
 
-  [els.fundsSearch, els.fundsSectorFilter].filter(Boolean).forEach(el => {
+  [els.fundsSearch, els.fundsSectorFilter, els.fundsRegionFilter].filter(Boolean).forEach(el => {
     el.addEventListener("input", renderFunds);
     el.addEventListener("change", renderFunds);
   });

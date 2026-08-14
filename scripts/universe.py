@@ -38,31 +38,84 @@ log = logging.getLogger("universe")
 # filter meaningful. Expense ratio and AI-exposure are still computed
 # live from real data (fundamentals.py) — only the sector tag and the
 # ticker list itself are static.
-ETF_UNIVERSE: dict[str, str] = {
-    # SPDR Select Sector — cleanly maps 1:1 to GICS sectors
-    "XLK": "Technology", "XLF": "Financial Services", "XLE": "Energy",
-    "XLV": "Healthcare", "XLI": "Industrials", "XLY": "Consumer Cyclical",
-    "XLP": "Consumer Defensive", "XLU": "Utilities", "XLB": "Basic Materials",
-    "XLRE": "Real Estate", "XLC": "Communication Services",
+ETF_UNIVERSE: dict[str, dict[str, str]] = {
+    # SPDR Select Sector — cleanly maps 1:1 to GICS sectors. All US-listed,
+    # investing in US-sector companies, so region = United States.
+    "XLK": {"sector": "Technology", "region": "United States"},
+    "XLF": {"sector": "Financial Services", "region": "United States"},
+    "XLE": {"sector": "Energy", "region": "United States"},
+    "XLV": {"sector": "Healthcare", "region": "United States"},
+    "XLI": {"sector": "Industrials", "region": "United States"},
+    "XLY": {"sector": "Consumer Cyclical", "region": "United States"},
+    "XLP": {"sector": "Consumer Defensive", "region": "United States"},
+    "XLU": {"sector": "Utilities", "region": "United States"},
+    "XLB": {"sector": "Basic Materials", "region": "United States"},
+    "XLRE": {"sector": "Real Estate", "region": "United States"},
+    "XLC": {"sector": "Communication Services", "region": "United States"},
     # Broad market
-    "SPY": "Broad Market", "VOO": "Broad Market", "IVV": "Broad Market",
-    "VTI": "Broad Market", "QQQ": "Broad Market", "DIA": "Broad Market",
-    "IWM": "Small Cap",
-    # International / regional
-    "EFA": "International Developed", "VEA": "International Developed",
-    "EEM": "Emerging Markets", "VWO": "Emerging Markets",
-    "EWU": "United Kingdom", "EWG": "Germany", "EWJ": "Japan", "EWA": "Australia",
-    # Thematic / sector-adjacent
-    "SMH": "Semiconductors", "SOXX": "Semiconductors", "ARKK": "Innovation/Growth",
-    "SKYY": "Cloud Computing", "ROBO": "Robotics & AI", "HACK": "Cybersecurity",
-    "IBB": "Biotechnology", "XBI": "Biotechnology", "ITA": "Aerospace & Defense",
-    "TAN": "Solar/Clean Energy", "URA": "Uranium",
-    # Bonds / fixed income
-    "AGG": "Bonds", "BND": "Bonds", "TLT": "Bonds (Long Treasury)",
-    "SHY": "Bonds (Short Treasury)", "LQD": "Bonds (Corporate)", "HYG": "Bonds (High Yield)",
+    "SPY": {"sector": "Broad Market", "region": "United States"},
+    "VOO": {"sector": "Broad Market", "region": "United States"},
+    "IVV": {"sector": "Broad Market", "region": "United States"},
+    "VTI": {"sector": "Broad Market", "region": "United States"},
+    "QQQ": {"sector": "Broad Market", "region": "United States"},
+    "DIA": {"sector": "Broad Market", "region": "United States"},
+    "IWM": {"sector": "Small Cap", "region": "United States"},
+    # International / regional — region IS the point of these funds
+    "EFA": {"sector": "Broad Market", "region": "International Developed"},
+    "VEA": {"sector": "Broad Market", "region": "International Developed"},
+    "EEM": {"sector": "Broad Market", "region": "Emerging Markets"},
+    "VWO": {"sector": "Broad Market", "region": "Emerging Markets"},
+    "EWU": {"sector": "Broad Market", "region": "United Kingdom"},
+    "EWG": {"sector": "Broad Market", "region": "Germany"},
+    "EWJ": {"sector": "Broad Market", "region": "Japan"},
+    "EWA": {"sector": "Broad Market", "region": "Australia"},
+    # Thematic / sector-adjacent (mostly US-listed & US-heavy holdings)
+    "SMH": {"sector": "Semiconductors", "region": "Global"},
+    "SOXX": {"sector": "Semiconductors", "region": "United States"},
+    "ARKK": {"sector": "Innovation/Growth", "region": "Global"},
+    "SKYY": {"sector": "Cloud Computing", "region": "United States"},
+    "ROBO": {"sector": "Robotics & AI", "region": "Global"},
+    "HACK": {"sector": "Cybersecurity", "region": "Global"},
+    "IBB": {"sector": "Biotechnology", "region": "United States"},
+    "XBI": {"sector": "Biotechnology", "region": "United States"},
+    "ITA": {"sector": "Aerospace & Defense", "region": "United States"},
+    "TAN": {"sector": "Solar/Clean Energy", "region": "Global"},
+    "URA": {"sector": "Uranium", "region": "Global"},
+    # Bonds / fixed income — US treasury/corporate unless noted
+    "AGG": {"sector": "Bonds", "region": "United States"},
+    "BND": {"sector": "Bonds", "region": "United States"},
+    "TLT": {"sector": "Bonds (Long Treasury)", "region": "United States"},
+    "SHY": {"sector": "Bonds (Short Treasury)", "region": "United States"},
+    "LQD": {"sector": "Bonds (Corporate)", "region": "United States"},
+    "HYG": {"sector": "Bonds (High Yield)", "region": "United States"},
     # Commodities proxies (metals themselves are covered separately in metals.py)
-    "GLD": "Commodities", "SLV": "Commodities", "USO": "Commodities",
+    "GLD": {"sector": "Commodities", "region": "Global"},
+    "SLV": {"sector": "Commodities", "region": "Global"},
+    "USO": {"sector": "Commodities", "region": "Global"},
 }
+
+# Ticker-suffix -> region, for equities (where they trade, not just an
+# abstract "market code"). Used to set row["region"] server-side so the
+# frontend has one authoritative field instead of re-deriving it from the
+# ticker string in JS.
+EQUITY_REGION_BY_SUFFIX: dict[str, str] = {
+    "": "United States",
+    ".AX": "Australia",
+    ".L": "United Kingdom",
+    ".DE": "Germany",
+    ".PA": "France",
+    ".AS": "Netherlands",
+    ".MC": "Spain",
+    ".MI": "Italy",
+    ".SW": "Switzerland",
+}
+
+
+def region_for_equity(ticker: str) -> str:
+    for suffix, region in EQUITY_REGION_BY_SUFFIX.items():
+        if suffix and ticker.endswith(suffix):
+            return region
+    return EQUITY_REGION_BY_SUFFIX[""]
 
 HEADERS = {"User-Agent": "Finscanner/0.1 (personal research tool; contact: set-your-email-here)"}
 
