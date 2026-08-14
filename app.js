@@ -40,7 +40,10 @@
     opportunityGrid: document.getElementById("opportunity-grid"),
     fundsList: document.getElementById("funds-list"),
     fundsCount: document.getElementById("funds-count"),
+    fundsSearch: document.getElementById("funds-search"),
+    fundsSectorFilter: document.getElementById("funds-sector-filter"),
     newsList: document.getElementById("news-list"),
+    newsSearch: document.getElementById("news-search"),
     smartmoneyList: document.getElementById("smartmoney-list"),
     thesesList: document.getElementById("theses-list"),
     compareInput: document.getElementById("compare-input"),
@@ -56,7 +59,7 @@
     metals: { title: "Metais", sub: "futuros e proxies · fontes gratuitas" },
     portfolio: { title: "O meu portfolio", sub: "guardado só neste dispositivo (localStorage)" },
     funds: { title: "ETFs", sub: "fundos cotados no universo rastreado" },
-    news: { title: "Notícias", sub: "notícias das posições que possuis" },
+    news: { title: "Notícias", sub: "posições, watchlist, ou pesquisa manual" },
     smartmoney: { title: "Smart Money", sub: "atividade de insiders · SEC Form 4" },
     theses: { title: "Teses", sub: "arquétipos quantitativos · hipóteses explicáveis" },
     compare: { title: "Comparar", sub: "comparação multifator lado a lado" },
@@ -913,10 +916,28 @@
 
   function escapeHtml(v) { return String(v ?? "").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
+  let fundsSectorsPopulated = false;
+
   function renderFunds() {
     if (!state.data) return;
-    const rows = state.data.stocks.filter(r => r.quote_type === "ETF");
-    els.fundsCount.textContent = `${rows.length} fundos`;
+    const allFunds = state.data.stocks.filter(r => r.quote_type === "ETF");
+
+    if (!fundsSectorsPopulated && els.fundsSectorFilter) {
+      const sectors = [...new Set(allFunds.map(r => r.sector).filter(Boolean))].sort();
+      els.fundsSectorFilter.innerHTML = `<option value="">todos os setores</option>` +
+        sectors.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+      fundsSectorsPopulated = true;
+    }
+
+    const q = (els.fundsSearch?.value || "").trim().toUpperCase();
+    const sector = els.fundsSectorFilter?.value || "";
+    const rows = allFunds.filter(r => {
+      if (sector && r.sector !== sector) return false;
+      if (q && !(r.ticker.toUpperCase().includes(q) || (r.name || "").toUpperCase().includes(q))) return false;
+      return true;
+    });
+
+    els.fundsCount.textContent = `${rows.length} de ${allFunds.length} fundos`;
     render(els.fundsList, rows);
   }
 
@@ -949,8 +970,10 @@
   async function renderNews() {
     if (!state.data) return;
     const portfolio = lsGet(LS_PORTFOLIO);
-    const tickers = Object.keys(portfolio);
-    if (!tickers.length) { els.newsList.innerHTML='<p class="empty-state">Adiciona posições ao portfolio para veres notícias relevantes.</p>'; return; }
+    const watchlist = lsGet(LS_WATCHLIST);
+    const manual = (els.newsSearch?.value || "").trim().toUpperCase();
+    const tickers = [...new Set([...Object.keys(portfolio), ...Object.keys(watchlist), ...(manual ? [manual] : [])])];
+    if (!tickers.length) { els.newsList.innerHTML='<p class="empty-state">Adiciona posições ao portfolio, marca tickers na watchlist (★), ou pesquisa um ticker acima.</p>'; return; }
     els.newsList.innerHTML = tickers.map(t=>`<article class="news-group" id="news-${CSS.escape(t)}"><h3>${escapeHtml(t)}</h3><p>A procurar notícias…</p></article>`).join('');
     await Promise.allSettled(tickers.slice(0,20).map(async ticker => {
       const box=document.getElementById(`news-${CSS.escape(ticker)}`);
@@ -960,9 +983,11 @@
         const u=`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(ticker)}&quotesCount=0&newsCount=4`;
         const res=await fetch(u,{cache:'no-store'}); if(!res.ok) throw new Error('blocked');
         const j=await res.json(); const news=(j.news||[]).slice(0,4);
+        if (!box) return;
         box.innerHTML=`<h3>${escapeHtml(ticker)}</h3>${news.map(n=>`<a class="news-item" href="${escapeHtml(n.link)}" target="_blank" rel="noopener"><strong>${escapeHtml(n.title)}</strong><span>${escapeHtml(n.publisher||'')}</span></a>`).join('')}<div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Google News</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
       } catch(e) {
-        box.innerHTML=`<h3>${escapeHtml(ticker)}</h3><p>O feed direto não está disponível neste browser.</p><div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Pesquisar notícias</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
+        if (!box) return;
+        box.innerHTML=`<h3>${escapeHtml(ticker)}</h3><p>O feed direto não está disponível neste browser (bloqueio de CORS do lado do Yahoo — não é algo que o Finscanner controle).</p><div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Pesquisar notícias</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
       }
     }));
   }
@@ -988,12 +1013,63 @@
     els.thesesList.querySelectorAll("[data-ticker]").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
   }
 
+  function resolveCompareTicker(term) {
+    if (!state.data) return null;
+    const t = term.toUpperCase();
+    // 1) exact ticker match
+    let hit = state.data.stocks.find(r => r.ticker.toUpperCase() === t);
+    if (hit) return hit;
+    // 2) ticker without exchange suffix (e.g. "AAL" matching "AAL.L")
+    hit = state.data.stocks.find(r => r.ticker.toUpperCase().split(".")[0] === t);
+    if (hit) return hit;
+    // 3) company name — exact word-boundary match first, then substring
+    const nameLower = term.toLowerCase();
+    hit = state.data.stocks.find(r => (r.name || "").toLowerCase().split(/[\s,.]+/).includes(nameLower));
+    if (hit) return hit;
+    hit = state.data.stocks.find(r => (r.name || "").toLowerCase().includes(nameLower));
+    return hit || null;
+  }
+
   function renderCompare() {
     if (!state.data) return;
-    const raw=(els.compareInput?.value||'').toUpperCase().split(/[\s,;]+/).filter(Boolean).slice(0,4);
-    const picks=raw.map(t=>state.data.stocks.find(r=>r.ticker===t)).filter(Boolean);
-    if (!raw.length) { els.compareList.innerHTML='<p class="empty-state">Escreve até 4 tickers separados por vírgulas.</p>'; return; }
-    els.compareList.innerHTML = picks.map(r=>`<article class="compare-card"><span class="eyebrow">${escapeHtml(r.ticker)}</span><h3>${escapeHtml(r.name||r.ticker)}</h3><div class="compare-score">${r.score ?? '—'}</div><div class="detail-row"><span>Qualidade</span><b>${r.quality_score ?? '—'}</b></div><div class="detail-row"><span>Crescimento</span><b>${r.growth_score ?? '—'}</b></div><div class="detail-row"><span>Cash flow</span><b>${r.cashflow_score ?? '—'}</b></div><div class="detail-row"><span>Valor</span><b>${r.valuation_score ?? '—'}</b></div><div class="detail-row"><span>Estabilidade</span><b>${r.stability_score ?? '—'}</b></div><div class="detail-row"><span>P/E fwd</span><b>${fmtRatio(r.forward_pe)}</b></div></article>`).join('') || '<p class="empty-state">Nenhum ticker encontrado no universo atual.</p>';
+    const raw = (els.compareInput?.value || "").split(/[,;]+/).map(s => s.trim()).filter(Boolean).slice(0, 4);
+    if (!raw.length) { els.compareList.innerHTML = '<p class="empty-state">Escreve até 4 tickers ou nomes de empresas, separados por vírgulas.</p>'; return; }
+
+    const picks = [];
+    const misses = [];
+    const seen = new Set();
+    for (const term of raw) {
+      const hit = resolveCompareTicker(term);
+      if (hit && !seen.has(hit.ticker)) { picks.push(hit); seen.add(hit.ticker); }
+      else if (!hit) misses.push(term);
+    }
+
+    const cards = picks.map(r => {
+      const isEtf = r.quote_type === "ETF";
+      const rows = isEtf ? [
+        ["Expense ratio", r.expense_ratio != null ? fmtPct(r.expense_ratio) : "—"],
+        ["Exposição AI", r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "sem dados"],
+        ["Setor", r.sector || "—"],
+        ["Preço", r.current_price != null ? r.current_price : "—"],
+      ] : [
+        ["Qualidade", r.quality_pct ?? "—"],
+        ["Crescimento", r.growth_pct ?? "—"],
+        ["Balanço", r.balance_pct ?? "—"],
+        ["Cash flow", r.cashflow_pct ?? "—"],
+        ["Valor", r.value_pct ?? "—"],
+        ["Estabilidade", r.stability_pct ?? "—"],
+        ["P/E fwd", fmtRatio(r.forward_pe)],
+      ];
+      return `<article class="compare-card">
+        <span class="eyebrow">${escapeHtml(r.ticker)}${isEtf ? " · ETF" : ""}</span>
+        <h3>${escapeHtml(r.name || r.ticker)}</h3>
+        <div class="compare-score">${r.score ?? "—"}</div>
+        ${rows.map(([label, val]) => `<div class="detail-row"><span>${label}</span><b>${val}</b></div>`).join("")}
+      </article>`;
+    }).join("");
+
+    const missNote = misses.length ? `<p class="unmatched-note">Não encontrado no universo rastreado: ${misses.map(escapeHtml).join(", ")}</p>` : "";
+    els.compareList.innerHTML = (cards || '<p class="empty-state">Nenhum ticker ou nome encontrado no universo atual.</p>') + missNote;
   }
 
   on(els.detailClose, "click", () => { if (els.detail) els.detail.hidden = true; });
@@ -1011,7 +1087,15 @@
     renderPortfolio();
   });
 
+  els.newsSearch?.addEventListener("keydown", (e) => { if (e.key === "Enter") renderNews(); });
+  els.newsSearch?.addEventListener("blur", renderNews);
+
   els.compareInput?.addEventListener("input", renderCompare);
+
+  [els.fundsSearch, els.fundsSectorFilter].filter(Boolean).forEach(el => {
+    el.addEventListener("input", renderFunds);
+    el.addEventListener("change", renderFunds);
+  });
 
   [els.search, els.marketFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].filter(Boolean).forEach(el => {
     el.addEventListener("input", applyFilters);

@@ -140,8 +140,17 @@
     </section>
 
 
-    <section id="view-funds" class="view"><div class="section-heading"><div><span class="eyebrow">FUNDS</span><h3>ETFs</h3></div><span class="section-count" id="funds-count">—</span></div><div id="funds-list" class="dossier"></div></section>
-    <section id="view-news" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">PORTFOLIO NEWS</span><h2>O que mudou nas empresas que possuis.</h2><p>Notícias recentes agregadas por ticker. Se a fonte direta bloquear o browser, ficam sempre disponíveis pesquisas externas por empresa.</p></div></section><div id="news-list" class="dossier"></div></section>
+    <section id="view-funds" class="view"><div class="section-heading"><div><span class="eyebrow">FUNDS</span><h3>ETFs</h3></div><span class="section-count" id="funds-count">—</span></div>
+      <div class="commandbar">
+        <input id="funds-search" type="text" placeholder="ticker ou nome…" autocomplete="off" spellcheck="false">
+        <select id="funds-sector-filter"><option value="">todos os setores</option></select>
+      </div>
+      <div id="funds-list" class="dossier"></div>
+    </section>
+    <section id="view-news" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">NOTÍCIAS</span><h2>Notícias das tuas posições e watchlist.</h2><p>Notícias recentes agregadas por ticker. Podes também pesquisar qualquer ticker manualmente. Se a fonte direta bloquear o browser, ficam sempre disponíveis pesquisas externas por empresa.</p></div></section>
+      <div class="commandbar"><input id="news-search" type="text" placeholder="pesquisar notícias de um ticker…" autocomplete="off" spellcheck="false"></div>
+      <div id="news-list" class="dossier"></div>
+    </section>
     <section id="view-smartmoney" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">SMART MONEY</span><h2>Onde os insiders estão ativos.</h2><p>Atividade Form 4 da SEC nos EUA, distinguindo compras e vendas open-market quando disponível.</p></div></section><div id="smartmoney-list" class="dossier"></div></section>
     <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">INVESTMENT THESES</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section><div id="theses-list" class="dossier"></div></section>
     <section id="view-compare" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">COMPARE</span><h2>Compara até 4 empresas lado a lado.</h2><p>Score, qualidade, crescimento, cash flow, valuation e risco no mesmo quadro.</p></div></section><div class="commandbar"><input id="compare-input" type="text" placeholder="AAPL, MSFT, ASML.AS, BMW.DE"></div><div id="compare-list" class="compare-grid"></div></section>

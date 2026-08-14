@@ -28,6 +28,42 @@ import yfinance as yf
 # behaviour — add a handler yourself if running standalone.
 log = logging.getLogger("universe")
 
+# ETF universe: yfinance/Yahoo has no free "screen all ETFs" endpoint
+# comparable to the equity screener, and Yahoo's own `sector` field is
+# usually blank for funds — so both the ticker list AND the sector label
+# are curated by hand here rather than fetched. This is a deliberate
+# trade-off: broad, liquid, well-known ETFs across the major GICS-style
+# sectors plus a few broad-market/thematic/bond funds, small enough to
+# maintain by hand, large enough to make the "procurar ETFs por setor"
+# filter meaningful. Expense ratio and AI-exposure are still computed
+# live from real data (fundamentals.py) — only the sector tag and the
+# ticker list itself are static.
+ETF_UNIVERSE: dict[str, str] = {
+    # SPDR Select Sector — cleanly maps 1:1 to GICS sectors
+    "XLK": "Technology", "XLF": "Financial Services", "XLE": "Energy",
+    "XLV": "Healthcare", "XLI": "Industrials", "XLY": "Consumer Cyclical",
+    "XLP": "Consumer Defensive", "XLU": "Utilities", "XLB": "Basic Materials",
+    "XLRE": "Real Estate", "XLC": "Communication Services",
+    # Broad market
+    "SPY": "Broad Market", "VOO": "Broad Market", "IVV": "Broad Market",
+    "VTI": "Broad Market", "QQQ": "Broad Market", "DIA": "Broad Market",
+    "IWM": "Small Cap",
+    # International / regional
+    "EFA": "International Developed", "VEA": "International Developed",
+    "EEM": "Emerging Markets", "VWO": "Emerging Markets",
+    "EWU": "United Kingdom", "EWG": "Germany", "EWJ": "Japan", "EWA": "Australia",
+    # Thematic / sector-adjacent
+    "SMH": "Semiconductors", "SOXX": "Semiconductors", "ARKK": "Innovation/Growth",
+    "SKYY": "Cloud Computing", "ROBO": "Robotics & AI", "HACK": "Cybersecurity",
+    "IBB": "Biotechnology", "XBI": "Biotechnology", "ITA": "Aerospace & Defense",
+    "TAN": "Solar/Clean Energy", "URA": "Uranium",
+    # Bonds / fixed income
+    "AGG": "Bonds", "BND": "Bonds", "TLT": "Bonds (Long Treasury)",
+    "SHY": "Bonds (Short Treasury)", "LQD": "Bonds (Corporate)", "HYG": "Bonds (High Yield)",
+    # Commodities proxies (metals themselves are covered separately in metals.py)
+    "GLD": "Commodities", "SLV": "Commodities", "USO": "Commodities",
+}
+
 HEADERS = {"User-Agent": "Finscanner/0.1 (personal research tool; contact: set-your-email-here)"}
 
 
@@ -140,9 +176,14 @@ def asx_constituents() -> list[str]:
 
 
 def wig_constituents() -> list[str]:
-    # The English Wikipedia WIG20 article does not carry a constituents
-    # table (only historical performance + navboxes) — confirmed via
-    # pipeline_log.txt on a real run, not assumed. The Polish article does.
+    # DISABLED — not called from build_universe(). Both the English and
+    # Polish Wikipedia WIG20 articles failed to yield a parseable
+    # constituents table (confirmed via pipeline_log.txt on real runs:
+    # the Polish page's tables lack proper <th> headers, so pandas
+    # returns generic '0'/'1' column names). No verified, current,
+    # free source for the 20 tickers was found. Left here undeleted in
+    # case a working source turns up later — kept honest as "off",
+    # not silently broken.
     raw = _wikipedia_table(
         "https://pl.wikipedia.org/wiki/WIG20",
         match="Ticker",
@@ -187,11 +228,10 @@ def build_universe() -> dict[str, list[str]]:
     time.sleep(1)
     universe["AU"] = asx_constituents()
     time.sleep(1)
-    universe["PL"] = wig_constituents()
-    time.sleep(1)
     universe["UK"] = ftse_constituents()
     time.sleep(1)
     universe["EU"] = europe_constituents()
+    universe["ETF"] = sorted(ETF_UNIVERSE.keys())
 
     for market, tickers in universe.items():
         log.info("%s: %d tickers", market, len(tickers))

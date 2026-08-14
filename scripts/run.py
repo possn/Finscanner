@@ -27,7 +27,7 @@ from metals import build_metals_payload
 from score import score_universe
 from thesis import classify as classify_thesis, evolve as evolve_thesis
 import thesis_history as thesis_history_mod
-from universe import build_universe
+from universe import build_universe, ETF_UNIVERSE
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
@@ -116,6 +116,8 @@ def main():
     rows = []
     for s in scored:
         row = dataclasses.asdict(s)
+        if row.get("quote_type") == "ETF" and not row.get("sector"):
+            row["sector"] = ETF_UNIVERSE.get(s.ticker)
         insider = insider_map.get(s.ticker, {"status": "not_available"})
         row["insider_status"] = insider.get("status", "not_available")
         row["insider_form4_count_30d"] = insider.get("form4_count_30d", "not_available")
