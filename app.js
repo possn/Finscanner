@@ -20,6 +20,9 @@
     metalsNote: document.getElementById("metals-note"),
     portfolioList: document.getElementById("portfolio-list"),
     portfolioSummary: document.getElementById("portfolio-summary"),
+    exposurePanel: document.getElementById("exposure-panel"),
+    portfolioFile: document.getElementById("portfolio-file"),
+    portfolioClear: document.getElementById("portfolio-clear"),
     sidenavItems: document.querySelectorAll(".sidenav-item"),
     views: document.querySelectorAll(".view"),
   };
@@ -44,6 +47,10 @@
   function lsSet(key, obj) {
     try { localStorage.setItem(key, JSON.stringify(obj)); } catch (e) { console.warn("localStorage write failed", e); }
   }
+  // Portfolio entries are objects: { qty: number|null, value: number|null }.
+  // `true` (from the old boolean "owned" toggle) is treated as qty:1 for
+  // backward compatibility with positions marked before the import
+  // feature existed.
   function isOwned(ticker) { return !!lsGet(LS_PORTFOLIO)[ticker]; }
   function isWatched(ticker) { return !!lsGet(LS_WATCHLIST)[ticker]; }
   function toggleOwned(ticker) {
@@ -318,6 +325,177 @@
     }
   }
 
+  // ---------- Portfolio import (CSV/JSON) ----------
+  // Mirrors the AI_EXPOSED_TICKERS set in scripts/score.py — kept in sync
+  // by hand since the two run in completely different environments
+  // (Python pipeline vs. browser).
+  const AI_EXPOSED_TICKERS = new Set([
+    "MSFT", "NVDA", "GOOGL", "GOOG", "AMZN", "META", "ORCL", "AVGO",
+    "AMD", "PLTR", "CRM", "NOW", "SNOW", "SMCI", "ARM", "TSM", "ASML",
+  ]);
+
+  function parseCsvPortfolio(text) {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return {};
+    const header = lines[0].split(",").map(h => h.trim().toLowerCase());
+    const tickerIdx = header.findIndex(h => ["ticker", "symbol"].includes(h));
+    const qtyIdx = header.findIndex(h => ["quantity", "qty", "shares", "units"].includes(h));
+    const valueIdx = header.findIndex(h => ["value", "amount", "market_value"].includes(h));
+    if (tickerIdx === -1) throw new Error("Coluna 'ticker' ou 'symbol' não encontrada no cabeçalho do CSV.");
+
+    const portfolio = {};
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",").map(c => c.trim());
+      const ticker = cols[tickerIdx]?.toUpperCase();
+      if (!ticker) continue;
+      const qty = qtyIdx !== -1 ? parseFloat(cols[qtyIdx]) : null;
+      const value = valueIdx !== -1 ? parseFloat(cols[valueIdx]) : null;
+      portfolio[ticker] = {
+        qty: Number.isFinite(qty) ? qty : null,
+        value: Number.isFinite(value) ? value : null,
+      };
+    }
+    return portfolio;
+  }
+
+  function parseJsonPortfolio(text) {
+    const data = JSON.parse(text);
+    const portfolio = {};
+    if (Array.isArray(data)) {
+      for (const row of data) {
+        const ticker = (row.ticker || row.symbol || "").toUpperCase();
+        if (!ticker) continue;
+        const qty = Number(row.quantity ?? row.qty ?? row.shares ?? row.units);
+        const value = Number(row.value ?? row.amount ?? row.market_value);
+        portfolio[ticker] = {
+          qty: Number.isFinite(qty) ? qty : null,
+          value: Number.isFinite(value) ? value : null,
+        };
+      }
+    } else if (data && typeof data === "object") {
+      for (const [ticker, v] of Object.entries(data)) {
+        const upper = ticker.toUpperCase();
+        if (typeof v === "number") {
+          portfolio[upper] = { qty: v, value: null };
+        } else if (v && typeof v === "object") {
+          const qty = Number(v.quantity ?? v.qty ?? v.shares);
+          const value = Number(v.value ?? v.amount);
+          portfolio[upper] = {
+            qty: Number.isFinite(qty) ? qty : null,
+            value: Number.isFinite(value) ? value : null,
+          };
+        }
+      }
+    }
+    return portfolio;
+  }
+
+  function handlePortfolioFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = String(reader.result);
+        const portfolio = file.name.toLowerCase().endsWith(".json")
+          ? parseJsonPortfolio(text)
+          : parseCsvPortfolio(text);
+        if (!Object.keys(portfolio).length) {
+          alert("Não encontrei nenhuma posição válida no ficheiro.");
+          return;
+        }
+        lsSet(LS_PORTFOLIO, portfolio);
+        renderPortfolio();
+      } catch (e) {
+        alert("Erro a ler o ficheiro: " + e.message);
+        console.error(e);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Position value: explicit `value` wins; otherwise qty × current_price
+  // from stocks.json (when we have a price for that ticker); otherwise
+  // null (position is counted but excluded from the value-weighted bars).
+  function positionValue(entry, stockRow) {
+    if (entry && typeof entry === "object") {
+      if (entry.value != null) return entry.value;
+      if (entry.qty != null && stockRow?.current_price != null) return entry.qty * stockRow.current_price;
+    }
+    return null;
+  }
+
+  function renderExposure(portfolio, matchedRows) {
+    const rowByTicker = Object.fromEntries(matchedRows.map(r => [r.ticker, r]));
+    const entries = Object.entries(portfolio).map(([ticker, entry]) => {
+      const row = rowByTicker[ticker];
+      const val = positionValue(entry, row);
+      return { ticker, row, val };
+    });
+
+    const valued = entries.filter(e => e.val != null && e.val > 0);
+    const totalValue = valued.reduce((s, e) => s + e.val, 0);
+    const unmatchedCount = entries.filter(e => !e.row).length;
+    const noValueCount = entries.filter(e => e.row && e.val == null).length;
+
+    if (!valued.length) {
+      els.exposurePanel.innerHTML = `
+        <div class="exposure-block">
+          <p class="unmatched-note">
+            Sem dados suficientes para calcular exposição ponderada por valor
+            (${unmatchedCount} ticker(s) fora do universo rastreado, ${noValueCount} sem preço/quantidade/valor).
+            A lista de posições abaixo continua a mostrar o que temos por ticker.
+          </p>
+        </div>`;
+      return;
+    }
+
+    // Sector breakdown (Yahoo Finance's own sector taxonomy — Technology,
+    // Consumer Cyclical, Financial Services, Basic Materials, etc.)
+    const bySector = {};
+    for (const e of valued) {
+      const sector = e.row.sector || "Sem setor / ETF";
+      bySector[sector] = (bySector[sector] || 0) + e.val;
+    }
+    const sectorRows = Object.entries(bySector).sort((a, b) => b[1] - a[1]);
+
+    // AI exposure: direct AI-flagged equities + weighted ETF ai_exposure_pct
+    const aiValue = valued.reduce((sum, e) => {
+      if (AI_EXPOSED_TICKERS.has(e.ticker)) return sum + e.val;
+      if (e.row.quote_type === "ETF" && e.row.ai_exposure_pct != null) {
+        return sum + e.val * (e.row.ai_exposure_pct / 100);
+      }
+      return sum;
+    }, 0);
+    const aiPct = (aiValue / totalValue) * 100;
+
+    const sectorBars = sectorRows.map(([sector, val]) => {
+      const pct = (val / totalValue) * 100;
+      return `
+        <div class="exposure-row">
+          <span class="exposure-label">${sector}</span>
+          <span class="exposure-bar-track"><span class="exposure-bar-fill" style="width:${pct.toFixed(1)}%"></span></span>
+          <span class="exposure-pct">${pct.toFixed(1)}%</span>
+        </div>`;
+    }).join("");
+
+    els.exposurePanel.innerHTML = `
+      <div class="exposure-block">
+        <h3 class="exposure-title">Exposição por setor (ponderada por valor)</h3>
+        ${sectorBars}
+        <div class="exposure-row" style="margin-top:0.5rem;">
+          <span class="exposure-label">Exposição a IA</span>
+          <span class="exposure-bar-track"><span class="exposure-bar-fill ai" style="width:${Math.min(aiPct,100).toFixed(1)}%"></span></span>
+          <span class="exposure-pct">${aiPct.toFixed(1)}%</span>
+        </div>
+        <p class="unmatched-note">
+          Valor total considerado: ${totalValue.toLocaleString("pt-PT", {maximumFractionDigits:0})}
+          (${valued.length} de ${entries.length} posições com valor calculável).
+          ${unmatchedCount ? `${unmatchedCount} ticker(s) fora do universo rastreado — sem setor/score.` : ""}
+          ${noValueCount ? `${noValueCount} posição(ões) sem quantidade nem valor explícito — não entram no peso.` : ""}
+          Exposição IA é direta (ações da lista fixa de nomes ligados a IA) + indireta via <code>ai_exposure_pct</code> de ETFs que possuis; não faz look-through a fundos que não tenham essa métrica.
+        </p>
+      </div>`;
+  }
+
   // ---------- Portfolio view ----------
   function renderPortfolio() {
     if (!state.data) return;
@@ -325,9 +503,13 @@
     const ownedTickers = Object.keys(portfolio);
     const rows = state.data.stocks.filter(r => ownedTickers.includes(r.ticker));
 
+    renderExposure(portfolio, rows);
+
     if (!rows.length) {
       els.portfolioSummary.innerHTML = "";
-      els.portfolioList.innerHTML = `<p class="empty-state">Ainda não marcaste nenhuma posição. Abre um ticker em Ações e toca em "Tenho esta posição".</p>`;
+      els.portfolioList.innerHTML = ownedTickers.length
+        ? `<p class="empty-state">${ownedTickers.length} ticker(s) importado(s), mas nenhum está no universo rastreado atualmente (fora do S&amp;P 500 / small-cap EUA / ASX200 / WIG20 / FTSE100).</p>`
+        : `<p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Ações e toca em "Tenho esta posição".</p>`;
       return;
     }
 
@@ -356,6 +538,18 @@
 
   els.detailClose.addEventListener("click", () => { els.detail.hidden = true; });
   els.detail.addEventListener("click", (e) => { if (e.target === els.detail) els.detail.hidden = true; });
+
+  els.portfolioFile.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) handlePortfolioFile(file);
+    e.target.value = ""; // allow re-selecting the same file
+  });
+
+  els.portfolioClear.addEventListener("click", () => {
+    if (!confirm("Limpar todo o portfolio importado/marcado?")) return;
+    lsSet(LS_PORTFOLIO, {});
+    renderPortfolio();
+  });
 
   [els.search, els.marketFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].forEach(el => {
     el.addEventListener("input", applyFilters);

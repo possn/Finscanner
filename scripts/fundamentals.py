@@ -43,6 +43,7 @@ class RawMetrics:
     # value
     trailing_pe: float | None = None
     price_to_book: float | None = None
+    current_price: float | None = None
 
     # stability
     beta: float | None = None
@@ -97,6 +98,7 @@ def fetch_one(ticker: str) -> RawMetrics:
         m.debt_to_equity = _as_float(info.get("debtToEquity"))
         m.trailing_pe = _as_float(info.get("trailingPE"))
         m.price_to_book = _as_float(info.get("priceToBook"))
+        m.current_price = _as_float(_safe_get(info, "currentPrice", "regularMarketPrice", "previousClose"))
         m.beta = _as_float(info.get("beta"))
         m.market_cap = _as_float(info.get("marketCap"))
 

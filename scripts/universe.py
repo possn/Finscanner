@@ -112,6 +112,23 @@ def _wikipedia_table(url: str, match: str, symbol_col_candidates: list[str]) -> 
         return []
 
 
+def sp500_constituents() -> list[str]:
+    """Large-cap coverage gap fix: the small/micro-cap screener above
+    deliberately excludes anything over $2B market cap, but a real
+    portfolio (which is the whole point of the CSV/JSON import feature)
+    is likely to hold large-caps. S&P 500 constituents cover most of
+    that gap for US equities at effectively zero extra engineering cost
+    — same Wikipedia-table pattern as the AU/PL/UK legs."""
+    raw = _wikipedia_table(
+        "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+        match="Symbol",
+        symbol_col_candidates=["Symbol", "Ticker symbol", "Ticker"],
+    )
+    # Wikipedia's Symbol column sometimes uses a dot for share classes
+    # (e.g. "BRK.B") where Yahoo Finance expects a dash ("BRK-B").
+    return [s.replace(".", "-") for s in raw]
+
+
 def asx_constituents() -> list[str]:
     raw = _wikipedia_table(
         "https://en.wikipedia.org/wiki/S%26P/ASX_200",
@@ -146,7 +163,7 @@ def build_universe() -> dict[str, list[str]]:
     """Returns {market_code: [tickers]}. Each leg is independent — one
     source failing does not block the others."""
     universe = {
-        "US": us_small_micro_cap(),
+        "US": sorted(set(us_small_micro_cap()) | set(sp500_constituents())),
     }
     time.sleep(1)
     universe["AU"] = asx_constituents()

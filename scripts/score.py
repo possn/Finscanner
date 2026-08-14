@@ -63,6 +63,7 @@ class ScoredTicker:
 
     expense_ratio: float | None = None
     ai_exposure_pct: float | None = None
+    current_price: float | None = None
 
 
 def _percentile_rank(value: float | None, all_values: list[float], invert: bool = False) -> float | None:
@@ -153,6 +154,7 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             leverage_pct=round(leverage, 1) if leverage is not None else None,
             value_pct=round(value, 1) if value is not None else None,
             stability_pct=round(stability, 1) if stability is not None else None,
+            current_price=r.current_price,
         ))
 
     for r in etfs:
@@ -165,7 +167,7 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             quote_type="ETF", score=None, data_confidence="low",
             zombie="unknown", interest_coverage=None,
             profitability_pct=None, leverage_pct=None, value_pct=None, stability_pct=None,
-            expense_ratio=r.expense_ratio, ai_exposure_pct=ai_pct,
+            expense_ratio=r.expense_ratio, ai_exposure_pct=ai_pct, current_price=r.current_price,
         ))
 
     return out
