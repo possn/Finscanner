@@ -1,320 +1,342 @@
-2026-08-14 18:09:30,655 INFO universe: US screener returned 500 tickers (paginated)
-2026-08-14 18:09:30,700 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/List_of_S%26P_500_companies -> HTTP 200, 568358 bytes
-2026-08-14 18:09:30,748 INFO universe: https://en.wikipedia.org/wiki/List_of_S%26P_500_companies: pd.read_html found 2 table(s) total (hint pattern was 'Symbol')
-2026-08-14 18:09:30,750 INFO universe: https://en.wikipedia.org/wiki/List_of_S%26P_500_companies: table[0] columns=['Symbol', 'Security', 'GICS Sector', 'GICS Sub-Industry', 'Headquarters Location', 'Date added', 'CIK', 'Founded'] -> matched column 'Symbol', 503 symbols, e.g. ['MMM', 'AOS', 'ABT', 'ABBV', 'ACN']
-2026-08-14 18:09:31,787 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/S%26P/ASX_200 -> HTTP 200, 277474 bytes
-2026-08-14 18:09:31,814 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: pd.read_html found 15 table(s) total (hint pattern was 'Code')
-2026-08-14 18:09:31,814 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[0] columns=['0', '1'] -> no match
-2026-08-14 18:09:31,814 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[1] columns=['Australian 200 (AP)', 'Unnamed: 1'] -> no match
-2026-08-14 18:09:31,815 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[2] columns=['Code', 'Company', 'Sector', 'Market Capitalisation (A$)', 'Headquarters'] -> matched column 'Code', 200 symbols, e.g. ['360', '4DX', 'A2M', 'AAI', 'AFI']
-2026-08-14 18:09:32,856 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_100_Index -> HTTP 200, 909319 bytes
-2026-08-14 18:09:32,907 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: pd.read_html found 24 table(s) total (hint pattern was 'Ticker')
-2026-08-14 18:09:32,907 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[0] columns=['0', '1'] -> no match
-2026-08-14 18:09:32,908 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[1] columns=['ICB Supersector', 'Marketcap (£ billion)[28]'] -> no match
-2026-08-14 18:09:32,908 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[2] columns=['0', '1'] -> no match
-2026-08-14 18:09:32,908 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[3] columns=['0', '1'] -> no match
-2026-08-14 18:09:32,908 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[4] columns=['0', '1', '2'] -> no match
-2026-08-14 18:09:32,908 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[5] columns=["('Year', 'Year')", "('Closing level', 'Closing level')", "('Change in index', '(points)')", "('Change in index', '(%)')"] -> no match
-2026-08-14 18:09:32,908 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[6] columns=['Company', 'Ticker', 'FTSE industry classification benchmark sector[39]'] -> matched column 'Ticker', 100 symbols, e.g. ['III', 'ABDN', 'ADM', 'AAF', 'ALW']
-2026-08-14 18:09:33,946 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/DAX -> HTTP 200, 319802 bytes
-2026-08-14 18:09:33,975 INFO universe: https://en.wikipedia.org/wiki/DAX: pd.read_html found 19 table(s) total (hint pattern was 'Ticker')
-2026-08-14 18:09:33,975 INFO universe: https://en.wikipedia.org/wiki/DAX: table[0] columns=['0', '1'] -> no match
-2026-08-14 18:09:33,975 INFO universe: https://en.wikipedia.org/wiki/DAX: table[1] columns=['DAX Combined Index (DAXA)', 'Unnamed: 1'] -> no match
-2026-08-14 18:09:33,975 INFO universe: https://en.wikipedia.org/wiki/DAX: table[2] columns=['Category', 'All-time highs[9][10]', 'All-time highs[9][10].1'] -> no match
-2026-08-14 18:09:33,976 INFO universe: https://en.wikipedia.org/wiki/DAX: table[3] columns=['Year', 'Closing level', 'Change in Index in Points', 'Change in Index in\xa0%'] -> no match
-2026-08-14 18:09:33,976 INFO universe: https://en.wikipedia.org/wiki/DAX: table[4] columns=['Ticker', 'Logo', 'Company', 'Prime Standard Sector', 'Index weighting (%)1', 'Employees', 'Founded'] -> matched column 'Ticker', 40 symbols, e.g. ['ADS.DE', 'AIR.PA', 'ALV.DE', 'BAS.DE', 'BAYN.DE']
-2026-08-14 18:09:34,415 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/CAC_40 -> HTTP 200, 229542 bytes
-2026-08-14 18:09:34,439 INFO universe: https://en.wikipedia.org/wiki/CAC_40: pd.read_html found 20 table(s) total (hint pattern was 'Ticker')
-2026-08-14 18:09:34,440 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[0] columns=['0', '1'] -> no match
-2026-08-14 18:09:34,440 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[1] columns=['CAC 40 (PIL)', 'Unnamed: 1'] -> no match
-2026-08-14 18:09:34,440 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[2] columns=['Type', 'Date', 'Value'] -> no match
-2026-08-14 18:09:34,440 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[3] columns=['Year', 'Closing level', 'Change in Index in Points', 'Change in Index in\xa0%'] -> no match
-2026-08-14 18:09:34,440 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[4] columns=['Company', 'Sector', 'GICS Sub-Industry', 'Ticker'] -> matched column 'Ticker', 40 symbols, e.g. ['AC.PA', 'AI.PA', 'AIR.PA', 'MT.AS', 'CS.PA']
-2026-08-14 18:09:34,878 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/AEX_index -> HTTP 200, 229334 bytes
-2026-08-14 18:09:34,904 INFO universe: https://en.wikipedia.org/wiki/AEX_index: pd.read_html found 22 table(s) total (hint pattern was 'Ticker')
-2026-08-14 18:09:34,904 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[0] columns=['0', '1'] -> no match
-2026-08-14 18:09:34,904 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[1] columns=['Year', 'Closing level', 'Change in index in points', 'Change in index in\xa0%'] -> no match
-2026-08-14 18:09:34,904 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[2] columns=['AEX Index (FTI)', 'Unnamed: 1'] -> no match
-2026-08-14 18:09:34,904 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[3] columns=['Ticker', 'Company', 'ICB Sector', 'Index weighting (%)'] -> matched column 'Ticker', 25 symbols, e.g. ['ABN.AS', 'ADYEN.AS', 'AGN.AS', 'AD.AS', 'AKZA.AS']
-2026-08-14 18:09:35,341 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/IBEX_35 -> HTTP 200, 250390 bytes
-2026-08-14 18:09:35,364 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: pd.read_html found 17 table(s) total (hint pattern was 'Ticker')
-2026-08-14 18:09:35,364 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: table[0] columns=['0', '1'] -> no match
-2026-08-14 18:09:35,364 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: table[1] columns=['IBEX Mini (BIBX)', 'Unnamed: 1'] -> no match
-2026-08-14 18:09:35,364 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: table[2] columns=['Ticker', 'Company', 'Sector'] -> matched column 'Ticker', 35 symbols, e.g. ['ACS.MC', 'ACX.MC', 'AMS.MC', 'ANA.MC', 'ANE.MC']
-2026-08-14 18:09:35,800 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_MIB -> HTTP 200, 146886 bytes
-2026-08-14 18:09:35,816 INFO universe: https://en.wikipedia.org/wiki/FTSE_MIB: pd.read_html found 13 table(s) total (hint pattern was 'Ticker')
-2026-08-14 18:09:35,816 INFO universe: https://en.wikipedia.org/wiki/FTSE_MIB: table[0] columns=['Year', 'Closing level', 'Change in index in points', 'Change in index in\xa0%'] -> no match
-2026-08-14 18:09:35,817 INFO universe: https://en.wikipedia.org/wiki/FTSE_MIB: table[1] columns=['Ticker', 'Company', 'ISIN', 'ICB Sector'] -> matched column 'Ticker', 40 symbols, e.g. ['A2A.MI', 'AMP.MI', 'AVIO.MI', 'AZM.MI', 'BMED.MI']
-2026-08-14 18:09:36,435 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/Swiss_Market_Index -> HTTP 200, 263547 bytes
-2026-08-14 18:09:36,460 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: pd.read_html found 17 table(s) total (hint pattern was 'Ticker')
-2026-08-14 18:09:36,460 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: table[0] columns=['0', '1'] -> no match
-2026-08-14 18:09:36,460 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: table[1] columns=['0', '1'] -> no match
-2026-08-14 18:09:36,461 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: table[2] columns=['Rank', 'Name', 'Sector', 'Ticker', 'Canton', 'Weighting in\xa0%'] -> matched column 'Ticker', 20 symbols, e.g. ['NOVN', 'ROP', 'NESN', 'ABBN', 'UBSG']
-2026-08-14 18:09:36,863 INFO universe: US: 1003 tickers
-2026-08-14 18:09:36,863 INFO universe: AU: 200 tickers
-2026-08-14 18:09:36,863 INFO universe: UK: 100 tickers
-2026-08-14 18:09:36,863 INFO universe: EU: 200 tickers
-2026-08-14 18:09:36,863 INFO universe: ETF: 46 tickers
-2026-08-14 18:09:36,864 INFO run: Total universe: 1549 tickers
-2026-08-14 18:09:39,296 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: A2A-MI.MI"}}}
-2026-08-14 18:09:47,584 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ABN-AS.AS"}}}
-2026-08-14 18:09:53,473 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AC-PA.PA"}}}
-2026-08-14 18:09:54,197 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ACA-PA.PA"}}}
-2026-08-14 18:09:57,874 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ACS-MC.MC"}}}
-2026-08-14 18:09:59,406 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ACX-MC.MC"}}}
-2026-08-14 18:10:00,207 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AD-AS.AS"}}}
-2026-08-14 18:10:07,093 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ADS-DE.DE"}}}
-2026-08-14 18:10:08,483 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ADYEN-AS.AS"}}}
-2026-08-14 18:10:11,135 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AENA-MC.MC"}}}
-2026-08-14 18:10:15,778 INFO fundamentals: fetched 50/1549
-2026-08-14 18:10:20,220 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AGN-AS.AS"}}}
-2026-08-14 18:10:22,831 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AI-PA.PA"}}}
-2026-08-14 18:10:26,542 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AIR-PA.DE"}}}
-2026-08-14 18:10:27,332 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AIR-PA.PA"}}}
-2026-08-14 18:10:31,928 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AKZA-AS.AS"}}}
-2026-08-14 18:10:40,132 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ALV-DE.DE"}}}
-2026-08-14 18:10:50,111 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AMP-MI.MI"}}}
-2026-08-14 18:10:54,504 INFO fundamentals: fetched 100/1549
-2026-08-14 18:10:55,429 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AMS-MC.MC"}}}
-2026-08-14 18:10:59,359 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ANA-MC.MC"}}}
-2026-08-14 18:11:00,661 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ANE-MC.MC"}}}
-2026-08-14 18:11:29,017 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASM-AS.AS"}}}
-2026-08-14 18:11:29,849 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS.AS"}}}
-2026-08-14 18:11:30,592 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASRNL-AS.AS"}}}
-2026-08-14 18:11:32,526 INFO fundamentals: fetched 150/1549
-2026-08-14 18:11:41,447 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AVIO-MI.MI"}}}
-2026-08-14 18:11:49,725 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AZM-MI.MI"}}}
-2026-08-14 18:11:56,613 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BAMI-MI.MI"}}}
-2026-08-14 18:11:58,760 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BAS-DE.DE"}}}
-2026-08-14 18:12:01,070 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BAYN-DE.DE"}}}
-2026-08-14 18:12:04,668 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BBVA-MC.MC"}}}
-2026-08-14 18:12:06,277 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BC-MI.MI"}}}
-2026-08-14 18:12:11,119 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BEI-DE.DE"}}}
-2026-08-14 18:12:11,783 INFO fundamentals: fetched 200/1549
-2026-08-14 18:12:13,614 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BESI-AS.AS"}}}
-2026-08-14 18:12:25,682 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BKT-MC.MC"}}}
-2026-08-14 18:12:33,200 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BMED-MI.MI"}}}
-2026-08-14 18:12:33,943 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BMPS-MI.MI"}}}
-2026-08-14 18:12:34,681 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BMW-DE.DE"}}}
-2026-08-14 18:12:36,135 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BN-PA.PA"}}}
-2026-08-14 18:12:37,422 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BNP-PA.PA"}}}
-2026-08-14 18:12:38,218 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BNR-DE.DE"}}}
-2026-08-14 18:12:42,863 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BPE-MI.MI"}}}
-2026-08-14 18:12:53,063 INFO fundamentals: fetched 250/1549
-2026-08-14 18:12:53,222 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BT.A.L"}}}
-2026-08-14 18:12:57,255 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BVI-PA.PA"}}}
-2026-08-14 18:13:03,602 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BZU-MI.MI"}}}
-2026-08-14 18:13:05,221 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CA-PA.PA"}}}
-2026-08-14 18:13:05,969 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CABK-MC.MC"}}}
-2026-08-14 18:13:08,431 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CAP-PA.PA"}}}
-2026-08-14 18:13:14,267 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CBK-DE.DE"}}}
-2026-08-14 18:13:31,355 INFO fundamentals: fetched 300/1549
-2026-08-14 18:13:47,037 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CLNX-MC.MC"}}}
-2026-08-14 18:14:05,075 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: COL-MC.MC"}}}
-2026-08-14 18:14:07,354 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CON-DE.DE"}}}
-2026-08-14 18:14:10,252 INFO fundamentals: fetched 350/1549
-2026-08-14 18:14:13,615 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CPR-MI.MI"}}}
-2026-08-14 18:14:28,119 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CS-PA.PA"}}}
-2026-08-14 18:14:46,275 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DB1-DE.DE"}}}
-2026-08-14 18:14:47,822 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DBK-DE.DE"}}}
-2026-08-14 18:14:48,488 INFO fundamentals: fetched 400/1549
-2026-08-14 18:14:59,575 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DG-PA.PA"}}}
-2026-08-14 18:15:02,925 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DHL-DE.DE"}}}
-2026-08-14 18:15:04,747 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DIA-MI.MI"}}}
-2026-08-14 18:15:23,698 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DSFIR-AS.AS"}}}
-2026-08-14 18:15:25,204 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DSY-PA.PA"}}}
-2026-08-14 18:15:26,902 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DTE-DE.DE"}}}
-2026-08-14 18:15:27,740 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DTG-DE.DE"}}}
-2026-08-14 18:15:31,466 INFO fundamentals: fetched 450/1549
-2026-08-14 18:15:39,910 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EDEN-PA.PA"}}}
-2026-08-14 18:15:47,203 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EL-PA.PA"}}}
-2026-08-14 18:15:48,908 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ELE-MC.MC"}}}
-2026-08-14 18:15:53,740 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EN-PA.PA"}}}
-2026-08-14 18:15:54,471 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENEL-MI.MI"}}}
-2026-08-14 18:15:55,154 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENG-MC.MC"}}}
-2026-08-14 18:15:55,955 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENGI-PA.PA"}}}
-2026-08-14 18:15:56,899 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENI-MI.MI"}}}
-2026-08-14 18:15:59,359 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENR-DE.DE"}}}
-2026-08-14 18:16:01,731 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EOAN-DE.DE"}}}
-2026-08-14 18:16:08,096 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ERF-PA.PA"}}}
-2026-08-14 18:16:09,616 INFO fundamentals: fetched 500/1549
-2026-08-14 18:16:28,937 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EXO-AS.AS"}}}
-2026-08-14 18:16:37,439 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FBK-MI.MI"}}}
-2026-08-14 18:16:41,370 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FCT-MI.MI"}}}
-2026-08-14 18:16:43,049 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FDR-MC.MC"}}}
-2026-08-14 18:16:47,145 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FER-MC.MC"}}}
-2026-08-14 18:16:48,640 INFO fundamentals: fetched 550/1549
-2026-08-14 18:17:00,133 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FME-DE.DE"}}}
-2026-08-14 18:17:05,883 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FRE-DE.DE"}}}
-2026-08-14 18:17:16,560 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: G-MI.MI"}}}
-2026-08-14 18:17:17,403 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: G1A-DE.DE"}}}
-2026-08-14 18:17:18,143 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: G24-DE.DE"}}}
-2026-08-14 18:17:28,404 INFO fundamentals: fetched 600/1549
-2026-08-14 18:17:39,291 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: GLE-PA.PA"}}}
-2026-08-14 18:17:56,045 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: GRF-MC.MC"}}}
-2026-08-14 18:18:06,678 INFO fundamentals: fetched 650/1549
-2026-08-14 18:18:13,130 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HEI-DE.DE"}}}
-2026-08-14 18:18:14,005 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HEIA-AS.AS"}}}
-2026-08-14 18:18:14,881 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HEN3-DE.DE"}}}
-2026-08-14 18:18:16,465 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HER-MI.MI"}}}
-2026-08-14 18:18:25,657 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HNR1-DE.DE"}}}
-2026-08-14 18:18:26,348 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HO-PA.PA"}}}
-2026-08-14 18:18:45,890 INFO fundamentals: fetched 700/1549
-2026-08-14 18:18:51,189 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IAG-MC.MC"}}}
-2026-08-14 18:18:55,453 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IBE-MC.MC"}}}
-2026-08-14 18:18:59,538 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IDR-MC.MC"}}}
-2026-08-14 18:19:03,632 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFL.AX"}}}
-2026-08-14 18:19:05,310 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFX-DE.DE"}}}
-2026-08-14 18:19:06,042 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IG-MI.MI"}}}
-2026-08-14 18:19:12,595 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IMCD-AS.AS"}}}
-2026-08-14 18:19:18,519 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: INGA-AS.AS"}}}
-2026-08-14 18:19:23,719 INFO fundamentals: fetched 750/1549
-2026-08-14 18:19:24,649 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: INW-MI.MI"}}}
-2026-08-14 18:19:30,306 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ISP-MI.MI"}}}
-2026-08-14 18:19:34,437 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ITX-MC.MC"}}}
-2026-08-14 18:19:36,232 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IVG-MI.MI"}}}
-2026-08-14 18:19:52,755 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: KER-PA.PA"}}}
-2026-08-14 18:20:01,444 INFO fundamentals: fetched 800/1549
-2026-08-14 18:20:06,450 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: KPN-AS.AS"}}}
-2026-08-14 18:20:17,075 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LDO-MI.MI"}}}
-2026-08-14 18:20:36,595 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LOG-MC.MC"}}}
-2026-08-14 18:20:41,172 INFO fundamentals: fetched 850/1549
-2026-08-14 18:20:42,445 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LR-PA.PA"}}}
-2026-08-14 18:20:46,841 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LTMC-MI.MI"}}}
-2026-08-14 18:21:00,185 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MAP-MC.MC"}}}
-2026-08-14 18:21:03,318 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MB-MI.MI"}}}
-2026-08-14 18:21:04,993 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MBG-DE.DE"}}}
-2026-08-14 18:21:05,804 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MC-PA.PA"}}}
-2026-08-14 18:21:19,387 INFO fundamentals: fetched 900/1549
-2026-08-14 18:21:22,461 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ML-PA.PA"}}}
-2026-08-14 18:21:32,267 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MONC-MI.MI"}}}
-2026-08-14 18:21:39,830 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MRK-DE.DE"}}}
-2026-08-14 18:21:40,544 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MRL-MC.MC"}}}
-2026-08-14 18:21:50,825 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MT-AS.AS"}}}
-2026-08-14 18:21:51,720 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MT-AS.PA"}}}
-2026-08-14 18:21:55,823 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MTS-MC.MC"}}}
-2026-08-14 18:21:58,239 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MTX-DE.DE"}}}
-2026-08-14 18:22:00,551 INFO fundamentals: fetched 950/1549
-2026-08-14 18:22:00,750 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MUV2-DE.DE"}}}
-2026-08-14 18:22:15,868 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NEXI-MI.MI"}}}
-2026-08-14 18:22:24,188 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NN-AS.AS"}}}
-2026-08-14 18:22:33,328 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NSR.AX"}}}
-2026-08-14 18:22:35,654 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NTGY-MC.MC"}}}
-2026-08-14 18:22:39,632 INFO fundamentals: fetched 1000/1549
-2026-08-14 18:23:06,451 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: OR-PA.PA"}}}
-2026-08-14 18:23:07,208 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ORA-PA.PA"}}}
-2026-08-14 18:23:16,631 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PAH3-DE.DE"}}}
-2026-08-14 18:23:18,970 INFO fundamentals: fetched 1050/1549
-2026-08-14 18:23:37,244 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PHIA-AS.AS"}}}
-2026-08-14 18:23:56,943 INFO fundamentals: fetched 1100/1549
-2026-08-14 18:24:02,547 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PRX-AS.AS"}}}
-2026-08-14 18:24:03,382 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PRY-MI.MI"}}}
-2026-08-14 18:24:10,001 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PST-MI.MI"}}}
-2026-08-14 18:24:12,537 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PUB-PA.PA"}}}
-2026-08-14 18:24:13,369 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PUIG-MC.MC"}}}
-2026-08-14 18:24:23,753 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: QIA-DE.DE"}}}
-2026-08-14 18:24:27,187 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RACE-MI.MI"}}}
-2026-08-14 18:24:27,952 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RAND-AS.AS"}}}
-2026-08-14 18:24:33,436 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: REC-MI.MI"}}}
-2026-08-14 18:24:34,128 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RED-MC.MC"}}}
-2026-08-14 18:24:35,417 INFO fundamentals: fetched 1150/1549
-2026-08-14 18:24:38,558 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: REN-AS.AS"}}}
-2026-08-14 18:24:39,293 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: REP-MC.MC"}}}
-2026-08-14 18:24:44,994 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RHM-DE.DE"}}}
-2026-08-14 18:24:45,881 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RI-PA.PA"}}}
-2026-08-14 18:24:53,373 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RMS-PA.PA"}}}
-2026-08-14 18:24:54,968 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RNO-PA.PA"}}}
-2026-08-14 18:24:59,773 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ROVI-MC.MC"}}}
-2026-08-14 18:25:10,931 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RWE-DE.DE"}}}
-2026-08-14 18:25:13,928 INFO fundamentals: fetched 1200/1549
-2026-08-14 18:25:16,238 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAB-MC.MC"}}}
-2026-08-14 18:25:17,833 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAF-PA.PA"}}}
-2026-08-14 18:25:18,687 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAN-MC.MC"}}}
-2026-08-14 18:25:19,335 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAN-PA.PA"}}}
-2026-08-14 18:25:20,812 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAP-DE.DE"}}}
-2026-08-14 18:25:29,633 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SCYR-MC.MC"}}}
-2026-08-14 18:25:40,932 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SGO-PA.PA"}}}
-2026-08-14 18:25:44,525 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SHELL-AS.AS"}}}
-2026-08-14 18:25:45,370 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SHL-DE.DE"}}}
-2026-08-14 18:25:51,107 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SIE-DE.DE"}}}
-2026-08-14 18:25:52,906 INFO fundamentals: fetched 1250/1549
-2026-08-14 18:25:58,193 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SLR-MC.MC"}}}
-2026-08-14 18:26:17,095 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SPM-MI.MI"}}}
-2026-08-14 18:26:20,468 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SRG-MI.MI"}}}
-2026-08-14 18:26:26,085 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STLAM-MI.MI"}}}
-2026-08-14 18:26:26,822 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STLAP-PA.PA"}}}
-2026-08-14 18:26:28,250 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STMMI-MI.MI"}}}
-2026-08-14 18:26:29,014 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STMPA-PA.PA"}}}
-2026-08-14 18:26:29,605 INFO fundamentals: fetched 1300/1549
-2026-08-14 18:26:34,505 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SU-PA.PA"}}}
-2026-08-14 18:26:43,196 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SY1-DE.DE"}}}
-2026-08-14 18:26:59,421 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TEF-MC.MC"}}}
-2026-08-14 18:27:01,591 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TEN-MI.MI"}}}
-2026-08-14 18:27:02,291 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TEP-PA.PA"}}}
-2026-08-14 18:27:08,071 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TIT-MI.MI"}}}
-2026-08-14 18:27:10,273 INFO fundamentals: fetched 1350/1549
-2026-08-14 18:27:25,558 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TRN-MI.MI"}}}
-2026-08-14 18:27:35,722 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TTE-PA.PA"}}}
-2026-08-14 18:27:48,301 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UCG-MI.MI"}}}
-2026-08-14 18:27:48,919 INFO fundamentals: fetched 1400/1549
-2026-08-14 18:27:54,105 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UMG-AS.AS"}}}
-2026-08-14 18:27:55,587 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UNA-AS.AS"}}}
-2026-08-14 18:27:57,893 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UNI-MC.MC"}}}
-2026-08-14 18:27:58,737 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UNI-MI.MI"}}}
-2026-08-14 18:28:04,737 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: URW-PA.PA"}}}
-2026-08-14 18:28:20,608 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: VIE-PA.PA"}}}
-2026-08-14 18:28:26,289 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: VNA-DE.DE"}}}
-2026-08-14 18:28:28,267 INFO fundamentals: fetched 1450/1549
-2026-08-14 18:28:29,504 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: VOW3-DE.DE"}}}
-2026-08-14 18:28:57,710 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: WKL-AS.AS"}}}
-2026-08-14 18:29:06,183 INFO fundamentals: fetched 1500/1549
-2026-08-14 18:29:26,389 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: XYX.AX"}}}
-2026-08-14 18:29:32,415 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ZAL-DE.DE"}}}
-2026-08-14 18:29:49,662 WARNING insiders: Could not load SEC ticker->CIK map (403 Client Error: Forbidden for url: https://www.sec.gov/files/company_tickers.json)
-2026-08-14 18:29:49,663 INFO insiders: SEC ticker->CIK map loaded with 0 entries
-2026-08-14 18:29:54,167 INFO insiders: insider intelligence 25/1049
-2026-08-14 18:29:58,671 INFO insiders: insider intelligence 50/1049
-2026-08-14 18:30:03,175 INFO insiders: insider intelligence 75/1049
-2026-08-14 18:30:07,679 INFO insiders: insider intelligence 100/1049
-2026-08-14 18:30:12,183 INFO insiders: insider intelligence 125/1049
-2026-08-14 18:30:16,687 INFO insiders: insider intelligence 150/1049
-2026-08-14 18:30:21,191 INFO insiders: insider intelligence 175/1049
-2026-08-14 18:30:25,695 INFO insiders: insider intelligence 200/1049
-2026-08-14 18:30:30,199 INFO insiders: insider intelligence 225/1049
-2026-08-14 18:30:34,703 INFO insiders: insider intelligence 250/1049
-2026-08-14 18:30:39,207 INFO insiders: insider intelligence 275/1049
-2026-08-14 18:30:43,711 INFO insiders: insider intelligence 300/1049
-2026-08-14 18:30:48,215 INFO insiders: insider intelligence 325/1049
-2026-08-14 18:30:52,719 INFO insiders: insider intelligence 350/1049
-2026-08-14 18:30:57,223 INFO insiders: insider intelligence 375/1049
-2026-08-14 18:31:01,727 INFO insiders: insider intelligence 400/1049
-2026-08-14 18:31:06,231 INFO insiders: insider intelligence 425/1049
-2026-08-14 18:31:10,735 INFO insiders: insider intelligence 450/1049
-2026-08-14 18:31:15,239 INFO insiders: insider intelligence 475/1049
-2026-08-14 18:31:19,743 INFO insiders: insider intelligence 500/1049
-2026-08-14 18:31:24,247 INFO insiders: insider intelligence 525/1049
-2026-08-14 18:31:28,751 INFO insiders: insider intelligence 550/1049
-2026-08-14 18:31:33,255 INFO insiders: insider intelligence 575/1049
-2026-08-14 18:31:37,759 INFO insiders: insider intelligence 600/1049
-2026-08-14 18:31:42,263 INFO insiders: insider intelligence 625/1049
-2026-08-14 18:31:46,766 INFO insiders: insider intelligence 650/1049
-2026-08-14 18:31:51,270 INFO insiders: insider intelligence 675/1049
-2026-08-14 18:31:55,774 INFO insiders: insider intelligence 700/1049
-2026-08-14 18:32:00,278 INFO insiders: insider intelligence 725/1049
-2026-08-14 18:32:04,782 INFO insiders: insider intelligence 750/1049
-2026-08-14 18:32:09,286 INFO insiders: insider intelligence 775/1049
-2026-08-14 18:32:13,790 INFO insiders: insider intelligence 800/1049
-2026-08-14 18:32:18,295 INFO insiders: insider intelligence 825/1049
-2026-08-14 18:32:22,799 INFO insiders: insider intelligence 850/1049
-2026-08-14 18:32:27,303 INFO insiders: insider intelligence 875/1049
-2026-08-14 18:32:31,807 INFO insiders: insider intelligence 900/1049
-2026-08-14 18:32:36,311 INFO insiders: insider intelligence 925/1049
-2026-08-14 18:32:40,814 INFO insiders: insider intelligence 950/1049
-2026-08-14 18:32:45,318 INFO insiders: insider intelligence 975/1049
-2026-08-14 18:32:49,822 INFO insiders: insider intelligence 1000/1049
-2026-08-14 18:32:54,327 INFO insiders: insider intelligence 1025/1049
-2026-08-14 18:32:59,105 INFO run: Wrote 1549 rows to /home/runner/work/Finscanner/Finscanner/scripts/../data/stocks.json
-2026-08-14 18:32:59,888 INFO run: Wrote metals data to /home/runner/work/Finscanner/Finscanner/scripts/../data/metals.json
-2026-08-14 18:32:59,894 INFO history: Wrote history for 1561 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/history.json
-2026-08-14 18:32:59,909 INFO valuation_history: Wrote valuation history for 1335 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/valuation_history.json
-2026-08-14 18:32:59,941 INFO thesis_history: Wrote thesis history for 1643 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/thesis_history.json
+2026-08-14 22:31:50,194 INFO universe: US small/micro-cap screener returned 500 tickers
+2026-08-14 22:31:50,351 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/List_of_S%26P_500_companies -> HTTP 200, 568358 bytes
+2026-08-14 22:31:50,396 INFO universe: https://en.wikipedia.org/wiki/List_of_S%26P_500_companies: pd.read_html found 2 table(s) total (hint pattern was 'Symbol')
+2026-08-14 22:31:50,398 INFO universe: https://en.wikipedia.org/wiki/List_of_S%26P_500_companies: table[0] columns=['Symbol', 'Security', 'GICS Sector', 'GICS Sub-Industry', 'Headquarters Location', 'Date added', 'CIK', 'Founded'] -> matched column 'Symbol', 503 symbols, e.g. ['MMM', 'AOS', 'ABT', 'ABBV', 'ACN']
+2026-08-14 22:31:51,079 INFO universe: US mid/large-cap screener returned 500 tickers
+2026-08-14 22:31:52,282 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/S%26P/ASX_200 -> HTTP 200, 277480 bytes
+2026-08-14 22:31:52,309 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: pd.read_html found 15 table(s) total (hint pattern was 'Code')
+2026-08-14 22:31:52,309 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[0] columns=['0', '1'] -> no match
+2026-08-14 22:31:52,309 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[1] columns=['Australian 200 (AP)', 'Unnamed: 1'] -> no match
+2026-08-14 22:31:52,310 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[2] columns=['Code', 'Company', 'Sector', 'Market Capitalisation (A$)', 'Headquarters'] -> matched column 'Code', 200 symbols, e.g. ['360', '4DX', 'A2M', 'AAI', 'AFI']
+2026-08-14 22:31:53,480 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_100_Index -> HTTP 200, 909319 bytes
+2026-08-14 22:31:53,528 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: pd.read_html found 24 table(s) total (hint pattern was 'Ticker')
+2026-08-14 22:31:53,529 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[0] columns=['0', '1'] -> no match
+2026-08-14 22:31:53,529 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[1] columns=['ICB Supersector', 'Marketcap (£ billion)[28]'] -> no match
+2026-08-14 22:31:53,529 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[2] columns=['0', '1'] -> no match
+2026-08-14 22:31:53,529 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[3] columns=['0', '1'] -> no match
+2026-08-14 22:31:53,529 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[4] columns=['0', '1', '2'] -> no match
+2026-08-14 22:31:53,529 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[5] columns=["('Year', 'Year')", "('Closing level', 'Closing level')", "('Change in index', '(points)')", "('Change in index', '(%)')"] -> no match
+2026-08-14 22:31:53,529 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[6] columns=['Company', 'Ticker', 'FTSE industry classification benchmark sector[39]'] -> matched column 'Ticker', 100 symbols, e.g. ['III', 'ABDN', 'ADM', 'AAF', 'ALW']
+2026-08-14 22:31:54,672 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/DAX -> HTTP 200, 319802 bytes
+2026-08-14 22:31:54,699 INFO universe: https://en.wikipedia.org/wiki/DAX: pd.read_html found 19 table(s) total (hint pattern was 'Ticker')
+2026-08-14 22:31:54,700 INFO universe: https://en.wikipedia.org/wiki/DAX: table[0] columns=['0', '1'] -> no match
+2026-08-14 22:31:54,700 INFO universe: https://en.wikipedia.org/wiki/DAX: table[1] columns=['DAX Combined Index (DAXA)', 'Unnamed: 1'] -> no match
+2026-08-14 22:31:54,700 INFO universe: https://en.wikipedia.org/wiki/DAX: table[2] columns=['Category', 'All-time highs[9][10]', 'All-time highs[9][10].1'] -> no match
+2026-08-14 22:31:54,700 INFO universe: https://en.wikipedia.org/wiki/DAX: table[3] columns=['Year', 'Closing level', 'Change in Index in Points', 'Change in Index in\xa0%'] -> no match
+2026-08-14 22:31:54,700 INFO universe: https://en.wikipedia.org/wiki/DAX: table[4] columns=['Ticker', 'Logo', 'Company', 'Prime Standard Sector', 'Index weighting (%)1', 'Employees', 'Founded'] -> matched column 'Ticker', 40 symbols, e.g. ['ADS.DE', 'AIR.PA', 'ALV.DE', 'BAS.DE', 'BAYN.DE']
+2026-08-14 22:31:55,234 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/CAC_40 -> HTTP 200, 229542 bytes
+2026-08-14 22:31:55,258 INFO universe: https://en.wikipedia.org/wiki/CAC_40: pd.read_html found 20 table(s) total (hint pattern was 'Ticker')
+2026-08-14 22:31:55,258 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[0] columns=['0', '1'] -> no match
+2026-08-14 22:31:55,258 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[1] columns=['CAC 40 (PIL)', 'Unnamed: 1'] -> no match
+2026-08-14 22:31:55,258 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[2] columns=['Type', 'Date', 'Value'] -> no match
+2026-08-14 22:31:55,258 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[3] columns=['Year', 'Closing level', 'Change in Index in Points', 'Change in Index in\xa0%'] -> no match
+2026-08-14 22:31:55,258 INFO universe: https://en.wikipedia.org/wiki/CAC_40: table[4] columns=['Company', 'Sector', 'GICS Sub-Industry', 'Ticker'] -> matched column 'Ticker', 40 symbols, e.g. ['AC.PA', 'AI.PA', 'AIR.PA', 'MT.AS', 'CS.PA']
+2026-08-14 22:31:55,873 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/AEX_index -> HTTP 200, 229334 bytes
+2026-08-14 22:31:55,898 INFO universe: https://en.wikipedia.org/wiki/AEX_index: pd.read_html found 22 table(s) total (hint pattern was 'Ticker')
+2026-08-14 22:31:55,898 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[0] columns=['0', '1'] -> no match
+2026-08-14 22:31:55,898 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[1] columns=['Year', 'Closing level', 'Change in index in points', 'Change in index in\xa0%'] -> no match
+2026-08-14 22:31:55,898 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[2] columns=['AEX Index (FTI)', 'Unnamed: 1'] -> no match
+2026-08-14 22:31:55,899 INFO universe: https://en.wikipedia.org/wiki/AEX_index: table[3] columns=['Ticker', 'Company', 'ICB Sector', 'Index weighting (%)'] -> matched column 'Ticker', 25 symbols, e.g. ['ABN.AS', 'ADYEN.AS', 'AGN.AS', 'AD.AS', 'AKZA.AS']
+2026-08-14 22:31:56,513 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/IBEX_35 -> HTTP 200, 250391 bytes
+2026-08-14 22:31:56,534 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: pd.read_html found 17 table(s) total (hint pattern was 'Ticker')
+2026-08-14 22:31:56,534 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: table[0] columns=['0', '1'] -> no match
+2026-08-14 22:31:56,534 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: table[1] columns=['IBEX Mini (BIBX)', 'Unnamed: 1'] -> no match
+2026-08-14 22:31:56,535 INFO universe: https://en.wikipedia.org/wiki/IBEX_35: table[2] columns=['Ticker', 'Company', 'Sector'] -> matched column 'Ticker', 35 symbols, e.g. ['ACS.MC', 'ACX.MC', 'AMS.MC', 'ANA.MC', 'ANE.MC']
+2026-08-14 22:31:57,060 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_MIB -> HTTP 200, 146885 bytes
+2026-08-14 22:31:57,076 INFO universe: https://en.wikipedia.org/wiki/FTSE_MIB: pd.read_html found 13 table(s) total (hint pattern was 'Ticker')
+2026-08-14 22:31:57,076 INFO universe: https://en.wikipedia.org/wiki/FTSE_MIB: table[0] columns=['Year', 'Closing level', 'Change in index in points', 'Change in index in\xa0%'] -> no match
+2026-08-14 22:31:57,077 INFO universe: https://en.wikipedia.org/wiki/FTSE_MIB: table[1] columns=['Ticker', 'Company', 'ISIN', 'ICB Sector'] -> matched column 'Ticker', 40 symbols, e.g. ['A2A.MI', 'AMP.MI', 'AVIO.MI', 'AZM.MI', 'BMED.MI']
+2026-08-14 22:31:57,612 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/Swiss_Market_Index -> HTTP 200, 263545 bytes
+2026-08-14 22:31:57,635 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: pd.read_html found 17 table(s) total (hint pattern was 'Ticker')
+2026-08-14 22:31:57,635 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: table[0] columns=['0', '1'] -> no match
+2026-08-14 22:31:57,636 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: table[1] columns=['0', '1'] -> no match
+2026-08-14 22:31:57,636 INFO universe: https://en.wikipedia.org/wiki/Swiss_Market_Index: table[2] columns=['Rank', 'Name', 'Sector', 'Ticker', 'Canton', 'Weighting in\xa0%'] -> matched column 'Ticker', 20 symbols, e.g. ['NOVN', 'ROP', 'NESN', 'ABBN', 'UBSG']
+2026-08-14 22:31:58,037 INFO universe: US: 1179 tickers
+2026-08-14 22:31:58,038 INFO universe: AU: 200 tickers
+2026-08-14 22:31:58,038 INFO universe: UK: 100 tickers
+2026-08-14 22:31:58,038 INFO universe: EU: 200 tickers
+2026-08-14 22:31:58,038 INFO universe: ETF: 46 tickers
+2026-08-14 22:31:58,039 INFO run: Total universe: 1725 tickers
+2026-08-14 22:32:00,270 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: A2A-MI.MI"}}}
+2026-08-14 22:32:07,972 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ABN-AS.AS"}}}
+2026-08-14 22:32:10,498 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AC-PA.PA"}}}
+2026-08-14 22:32:11,136 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ACA-PA.PA"}}}
+2026-08-14 22:32:16,909 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ACS-MC.MC"}}}
+2026-08-14 22:32:17,514 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ACX-MC.MC"}}}
+2026-08-14 22:32:18,174 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AD-AS.AS"}}}
+2026-08-14 22:32:23,573 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ADS-DE.DE"}}}
+2026-08-14 22:32:24,855 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ADYEN-AS.AS"}}}
+2026-08-14 22:32:27,429 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AENA-MC.MC"}}}
+2026-08-14 22:32:30,524 INFO fundamentals: fetched 50/1725
+2026-08-14 22:32:33,468 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AGN-AS.AS"}}}
+2026-08-14 22:32:34,902 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AI-PA.PA"}}}
+2026-08-14 22:32:38,130 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AIR-PA.DE"}}}
+2026-08-14 22:32:38,880 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AIR-PA.PA"}}}
+2026-08-14 22:32:43,396 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AKZA-AS.AS"}}}
+2026-08-14 22:32:54,506 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ALV-DE.DE"}}}
+2026-08-14 22:33:01,708 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AMP-MI.MI"}}}
+2026-08-14 22:33:02,844 INFO fundamentals: fetched 100/1725
+2026-08-14 22:33:04,948 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AMS-MC.MC"}}}
+2026-08-14 22:33:08,066 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ANA-MC.MC"}}}
+2026-08-14 22:33:08,568 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ANE-MC.MC"}}}
+2026-08-14 22:33:30,352 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASM-AS.AS"}}}
+2026-08-14 22:33:31,681 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS.AS"}}}
+2026-08-14 22:33:32,267 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASRNL-AS.AS"}}}
+2026-08-14 22:33:34,561 INFO fundamentals: fetched 150/1725
+2026-08-14 22:33:43,622 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AVIO-MI.MI"}}}
+2026-08-14 22:33:47,459 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AZM-MI.MI"}}}
+2026-08-14 22:33:56,005 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BAMI-MI.MI"}}}
+2026-08-14 22:33:57,822 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BAS-DE.DE"}}}
+2026-08-14 22:33:59,647 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BAYN-DE.DE"}}}
+2026-08-14 22:34:02,841 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BBVA-MC.MC"}}}
+2026-08-14 22:34:04,007 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BC-MI.MI"}}}
+2026-08-14 22:34:06,445 INFO fundamentals: fetched 200/1725
+2026-08-14 22:34:07,790 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BEI-DE.DE"}}}
+2026-08-14 22:34:09,782 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BESI-AS.AS"}}}
+2026-08-14 22:34:23,461 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BKT-MC.MC"}}}
+2026-08-14 22:34:27,828 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BMED-MI.MI"}}}
+2026-08-14 22:34:29,717 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BMPS-MI.MI"}}}
+2026-08-14 22:34:30,358 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BMW-DE.DE"}}}
+2026-08-14 22:34:32,227 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BN-PA.PA"}}}
+2026-08-14 22:34:33,799 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BNP-PA.PA"}}}
+2026-08-14 22:34:34,426 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BNR-DE.DE"}}}
+2026-08-14 22:34:39,650 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BPE-MI.MI"}}}
+2026-08-14 22:34:40,107 INFO fundamentals: fetched 250/1725
+2026-08-14 22:34:49,816 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BT.A.L"}}}
+2026-08-14 22:34:52,829 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BVI-PA.PA"}}}
+2026-08-14 22:35:00,093 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BZU-MI.MI"}}}
+2026-08-14 22:35:02,050 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CA-PA.PA"}}}
+2026-08-14 22:35:02,830 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CABK-MC.MC"}}}
+2026-08-14 22:35:06,343 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CAP-PA.PA"}}}
+2026-08-14 22:35:11,103 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CBK-DE.DE"}}}
+2026-08-14 22:35:12,375 INFO fundamentals: fetched 300/1725
+2026-08-14 22:35:42,043 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CLNX-MC.MC"}}}
+2026-08-14 22:35:45,112 INFO fundamentals: fetched 350/1725
+2026-08-14 22:36:01,590 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: COL-MC.MC"}}}
+2026-08-14 22:36:02,893 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CON-DE.DE"}}}
+2026-08-14 22:36:09,924 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CPR-MI.MI"}}}
+2026-08-14 22:36:17,156 INFO fundamentals: fetched 400/1725
+2026-08-14 22:36:24,444 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CS-PA.PA"}}}
+2026-08-14 22:36:46,938 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DB1-DE.DE"}}}
+2026-08-14 22:36:48,097 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DBK-DE.DE"}}}
+2026-08-14 22:36:50,636 INFO fundamentals: fetched 450/1725
+2026-08-14 22:36:56,676 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DG-PA.PA"}}}
+2026-08-14 22:37:00,489 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DHL-DE.DE"}}}
+2026-08-14 22:37:03,429 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DIA-MI.MI"}}}
+2026-08-14 22:37:16,347 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DSFIR-AS.AS"}}}
+2026-08-14 22:37:16,921 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DSY-PA.PA"}}}
+2026-08-14 22:37:18,189 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DTE-DE.DE"}}}
+2026-08-14 22:37:18,782 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: DTG-DE.DE"}}}
+2026-08-14 22:37:22,685 INFO fundamentals: fetched 500/1725
+2026-08-14 22:37:34,686 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EDEN-PA.PA"}}}
+2026-08-14 22:37:39,582 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EL-PA.PA"}}}
+2026-08-14 22:37:40,952 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ELE-MC.MC"}}}
+2026-08-14 22:37:45,999 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EN-PA.PA"}}}
+2026-08-14 22:37:47,348 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENEL-MI.MI"}}}
+2026-08-14 22:37:47,884 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENG-MC.MC"}}}
+2026-08-14 22:37:48,478 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENGI-PA.PA"}}}
+2026-08-14 22:37:50,871 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENI-MI.MI"}}}
+2026-08-14 22:37:51,498 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ENR-DE.DE"}}}
+2026-08-14 22:37:53,409 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EOAN-DE.DE"}}}
+2026-08-14 22:37:53,952 INFO fundamentals: fetched 550/1725
+2026-08-14 22:38:00,731 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ERF-PA.PA"}}}
+2026-08-14 22:38:13,659 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: EXO-AS.AS"}}}
+2026-08-14 22:38:20,147 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FBK-MI.MI"}}}
+2026-08-14 22:38:22,428 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FCT-MI.MI"}}}
+2026-08-14 22:38:23,682 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FDR-MC.MC"}}}
+2026-08-14 22:38:24,819 INFO fundamentals: fetched 600/1725
+2026-08-14 22:38:28,443 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FER-MC.MC"}}}
+2026-08-14 22:38:37,749 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FME-DE.DE"}}}
+2026-08-14 22:38:42,748 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FRE-DE.DE"}}}
+2026-08-14 22:38:51,640 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: G-MI.MI"}}}
+2026-08-14 22:38:52,328 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: G1A-DE.DE"}}}
+2026-08-14 22:38:52,940 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: G24-DE.DE"}}}
+2026-08-14 22:38:56,397 INFO fundamentals: fetched 650/1725
+2026-08-14 22:39:10,972 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: GLE-PA.PA"}}}
+2026-08-14 22:39:25,652 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: GRF-MC.MC"}}}
+2026-08-14 22:39:28,158 INFO fundamentals: fetched 700/1725
+2026-08-14 22:39:40,778 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HEI-DE.DE"}}}
+2026-08-14 22:39:41,290 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HEIA-AS.AS"}}}
+2026-08-14 22:39:41,906 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HEN3-DE.DE"}}}
+2026-08-14 22:39:42,787 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HER-MI.MI"}}}
+2026-08-14 22:39:49,951 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HNR1-DE.DE"}}}
+2026-08-14 22:39:50,507 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: HO-PA.PA"}}}
+2026-08-14 22:39:59,471 INFO fundamentals: fetched 750/1725
+2026-08-14 22:40:08,301 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IAG-MC.MC"}}}
+2026-08-14 22:40:10,339 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IBE-MC.MC"}}}
+2026-08-14 22:40:15,649 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IDR-MC.MC"}}}
+2026-08-14 22:40:18,351 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFL.AX"}}}
+2026-08-14 22:40:19,801 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFX-DE.DE"}}}
+2026-08-14 22:40:20,408 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IG-MI.MI"}}}
+2026-08-14 22:40:25,839 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IMCD-AS.AS"}}}
+2026-08-14 22:40:31,154 INFO fundamentals: fetched 800/1725
+2026-08-14 22:40:33,819 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: INGA-AS.AS"}}}
+2026-08-14 22:40:42,448 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: INW-MI.MI"}}}
+2026-08-14 22:40:48,078 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ISP-MI.MI"}}}
+2026-08-14 22:40:52,887 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ITX-MC.MC"}}}
+2026-08-14 22:40:53,444 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IVG-MI.MI"}}}
+2026-08-14 22:41:02,572 INFO fundamentals: fetched 850/1725
+2026-08-14 22:41:11,750 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: KER-PA.PA"}}}
+2026-08-14 22:41:22,630 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: KPN-AS.AS"}}}
+2026-08-14 22:41:31,880 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LDO-MI.MI"}}}
+2026-08-14 22:41:34,937 INFO fundamentals: fetched 900/1725
+2026-08-14 22:41:49,622 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LOG-MC.MC"}}}
+2026-08-14 22:41:54,361 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LR-PA.PA"}}}
+2026-08-14 22:41:58,143 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: LTMC-MI.MI"}}}
+2026-08-14 22:42:07,059 INFO fundamentals: fetched 950/1725
+2026-08-14 22:42:09,116 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MAP-MC.MC"}}}
+2026-08-14 22:42:11,720 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MB-MI.MI"}}}
+2026-08-14 22:42:12,373 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MBG-DE.DE"}}}
+2026-08-14 22:42:13,586 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MC-PA.PA"}}}
+2026-08-14 22:42:30,681 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ML-PA.PA"}}}
+2026-08-14 22:42:38,435 INFO fundamentals: fetched 1000/1725
+2026-08-14 22:42:38,541 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MONC-MI.MI"}}}
+2026-08-14 22:42:44,725 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MRK-DE.DE"}}}
+2026-08-14 22:42:45,393 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MRL-MC.MC"}}}
+2026-08-14 22:42:53,491 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MT-AS.AS"}}}
+2026-08-14 22:42:54,139 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MT-AS.PA"}}}
+2026-08-14 22:42:56,978 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MTS-MC.MC"}}}
+2026-08-14 22:42:58,216 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MTX-DE.DE"}}}
+2026-08-14 22:43:00,087 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: MUV2-DE.DE"}}}
+2026-08-14 22:43:09,483 INFO fundamentals: fetched 1050/1725
+2026-08-14 22:43:16,128 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NEXI-MI.MI"}}}
+2026-08-14 22:43:25,372 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NN-AS.AS"}}}
+2026-08-14 22:43:33,485 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NSR.AX"}}}
+2026-08-14 22:43:36,499 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NTGY-MC.MC"}}}
+2026-08-14 22:43:40,738 INFO fundamentals: fetched 1100/1725
+2026-08-14 22:44:06,872 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: OR-PA.PA"}}}
+2026-08-14 22:44:07,481 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ORA-PA.PA"}}}
+2026-08-14 22:44:12,719 INFO fundamentals: fetched 1150/1725
+2026-08-14 22:44:18,931 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PAH3-DE.DE"}}}
+2026-08-14 22:44:35,550 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PHIA-AS.AS"}}}
+2026-08-14 22:44:45,076 INFO fundamentals: fetched 1200/1725
+2026-08-14 22:44:56,612 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PRX-AS.AS"}}}
+2026-08-14 22:44:57,195 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PRY-MI.MI"}}}
+2026-08-14 22:45:01,022 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PST-MI.MI"}}}
+2026-08-14 22:45:02,962 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PUB-PA.PA"}}}
+2026-08-14 22:45:03,594 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: PUIG-MC.MC"}}}
+2026-08-14 22:45:11,211 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: QIA-DE.DE"}}}
+2026-08-14 22:45:16,031 INFO fundamentals: fetched 1250/1725
+2026-08-14 22:45:17,419 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RACE-MI.MI"}}}
+2026-08-14 22:45:18,888 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RAND-AS.AS"}}}
+2026-08-14 22:45:26,894 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: REC-MI.MI"}}}
+2026-08-14 22:45:27,532 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RED-MC.MC"}}}
+2026-08-14 22:45:32,927 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: REN-AS.AS"}}}
+2026-08-14 22:45:33,595 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: REP-MC.MC"}}}
+2026-08-14 22:45:38,742 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RHM-DE.DE"}}}
+2026-08-14 22:45:39,413 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RI-PA.PA"}}}
+2026-08-14 22:45:46,864 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RMS-PA.PA"}}}
+2026-08-14 22:45:47,309 INFO fundamentals: fetched 1300/1725
+2026-08-14 22:45:48,685 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RNO-PA.PA"}}}
+2026-08-14 22:45:54,341 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ROVI-MC.MC"}}}
+2026-08-14 22:46:01,908 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: RWE-DE.DE"}}}
+2026-08-14 22:46:05,640 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAB-MC.MC"}}}
+2026-08-14 22:46:06,366 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAF-PA.PA"}}}
+2026-08-14 22:46:09,498 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAN-MC.MC"}}}
+2026-08-14 22:46:10,098 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAN-PA.PA"}}}
+2026-08-14 22:46:11,401 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SAP-DE.DE"}}}
+2026-08-14 22:46:17,727 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SCYR-MC.MC"}}}
+2026-08-14 22:46:18,709 INFO fundamentals: fetched 1350/1725
+2026-08-14 22:46:26,666 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SGO-PA.PA"}}}
+2026-08-14 22:46:29,906 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SHELL-AS.AS"}}}
+2026-08-14 22:46:31,224 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SHL-DE.DE"}}}
+2026-08-14 22:46:35,193 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SIE-DE.DE"}}}
+2026-08-14 22:46:47,092 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SLR-MC.MC"}}}
+2026-08-14 22:46:49,835 INFO fundamentals: fetched 1400/1725
+2026-08-14 22:47:05,109 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SPM-MI.MI"}}}
+2026-08-14 22:47:12,873 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SRG-MI.MI"}}}
+2026-08-14 22:47:19,902 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STLAM-MI.MI"}}}
+2026-08-14 22:47:20,575 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STLAP-PA.PA"}}}
+2026-08-14 22:47:21,697 INFO fundamentals: fetched 1450/1725
+2026-08-14 22:47:22,454 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STMMI-MI.MI"}}}
+2026-08-14 22:47:23,020 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: STMPA-PA.PA"}}}
+2026-08-14 22:47:28,250 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SU-PA.PA"}}}
+2026-08-14 22:47:36,010 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: SY1-DE.DE"}}}
+2026-08-14 22:47:50,753 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TEF-MC.MC"}}}
+2026-08-14 22:47:52,216 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TEN-MI.MI"}}}
+2026-08-14 22:47:53,466 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TEP-PA.PA"}}}
+2026-08-14 22:47:53,966 INFO fundamentals: fetched 1500/1725
+2026-08-14 22:47:59,556 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TIT-MI.MI"}}}
+2026-08-14 22:48:15,516 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TRN-MI.MI"}}}
+2026-08-14 22:48:25,282 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TTE-PA.PA"}}}
+2026-08-14 22:48:25,790 INFO fundamentals: fetched 1550/1725
+2026-08-14 22:48:36,148 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UCG-MI.MI"}}}
+2026-08-14 22:48:41,897 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UMG-AS.AS"}}}
+2026-08-14 22:48:42,492 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UNA-AS.AS"}}}
+2026-08-14 22:48:44,416 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UNI-MC.MC"}}}
+2026-08-14 22:48:44,972 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: UNI-MI.MI"}}}
+2026-08-14 22:48:49,922 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: URW-PA.PA"}}}
+2026-08-14 22:48:58,710 INFO fundamentals: fetched 1600/1725
+2026-08-14 22:49:04,876 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: VIE-PA.PA"}}}
+2026-08-14 22:49:09,976 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: VNA-DE.DE"}}}
+2026-08-14 22:49:13,383 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: VOW3-DE.DE"}}}
+2026-08-14 22:49:29,439 INFO fundamentals: fetched 1650/1725
+2026-08-14 22:49:35,485 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: WKL-AS.AS"}}}
+2026-08-14 22:49:57,608 INFO fundamentals: fetched 1700/1725
+2026-08-14 22:49:59,720 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: XYX.AX"}}}
+2026-08-14 22:50:02,326 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ZAL-DE.DE"}}}
+2026-08-14 22:50:25,413 INFO insiders: SEC ticker->CIK map loaded with 10387 entries
+2026-08-14 22:50:42,635 INFO insiders: insider intelligence 25/1225
+2026-08-14 22:50:54,407 INFO insiders: insider intelligence 50/1225
+2026-08-14 22:51:11,110 INFO insiders: insider intelligence 75/1225
+2026-08-14 22:51:31,154 INFO insiders: insider intelligence 100/1225
+2026-08-14 22:51:45,372 INFO insiders: insider intelligence 125/1225
+2026-08-14 22:52:00,941 INFO insiders: insider intelligence 150/1225
+2026-08-14 22:52:17,852 INFO insiders: insider intelligence 175/1225
+2026-08-14 22:52:32,505 INFO insiders: insider intelligence 200/1225
+2026-08-14 22:52:50,995 INFO insiders: insider intelligence 225/1225
+2026-08-14 22:53:05,063 INFO insiders: insider intelligence 250/1225
+2026-08-14 22:53:23,502 INFO insiders: insider intelligence 275/1225
+2026-08-14 22:53:40,133 INFO insiders: insider intelligence 300/1225
+2026-08-14 22:53:56,872 INFO insiders: insider intelligence 325/1225
+2026-08-14 22:54:13,085 INFO insiders: insider intelligence 350/1225
+2026-08-14 22:54:28,457 INFO insiders: insider intelligence 375/1225
+2026-08-14 22:54:42,030 INFO insiders: insider intelligence 400/1225
+2026-08-14 22:54:56,874 INFO insiders: insider intelligence 425/1225
+2026-08-14 22:55:13,489 INFO insiders: insider intelligence 450/1225
+2026-08-14 22:55:30,998 INFO insiders: insider intelligence 475/1225
+2026-08-14 22:55:48,471 INFO insiders: insider intelligence 500/1225
+2026-08-14 22:56:09,732 INFO insiders: insider intelligence 525/1225
+2026-08-14 22:56:24,627 INFO insiders: insider intelligence 550/1225
+2026-08-14 22:56:43,354 INFO insiders: insider intelligence 575/1225
+2026-08-14 22:56:58,987 INFO insiders: insider intelligence 600/1225
+2026-08-14 22:57:13,202 INFO insiders: insider intelligence 625/1225
+2026-08-14 22:57:28,735 INFO insiders: insider intelligence 650/1225
+2026-08-14 22:57:44,912 INFO insiders: insider intelligence 675/1225
+2026-08-14 22:58:08,512 INFO insiders: insider intelligence 700/1225
+2026-08-14 22:58:28,311 INFO insiders: insider intelligence 725/1225
+2026-08-14 22:58:50,224 INFO insiders: insider intelligence 750/1225
+2026-08-14 22:59:06,646 INFO insiders: insider intelligence 775/1225
+2026-08-14 22:59:18,970 INFO insiders: insider intelligence 800/1225
+2026-08-14 22:59:36,044 INFO insiders: insider intelligence 825/1225
+2026-08-14 22:59:53,674 INFO insiders: insider intelligence 850/1225
+2026-08-14 23:00:12,170 INFO insiders: insider intelligence 875/1225
+2026-08-14 23:00:25,768 INFO insiders: insider intelligence 900/1225
+2026-08-14 23:00:39,284 INFO insiders: insider intelligence 925/1225
+2026-08-14 23:00:54,139 INFO insiders: insider intelligence 950/1225
+2026-08-14 23:01:13,968 INFO insiders: insider intelligence 975/1225
+2026-08-14 23:01:31,708 INFO insiders: insider intelligence 1000/1225
+2026-08-14 23:01:46,492 INFO insiders: insider intelligence 1025/1225
+2026-08-14 23:02:03,880 INFO insiders: insider intelligence 1050/1225
+2026-08-14 23:02:20,759 INFO insiders: insider intelligence 1075/1225
+2026-08-14 23:02:39,241 INFO insiders: insider intelligence 1100/1225
+2026-08-14 23:02:57,818 INFO insiders: insider intelligence 1125/1225
+2026-08-14 23:03:17,011 INFO insiders: insider intelligence 1150/1225
+2026-08-14 23:03:31,163 INFO insiders: insider intelligence 1175/1225
+2026-08-14 23:03:36,851 INFO insiders: insider intelligence 1200/1225
+2026-08-14 23:03:41,795 INFO insiders: insider intelligence 1225/1225
+2026-08-14 23:03:42,266 INFO run: Wrote 1725 rows to /home/runner/work/Finscanner/Finscanner/scripts/../data/stocks.json
+2026-08-14 23:03:42,730 INFO run: Wrote metals data to /home/runner/work/Finscanner/Finscanner/scripts/../data/metals.json
+2026-08-14 23:03:42,737 INFO history: Wrote history for 2135 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/history.json
+2026-08-14 23:03:42,755 INFO valuation_history: Wrote valuation history for 1964 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/valuation_history.json
+2026-08-14 23:03:42,796 INFO thesis_history: Wrote thesis history for 2319 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/thesis_history.json
+2026-08-14 23:03:48,274 INFO news: news fetch 200/1725
+2026-08-14 23:03:53,213 INFO news: news fetch 400/1725
+2026-08-14 23:03:58,132 INFO news: news fetch 600/1725
+2026-08-14 23:04:03,208 INFO news: news fetch 800/1725
+2026-08-14 23:04:08,224 INFO news: news fetch 1000/1725
+2026-08-14 23:04:13,036 INFO news: news fetch 1200/1725
+2026-08-14 23:04:17,857 INFO news: news fetch 1400/1725
+2026-08-14 23:04:22,831 INFO news: news fetch 1600/1725
+2026-08-14 23:04:26,530 INFO news: news: 1718/1725 tickers returned at least one headline
+2026-08-14 23:04:26,582 INFO run: Wrote news for 1718 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/news.json
