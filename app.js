@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, history: null, activeView: "stocks" };
+  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, activeView: "stocks" };
 
   const els = {
     list: document.getElementById("list"),
@@ -36,12 +36,23 @@
     marketStats: document.getElementById("market-stats"),
     insightStrip: document.getElementById("insight-strip"),
     resultCount: document.getElementById("result-count"),
+    opportunityGrid: document.getElementById("opportunity-grid"),
+    fundsList: document.getElementById("funds-list"),
+    fundsCount: document.getElementById("funds-count"),
+    newsList: document.getElementById("news-list"),
+    smartmoneyList: document.getElementById("smartmoney-list"),
+    compareInput: document.getElementById("compare-input"),
+    compareList: document.getElementById("compare-list"),
   };
 
   const VIEW_META = {
     stocks: { title: "Ações", sub: "dossiê diário · fontes gratuitas" },
     metals: { title: "Metais", sub: "futuros e proxies · fontes gratuitas" },
     portfolio: { title: "O meu portfolio", sub: "guardado só neste dispositivo (localStorage)" },
+    funds: { title: "ETFs", sub: "fundos cotados no universo rastreado" },
+    news: { title: "Notícias", sub: "notícias das posições que possuis" },
+    smartmoney: { title: "Smart Money", sub: "atividade de insiders · SEC Form 4" },
+    compare: { title: "Comparar", sub: "comparação multifator lado a lado" },
   };
 
   // ---------- localStorage: portfolio (owned) + watchlist (starred) ----------
@@ -84,6 +95,10 @@
     els.mobileTitle.textContent = VIEW_META[view].title;
     updateGeneratedAt();
     if (view === "portfolio") renderPortfolio();
+    if (view === "funds") renderFunds();
+    if (view === "news") renderNews();
+    if (view === "smartmoney") renderSmartMoney();
+    if (view === "compare") renderCompare();
     closeMobileSidebar();
   }
 
@@ -141,6 +156,7 @@
     if (ticker.endsWith(".AX")) return "AU";
     if (ticker.endsWith(".WA")) return "PL";
     if (ticker.endsWith(".L")) return "UK";
+    if ([".DE",".PA",".AS",".MC",".MI",".SW"].some(x => ticker.endsWith(x))) return "EU";
     return "US";
   }
 
@@ -172,6 +188,39 @@
     const sign = Number(n) < 0 ? "−" : "";
     const suffix = abs >= 1e9 ? (abs/1e9).toFixed(1)+"B" : abs >= 1e6 ? (abs/1e6).toFixed(1)+"M" : abs.toLocaleString("pt-PT", {maximumFractionDigits:0});
     return `${sign}${suffix}${currency ? " " + currency : ""}`;
+  }
+
+  function fmtSignedPct(n) {
+    if (n == null || !Number.isFinite(Number(n))) return "—";
+    const x = Number(n);
+    return `${x > 0 ? "+" : ""}${x.toFixed(1)}%`;
+  }
+
+  function relativeClass(n) {
+    if (n == null || !Number.isFinite(Number(n))) return "neutral";
+    if (Number(n) <= -10) return "discount";
+    if (Number(n) >= 10) return "premium";
+    return "neutral";
+  }
+
+  function valuationLabel(r) {
+    const rels = [r.trailing_pe_vs_sector_pct, r.forward_pe_vs_sector_pct, r.pb_vs_sector_pct, r.ev_ebitda_vs_sector_pct]
+      .filter(v => Number.isFinite(Number(v))).map(Number);
+    if (!rels.length) return {label:"Sem benchmark", cls:"neutral", avg:null};
+    const avg = rels.reduce((a,b)=>a+b,0) / rels.length;
+    if (avg <= -15) return {label:"Desconto vs setor", cls:"discount", avg};
+    if (avg >= 15) return {label:"Prémio vs setor", cls:"premium", avg};
+    return {label:"Em linha com setor", cls:"neutral", avg};
+  }
+
+  function ownValuationContext(ticker, field, current) {
+    const series = state.valuationHistory?.[ticker] || {};
+    const vals = Object.values(series).map(x => x?.[field]).filter(v => Number.isFinite(Number(v)) && Number(v) > 0).map(Number).sort((a,b)=>a-b);
+    if (!Number.isFinite(Number(current)) || Number(current) <= 0) return {days:vals.length, median:null, rel:null};
+    if (vals.length < 5) return {days:vals.length, median:null, rel:null};
+    const mid = Math.floor(vals.length/2);
+    const median = vals.length % 2 ? vals[mid] : (vals[mid-1] + vals[mid]) / 2;
+    return {days:vals.length, median, rel:(Number(current)/median - 1)*100};
   }
 
   function investmentVerdict(r) {
@@ -222,6 +271,17 @@
     } catch (e) {
       state.history = {};
       console.warn("history.json unavailable yet", e);
+    }
+  }
+
+  async function loadValuationHistory() {
+    try {
+      const res = await fetch("data/valuation_history.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      state.valuationHistory = await res.json();
+    } catch (e) {
+      state.valuationHistory = {};
+      console.warn("valuation_history.json unavailable yet", e);
     }
   }
 
@@ -300,6 +360,23 @@
       </button>`;
     }).join("");
     els.insightStrip.querySelectorAll(".insight-card").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
+
+    const opportunities = scored
+      .filter(r => r.zombie !== "yes" && r.data_confidence !== "low" && Number(r.quality_pct ?? r.profitability_pct) >= 60 && Number(r.value_pct) >= 55)
+      .sort((a,b) => (b.quality_value_score ?? 0) - (a.quality_value_score ?? 0))
+      .slice(0, 6);
+    if (els.opportunityGrid) {
+      els.opportunityGrid.innerHTML = opportunities.length ? opportunities.map(r => {
+        const v = valuationLabel(r);
+        return `<button class="opportunity-card" data-ticker="${r.ticker}">
+          <span class="opportunity-card__top"><strong>${r.ticker}</strong><em class="valuation-chip ${v.cls}">${v.label}</em></span>
+          <small>${r.name || ""}</small>
+          <span class="opportunity-card__axes"><b>Q ${Math.round(r.quality_pct ?? r.profitability_pct ?? 0)}</b><b>V ${Math.round(r.value_pct ?? 0)}</b><b>G ${Math.round(r.growth_pct ?? 0)}</b></span>
+          <span class="opportunity-card__score">Q×V ${r.quality_value_score ?? "—"}</span>
+        </button>`;
+      }).join("") : `<p class="empty-state compact">Nenhuma empresa cumpre simultaneamente os limiares de qualidade e valor neste universo.</p>`;
+      els.opportunityGrid.querySelectorAll(".opportunity-card").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
+    }
   }
 
   function applyFilters() {
@@ -323,6 +400,7 @@
       if (sort === "score-asc") return (a.score ?? 999) - (b.score ?? 999);
       if (sort === "ticker-asc") return a.ticker.localeCompare(b.ticker);
       if (sort === "cap-desc") return (b.market_cap ?? 0) - (a.market_cap ?? 0);
+      if (sort === "qv-desc") return (b.quality_value_score ?? -1) - (a.quality_value_score ?? -1);
       return 0;
     });
 
@@ -410,6 +488,19 @@
     return true;
   }
 
+  function valuationCompareHtml(label, current, sectorMedian, relSector, own) {
+    const cls = relativeClass(relSector);
+    const ownText = own.median == null
+      ? (own.days ? `histórico próprio em construção · ${own.days} dia(s)` : "histórico próprio ainda sem dados")
+      : `mediana própria ${fmtRatio(own.median)} · ${fmtSignedPct(own.rel)} vs histórico observado`;
+    return `<div class="comparison-card">
+      <span>${label}</span>
+      <strong>${fmtRatio(current)}</strong>
+      <div><small>setor ${fmtRatio(sectorMedian)}</small><em class="${cls}">${fmtSignedPct(relSector)}</em></div>
+      <p>${ownText}</p>
+    </div>`;
+  }
+
   function openDetail(ticker) {
     const r = state.data.stocks.find(s => s.ticker === ticker);
     if (!r) return;
@@ -418,8 +509,28 @@
     const insider = typeof r.insider_form4_count_30d === "number"
       ? `${r.insider_form4_count_30d} filings Form 4 (30 dias)`
       : "não disponível";
+    const insiderNet = r.insider_net_value_30d;
+    const insiderNetLabel = insiderNet == null ? "—" : `${insiderNet >= 0 ? "+" : "−"}${fmtMoney(Math.abs(insiderNet), r.currency || "USD")}`;
+    const insiderTx = Array.isArray(r.insider_transactions) ? r.insider_transactions : [];
+    const insiderTxHtml = insiderTx.length ? insiderTx.map(tx => `
+      <div class="insider-tx ${tx.type === 'buy' ? 'buy' : 'sell'}">
+        <span>${tx.type === 'buy' ? 'COMPRA' : 'VENDA'} · ${escapeHtml(tx.date || '—')}</span>
+        <strong>${escapeHtml(tx.owner || 'Insider')}</strong>
+        <small>${escapeHtml(tx.role || '')}${tx.shares != null ? ` · ${Number(tx.shares).toLocaleString('pt-PT')} ações` : ''}${tx.price != null ? ` @ ${Number(tx.price).toFixed(2)}` : ''}${tx.value != null ? ` · ${fmtMoney(tx.value, r.currency || 'USD')}` : ''}</small>
+      </div>`).join('') : '<p class="detail-note">Sem compras/vendas open-market P/S detalhadas nos filings recentes analisados.</p>';
+
+    const dilution = r.diluted_shares_yoy;
+    const dilutionLabel = dilution == null ? "—" : `${dilution >= 0 ? "+" : ""}${(dilution * 100).toFixed(1)}%`;
+    const dilutionClass = dilution == null ? "neutral" : dilution > 0.03 ? "negative" : dilution < -0.03 ? "positive" : "neutral";
+    const marginDelta = r.net_margin_yoy_change_pp;
+    const marginDeltaLabel = marginDelta == null ? "—" : `${marginDelta >= 0 ? "+" : ""}${Number(marginDelta).toFixed(1)} pp`;
     const owned = isOwned(r.ticker);
     const series = (state.history && state.history[r.ticker]) || {};
+    const valuation = valuationLabel(r);
+    const ownPe = ownValuationContext(r.ticker, "pe", r.trailing_pe);
+    const ownFpe = ownValuationContext(r.ticker, "fpe", r.forward_pe);
+    const ownPb = ownValuationContext(r.ticker, "pb", r.price_to_book);
+    const ownEv = ownValuationContext(r.ticker, "ev", r.enterprise_to_ebitda);
     const hasHistory = Object.keys(series).length >= 2;
     const verdict = investmentVerdict(r);
     const dimensions = [
@@ -452,12 +563,34 @@
         <div><span>Crescimento lucros</span><strong>${fmtRawPct(r.earnings_growth)}</strong></div><div><span>Crescimento EPS trimestral</span><strong>${fmtRawPct(r.earnings_quarterly_growth)}</strong></div>
       </div>
 
+      <h3 class="dossier-title">Growth Intelligence</h3>
+      <div class="growth-intel-grid">
+        <div><span>Receita YoY · último trimestre</span><strong>${fmtRawPct(r.revenue_yoy_latest)}</strong></div>
+        <div><span>Lucro líquido YoY · último trimestre</span><strong>${fmtRawPct(r.net_income_yoy_latest)}</strong></div>
+        <div><span>Margem líquida · último trimestre</span><strong>${fmtRawPct(r.net_margin_latest)}</strong><small>${marginDeltaLabel} vs trimestre homólogo</small></div>
+        <div class="${dilutionClass}"><span>Diluição de ações · YoY</span><strong>${dilutionLabel}</strong><small>${dilution != null && dilution > 0 ? 'mais ações em circulação diluída' : dilution != null && dilution < 0 ? 'redução do número diluído de ações' : 'sem sinal material'}</small></div>
+        <div><span>Buybacks · último trimestre</span><strong>${fmtMoney(r.repurchases_last_quarter, r.currency)}</strong></div>
+      </div>
+      <p class="detail-note">Comparação YoY usa o trimestre mais recente vs o trimestre homólogo, quando existem pelo menos 5 observações trimestrais.</p>
+
       <h3 class="dossier-title">Cash flow & balanço</h3>
       <div class="dossier-grid">
         <div><span>Free cash flow</span><strong>${fmtMoney(r.free_cash_flow, r.currency)}</strong></div><div><span>FCF yield</span><strong>${fmtRawPct(r.fcf_yield)}</strong></div>
         <div><span>Operating cash flow</span><strong>${fmtMoney(r.operating_cash_flow, r.currency)}</strong></div><div><span>Net cash</span><strong>${fmtMoney(r.net_cash, r.currency)}</strong></div>
         <div><span>Current ratio</span><strong>${fmtRatio(r.current_ratio)}</strong></div><div><span>Quick ratio</span><strong>${fmtRatio(r.quick_ratio)}</strong></div>
         <div><span>Dívida / equity</span><strong>${r.debt_to_equity == null ? "—" : Number(r.debt_to_equity).toFixed(1)}</strong></div><div><span>Cobertura de juros</span><strong>${fmtRatio(r.interest_coverage)}</strong></div>
+      </div>
+
+      <h3 class="dossier-title">Valuation Lens</h3>
+      <div class="valuation-summary ${valuation.cls}">
+        <div><span class="eyebrow">RELATIVE VALUATION</span><strong>${valuation.label}</strong><p>${r.peer_count ?? 0} pares do mesmo setor usados como universo comparável.</p></div>
+        <div class="valuation-summary__number">${valuation.avg == null ? "—" : fmtSignedPct(valuation.avg)}<span>média simples dos múltiplos disponíveis vs mediana setorial</span></div>
+      </div>
+      <div class="comparison-grid">
+        ${valuationCompareHtml("P/E trailing", r.trailing_pe, r.sector_trailing_pe_median, r.trailing_pe_vs_sector_pct, ownPe)}
+        ${valuationCompareHtml("P/E forward", r.forward_pe, r.sector_forward_pe_median, r.forward_pe_vs_sector_pct, ownFpe)}
+        ${valuationCompareHtml("Price / book", r.price_to_book, r.sector_pb_median, r.pb_vs_sector_pct, ownPb)}
+        ${valuationCompareHtml("EV / EBITDA", r.enterprise_to_ebitda, r.sector_ev_ebitda_median, r.ev_ebitda_vs_sector_pct, ownEv)}
       </div>
 
       <h3 class="dossier-title">Valuation & retorno ao acionista</h3>
@@ -467,6 +600,15 @@
         <div><span>PEG</span><strong>${r.peg_ratio == null ? "—" : Number(r.peg_ratio).toFixed(2)}</strong></div><div><span>Dividend yield</span><strong>${fmtRawPct(r.dividend_yield)}</strong></div>
         <div><span>Payout ratio</span><strong>${fmtRawPct(r.payout_ratio)}</strong></div><div><span>Beta</span><strong>${r.beta == null ? "—" : Number(r.beta).toFixed(2)}</strong></div>
       </div>
+
+      <h3 class="dossier-title">Smart Money · SEC Form 4</h3>
+      <div class="smartmoney-summary">
+        <div><span>Compras open-market</span><strong>${r.insider_buy_count_30d ?? '—'}</strong><small>${fmtMoney(r.insider_buy_value_30d, r.currency || 'USD')}</small></div>
+        <div><span>Vendas open-market</span><strong>${r.insider_sell_count_30d ?? '—'}</strong><small>${fmtMoney(r.insider_sell_value_30d, r.currency || 'USD')}</small></div>
+        <div><span>Fluxo líquido P/S</span><strong class="${insiderNet == null ? '' : insiderNet >= 0 ? 'positive-text' : 'negative-text'}">${insiderNetLabel}</strong><small>${insider}</small></div>
+      </div>
+      <div class="insider-transactions">${insiderTxHtml}</div>
+      <p class="detail-note">Só códigos SEC P (open-market purchase) e S (open-market sale). Awards, vesting, opções, gifts e outras transações não são tratados como compra/venda.</p>
 
       <h3 class="dossier-title">Risco & contexto</h3>
       <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
@@ -700,6 +842,71 @@
     render(els.portfolioList, rows);
   }
 
+
+  function escapeHtml(v) { return String(v ?? "").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+  function renderFunds() {
+    if (!state.data) return;
+    const rows = state.data.stocks.filter(r => r.quote_type === "ETF");
+    els.fundsCount.textContent = `${rows.length} fundos`;
+    render(els.fundsList, rows);
+  }
+
+  function renderSmartMoney() {
+    if (!state.data) return;
+    const rows = state.data.stocks.filter(r => typeof r.insider_form4_count_30d === "number")
+      .sort((a,b)=>{
+        const an = a.insider_net_value_30d ?? -Infinity;
+        const bn = b.insider_net_value_30d ?? -Infinity;
+        if (bn !== an) return bn - an;
+        return (b.insider_form4_count_30d||0)-(a.insider_form4_count_30d||0);
+      }).slice(0,100);
+    els.smartmoneyList.innerHTML = rows.length ? rows.map(r => {
+      const net = r.insider_net_value_30d;
+      const signal = net == null ? 'activity' : net > 0 ? 'buy' : net < 0 ? 'sell' : 'flat';
+      const netText = net == null ? 'sem P/S detalhado' : `${net >= 0 ? '+' : '−'}${fmtMoney(Math.abs(net), r.currency || 'USD')}`;
+      return `
+      <article class="intel-card smartmoney-card ${signal}" data-ticker="${escapeHtml(r.ticker)}">
+        <div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h3>${escapeHtml(r.name || r.ticker)}</h3><p>${escapeHtml(r.sector || "")}</p></div>
+        <div class="smartmoney-stats">
+          <div><strong>${r.insider_buy_count_30d ?? '—'}</strong><span>compras</span></div>
+          <div><strong>${r.insider_sell_count_30d ?? '—'}</strong><span>vendas</span></div>
+          <div><strong class="${net != null && net >= 0 ? 'positive-text' : net != null ? 'negative-text' : ''}">${netText}</strong><span>fluxo líquido</span></div>
+        </div>
+      </article>`;
+    }).join("") : '<p class="empty-state">Sem dados SEC disponíveis.</p>';
+    els.smartmoneyList.querySelectorAll('[data-ticker]').forEach(x=>x.addEventListener('click',()=>openDetail(x.dataset.ticker)));
+  }
+
+  async function renderNews() {
+    if (!state.data) return;
+    const portfolio = lsGet(LS_PORTFOLIO);
+    const tickers = Object.keys(portfolio);
+    if (!tickers.length) { els.newsList.innerHTML='<p class="empty-state">Adiciona posições ao portfolio para veres notícias relevantes.</p>'; return; }
+    els.newsList.innerHTML = tickers.map(t=>`<article class="news-group" id="news-${CSS.escape(t)}"><h3>${escapeHtml(t)}</h3><p>A procurar notícias…</p></article>`).join('');
+    await Promise.allSettled(tickers.slice(0,20).map(async ticker => {
+      const box=document.getElementById(`news-${CSS.escape(ticker)}`);
+      const g=`https://www.google.com/search?tbm=nws&q=${encodeURIComponent(ticker+' stock')}`;
+      const y=`https://finance.yahoo.com/quote/${encodeURIComponent(ticker)}/news/`;
+      try {
+        const u=`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(ticker)}&quotesCount=0&newsCount=4`;
+        const res=await fetch(u,{cache:'no-store'}); if(!res.ok) throw new Error('blocked');
+        const j=await res.json(); const news=(j.news||[]).slice(0,4);
+        box.innerHTML=`<h3>${escapeHtml(ticker)}</h3>${news.map(n=>`<a class="news-item" href="${escapeHtml(n.link)}" target="_blank" rel="noopener"><strong>${escapeHtml(n.title)}</strong><span>${escapeHtml(n.publisher||'')}</span></a>`).join('')}<div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Google News</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
+      } catch(e) {
+        box.innerHTML=`<h3>${escapeHtml(ticker)}</h3><p>O feed direto não está disponível neste browser.</p><div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Pesquisar notícias</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
+      }
+    }));
+  }
+
+  function renderCompare() {
+    if (!state.data) return;
+    const raw=(els.compareInput?.value||'').toUpperCase().split(/[\s,;]+/).filter(Boolean).slice(0,4);
+    const picks=raw.map(t=>state.data.stocks.find(r=>r.ticker===t)).filter(Boolean);
+    if (!raw.length) { els.compareList.innerHTML='<p class="empty-state">Escreve até 4 tickers separados por vírgulas.</p>'; return; }
+    els.compareList.innerHTML = picks.map(r=>`<article class="compare-card"><span class="eyebrow">${escapeHtml(r.ticker)}</span><h3>${escapeHtml(r.name||r.ticker)}</h3><div class="compare-score">${r.score ?? '—'}</div><div class="detail-row"><span>Qualidade</span><b>${r.quality_score ?? '—'}</b></div><div class="detail-row"><span>Crescimento</span><b>${r.growth_score ?? '—'}</b></div><div class="detail-row"><span>Cash flow</span><b>${r.cashflow_score ?? '—'}</b></div><div class="detail-row"><span>Valor</span><b>${r.valuation_score ?? '—'}</b></div><div class="detail-row"><span>Estabilidade</span><b>${r.stability_score ?? '—'}</b></div><div class="detail-row"><span>P/E fwd</span><b>${fmtRatio(r.forward_pe)}</b></div></article>`).join('') || '<p class="empty-state">Nenhum ticker encontrado no universo atual.</p>';
+  }
+
   els.detailClose.addEventListener("click", () => { els.detail.hidden = true; });
   els.detail.addEventListener("click", (e) => { if (e.target === els.detail) els.detail.hidden = true; });
 
@@ -715,6 +922,8 @@
     renderPortfolio();
   });
 
+  els.compareInput?.addEventListener("input", renderCompare);
+
   [els.search, els.marketFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].forEach(el => {
     el.addEventListener("input", applyFilters);
     el.addEventListener("change", applyFilters);
@@ -729,4 +938,5 @@
   load();
   loadMetals();
   loadHistory();
+  loadValuationHistory();
 })();

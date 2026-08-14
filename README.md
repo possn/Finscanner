@@ -8,7 +8,7 @@ API pagas, sem subscrição, sem backend a correr — apenas GitHub Actions
 ## Arquitetura
 
 ```
-Universo (US screener + índices AU/PL/UK via Wikipedia)
+Universo (US screener + índices AU/PL/UK/Europa via Wikipedia)
         │
         ▼
 yfinance (fundamentais)          SEC EDGAR (Form 4, só EUA)
@@ -51,6 +51,9 @@ precisas de fazer nada depois do primeiro deploy.
 ## Funcionalidades
 
 - **Ações/ETFs**: score composto, zombie detector, insider signals (SEC EDGAR, só EUA), fee audit e AI exposure (ETFs, best-effort)
+- **Europa**: DAX, CAC 40, AEX, IBEX 35, FTSE MIB e SMI (Yahoo suffixes via yfinance)
+- **Intelligence**: tabs de Notícias do portfolio, Smart Money (atividade SEC Form 4) e comparação até 4 tickers
+- **ETFs**: workspace dedicado aos fundos presentes no universo rastreado
 - **Metais**: ouro/prata/cobre/platina/paládio (futuros) + urânio (proxy ETF), preço, variação diária, volatilidade
 - **Watchlist**: marca tickers com ★, filtra por "só watchlist" — guardado em `localStorage`, só neste dispositivo
 - **Portfolio ("O meu")**: marca posições que possuis, vê resumo agregado (score médio, zombies na carteira, expense ratio médio, exposição AI média) — também só `localStorage`
@@ -75,7 +78,7 @@ precisas de fazer nada depois do primeiro deploy.
   zombie" por omissão.
 - **Insider signals**: contagem de filings Form 4 nos últimos 30 dias via
   SEC EDGAR. **Só EUA** — é uma contagem de atividade, não distingue
-  compra de venda nem opções exercidas. AU/PL/UK ficam `not_available`
+  compra de venda nem opções exercidas. AU/PL/UK/Europa ficam `not_available`
   por não existir equivalente gratuito unificado a EDGAR.
 - **Fee audit / AI exposure**: dados de holdings de ETF via yfinance são
   inconsistentes (`funds_data.top_holdings` nem sempre disponível fora
@@ -91,3 +94,15 @@ precisas de fazer nada depois do primeiro deploy.
 Ferramenta de organização pessoal de dados públicos. O score não foi
 validado estatisticamente. Confirma sempre os números na fonte primária
 antes de qualquer decisão.
+
+## v0.6 — Growth Intelligence & Smart Money
+
+- SEC Form 4 passa a usar uma janela temporal real de 30 dias.
+- O parser distingue apenas compras open-market (`P`) e vendas open-market (`S`). Awards, vesting, gifts e exercícios de opções não são tratados como compras/vendas.
+- O dossier mostra contagem, valor comprado, valor vendido, fluxo líquido e até 8 transações recentes interpretáveis.
+- Growth Intelligence usa até 5 trimestres para comparar receita, lucro líquido e diluted average shares com o trimestre homólogo.
+- A variação YoY de diluted average shares é apresentada como diluição/redução do número de ações; buybacks do trimestre são lidos do cash-flow quando disponíveis.
+
+### SEC User-Agent
+
+Para maior conformidade com a política de fair access da SEC, cria no repositório um GitHub Actions secret chamado `SEC_USER_AGENT` com um identificador e email de contacto, por exemplo `Finscanner research nome@dominio.pt`. Se o secret não existir, existe um fallback técnico, mas um contacto real é preferível.

@@ -1,5 +1,5 @@
 // Increment this on every deploy that changes cached files.
-const CACHE_VERSION = "finscanner-v6-investment-dossier";
+const CACHE_VERSION = "finscanner-v9-growth-smart-money";
 
 const SHELL_FILES = [
   "./",
@@ -30,7 +30,7 @@ self.addEventListener("fetch", (event) => {
 
   // Data files: always try the network first so the daily update shows up
   // immediately; fall back to cache only when offline.
-  if (url.pathname.endsWith("/data/stocks.json") || url.pathname.endsWith("/data/metals.json") || url.pathname.endsWith("/data/history.json")) {
+  if (url.pathname.endsWith("/data/stocks.json") || url.pathname.endsWith("/data/metals.json") || url.pathname.endsWith("/data/history.json") || url.pathname.endsWith("/data/valuation_history.json")) {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
