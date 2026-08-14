@@ -48,7 +48,22 @@ O workflow `.github/workflows/update-data.yml` corre todos os dias às
 06:15 UTC, regenera `data/stocks.json` e faz commit automático — não
 precisas de fazer nada depois do primeiro deploy.
 
-## Metodologia — e as suas limitações (deliberadamente não escondidas)
+## Funcionalidades
+
+- **Ações/ETFs**: score composto, zombie detector, insider signals (SEC EDGAR, só EUA), fee audit e AI exposure (ETFs, best-effort)
+- **Metais**: ouro/prata/cobre/platina/paládio (futuros) + urânio (proxy ETF), preço, variação diária, volatilidade
+- **Watchlist**: marca tickers com ★, filtra por "só watchlist" — guardado em `localStorage`, só neste dispositivo
+- **Portfolio ("O meu")**: marca posições que possuis, vê resumo agregado (score médio, zombies na carteira, expense ratio médio, exposição AI média) — também só `localStorage`
+- **Histórico de score**: `data/history.json` acumula o score diário por ticker (até 120 dias); aparece como sparkline no detalhe de cada ticker assim que houver ≥2 dias de dados
+
+## O que falta em relação à Winston (deliberadamente, ver conversa de build)
+
+- **Sem "Ledger"** (briefing diário em linguagem natural) — precisaria de LLM, o que deixa de ser gratuito. Decisão explícita: manter 100% grátis.
+- **Sem sync entre dispositivos** — portfolio/watchlist vivem só no browser que os criou (`localStorage`). Sincronizar exigiria uma conta+backend.
+- **Cobertura ainda não é "milhares"** — yfinance exige uma chamada por ticker para fundamentais; escalar para milhares tornaria a run diária impraticavelmente longa/arriscada (rate limiting da Yahoo). ~800-900 tickers é o equilíbrio atual.
+- **Insider signals sem direção** — só contagem de filings Form 4, não distingue compra/venda/opções.
+
+
 
 - **Score composto (0–100)**: média ponderada de 4 dimensões (rentabilidade
   30%, alavancagem/solvência 30%, valorização 20%, estabilidade 20%),

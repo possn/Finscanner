@@ -45,9 +45,13 @@ MARKETS = {
 }
 
 
-def us_small_micro_cap(limit: int = 400) -> list[str]:
+def us_small_micro_cap(limit: int = 500) -> list[str]:
     """Reuses the same Yahoo screener approach as the existing stock-scanner:
-    yf.screen + EquityQuery, filtered to small/micro-cap US equities."""
+    yf.screen + EquityQuery, filtered to small/micro-cap US equities.
+    Yahoo's screener API caps each individual response at 250 rows, so
+    reaching a higher `limit` means paginating with `offset` rather than
+    asking for a bigger `size` in one call."""
+    tickers: list[str] = []
     try:
         q = yf.EquityQuery(
             "and",
@@ -57,14 +61,23 @@ def us_small_micro_cap(limit: int = 400) -> list[str]:
                 yf.EquityQuery("gt", ["dayvolume", 100_000]),
             ],
         )
-        result = yf.screen(q, sortField="intradaymarketcap", sortAsc=False, size=min(limit, 250))
-        quotes = result.get("quotes", [])
-        tickers = [q["symbol"] for q in quotes if "symbol" in q]
-        log.info("US screener returned %d tickers", len(tickers))
+        offset = 0
+        page_size = 250
+        while len(tickers) < limit:
+            result = yf.screen(q, sortField="intradaymarketcap", sortAsc=False, size=page_size, offset=offset)
+            quotes = result.get("quotes", [])
+            if not quotes:
+                break
+            tickers.extend(qq["symbol"] for qq in quotes if "symbol" in qq)
+            offset += page_size
+            if len(quotes) < page_size:
+                break  # fewer than a full page means we've exhausted the screener's matches
+        tickers = tickers[:limit]
+        log.info("US screener returned %d tickers (paginated)", len(tickers))
         return tickers
     except Exception as e:
-        log.warning("US screener failed (%s) — falling back to empty list", e)
-        return []
+        log.warning("US screener failed (%s) — falling back to %d tickers fetched before failure", e, len(tickers))
+        return tickers
 
 
 def _wikipedia_table(url: str, match: str, symbol_col_candidates: list[str]) -> list[str]:

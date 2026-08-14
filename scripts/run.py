@@ -20,6 +20,7 @@ import sys
 import traceback
 
 from fundamentals import fetch_many
+import history as history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
 from score import score_universe
@@ -27,6 +28,7 @@ from universe import build_universe
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
+HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "history.json")
 ERROR_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "last_error.log")
 PIPELINE_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "pipeline_log.txt")
 
@@ -43,7 +45,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "insiders", "score", "metals"):
+for _name in ("run", "universe", "fundamentals", "insiders", "score", "metals", "history"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -116,6 +118,11 @@ def main():
     with open(METALS_OUT_PATH, "w") as f:
         json.dump(metals_payload, f, indent=2)
     log.info("Wrote metals data to %s", METALS_OUT_PATH)
+
+    today = datetime.date.today().isoformat()
+    history = history_mod.load(HISTORY_PATH)
+    history = history_mod.update(history, rows, today)
+    history_mod.save(history, HISTORY_PATH)
 
 
 if __name__ == "__main__":

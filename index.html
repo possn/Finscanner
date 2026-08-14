@@ -27,6 +27,10 @@
       <span class="sidenav-icon">◆</span>
       <span class="sidenav-label">Metais</span>
     </button>
+    <button class="sidenav-item" data-view="portfolio" aria-label="Portfolio">
+      <span class="sidenav-icon">★</span>
+      <span class="sidenav-label">Meu</span>
+    </button>
   </nav>
 
   <div class="content-col">
@@ -61,6 +65,10 @@
           <input type="checkbox" id="zombie-only">
           <span>só zombies</span>
         </label>
+        <label class="toggle">
+          <input type="checkbox" id="watchlist-only">
+          <span>★ watchlist</span>
+        </label>
       </div>
 
       <main id="list" class="dossier">
@@ -73,6 +81,13 @@
         <p class="empty-state">A carregar dados…</p>
       </main>
       <p class="metals-note" id="metals-note"></p>
+    </section>
+
+    <section id="view-portfolio" class="view">
+      <div id="portfolio-summary" class="portfolio-summary"></div>
+      <main id="portfolio-list" class="dossier">
+        <p class="empty-state">Ainda não marcaste nenhuma posição. Abre um ticker em Ações e toca em "Tenho esta posição".</p>
+      </main>
     </section>
 
     <footer class="foot-note">
