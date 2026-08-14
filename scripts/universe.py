@@ -135,39 +135,54 @@ MARKETS = {
 }
 
 
-def us_small_micro_cap(limit: int = 500) -> list[str]:
-    """Reuses the same Yahoo screener approach as the existing stock-scanner:
-    yf.screen + EquityQuery, filtered to small/micro-cap US equities.
-    Yahoo's screener API caps each individual response at 250 rows, so
-    reaching a higher `limit` means paginating with `offset` rather than
-    asking for a bigger `size` in one call."""
+def _us_cap_range_screener(min_cap: float, max_cap: float, limit: int, sort_desc: bool = False) -> list[str]:
+    """Generic Yahoo screener call for a US market-cap band. Yahoo's
+    screener API caps each individual response at 250 rows, so reaching
+    a higher `limit` means paginating with `offset` rather than asking
+    for a bigger `size` in one call."""
     tickers: list[str] = []
     try:
         q = yf.EquityQuery(
             "and",
             [
                 yf.EquityQuery("eq", ["region", "us"]),
-                yf.EquityQuery("btwn", ["intradaymarketcap", 50_000_000, 2_000_000_000]),
+                yf.EquityQuery("btwn", ["intradaymarketcap", min_cap, max_cap]),
                 yf.EquityQuery("gt", ["dayvolume", 100_000]),
             ],
         )
         offset = 0
         page_size = 250
         while len(tickers) < limit:
-            result = yf.screen(q, sortField="intradaymarketcap", sortAsc=False, size=page_size, offset=offset)
+            result = yf.screen(q, sortField="intradaymarketcap", sortAsc=not sort_desc, size=page_size, offset=offset)
             quotes = result.get("quotes", [])
             if not quotes:
                 break
             tickers.extend(qq["symbol"] for qq in quotes if "symbol" in qq)
             offset += page_size
             if len(quotes) < page_size:
-                break  # fewer than a full page means we've exhausted the screener's matches
-        tickers = tickers[:limit]
-        log.info("US screener returned %d tickers (paginated)", len(tickers))
-        return tickers
+                break
+        return tickers[:limit]
     except Exception as e:
-        log.warning("US screener failed (%s) — falling back to %d tickers fetched before failure", e, len(tickers))
+        log.warning("US screener failed for range %s-%s (%s) — returning %d tickers fetched before failure", min_cap, max_cap, e, len(tickers))
         return tickers
+
+
+def us_small_micro_cap(limit: int = 500) -> list[str]:
+    """Small/micro-cap US equities ($50M-$2B)."""
+    tickers = _us_cap_range_screener(50_000_000, 2_000_000_000, limit)
+    log.info("US small/micro-cap screener returned %d tickers", len(tickers))
+    return tickers
+
+
+def us_mid_large_cap(limit: int = 500) -> list[str]:
+    """Mid/large-cap US equities ($2B-$750B) not necessarily in the S&P
+    500 — added because a real portfolio (dividend-focused especially)
+    routinely holds mid-caps, REITs and BDCs that never make the index
+    (e.g. AGNC, ADC, GAIN, CTRE) but are far too large for the
+    small/micro-cap screener above."""
+    tickers = _us_cap_range_screener(2_000_000_000, 750_000_000_000, limit, sort_desc=True)
+    log.info("US mid/large-cap screener returned %d tickers", len(tickers))
+    return tickers
 
 
 def _wikipedia_table(url: str, match: str, symbol_col_candidates: list[str]) -> list[str]:
@@ -276,7 +291,7 @@ def build_universe() -> dict[str, list[str]]:
     """Returns {market_code: [tickers]}. Each leg is independent — one
     source failing does not block the others."""
     universe = {
-        "US": sorted(set(us_small_micro_cap()) | set(sp500_constituents())),
+        "US": sorted(set(us_small_micro_cap()) | set(sp500_constituents()) | set(us_mid_large_cap())),
     }
     time.sleep(1)
     universe["AU"] = asx_constituents()

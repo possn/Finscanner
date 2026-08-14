@@ -182,6 +182,10 @@
     btn.addEventListener("click", () => switchView(btn.dataset.view));
   });
 
+  document.querySelectorAll(".orientation-card[data-goto]").forEach(btn => {
+    btn.addEventListener("click", () => switchView(btn.dataset.goto));
+  });
+
   function marketOf(ticker) {
     if (ticker.endsWith(".AX")) return "AU";
     if (ticker.endsWith(".WA")) return "PL";
@@ -749,6 +753,46 @@
     "AMD", "PLTR", "CRM", "NOW", "SNOW", "SMCI", "ARM", "TSM", "ASML",
   ]);
 
+  // DivTracker and several other portfolio exports use ISO-country-style
+  // suffixes (.FR, .GB, .PT...) instead of the actual Yahoo Finance
+  // exchange suffixes Finscanner's universe is keyed on (.PA, .L, .LS...).
+  // Without this remap, e.g. "AIR.FR" would never match "AIR.PA" even
+  // though it's the same company on the same exchange — remapping first
+  // maximizes real matches against the tracked universe.
+  const TICKER_SUFFIX_REMAP = {
+    ".FR": ".PA",   // France -> Euronext Paris
+    ".GB": ".L",    // UK -> London Stock Exchange
+    ".ES": ".MC",   // Spain -> Madrid
+    ".NL": ".AS",   // Netherlands -> Euronext Amsterdam
+    ".CH": ".SW",   // Switzerland -> SIX Swiss Exchange
+    ".SE": ".ST",   // Sweden -> Stockholm (not currently tracked, but matches cleanly if added later)
+    ".DK": ".CO",   // Denmark -> Copenhagen (not currently tracked)
+    ".PT": ".LS",   // Portugal -> Euronext Lisbon (not currently tracked)
+    ".PL": ".WA",   // Poland -> Warsaw (not currently tracked — see universe.py)
+    ".IT": ".MI",   // Italy -> Borsa Italiana
+  };
+  function normalizeTicker(raw) {
+    const t = raw.trim().toUpperCase();
+    const dot = t.lastIndexOf(".");
+    if (dot === -1) return t;
+    const suffix = t.slice(dot);
+    const mapped = TICKER_SUFFIX_REMAP[suffix];
+    return mapped ? t.slice(0, dot) + mapped : t;
+  }
+
+  function accumulatePosition(portfolio, ticker, qty, value) {
+    const existing = portfolio[ticker];
+    if (!existing) {
+      portfolio[ticker] = { qty: Number.isFinite(qty) ? qty : null, value: Number.isFinite(value) ? value : null };
+      return;
+    }
+    // Same ticker appearing again (multiple purchase lots) — accumulate
+    // rather than overwrite, so a position bought in 4 tranches doesn't
+    // end up recorded as only the last tranche's quantity.
+    if (Number.isFinite(qty)) existing.qty = (existing.qty || 0) + qty;
+    if (Number.isFinite(value)) existing.value = (existing.value || 0) + value;
+  }
+
   function parseCsvPortfolio(text) {
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     if (!lines.length) return {};
@@ -761,14 +805,12 @@
     const portfolio = {};
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(",").map(c => c.trim());
-      const ticker = cols[tickerIdx]?.toUpperCase();
-      if (!ticker) continue;
+      const rawTicker = cols[tickerIdx];
+      if (!rawTicker) continue;
+      const ticker = normalizeTicker(rawTicker);
       const qty = qtyIdx !== -1 ? parseFloat(cols[qtyIdx]) : null;
       const value = valueIdx !== -1 ? parseFloat(cols[valueIdx]) : null;
-      portfolio[ticker] = {
-        qty: Number.isFinite(qty) ? qty : null,
-        value: Number.isFinite(value) ? value : null,
-      };
+      accumulatePosition(portfolio, ticker, qty, value);
     }
     return portfolio;
   }
@@ -778,27 +820,22 @@
     const portfolio = {};
     if (Array.isArray(data)) {
       for (const row of data) {
-        const ticker = (row.ticker || row.symbol || "").toUpperCase();
-        if (!ticker) continue;
+        const rawTicker = row.ticker || row.symbol || "";
+        if (!rawTicker) continue;
+        const ticker = normalizeTicker(rawTicker);
         const qty = Number(row.quantity ?? row.qty ?? row.shares ?? row.units);
         const value = Number(row.value ?? row.amount ?? row.market_value);
-        portfolio[ticker] = {
-          qty: Number.isFinite(qty) ? qty : null,
-          value: Number.isFinite(value) ? value : null,
-        };
+        accumulatePosition(portfolio, ticker, qty, value);
       }
     } else if (data && typeof data === "object") {
-      for (const [ticker, v] of Object.entries(data)) {
-        const upper = ticker.toUpperCase();
+      for (const [rawTicker, v] of Object.entries(data)) {
+        const ticker = normalizeTicker(rawTicker);
         if (typeof v === "number") {
-          portfolio[upper] = { qty: v, value: null };
+          accumulatePosition(portfolio, ticker, v, null);
         } else if (v && typeof v === "object") {
           const qty = Number(v.quantity ?? v.qty ?? v.shares);
           const value = Number(v.value ?? v.amount);
-          portfolio[upper] = {
-            qty: Number.isFinite(qty) ? qty : null,
-            value: Number.isFinite(value) ? value : null,
-          };
+          accumulatePosition(portfolio, ticker, qty, value);
         }
       }
     }
@@ -813,12 +850,19 @@
         const portfolio = file.name.toLowerCase().endsWith(".json")
           ? parseJsonPortfolio(text)
           : parseCsvPortfolio(text);
-        if (!Object.keys(portfolio).length) {
+        const tickers = Object.keys(portfolio);
+        if (!tickers.length) {
           alert("Não encontrei nenhuma posição válida no ficheiro.");
           return;
         }
         lsSet(LS_PORTFOLIO, portfolio);
+        const universeTickers = new Set((state.data?.stocks || []).map(r => r.ticker));
+        const matched = tickers.filter(t => universeTickers.has(t)).length;
+        const missed = tickers.length - matched;
         renderPortfolio();
+        if (missed > 0) {
+          alert(`Importado: ${tickers.length} posições.\n${matched} encontradas no universo rastreado, ${missed} não encontradas (fora do universo — ver lista completa na secção de exposição).`);
+        }
       } catch (e) {
         alert("Erro a ler o ficheiro: " + e.message);
         console.error(e);
@@ -852,8 +896,16 @@
 
     const valued = entries.filter(e => e.val != null && e.val > 0);
     const totalValue = valued.reduce((s, e) => s + e.val, 0);
-    const unmatchedCount = entries.filter(e => !e.row).length;
+    const unmatched = entries.filter(e => !e.row);
+    const unmatchedCount = unmatched.length;
     const noValueCount = entries.filter(e => e.row && e.val == null).length;
+
+    const unmatchedListHtml = unmatchedCount ? `
+      <div class="exposure-block">
+        <h3 class="exposure-title">Fora do universo rastreado (${unmatchedCount})</h3>
+        <p class="unmatched-note">Estes tickers não constam do universo atual do Finscanner (~1550 ações/ETFs EUA/AU/UK/Europa) — podem ser mercados ainda não cobertos, ADRs, ou sufixo diferente do Yahoo Finance.</p>
+        <p class="unmatched-note" style="font-family:var(--font-mono, monospace);word-break:break-word;">${unmatched.map(e => escapeHtml(e.ticker)).join(", ")}</p>
+      </div>` : "";
 
     if (!valued.length) {
       els.exposurePanel.innerHTML = `
@@ -863,18 +915,22 @@
             (${unmatchedCount} ticker(s) fora do universo rastreado, ${noValueCount} sem preço/quantidade/valor).
             A lista de posições abaixo continua a mostrar o que temos por ticker.
           </p>
-        </div>`;
+        </div>` + unmatchedListHtml;
       return;
     }
 
     // Sector breakdown (Yahoo Finance's own sector taxonomy — Technology,
     // Consumer Cyclical, Financial Services, Basic Materials, etc.)
     const bySector = {};
+    const byRegion = {};
     for (const e of valued) {
       const sector = e.row ? (e.row.sector || "Sem setor / ETF") : "Fora do universo rastreado";
       bySector[sector] = (bySector[sector] || 0) + e.val;
+      const region = e.row ? (e.row.region ? regionLabel(e.row.region) : "Região desconhecida") : "Fora do universo rastreado";
+      byRegion[region] = (byRegion[region] || 0) + e.val;
     }
     const sectorRows = Object.entries(bySector).sort((a, b) => b[1] - a[1]);
+    const regionRows = Object.entries(byRegion).sort((a, b) => b[1] - a[1]);
 
     // AI exposure: direct AI-flagged equities + weighted ETF ai_exposure_pct
     const aiValue = valued.reduce((sum, e) => {
@@ -886,33 +942,39 @@
     }, 0);
     const aiPct = (aiValue / totalValue) * 100;
 
-    const sectorBars = sectorRows.map(([sector, val]) => {
+    const barRow = (label, val, cls = "") => {
       const pct = (val / totalValue) * 100;
       return `
         <div class="exposure-row">
-          <span class="exposure-label">${sector}</span>
-          <span class="exposure-bar-track"><span class="exposure-bar-fill" style="width:${pct.toFixed(1)}%"></span></span>
+          <span class="exposure-label">${escapeHtml(label)}</span>
+          <span class="exposure-bar-track"><span class="exposure-bar-fill ${cls}" style="width:${pct.toFixed(1)}%"></span></span>
           <span class="exposure-pct">${pct.toFixed(1)}%</span>
         </div>`;
-    }).join("");
+    };
 
     els.exposurePanel.innerHTML = `
       <div class="exposure-block">
         <h3 class="exposure-title">Exposição por setor (ponderada por valor)</h3>
-        ${sectorBars}
-        <div class="exposure-row" style="margin-top:0.5rem;">
-          <span class="exposure-label">Exposição a IA</span>
-          <span class="exposure-bar-track"><span class="exposure-bar-fill ai" style="width:${Math.min(aiPct,100).toFixed(1)}%"></span></span>
-          <span class="exposure-pct">${aiPct.toFixed(1)}%</span>
-        </div>
+        ${sectorRows.map(([sector, val]) => barRow(sector, val)).join("")}
+      </div>
+      <div class="exposure-block">
+        <h3 class="exposure-title">Exposição geográfica (ponderada por valor)</h3>
+        ${regionRows.map(([region, val]) => barRow(region, val, "ai")).join("")}
+      </div>
+      <div class="exposure-block">
+        <h3 class="exposure-title">Exposição a IA</h3>
+        ${barRow("IA (direta + via ETFs)", aiValue)}
+        <p class="unmatched-note">Direta (ações da lista fixa de nomes ligados a IA) + indireta via <code>ai_exposure_pct</code> de ETFs que possuis; não faz look-through a fundos sem essa métrica.</p>
+      </div>
+      <div class="exposure-block">
         <p class="unmatched-note">
           Valor total considerado: ${totalValue.toLocaleString("pt-PT", {maximumFractionDigits:0})}
           (${valued.length} de ${entries.length} posições com valor calculável).
-          ${unmatchedCount ? `${unmatchedCount} ticker(s) fora do universo rastreado — sem setor/score.` : ""}
+          ${unmatchedCount ? `${unmatchedCount} ticker(s) fora do universo rastreado — ver lista abaixo.` : ""}
           ${noValueCount ? `${noValueCount} posição(ões) sem quantidade nem valor explícito — não entram no peso.` : ""}
-          Exposição IA é direta (ações da lista fixa de nomes ligados a IA) + indireta via <code>ai_exposure_pct</code> de ETFs que possuis; não faz look-through a fundos que não tenham essa métrica.
         </p>
-      </div>`;
+      </div>
+      ${unmatchedListHtml}`;
   }
 
   // ---------- Portfolio view ----------
