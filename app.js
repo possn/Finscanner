@@ -33,6 +33,9 @@
     themeToggle: document.getElementById("theme-toggle"),
     themeIcon: document.getElementById("theme-icon"),
     themeLabel: document.getElementById("theme-label"),
+    marketStats: document.getElementById("market-stats"),
+    insightStrip: document.getElementById("insight-strip"),
+    resultCount: document.getElementById("result-count"),
   };
 
   const VIEW_META = {
@@ -159,6 +162,7 @@
       if (!res.ok) throw new Error("HTTP " + res.status);
       state.data = await res.json();
       if (state.activeView === "stocks") updateGeneratedAt();
+      renderMarketOverview();
       applyFilters();
     } catch (e) {
       els.list.innerHTML = `<p class="empty-state">Não foi possível carregar data/stocks.json.<br>Corre o pipeline (scripts/run.py) pelo menos uma vez.</p>`;
@@ -228,6 +232,45 @@
       </div>`;
   }
 
+
+  function scoreBand(score) {
+    if (score == null) return { label: "Sem classificação", cls: "neutral" };
+    if (score >= 75) return { label: "Excelente", cls: "excellent" };
+    if (score >= 65) return { label: "Atrativa", cls: "good" };
+    if (score >= 50) return { label: "Neutra", cls: "neutral" };
+    return { label: "Frágil", cls: "weak" };
+  }
+
+  function renderMarketOverview() {
+    if (!state.data?.stocks?.length) return;
+    const rows = state.data.stocks;
+    const scored = rows.filter(r => Number.isFinite(r.score));
+    const sortedScores = scored.map(r => r.score).sort((a,b)=>a-b);
+    const median = sortedScores.length ? sortedScores[Math.floor(sortedScores.length/2)] : null;
+    const quality = scored.filter(r => r.score >= 70).length;
+    els.marketStats.innerHTML = `
+      <div class="hero-stat"><span>Universo</span><strong>${rows.length}</strong></div>
+      <div class="hero-stat"><span>Score ≥ 70</span><strong>${quality}</strong></div>
+      <div class="hero-stat"><span>Score mediano</span><strong>${median == null ? "—" : median.toFixed(1)}</strong></div>`;
+
+    const candidates = scored
+      .filter(r => r.zombie !== "yes" && r.data_confidence !== "low")
+      .sort((a,b) => (b.score ?? 0) - (a.score ?? 0))
+      .slice(0, 3);
+    els.insightStrip.innerHTML = candidates.map((r, i) => {
+      const band = scoreBand(r.score);
+      const why = i === 0 ? "Maior score do universo filtrado" :
+        (r.profitability_pct >= 70 ? "Rentabilidade acima da maioria" :
+        (r.stability_pct >= 70 ? "Estabilidade operacional elevada" : "Perfil composto equilibrado"));
+      return `<button class="insight-card" data-ticker="${r.ticker}">
+        <span class="insight-card__rank">0${i+1}</span>
+        <span class="insight-card__body"><strong>${r.ticker}</strong><small>${r.name || ""}</small><em>${why}</em></span>
+        <span class="score-pill ${band.cls}">${Math.round(r.score)}</span>
+      </button>`;
+    }).join("");
+    els.insightStrip.querySelectorAll(".insight-card").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
+  }
+
   function applyFilters() {
     if (!state.data) return;
     const q = els.search.value.trim().toUpperCase();
@@ -253,6 +296,7 @@
     });
 
     state.filtered = rows;
+    if (els.resultCount) els.resultCount.textContent = `${rows.length} resultados`;
     render(els.list, state.filtered);
   }
 
@@ -280,27 +324,36 @@
   }
 
   function cardHtml(r) {
-    const stampClass = r.score == null ? "stamp na" : "stamp";
-    const stampText = r.score == null ? "N/A" : Math.round(r.score);
     const flags = [];
-    if (r.zombie === "yes") flags.push(`<span class="badge zombie">zombie</span>`);
-    if (typeof r.insider_form4_count_30d === "number" && r.insider_form4_count_30d > 0) {
-      flags.push(`<span class="badge insider">${r.insider_form4_count_30d} form4 · 30d</span>`);
-    }
+    if (r.zombie === "yes") flags.push(`<span class="badge zombie">risco financeiro</span>`);
     if (r.data_confidence === "low") flags.push(`<span class="badge low-confidence">dados limitados</span>`);
     if (isOwned(r.ticker)) flags.push(`<span class="badge owned">na carteira</span>`);
-
     const starred = isWatched(r.ticker);
+    const band = scoreBand(r.score);
+    const metrics = [
+      ["Qualidade", r.profitability_pct],
+      ["Balanço", r.leverage_pct],
+      ["Valor", r.value_pct],
+      ["Estabilidade", r.stability_pct],
+    ];
     return `
-      <article class="card" data-ticker="${r.ticker}" tabindex="0">
-        <div class="${stampClass}">${stampText}</div>
-        <div class="card-main">
-          <div class="card-ticker">${r.ticker} <button class="star-btn ${starred ? 'is-active' : ''}" data-ticker="${r.ticker}" aria-label="Watchlist">${starred ? "★" : "☆"}</button></div>
-          <div class="card-name">${r.name || "—"}</div>
+      <article class="card stock-card" data-ticker="${r.ticker}" tabindex="0">
+        <div class="stock-card__identity">
+          <div class="company-mark">${r.ticker.replace(/\..*/, '').slice(0,2)}</div>
+          <div class="card-main">
+            <div class="card-ticker">${r.ticker} <button class="star-btn ${starred ? 'is-active' : ''}" data-ticker="${r.ticker}" aria-label="Watchlist">${starred ? "★" : "☆"}</button></div>
+            <div class="card-name">${r.name || "—"}</div>
+            <div class="card-sector">${r.sector || "Sem setor"} · ${marketOf(r.ticker)}</div>
+          </div>
         </div>
-        <div class="card-flags">${flags.join("")}</div>
-      </article>
-    `;
+        <div class="metric-ribbon">${metrics.map(([label,val]) => `<div><span>${label}</span><strong>${val == null ? "—" : Math.round(val)}</strong></div>`).join("")}</div>
+        <div class="stock-card__verdict">
+          <span class="score-pill ${band.cls}">${r.score == null ? "—" : Math.round(r.score)}</span>
+          <strong>${band.label}</strong>
+          <small>${fmtCap(r.market_cap)}</small>
+          <div class="card-flags">${flags.join("")}</div>
+        </div>
+      </article>`;
   }
 
   // ---------- score history sparkline (plain <canvas>, no chart library) ----------
