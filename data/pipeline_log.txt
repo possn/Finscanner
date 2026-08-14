@@ -1,76 +1,61 @@
-2026-08-14 13:37:23,532 INFO universe: US screener returned 309 tickers (paginated)
-2026-08-14 13:37:23,665 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/List_of_S%26P_500_companies -> HTTP 200, 568355 bytes
-2026-08-14 13:37:23,711 INFO universe: https://en.wikipedia.org/wiki/List_of_S%26P_500_companies: pd.read_html found 2 table(s) total (hint pattern was 'Symbol')
-2026-08-14 13:37:23,713 INFO universe: https://en.wikipedia.org/wiki/List_of_S%26P_500_companies: table[0] columns=['Symbol', 'Security', 'GICS Sector', 'GICS Sub-Industry', 'Headquarters Location', 'Date added', 'CIK', 'Founded'] -> matched column 'Symbol', 503 symbols, e.g. ['MMM', 'AOS', 'ABT', 'ABBV', 'ACN']
-2026-08-14 13:37:24,829 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/S%26P/ASX_200 -> HTTP 200, 277475 bytes
-2026-08-14 13:37:24,854 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: pd.read_html found 15 table(s) total (hint pattern was 'Code')
-2026-08-14 13:37:24,854 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[0] columns=['0', '1'] -> no match
-2026-08-14 13:37:24,854 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[1] columns=['Australian 200 (AP)', 'Unnamed: 1'] -> no match
-2026-08-14 13:37:24,855 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[2] columns=['Code', 'Company', 'Sector', 'Market Capitalisation (A$)', 'Headquarters'] -> matched column 'Code', 200 symbols, e.g. ['360', '4DX', 'A2M', 'AAI', 'AFI']
-2026-08-14 13:37:26,199 INFO universe: Wikipedia GET https://pl.wikipedia.org/wiki/WIG20 -> HTTP 200, 211328 bytes
-2026-08-14 13:37:26,206 INFO universe: https://pl.wikipedia.org/wiki/WIG20: pd.read_html found 3 table(s) total (hint pattern was 'Ticker')
-2026-08-14 13:37:26,206 INFO universe: https://pl.wikipedia.org/wiki/WIG20: table[0] columns=['0', '1'] -> no match
-2026-08-14 13:37:26,206 INFO universe: https://pl.wikipedia.org/wiki/WIG20: table[1] columns=['0', '1'] -> no match
-2026-08-14 13:37:26,206 INFO universe: https://pl.wikipedia.org/wiki/WIG20: table[2] columns=['0', '1'] -> no match
-2026-08-14 13:37:26,206 WARNING universe: No table on https://pl.wikipedia.org/wiki/WIG20 had a column matching ['Ticker', 'Symbol', 'Skrót', 'Kod']
-2026-08-14 13:37:27,347 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_100_Index -> HTTP 200, 909353 bytes
-2026-08-14 13:37:27,395 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: pd.read_html found 24 table(s) total (hint pattern was 'Ticker')
-2026-08-14 13:37:27,396 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[0] columns=['0', '1'] -> no match
-2026-08-14 13:37:27,396 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[1] columns=['ICB Supersector', 'Marketcap (£ billion)[28]'] -> no match
-2026-08-14 13:37:27,396 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[2] columns=['0', '1'] -> no match
-2026-08-14 13:37:27,396 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[3] columns=['0', '1'] -> no match
-2026-08-14 13:37:27,396 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[4] columns=['0', '1', '2'] -> no match
-2026-08-14 13:37:27,396 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[5] columns=["('Year', 'Year')", "('Closing level', 'Closing level')", "('Change in index', '(points)')", "('Change in index', '(%)')"] -> no match
-2026-08-14 13:37:27,396 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[6] columns=['Company', 'Ticker', 'FTSE industry classification benchmark sector[39]'] -> matched column 'Ticker', 100 symbols, e.g. ['III', 'ABDN', 'ADM', 'AAF', 'ALW']
-2026-08-14 13:37:27,397 INFO universe: US: 812 tickers
-2026-08-14 13:37:27,398 INFO universe: AU: 200 tickers
-2026-08-14 13:37:27,398 INFO universe: PL: 0 tickers
-2026-08-14 13:37:27,398 INFO universe: UK: 100 tickers
-2026-08-14 13:37:27,398 INFO run: Total universe: 1112 tickers
-2026-08-14 13:37:53,983 INFO fundamentals: fetched 50/1112
-2026-08-14 13:38:20,920 INFO fundamentals: fetched 100/1112
-2026-08-14 13:38:50,192 INFO fundamentals: fetched 150/1112
-2026-08-14 13:39:01,508 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BT.A.L"}}}
-2026-08-14 13:39:16,683 INFO fundamentals: fetched 200/1112
-2026-08-14 13:39:45,314 INFO fundamentals: fetched 250/1112
-2026-08-14 13:40:15,409 INFO fundamentals: fetched 300/1112
-2026-08-14 13:40:42,222 INFO fundamentals: fetched 350/1112
-2026-08-14 13:41:09,301 INFO fundamentals: fetched 400/1112
-2026-08-14 13:41:35,468 INFO fundamentals: fetched 450/1112
-2026-08-14 13:42:05,605 INFO fundamentals: fetched 500/1112
-2026-08-14 13:42:09,939 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFL.AX"}}}
-2026-08-14 13:42:31,453 INFO fundamentals: fetched 550/1112
-2026-08-14 13:42:57,725 INFO fundamentals: fetched 600/1112
-2026-08-14 13:43:24,276 INFO fundamentals: fetched 650/1112
-2026-08-14 13:43:51,703 INFO fundamentals: fetched 700/1112
-2026-08-14 13:43:53,967 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NSR.AX"}}}
-2026-08-14 13:44:18,876 INFO fundamentals: fetched 750/1112
-2026-08-14 13:44:46,481 INFO fundamentals: fetched 800/1112
-2026-08-14 13:45:14,694 INFO fundamentals: fetched 850/1112
-2026-08-14 13:45:41,420 INFO fundamentals: fetched 900/1112
-2026-08-14 13:46:10,121 INFO fundamentals: fetched 950/1112
-2026-08-14 13:46:38,548 INFO fundamentals: fetched 1000/1112
-2026-08-14 13:47:04,787 INFO fundamentals: fetched 1050/1112
-2026-08-14 13:47:29,101 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: XYX.AX"}}}
-2026-08-14 13:47:32,267 INFO fundamentals: fetched 1100/1112
-2026-08-14 13:47:39,583 INFO insiders: SEC ticker->CIK map loaded with 10396 entries
-2026-08-14 13:50:48,266 INFO insiders: insider check 50/812 (resolved so far: 43)
-2026-08-14 13:54:41,841 INFO insiders: insider check 100/812 (resolved so far: 85)
-2026-08-14 13:57:18,575 INFO insiders: insider check 150/812 (resolved so far: 132)
-2026-08-14 14:00:40,156 INFO insiders: insider check 200/812 (resolved so far: 175)
-2026-08-14 14:04:25,433 INFO insiders: insider check 250/812 (resolved so far: 220)
-2026-08-14 14:07:53,460 INFO insiders: insider check 300/812 (resolved so far: 264)
-2026-08-14 14:10:48,912 INFO insiders: insider check 350/812 (resolved so far: 304)
-2026-08-14 14:13:38,211 INFO insiders: insider check 400/812 (resolved so far: 352)
-2026-08-14 14:16:23,580 INFO insiders: insider check 450/812 (resolved so far: 393)
-2026-08-14 14:20:22,327 INFO insiders: insider check 500/812 (resolved so far: 436)
-2026-08-14 14:22:58,250 INFO insiders: insider check 550/812 (resolved so far: 482)
-2026-08-14 14:26:36,165 INFO insiders: insider check 600/812 (resolved so far: 526)
-2026-08-14 14:30:10,229 INFO insiders: insider check 650/812 (resolved so far: 566)
-2026-08-14 14:34:12,401 INFO insiders: insider check 700/812 (resolved so far: 606)
-2026-08-14 14:38:15,955 INFO insiders: insider check 750/812 (resolved so far: 649)
-2026-08-14 14:42:04,004 INFO insiders: insider check 800/812 (resolved so far: 693)
-2026-08-14 14:42:55,450 INFO insiders: insider annotate done: 703/812 tickers resolved to a CIK+filing count
-2026-08-14 14:42:55,493 INFO run: Wrote 1112 rows to /home/runner/work/Finscanner/Finscanner/scripts/../data/stocks.json
-2026-08-14 14:42:56,250 INFO run: Wrote metals data to /home/runner/work/Finscanner/Finscanner/scripts/../data/metals.json
-2026-08-14 14:42:56,254 INFO history: Wrote history for 1106 tickers to /home/runner/work/Finscanner/Finscanner/scripts/../data/history.json
+2026-08-14 12:18:57,799 INFO universe: US screener returned 250 tickers
+2026-08-14 12:18:58,840 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/S%26P/ASX_200 -> HTTP 200, 277480 bytes
+2026-08-14 12:18:58,871 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: pd.read_html found 15 table(s) total (hint pattern was 'Code')
+2026-08-14 12:18:58,872 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[0] columns=['0', '1'] -> no match
+2026-08-14 12:18:58,872 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[1] columns=['Australian 200 (AP)', 'Unnamed: 1'] -> no match
+2026-08-14 12:18:58,873 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: table[2] columns=['Code', 'Company', 'Sector', 'Market Capitalisation (A$)', 'Headquarters'] -> matched column 'Code', 200 symbols, e.g. ['360', '4DX', 'A2M', 'AAI', 'AFI']
+2026-08-14 12:18:59,908 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/WIG20 -> HTTP 200, 144932 bytes
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: pd.read_html found 14 table(s) total (hint pattern was 'Ticker')
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[0] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[1] columns=['Year', 'Closing level', 'Change in index in points', 'Change in index in\xa0%'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[2] columns=['vteMajor European stock market indices', 'vteMajor European stock market indices.1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[3] columns=['vteStock market indices', 'vteStock market indices.1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[4] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[5] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[6] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[7] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[8] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[9] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[10] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[11] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[12] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,923 INFO universe: https://en.wikipedia.org/wiki/WIG20: table[13] columns=['0', '1'] -> no match
+2026-08-14 12:18:59,924 WARNING universe: No table on https://en.wikipedia.org/wiki/WIG20 had a column matching ['Ticker', 'Symbol', 'WSE ticker', 'Code']
+2026-08-14 12:19:00,964 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_100_Index -> HTTP 200, 909319 bytes
+2026-08-14 12:19:01,022 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: pd.read_html found 24 table(s) total (hint pattern was 'Ticker')
+2026-08-14 12:19:01,022 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[0] columns=['0', '1'] -> no match
+2026-08-14 12:19:01,023 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[1] columns=['ICB Supersector', 'Marketcap (£ billion)[28]'] -> no match
+2026-08-14 12:19:01,023 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[2] columns=['0', '1'] -> no match
+2026-08-14 12:19:01,023 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[3] columns=['0', '1'] -> no match
+2026-08-14 12:19:01,023 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[4] columns=['0', '1', '2'] -> no match
+2026-08-14 12:19:01,023 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[5] columns=["('Year', 'Year')", "('Closing level', 'Closing level')", "('Change in index', '(points)')", "('Change in index', '(%)')"] -> no match
+2026-08-14 12:19:01,023 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: table[6] columns=['Company', 'Ticker', 'FTSE industry classification benchmark sector[39]'] -> matched column 'Ticker', 100 symbols, e.g. ['III', 'ABDN', 'ADM', 'AAF', 'ALW']
+2026-08-14 12:19:01,024 INFO universe: US: 250 tickers
+2026-08-14 12:19:01,024 INFO universe: AU: 200 tickers
+2026-08-14 12:19:01,024 INFO universe: PL: 0 tickers
+2026-08-14 12:19:01,025 INFO universe: UK: 100 tickers
+2026-08-14 12:19:01,025 INFO run: Total universe: 550 tickers
+2026-08-14 12:19:23,841 INFO fundamentals: fetched 50/550
+2026-08-14 12:19:45,515 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BT.A.L"}}}
+2026-08-14 12:19:46,400 INFO fundamentals: fetched 100/550
+2026-08-14 12:20:08,546 INFO fundamentals: fetched 150/550
+2026-08-14 12:20:30,813 INFO fundamentals: fetched 200/550
+2026-08-14 12:20:51,891 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFL.AX"}}}
+2026-08-14 12:20:53,186 INFO fundamentals: fetched 250/550
+2026-08-14 12:21:15,661 INFO fundamentals: fetched 300/550
+2026-08-14 12:21:31,597 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NSR.AX"}}}
+2026-08-14 12:21:37,697 INFO fundamentals: fetched 350/550
+2026-08-14 12:21:59,732 INFO fundamentals: fetched 400/550
+2026-08-14 12:22:23,298 INFO fundamentals: fetched 450/550
+2026-08-14 12:22:45,214 INFO fundamentals: fetched 500/550
+2026-08-14 12:23:02,954 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: XYX.AX"}}}
+2026-08-14 12:23:07,441 INFO fundamentals: fetched 550/550
+2026-08-14 12:23:07,737 INFO insiders: SEC ticker->CIK map loaded with 10387 entries
+2026-08-14 12:26:11,572 INFO insiders: insider check 50/250 (resolved so far: 49)
+2026-08-14 12:29:07,820 INFO insiders: insider check 100/250 (resolved so far: 95)
+2026-08-14 12:32:48,241 INFO insiders: insider check 150/250 (resolved so far: 141)
+2026-08-14 12:35:34,539 INFO insiders: insider check 200/250 (resolved so far: 187)
+2026-08-14 12:37:41,327 INFO insiders: insider check 250/250 (resolved so far: 234)
+2026-08-14 12:37:41,328 INFO insiders: insider annotate done: 234/250 tickers resolved to a CIK+filing count
+2026-08-14 12:37:41,345 INFO run: Wrote 550 rows to /home/runner/work/Finscanner/Finscanner/scripts/../data/stocks.json
+2026-08-14 12:37:41,971 INFO run: Wrote metals data to /home/runner/work/Finscanner/Finscanner/scripts/../data/metals.json
