@@ -109,10 +109,13 @@ def asx_constituents() -> list[str]:
 
 
 def wig_constituents() -> list[str]:
+    # The English Wikipedia WIG20 article does not carry a constituents
+    # table (only historical performance + navboxes) — confirmed via
+    # pipeline_log.txt on a real run, not assumed. The Polish article does.
     raw = _wikipedia_table(
-        "https://en.wikipedia.org/wiki/WIG20",
+        "https://pl.wikipedia.org/wiki/WIG20",
         match="Ticker",
-        symbol_col_candidates=["Ticker", "Symbol", "WSE ticker", "Code"],
+        symbol_col_candidates=["Ticker", "Symbol", "Skrót", "Kod"],
     )
     return [f"{s}.WA" for s in raw]
 
