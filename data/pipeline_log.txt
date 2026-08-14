@@ -1,40 +1,40 @@
-2026-08-14 11:35:44,889 INFO universe: US screener returned 250 tickers
-2026-08-14 11:35:46,052 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/S%26P/ASX_200 -> HTTP 200, 277480 bytes
-2026-08-14 11:35:46,068 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: pd.read_html found 1 table(s) matching 'Code'
-2026-08-14 11:35:46,069 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: first matching table columns = ['Code', 'Company', 'Sector', 'Market Capitalisation (A$)', 'Headquarters']
-2026-08-14 11:35:46,069 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: extracted 200 raw symbols, e.g. ['360', '4DX', 'A2M', 'AAI', 'AFI']
-2026-08-14 11:35:47,193 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/WIG20 -> HTTP 200, 144919 bytes
-2026-08-14 11:35:47,196 WARNING universe: Wikipedia fetch failed for https://en.wikipedia.org/wiki/WIG20 (ImportError: `Import html5lib` failed.  Use pip or conda to install the html5lib package.)
-2026-08-14 11:35:48,315 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_100_Index -> HTTP 200, 909319 bytes
-2026-08-14 11:35:48,343 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: pd.read_html found 1 table(s) matching 'Ticker'
-2026-08-14 11:35:48,343 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: first matching table columns = ['Company', 'Ticker', 'FTSE industry classification benchmark sector[39]']
-2026-08-14 11:35:48,343 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: extracted 100 raw symbols, e.g. ['III', 'ABDN', 'ADM', 'AAF', 'ALW']
-2026-08-14 11:35:48,344 INFO universe: US: 250 tickers
-2026-08-14 11:35:48,344 INFO universe: AU: 200 tickers
-2026-08-14 11:35:48,344 INFO universe: PL: 0 tickers
-2026-08-14 11:35:48,344 INFO universe: UK: 100 tickers
-2026-08-14 11:35:48,344 INFO run: Total universe: 550 tickers
-2026-08-14 11:36:20,042 INFO fundamentals: fetched 50/550
-2026-08-14 11:36:51,135 INFO fundamentals: fetched 100/550
-2026-08-14 11:36:51,411 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BT.A.L"}}}
-2026-08-14 11:37:23,188 INFO fundamentals: fetched 150/550
-2026-08-14 11:37:54,681 INFO fundamentals: fetched 200/550
-2026-08-14 11:38:23,671 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFL.AX"}}}
-2026-08-14 11:38:26,257 INFO fundamentals: fetched 250/550
-2026-08-14 11:38:58,572 INFO fundamentals: fetched 300/550
-2026-08-14 11:39:21,602 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NSR.AX"}}}
-2026-08-14 11:39:32,697 INFO fundamentals: fetched 350/550
-2026-08-14 11:40:04,135 INFO fundamentals: fetched 400/550
-2026-08-14 11:40:35,643 INFO fundamentals: fetched 450/550
-2026-08-14 11:41:08,395 INFO fundamentals: fetched 500/550
-2026-08-14 11:41:34,849 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: XYX.AX"}}}
-2026-08-14 11:41:40,541 INFO fundamentals: fetched 550/550
-2026-08-14 11:41:40,833 INFO insiders: SEC ticker->CIK map loaded with 10387 entries
-2026-08-14 11:43:24,738 INFO insiders: insider check 50/250 (resolved so far: 49)
-2026-08-14 11:44:30,609 INFO insiders: insider check 100/250 (resolved so far: 96)
-2026-08-14 11:46:24,898 INFO insiders: insider check 150/250 (resolved so far: 141)
-2026-08-14 11:47:59,735 INFO insiders: insider check 200/250 (resolved so far: 188)
-2026-08-14 11:49:55,772 INFO insiders: insider check 250/250 (resolved so far: 235)
-2026-08-14 11:49:55,772 INFO insiders: insider annotate done: 235/250 tickers resolved to a CIK+filing count
-2026-08-14 11:49:55,783 INFO run: Wrote 550 rows to /home/runner/work/Finscanner/Finscanner/scripts/../data/stocks.json
-2026-08-14 11:49:57,329 INFO run: Wrote metals data to /home/runner/work/Finscanner/Finscanner/scripts/../data/metals.json
+2026-08-14 11:55:31,924 INFO universe: US screener returned 250 tickers
+2026-08-14 11:55:32,964 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/S%26P/ASX_200 -> HTTP 200, 277480 bytes
+2026-08-14 11:55:32,986 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: pd.read_html found 1 table(s) matching 'Code'
+2026-08-14 11:55:32,987 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: first matching table columns = ['Code', 'Company', 'Sector', 'Market Capitalisation (A$)', 'Headquarters']
+2026-08-14 11:55:32,988 INFO universe: https://en.wikipedia.org/wiki/S%26P/ASX_200: extracted 200 raw symbols, e.g. ['360', '4DX', 'A2M', 'AAI', 'AFI']
+2026-08-14 11:55:34,106 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/WIG20 -> HTTP 200, 144932 bytes
+2026-08-14 11:55:34,264 WARNING universe: Wikipedia fetch failed for https://en.wikipedia.org/wiki/WIG20 (ValueError: No tables found matching pattern 'Ticker')
+2026-08-14 11:55:35,305 INFO universe: Wikipedia GET https://en.wikipedia.org/wiki/FTSE_100_Index -> HTTP 200, 909319 bytes
+2026-08-14 11:55:35,343 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: pd.read_html found 1 table(s) matching 'Ticker'
+2026-08-14 11:55:35,343 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: first matching table columns = ['Company', 'Ticker', 'FTSE industry classification benchmark sector[39]']
+2026-08-14 11:55:35,343 INFO universe: https://en.wikipedia.org/wiki/FTSE_100_Index: extracted 100 raw symbols, e.g. ['III', 'ABDN', 'ADM', 'AAF', 'ALW']
+2026-08-14 11:55:35,345 INFO universe: US: 250 tickers
+2026-08-14 11:55:35,345 INFO universe: AU: 200 tickers
+2026-08-14 11:55:35,345 INFO universe: PL: 0 tickers
+2026-08-14 11:55:35,345 INFO universe: UK: 100 tickers
+2026-08-14 11:55:35,345 INFO run: Total universe: 550 tickers
+2026-08-14 11:55:58,109 INFO fundamentals: fetched 50/550
+2026-08-14 11:56:19,508 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: BT.A.L"}}}
+2026-08-14 11:56:20,244 INFO fundamentals: fetched 100/550
+2026-08-14 11:56:42,884 INFO fundamentals: fetched 150/550
+2026-08-14 11:57:04,786 INFO fundamentals: fetched 200/550
+2026-08-14 11:57:26,136 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: IFL.AX"}}}
+2026-08-14 11:57:27,302 INFO fundamentals: fetched 250/550
+2026-08-14 11:57:49,853 INFO fundamentals: fetched 300/550
+2026-08-14 11:58:06,044 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: NSR.AX"}}}
+2026-08-14 11:58:12,248 INFO fundamentals: fetched 350/550
+2026-08-14 11:58:34,293 INFO fundamentals: fetched 400/550
+2026-08-14 11:58:56,633 INFO fundamentals: fetched 450/550
+2026-08-14 11:59:19,273 INFO fundamentals: fetched 500/550
+2026-08-14 11:59:37,362 ERROR yfinance: HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: XYX.AX"}}}
+2026-08-14 11:59:41,684 INFO fundamentals: fetched 550/550
+2026-08-14 11:59:41,973 INFO insiders: SEC ticker->CIK map loaded with 10387 entries
+2026-08-14 12:02:32,091 INFO insiders: insider check 50/250 (resolved so far: 49)
+2026-08-14 12:06:08,516 INFO insiders: insider check 100/250 (resolved so far: 92)
+2026-08-14 12:08:54,124 INFO insiders: insider check 150/250 (resolved so far: 139)
+2026-08-14 12:11:39,061 INFO insiders: insider check 200/250 (resolved so far: 185)
+2026-08-14 12:14:51,095 INFO insiders: insider check 250/250 (resolved so far: 232)
+2026-08-14 12:14:51,096 INFO insiders: insider annotate done: 232/250 tickers resolved to a CIK+filing count
+2026-08-14 12:14:51,114 INFO run: Wrote 550 rows to /home/runner/work/Finscanner/Finscanner/scripts/../data/stocks.json
+2026-08-14 12:14:51,753 INFO run: Wrote metals data to /home/runner/work/Finscanner/Finscanner/scripts/../data/metals.json
