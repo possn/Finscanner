@@ -21,7 +21,10 @@ import pandas as pd
 import requests
 import yfinance as yf
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+# Logging is configured centrally by run.py (so all module logs land in
+# the committed data/pipeline_log.txt). When this module is run directly
+# in isolation, output falls back to Python's default "no handlers"
+# behaviour — add a handler yourself if running standalone.
 log = logging.getLogger("universe")
 
 HEADERS = {"User-Agent": "Finscanner/0.1 (personal research tool; contact: set-your-email-here)"}
@@ -65,15 +68,22 @@ def us_small_micro_cap(limit: int = 400) -> list[str]:
 
 def _wikipedia_table(url: str, match: str, symbol_col_candidates: list[str]) -> list[str]:
     try:
-        tables = pd.read_html(requests.get(url, headers=HEADERS, timeout=20).text, match=match)
+        resp = requests.get(url, headers=HEADERS, timeout=20)
+        log.info("Wikipedia GET %s -> HTTP %d, %d bytes", url, resp.status_code, len(resp.content))
+        resp.raise_for_status()
+        tables = pd.read_html(resp.text, match=match)
+        log.info("%s: pd.read_html found %d table(s) matching %r", url, len(tables), match)
         df = tables[0]
+        log.info("%s: first matching table columns = %s", url, list(df.columns))
         col = next((c for c in df.columns if c in symbol_col_candidates), None)
         if col is None:
-            log.warning("No symbol column found in table at %s (columns=%s)", url, list(df.columns))
+            log.warning("No symbol column found in table at %s (columns=%s, looked for=%s)", url, list(df.columns), symbol_col_candidates)
             return []
-        return [str(s).strip() for s in df[col].dropna().tolist()]
+        vals = [str(s).strip() for s in df[col].dropna().tolist()]
+        log.info("%s: extracted %d raw symbols, e.g. %s", url, len(vals), vals[:5])
+        return vals
     except Exception as e:
-        log.warning("Wikipedia fetch failed for %s (%s)", url, e)
+        log.warning("Wikipedia fetch failed for %s (%s: %s)", url, type(e).__name__, e)
         return []
 
 

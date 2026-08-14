@@ -82,10 +82,17 @@ def form4_activity(ticker: str, days: int = 30) -> str | int:
 def annotate(tickers: list[str], pause: float = 0.15) -> dict[str, str | int]:
     """SEC asks for <=10 req/s from a single source; we go far slower to
     stay a good citizen on a free, shared resource."""
+    cik_map = _load_ticker_cik_map()
+    log.info("SEC ticker->CIK map loaded with %d entries", len(cik_map))
+
     out = {}
+    resolved = 0
     for i, tk in enumerate(tickers):
         out[tk] = form4_activity(tk)
+        if out[tk] != "not_available":
+            resolved += 1
         time.sleep(pause)
         if (i + 1) % 50 == 0:
-            log.info("insider check %d/%d", i + 1, len(tickers))
+            log.info("insider check %d/%d (resolved so far: %d)", i + 1, len(tickers), resolved)
+    log.info("insider annotate done: %d/%d tickers resolved to a CIK+filing count", resolved, len(tickers))
     return out

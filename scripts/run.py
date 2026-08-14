@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import io
 import json
 import logging
 import os
@@ -24,12 +25,34 @@ from metals import build_metals_payload
 from score import score_universe
 from universe import build_universe
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-log = logging.getLogger("run")
-
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
 ERROR_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "last_error.log")
+PIPELINE_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "pipeline_log.txt")
+
+# Every run's log is captured to a string AND committed to the repo as
+# data/pipeline_log.txt, in addition to going to stdout for the Actions
+# UI. This is the primary debugging channel: GitHub Actions log storage
+# is a temporary blob that expires and isn't reachable from every
+# environment, but a file in the repo is reachable from anywhere with
+# read access to the repo (including the plain REST contents API).
+_log_buffer = io.StringIO()
+_handler_stream = logging.StreamHandler(_log_buffer)
+_handler_console = logging.StreamHandler(sys.stdout)
+_fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+_handler_stream.setFormatter(_fmt)
+_handler_console.setFormatter(_fmt)
+logging.basicConfig(level=logging.INFO, handlers=[_handler_stream, _handler_console])
+log = logging.getLogger("run")
+
+
+def _flush_pipeline_log():
+    try:
+        os.makedirs(os.path.dirname(PIPELINE_LOG_PATH), exist_ok=True)
+        with open(PIPELINE_LOG_PATH, "w") as f:
+            f.write(_log_buffer.getvalue())
+    except Exception:
+        pass  # never let log-writing itself break the run
 
 # Reference expense-ratio benchmarks by broad category, used only for the
 # fee-audit "vs. category average" comparison. Figures are illustrative
@@ -100,10 +123,12 @@ if __name__ == "__main__":
         # is unambiguous in the repo state.
         if os.path.exists(ERROR_LOG_PATH):
             os.remove(ERROR_LOG_PATH)
+        _flush_pipeline_log()
     except Exception:
         os.makedirs(os.path.dirname(ERROR_LOG_PATH), exist_ok=True)
         with open(ERROR_LOG_PATH, "w") as f:
             f.write(f"Failed at {datetime.datetime.utcnow().isoformat()}Z\n\n")
             f.write(traceback.format_exc())
         traceback.print_exc()
+        _flush_pipeline_log()
         sys.exit(1)
