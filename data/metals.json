@@ -1,5 +1,84 @@
 {
-  "generated_at": "1970-01-01T00:00:00Z",
-  "note": "Placeholder — corre python scripts/run.py ou aciona o workflow do GitHub Actions para gerar dados reais.",
-  "instruments": []
+  "generated_at": "2026-08-14T11:00:24.590067Z",
+  "note": "Pre\u00e7os de futuros (n\u00e3o spot) para ouro/prata/cobre/platina/pal\u00e1dio. Ur\u00e2nio \u00e9 um proxy via ETF de mineradoras (URA), n\u00e3o o pre\u00e7o do metal \u2014 n\u00e3o existe fonte gratuita de pre\u00e7o spot de ur\u00e2nio. Sem indicador de stress/tens\u00e3o de mercado: exigiria dados de invent\u00e1rio/lease rates que n\u00e3o est\u00e3o dispon\u00edveis gratuitamente; nenhum n\u00famero \u00e9 inventado.",
+  "instruments": [
+    {
+      "ticker": "GC=F",
+      "label": "Ouro",
+      "kind": "futures",
+      "unit": "USD/oz",
+      "data": {
+        "price": 4408.2,
+        "day_change_pct": 1.02,
+        "range_90d_low": 3985.6,
+        "range_90d_high": 4720.4,
+        "volatility_annualized_pct": 24.2
+      }
+    },
+    {
+      "ticker": "SI=F",
+      "label": "Prata",
+      "kind": "futures",
+      "unit": "USD/oz",
+      "data": {
+        "price": 64.84,
+        "day_change_pct": -0.05,
+        "range_90d_low": 55.898,
+        "range_90d_high": 88.888,
+        "volatility_annualized_pct": 48.2
+      }
+    },
+    {
+      "ticker": "HG=F",
+      "label": "Cobre",
+      "kind": "futures",
+      "unit": "USD/lb",
+      "data": {
+        "price": 6.579,
+        "day_change_pct": -0.2,
+        "range_90d_low": 5.795,
+        "range_90d_high": 6.703,
+        "volatility_annualized_pct": 26.5
+      }
+    },
+    {
+      "ticker": "PL=F",
+      "label": "Platina",
+      "kind": "futures",
+      "unit": "USD/oz",
+      "data": {
+        "price": 1732.2,
+        "day_change_pct": 0.41,
+        "range_90d_low": 1550.2,
+        "range_90d_high": 2187.1,
+        "volatility_annualized_pct": 39.1
+      }
+    },
+    {
+      "ticker": "PA=F",
+      "label": "Pal\u00e1dio",
+      "kind": "futures",
+      "unit": "USD/oz",
+      "data": {
+        "price": 1311.0,
+        "day_change_pct": -0.88,
+        "range_90d_low": 1161.3,
+        "range_90d_high": 1546.0,
+        "volatility_annualized_pct": 43.4
+      }
+    },
+    {
+      "ticker": "URA",
+      "label": "Ur\u00e2nio (proxy: Global X Uranium ETF)",
+      "kind": "etf_proxy",
+      "unit": "USD",
+      "data": {
+        "price": 45.25,
+        "day_change_pct": 0.11,
+        "range_90d_low": 37.52,
+        "range_90d_high": 58.26,
+        "volatility_annualized_pct": 52.0
+      }
+    }
+  ]
 }
