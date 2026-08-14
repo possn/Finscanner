@@ -25,13 +25,15 @@ import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
 from score import score_universe
-from thesis import classify as classify_thesis
+from thesis import classify as classify_thesis, evolve as evolve_thesis
+import thesis_history as thesis_history_mod
 from universe import build_universe
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
 HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "history.json")
 VALUATION_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "valuation_history.json")
+THESIS_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "thesis_history.json")
 ERROR_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "last_error.log")
 PIPELINE_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "pipeline_log.txt")
 
@@ -48,7 +50,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "history", "valuation_history"):
+for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "history", "valuation_history", "thesis_history"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -108,6 +110,8 @@ def main():
     us_tickers = [s.ticker for s in scored if "." not in s.ticker]
     insider_map = annotate_insiders(us_tickers)
     raw_by_ticker = {r.ticker: r for r in raw}
+    today = datetime.date.today().isoformat()
+    thesis_history = thesis_history_mod.load(THESIS_HISTORY_PATH)
 
     rows = []
     for s in scored:
@@ -128,12 +132,19 @@ def main():
             row["quarterly_net_income"] = rm.quarterly_net_income
             row["quarterly_diluted_shares"] = rm.quarterly_diluted_shares
             row["revenue_yoy_latest"] = rm.revenue_yoy_latest
+            row["revenue_yoy_prior"] = rm.revenue_yoy_prior
+            row["revenue_yoy_acceleration_pp"] = rm.revenue_yoy_acceleration_pp
             row["net_income_yoy_latest"] = rm.net_income_yoy_latest
+            row["net_income_yoy_prior"] = rm.net_income_yoy_prior
+            row["net_income_yoy_acceleration_pp"] = rm.net_income_yoy_acceleration_pp
             row["diluted_shares_yoy"] = rm.diluted_shares_yoy
             row["net_margin_latest"] = rm.net_margin_latest
             row["net_margin_yoy_change_pp"] = rm.net_margin_yoy_change_pp
+            row["net_margin_yoy_change_prior_pp"] = rm.net_margin_yoy_change_prior_pp
             row["repurchases_last_quarter"] = rm.repurchases_last_quarter
         row.update(classify_thesis(row))
+        prev_date, prev_snapshot = thesis_history_mod.previous(thesis_history, s.ticker, today)
+        row.update(evolve_thesis(row, prev_snapshot, prev_date))
         rows.append(row)
 
     payload = {
@@ -149,8 +160,8 @@ def main():
             "formula and scripts/insiders.py + scripts/fundamentals.py "
             "for documented data limitations. The thesis taxonomy is deterministic and "
             "explainable (scripts/thesis.py), not a recommendation or forecast. Insider P/S signals are limited to "
-            "open-market Form 4 transaction codes and quarterly growth/dilution "
-            "uses the latest five Yahoo Finance quarters when available."
+            "open-market Form 4 transaction codes and quarterly growth/dilution and acceleration "
+            "use up to the latest six Yahoo Finance quarters when available."
         ),
         "stocks": rows,
     }
@@ -166,7 +177,6 @@ def main():
         json.dump(_json_safe(metals_payload), f, indent=2)
     log.info("Wrote metals data to %s", METALS_OUT_PATH)
 
-    today = datetime.date.today().isoformat()
     history = history_mod.load(HISTORY_PATH)
     history = history_mod.update(history, rows, today)
     history_mod.save(history, HISTORY_PATH)
@@ -174,6 +184,9 @@ def main():
     valuation_history = valuation_history_mod.load(VALUATION_HISTORY_PATH)
     valuation_history = valuation_history_mod.update(valuation_history, rows, today)
     valuation_history_mod.save(valuation_history, VALUATION_HISTORY_PATH)
+
+    thesis_history = thesis_history_mod.update(thesis_history, rows, today)
+    thesis_history_mod.save(thesis_history, THESIS_HISTORY_PATH)
 
 
 if __name__ == "__main__":

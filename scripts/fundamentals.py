@@ -42,10 +42,15 @@ class RawMetrics:
     quarterly_net_income: list[dict] = field(default_factory=list)
     quarterly_diluted_shares: list[dict] = field(default_factory=list)
     revenue_yoy_latest: float | None = None
+    revenue_yoy_prior: float | None = None
+    revenue_yoy_acceleration_pp: float | None = None
     net_income_yoy_latest: float | None = None
+    net_income_yoy_prior: float | None = None
+    net_income_yoy_acceleration_pp: float | None = None
     diluted_shares_yoy: float | None = None
     net_margin_latest: float | None = None
     net_margin_yoy_change_pp: float | None = None
+    net_margin_yoy_change_prior_pp: float | None = None
     repurchases_last_quarter: float | None = None
 
     # cash flow
@@ -168,7 +173,7 @@ def fetch_one(ticker: str) -> RawMetrics:
             try:
                 qfin = t.quarterly_financials
                 if qfin is not None and not qfin.empty:
-                    cols = list(qfin.columns)[:5]
+                    cols = list(qfin.columns)[:6]
 
                     def series_for(labels):
                         for label in labels:
@@ -176,8 +181,7 @@ def fetch_one(ticker: str) -> RawMetrics:
                                 vals = []
                                 for c in cols:
                                     v = _as_float(qfin.loc[label, c])
-                                    if v is not None:
-                                        vals.append({"date": str(getattr(c, "date", lambda: c)()), "value": v})
+                                    vals.append({"date": str(getattr(c, "date", lambda: c)()), "value": v})
                                 return vals
                         return []
 
@@ -185,21 +189,36 @@ def fetch_one(ticker: str) -> RawMetrics:
                     m.quarterly_net_income = series_for(("Net Income", "Net Income Common Stockholders"))
                     m.quarterly_diluted_shares = series_for(("Diluted Average Shares", "Basic Average Shares"))
 
-                    def yoy(series):
-                        if len(series) >= 5 and series[4]["value"] not in (None, 0):
-                            return series[0]["value"] / series[4]["value"] - 1.0
+                    def yoy_at(series, offset=0):
+                        old = offset + 4
+                        if len(series) > old and series[offset]["value"] is not None and series[old]["value"] not in (None, 0):
+                            return series[offset]["value"] / series[old]["value"] - 1.0
                         return None
 
-                    m.revenue_yoy_latest = yoy(m.quarterly_revenue)
-                    m.net_income_yoy_latest = yoy(m.quarterly_net_income)
-                    m.diluted_shares_yoy = yoy(m.quarterly_diluted_shares)
+                    m.revenue_yoy_latest = yoy_at(m.quarterly_revenue, 0)
+                    m.revenue_yoy_prior = yoy_at(m.quarterly_revenue, 1)
+                    if m.revenue_yoy_latest is not None and m.revenue_yoy_prior is not None:
+                        m.revenue_yoy_acceleration_pp = (m.revenue_yoy_latest - m.revenue_yoy_prior) * 100.0
+                    m.net_income_yoy_latest = yoy_at(m.quarterly_net_income, 0)
+                    m.net_income_yoy_prior = yoy_at(m.quarterly_net_income, 1)
+                    if m.net_income_yoy_latest is not None and m.net_income_yoy_prior is not None:
+                        m.net_income_yoy_acceleration_pp = (m.net_income_yoy_latest - m.net_income_yoy_prior) * 100.0
+                    m.diluted_shares_yoy = yoy_at(m.quarterly_diluted_shares, 0)
 
-                    if m.quarterly_revenue and m.quarterly_net_income and m.quarterly_revenue[0]["value"]:
+                    if m.quarterly_revenue and m.quarterly_net_income and m.quarterly_revenue[0]["value"] not in (None, 0) and m.quarterly_net_income[0]["value"] is not None:
                         m.net_margin_latest = m.quarterly_net_income[0]["value"] / m.quarterly_revenue[0]["value"]
-                    if len(m.quarterly_revenue) >= 5 and len(m.quarterly_net_income) >= 5 and m.quarterly_revenue[4]["value"]:
+                    if len(m.quarterly_revenue) >= 5 and len(m.quarterly_net_income) >= 5 and m.quarterly_revenue[4]["value"] not in (None, 0) and m.quarterly_net_income[4]["value"] is not None:
                         old_margin = m.quarterly_net_income[4]["value"] / m.quarterly_revenue[4]["value"]
                         if m.net_margin_latest is not None:
                             m.net_margin_yoy_change_pp = (m.net_margin_latest - old_margin) * 100.0
+                    if (len(m.quarterly_revenue) >= 6 and len(m.quarterly_net_income) >= 6
+                            and m.quarterly_revenue[1]["value"] not in (None, 0)
+                            and m.quarterly_revenue[5]["value"] not in (None, 0)
+                            and m.quarterly_net_income[1]["value"] is not None
+                            and m.quarterly_net_income[5]["value"] is not None):
+                        prev_margin = m.quarterly_net_income[1]["value"] / m.quarterly_revenue[1]["value"]
+                        prev_old_margin = m.quarterly_net_income[5]["value"] / m.quarterly_revenue[5]["value"]
+                        m.net_margin_yoy_change_prior_pp = (prev_margin - prev_old_margin) * 100.0
             except Exception as e:
                 log.debug("%s: quarterly financials unavailable (%s)", ticker, e)
 

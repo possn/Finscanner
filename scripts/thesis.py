@@ -136,3 +136,102 @@ def classify(row: dict) -> dict:
         "thesis_evidence": evidence,
         "thesis_risks": risks,
     }
+
+
+def _delta(current, previous):
+    a, b = _n(current), _n(previous)
+    return None if a is None or b is None else a - b
+
+
+def evolve(row: dict, previous: dict | None = None, previous_date: str | None = None) -> dict:
+    """Describe direction of the current thesis using quarterly acceleration plus
+    the previous persisted daily snapshot when available.
+
+    The result is deliberately rule-based.  'Strengthening' means the measured
+    evidence supporting the current thesis improved; it is not a return forecast.
+    """
+    previous = previous or {}
+    score_delta = _delta(row.get("score"), previous.get("score"))
+    quality_delta = _delta(row.get("quality_pct"), previous.get("quality_pct"))
+    growth_delta = _delta(row.get("growth_pct"), previous.get("growth_pct"))
+    value_delta = _delta(row.get("value_pct"), previous.get("value_pct"))
+    rev_acc = _n(row.get("revenue_yoy_acceleration_pp"))
+    ni_acc = _n(row.get("net_income_yoy_acceleration_pp"))
+    margin_delta = _n(row.get("net_margin_yoy_change_pp"))
+    dilution = _pct(row.get("diluted_shares_yoy"))
+    prior_type = previous.get("thesis_type")
+    current_type = row.get("thesis_type")
+
+    positive = 0
+    negative = 0
+    drivers: list[str] = []
+
+    if score_delta is not None:
+        if score_delta >= 3:
+            positive += 2; drivers.append(f"Score +{score_delta:.1f} vs última observação.")
+        elif score_delta <= -3:
+            negative += 2; drivers.append(f"Score {score_delta:.1f} vs última observação.")
+    if growth_delta is not None:
+        if growth_delta >= 5:
+            positive += 1; drivers.append(f"Percentil de crescimento +{growth_delta:.0f}.")
+        elif growth_delta <= -5:
+            negative += 1; drivers.append(f"Percentil de crescimento {growth_delta:.0f}.")
+    if quality_delta is not None:
+        if quality_delta >= 5: positive += 1
+        elif quality_delta <= -5: negative += 1
+    if value_delta is not None and abs(value_delta) >= 8:
+        drivers.append(f"Percentil de valuation {value_delta:+.0f} vs última observação.")
+    if rev_acc is not None:
+        if rev_acc >= 5:
+            positive += 2; drivers.append(f"Crescimento de receitas acelerou {rev_acc:+.1f} pp YoY.")
+        elif rev_acc <= -5:
+            negative += 2; drivers.append(f"Crescimento de receitas desacelerou {rev_acc:.1f} pp YoY.")
+    if ni_acc is not None:
+        if ni_acc >= 10:
+            positive += 1; drivers.append(f"Crescimento do lucro acelerou {ni_acc:+.1f} pp YoY.")
+        elif ni_acc <= -10:
+            negative += 1; drivers.append(f"Crescimento do lucro desacelerou {ni_acc:.1f} pp YoY.")
+    if margin_delta is not None:
+        if margin_delta >= 2:
+            positive += 1; drivers.append(f"Margem líquida +{margin_delta:.1f} pp YoY.")
+        elif margin_delta <= -2:
+            negative += 1; drivers.append(f"Margem líquida {margin_delta:.1f} pp YoY.")
+    if dilution is not None and dilution >= 8:
+        negative += 2; drivers.append(f"Diluição de {dilution:.1f}% YoY.")
+    if row.get("zombie") == "yes":
+        negative += 2; drivers.append("Cobertura de juros inferior a 1×.")
+
+    changed = bool(prior_type and current_type and prior_type != current_type)
+    if changed:
+        direction = "changed"
+        label = "Mudança de tese"
+        summary = f"A classificação mudou de {prior_type} para {current_type}."
+    elif positive >= negative + 2:
+        direction = "strengthening"
+        label = "A reforçar"
+        summary = "Os sinais operacionais/quantitativos recentes reforçam a tese atual."
+    elif negative >= positive + 2:
+        direction = "weakening"
+        label = "A enfraquecer"
+        summary = "Os sinais recentes deterioraram-se e aumentam o risco de quebra da tese."
+    elif previous:
+        direction = "stable"
+        label = "Estável"
+        summary = "Não existe alteração quantitativa suficientemente forte para mudar a direção da tese."
+    else:
+        direction = "baseline"
+        label = "Baseline"
+        summary = "Primeira observação persistida; a direção ficará mais robusta à medida que o histórico acumular."
+
+    return {
+        "thesis_direction": direction,
+        "thesis_direction_label": label,
+        "thesis_evolution_summary": summary,
+        "thesis_previous_type": prior_type,
+        "thesis_previous_date": previous_date,
+        "thesis_score_delta": None if score_delta is None else round(score_delta, 2),
+        "thesis_quality_delta": None if quality_delta is None else round(quality_delta, 2),
+        "thesis_growth_delta": None if growth_delta is None else round(growth_delta, 2),
+        "thesis_value_delta": None if value_delta is None else round(value_delta, 2),
+        "thesis_evolution_drivers": drivers[:5],
+    }
