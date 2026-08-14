@@ -25,6 +25,7 @@ import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
 from score import score_universe
+from thesis import classify as classify_thesis
 from universe import build_universe
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
@@ -47,7 +48,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "insiders", "score", "metals", "history", "valuation_history"):
+for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "history", "valuation_history"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -132,6 +133,7 @@ def main():
             row["net_margin_latest"] = rm.net_margin_latest
             row["net_margin_yoy_change_pp"] = rm.net_margin_yoy_change_pp
             row["repurchases_last_quarter"] = rm.repurchases_last_quarter
+        row.update(classify_thesis(row))
         rows.append(row)
 
     payload = {
@@ -145,7 +147,8 @@ def main():
             "accumulates the scanner's own daily valuation observations over time. "
             "Not investment advice. See scripts/score.py for the exact "
             "formula and scripts/insiders.py + scripts/fundamentals.py "
-            "for documented data limitations. Insider P/S signals are limited to "
+            "for documented data limitations. The thesis taxonomy is deterministic and "
+            "explainable (scripts/thesis.py), not a recommendation or forecast. Insider P/S signals are limited to "
             "open-market Form 4 transaction codes and quarterly growth/dilution "
             "uses the latest five Yahoo Finance quarters when available."
         ),
