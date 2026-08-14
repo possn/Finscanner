@@ -24,6 +24,7 @@ import history as history_mod
 import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
+from news import fetch_news_for_universe
 from score import score_universe
 from thesis import classify as classify_thesis, evolve as evolve_thesis
 import thesis_history as thesis_history_mod
@@ -34,6 +35,7 @@ METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.
 HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "history.json")
 VALUATION_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "valuation_history.json")
 THESIS_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "thesis_history.json")
+NEWS_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "news.json")
 ERROR_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "last_error.log")
 PIPELINE_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "pipeline_log.txt")
 
@@ -50,7 +52,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "history", "valuation_history", "thesis_history"):
+for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "history", "valuation_history", "thesis_history", "news"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -194,6 +196,11 @@ def main():
 
     thesis_history = thesis_history_mod.update(thesis_history, rows, today)
     thesis_history_mod.save(thesis_history, THESIS_HISTORY_PATH)
+
+    news_payload = fetch_news_for_universe(all_tickers)
+    with open(NEWS_PATH, "w") as f:
+        json.dump(_json_safe(news_payload), f, separators=(",", ":"))
+    log.info("Wrote news for %d tickers to %s", len(news_payload["tickers"]), NEWS_PATH)
 
 
 if __name__ == "__main__":

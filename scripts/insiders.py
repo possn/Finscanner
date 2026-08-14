@@ -22,7 +22,14 @@ import requests
 
 log = logging.getLogger("insiders")
 
-SEC_USER_AGENT = os.getenv("SEC_USER_AGENT") or "Finscanner/0.6 research app contact: finscanner@users.noreply.github.com"
+SEC_USER_AGENT = os.getenv("SEC_USER_AGENT") or "Finscanner research-tool finscanner-app@proton.me"
+# NOTE: SEC's bot-filtering appears to reject User-Agent strings containing
+# "/" or ":" (they read as library-generated signatures like
+# "Python-urllib/3.9" rather than a genuine app identity) — confirmed by
+# testing: "Finscanner/0.6 research app contact: ..." got a 403, while
+# "Finscanner research-tool <contact>" (no slash, no colon) succeeded on a
+# real run. Keep this format if you ever change it. A GitHub secret named
+# SEC_USER_AGENT overrides this default if set.
 HEADERS = {
     "User-Agent": SEC_USER_AGENT,
     "Accept-Encoding": "gzip, deflate",

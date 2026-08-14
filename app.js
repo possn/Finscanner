@@ -1,12 +1,13 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, thesisHistory: null, activeView: "stocks" };
+  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "stocks" };
 
   const els = {
     list: document.getElementById("list"),
     search: document.getElementById("search"),
     marketFilter: document.getElementById("market-filter"),
+    stocksSectorFilter: document.getElementById("stocks-sector-filter"),
     sortBy: document.getElementById("sort-by"),
     zombieOnly: document.getElementById("zombie-only"),
     watchlistOnly: document.getElementById("watchlist-only"),
@@ -480,7 +481,6 @@
   };
   function regionLabel(region) { return REGION_LABELS_PT[region] || region; }
 
-  let stocksRegionsPopulated = false;
   function populateRegionFilter(selectEl, rows, populatedFlagSetter) {
     if (!selectEl) return;
     const regions = [...new Set(rows.map(r => r.region).filter(Boolean))]
@@ -490,19 +490,30 @@
     populatedFlagSetter();
   }
 
+  let stocksRegionsPopulated = false;
+  let stocksSectorsPopulated = false;
   function applyFilters() {
     if (!state.data) return;
+    const equities = state.data.stocks.filter(r => r.quote_type !== "ETF");
     if (!stocksRegionsPopulated) {
-      populateRegionFilter(els.marketFilter, state.data.stocks.filter(r => r.quote_type !== "ETF"), () => { stocksRegionsPopulated = true; });
+      populateRegionFilter(els.marketFilter, equities, () => { stocksRegionsPopulated = true; });
+    }
+    if (!stocksSectorsPopulated && els.stocksSectorFilter) {
+      const sectors = [...new Set(equities.map(r => r.sector).filter(Boolean))].sort();
+      els.stocksSectorFilter.innerHTML = `<option value="">todos os setores</option>` +
+        sectors.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+      stocksSectorsPopulated = true;
     }
     const q = els.search.value.trim().toUpperCase();
     const region = els.marketFilter.value;
+    const sector = els.stocksSectorFilter?.value || "";
     const zombieOnly = els.zombieOnly.checked;
     const watchlistOnly = els.watchlistOnly.checked;
 
     let rows = state.data.stocks.filter(r => {
       if (r.quote_type === "ETF") return false;
       if (region && r.region !== region) return false;
+      if (sector && r.sector !== sector) return false;
       if (zombieOnly && r.zombie !== "yes") return false;
       if (watchlistOnly && !isWatched(r.ticker)) return false;
       if (q && !(r.ticker.toUpperCase().includes(q) || (r.name || "").toUpperCase().includes(q))) return false;
@@ -513,6 +524,12 @@
     rows.sort((a, b) => {
       if (sort === "score-desc") return (b.score ?? -1) - (a.score ?? -1);
       if (sort === "score-asc") return (a.score ?? 999) - (b.score ?? 999);
+      if (sort === "quality-desc") return (b.quality_pct ?? -1) - (a.quality_pct ?? -1);
+      if (sort === "growth-desc") return (b.growth_pct ?? -1) - (a.growth_pct ?? -1);
+      if (sort === "balance-desc") return (b.balance_pct ?? -1) - (a.balance_pct ?? -1);
+      if (sort === "cashflow-desc") return (b.cashflow_pct ?? -1) - (a.cashflow_pct ?? -1);
+      if (sort === "value-desc") return (b.value_pct ?? -1) - (a.value_pct ?? -1);
+      if (sort === "stability-desc") return (b.stability_pct ?? -1) - (a.stability_pct ?? -1);
       if (sort === "ticker-asc") return a.ticker.localeCompare(b.ticker);
       if (sort === "cap-desc") return (b.market_cap ?? 0) - (a.market_cap ?? 0);
       if (sort === "qv-desc") return (b.quality_value_score ?? -1) - (a.quality_value_score ?? -1);
@@ -1074,29 +1091,32 @@
     els.smartmoneyList.querySelectorAll('[data-ticker]').forEach(x=>x.addEventListener('click',()=>openDetail(x.dataset.ticker)));
   }
 
-  async function renderNews() {
+  async function loadNews() {
+    try { state.news = await fetchJson("data/news.json", 15000); }
+    catch (e) { state.news = null; console.warn("news.json unavailable yet", e); }
+  }
+
+  function renderNews() {
     if (!state.data) return;
     const portfolio = lsGet(LS_PORTFOLIO);
     const watchlist = lsGet(LS_WATCHLIST);
     const manual = (els.newsSearch?.value || "").trim().toUpperCase();
     const tickers = [...new Set([...Object.keys(portfolio), ...Object.keys(watchlist), ...(manual ? [manual] : [])])];
     if (!tickers.length) { els.newsList.innerHTML='<p class="empty-state">Adiciona posições ao portfolio, marca tickers na watchlist (★), ou pesquisa um ticker acima.</p>'; return; }
-    els.newsList.innerHTML = tickers.map(t=>`<article class="news-group" id="news-${CSS.escape(t)}"><h3>${escapeHtml(t)}</h3><p>A procurar notícias…</p></article>`).join('');
-    await Promise.allSettled(tickers.slice(0,20).map(async ticker => {
-      const box=document.getElementById(`news-${CSS.escape(ticker)}`);
-      const g=`https://www.google.com/search?tbm=nws&q=${encodeURIComponent(ticker+' stock')}`;
-      const y=`https://finance.yahoo.com/quote/${encodeURIComponent(ticker)}/news/`;
-      try {
-        const u=`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(ticker)}&quotesCount=0&newsCount=4`;
-        const res=await fetch(u,{cache:'no-store'}); if(!res.ok) throw new Error('blocked');
-        const j=await res.json(); const news=(j.news||[]).slice(0,4);
-        if (!box) return;
-        box.innerHTML=`<h3>${escapeHtml(ticker)}</h3>${news.map(n=>`<a class="news-item" href="${escapeHtml(n.link)}" target="_blank" rel="noopener"><strong>${escapeHtml(n.title)}</strong><span>${escapeHtml(n.publisher||'')}</span></a>`).join('')}<div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Google News</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
-      } catch(e) {
-        if (!box) return;
-        box.innerHTML=`<h3>${escapeHtml(ticker)}</h3><p>O feed direto não está disponível neste browser (bloqueio de CORS do lado do Yahoo — não é algo que o Finscanner controle).</p><div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Pesquisar notícias</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div>`;
+
+    const newsByTicker = state.news?.tickers || {};
+    els.newsList.innerHTML = tickers.map(ticker => {
+      const items = newsByTicker[ticker] || [];
+      const g = `https://www.google.com/search?tbm=nws&q=${encodeURIComponent(ticker + " stock")}`;
+      const y = `https://finance.yahoo.com/quote/${encodeURIComponent(ticker)}/news/`;
+      if (items.length) {
+        return `<article class="news-group"><h3>${escapeHtml(ticker)}</h3>${items.map(n => `<a class="news-item" href="${escapeHtml(n.link)}" target="_blank" rel="noopener"><strong>${escapeHtml(n.title)}</strong><span>${escapeHtml(n.source || "")}</span></a>`).join("")}<div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Google News</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div></article>`;
       }
-    }));
+      const reason = state.news
+        ? "Sem notícias pré-carregadas para este ticker (fora do universo rastreado, ou nenhuma notícia recente encontrada)."
+        : "Ficheiro de notícias ainda não gerado — corre o pipeline (scripts/run.py) pelo menos uma vez.";
+      return `<article class="news-group"><h3>${escapeHtml(ticker)}</h3><p>${reason}</p><div class="news-actions"><a href="${g}" target="_blank" rel="noopener">Pesquisar notícias</a><a href="${y}" target="_blank" rel="noopener">Yahoo Finance</a></div></article>`;
+    }).join("");
   }
 
   function renderTheses() {
@@ -1204,7 +1224,7 @@
     el.addEventListener("change", renderFunds);
   });
 
-  [els.search, els.marketFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].filter(Boolean).forEach(el => {
+  [els.search, els.marketFilter, els.stocksSectorFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].filter(Boolean).forEach(el => {
     el.addEventListener("input", applyFilters);
     el.addEventListener("change", applyFilters);
   });
@@ -1220,4 +1240,5 @@
   loadHistory();
   loadValuationHistory();
   loadThesisHistory();
+  loadNews();
 })();
