@@ -116,8 +116,8 @@ def main():
         "universe_counts": {k: len(v) for k, v in universe.items()},
         "category_benchmarks": CATEGORY_BENCHMARKS,
         "methodology_note": (
-            "Composite score is an unvalidated, weighted blend of public "
-            "fundamentals (profitability, leverage, value, stability). "
+            "Composite score is an unvalidated, explainable multi-factor blend of public "
+            "fundamentals (quality, growth, balance sheet, cash flow, valuation and stability). "
             "Not investment advice. See scripts/score.py for the exact "
             "formula and scripts/insiders.py + scripts/fundamentals.py "
             "for documented data limitations."
