@@ -106,12 +106,3 @@ antes de qualquer decisão.
 ### SEC User-Agent
 
 Para maior conformidade com a política de fair access da SEC, cria no repositório um GitHub Actions secret chamado `SEC_USER_AGENT` com um identificador e email de contacto, por exemplo `Finscanner research nome@dominio.pt`. Se o secret não existir, existe um fallback técnico, mas um contacto real é preferível.
-
-## v0.7 — Explainable Investment Theses
-
-The daily pipeline now adds a deterministic, inspectable thesis taxonomy in `scripts/thesis.py`.
-It can classify equities as Quality Compounder, GARP, Deep Value, Turnaround,
-Insider Accumulation, Balanced Candidate, High Growth / High Dilution,
-Leveraged Growth, Value Trap Risk, or Watch / No Edge. Every classification
-contains a short hypothesis, supporting evidence, explicit risks and a confidence
-level. It is a screening taxonomy, not a return forecast or investment recommendation.

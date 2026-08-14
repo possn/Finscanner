@@ -1,50 +1,41 @@
-// Increment this on every deploy that changes cached files.
-const CACHE_VERSION = "finscanner-v10-thesis-engine";
+const CACHE_VERSION = "finscanner-v12-shell-repair-081";
+const SHELL_FILES = ["./", "./index.html", "./style.css?v=0.8.1", "./app.js?v=0.8.1", "./manifest.json"];
 
-const SHELL_FILES = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./app.js",
-  "./manifest.json",
-];
-
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(SHELL_FILES))
-  );
+self.addEventListener("install", event => {
+  event.waitUntil(caches.open(CACHE_VERSION).then(cache => cache.addAll(SHELL_FILES)));
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
-    )
-  );
+self.addEventListener("activate", event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))));
   self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
-  // Data files: always try the network first so the daily update shows up
-  // immediately; fall back to cache only when offline.
-  if (url.pathname.endsWith("/data/stocks.json") || url.pathname.endsWith("/data/metals.json") || url.pathname.endsWith("/data/history.json") || url.pathname.endsWith("/data/valuation_history.json")) {
-    event.respondWith(
-      fetch(event.request)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(event.request))
-    );
+  const isData = url.pathname.includes("/data/") && url.pathname.endsWith(".json");
+  const isNavigation = event.request.mode === "navigate" || url.pathname.endsWith("/index.html") || url.pathname.endsWith("/");
+  const isShellAsset = url.pathname.endsWith("/app.js") || url.pathname.endsWith("/style.css") || url.pathname.endsWith("/manifest.json");
+
+  // Network-first avoids serving an old HTML shell with a new JS bundle (or the reverse).
+  if (isNavigation || isShellAsset || isData) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(event.request, { cache: "no-store" });
+        if (fresh && fresh.ok) {
+          const clone = fresh.clone();
+          caches.open(CACHE_VERSION).then(cache => cache.put(event.request, clone));
+        }
+        return fresh;
+      } catch (err) {
+        return (await caches.match(event.request)) || Response.error();
+      }
+    })());
     return;
   }
 
-  // App shell: cache-first.
-  event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
-  );
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
 });

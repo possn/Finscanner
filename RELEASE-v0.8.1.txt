@@ -1,0 +1,9 @@
+Finscanner v0.8.1 — Shell Integrity Repair
+
+Hotfix for a deployment regression in v0.8:
+- Restores the full sidebar: Ações, ETFs, Metais, Notícias, Smart Money, Teses, Comparar, O meu portfolio.
+- Restores the missing Teses view in index.html.
+- Prevents mixed cached HTML/JS versions by using network-first service-worker logic for app shell files.
+- Adds cache-busting to app.js and style.css.
+- Makes event binding resilient if an older cached HTML shell is temporarily present.
+- Adds a 15 s timeout, explicit error state and retry button for data/stocks.json instead of an endless “a carregar…”.

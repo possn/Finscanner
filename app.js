@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, activeView: "stocks" };
+  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, thesisHistory: null, activeView: "stocks" };
 
   const els = {
     list: document.getElementById("list"),
@@ -45,6 +45,10 @@
     compareInput: document.getElementById("compare-input"),
     compareList: document.getElementById("compare-list"),
   };
+
+  function on(el, event, handler) {
+    if (el) el.addEventListener(event, handler);
+  }
 
   const VIEW_META = {
     stocks: { title: "Ações", sub: "dossiê diário · fontes gratuitas" },
@@ -113,9 +117,9 @@
     els.sidebar.classList.remove("sidebar--aberta");
     els.sidebarBackdrop.hidden = true;
   }
-  els.menuBtn.addEventListener("click", openMobileSidebar);
-  els.sidebarClose.addEventListener("click", closeMobileSidebar);
-  els.sidebarBackdrop.addEventListener("click", closeMobileSidebar);
+  on(els.menuBtn, "click", openMobileSidebar);
+  on(els.sidebarClose, "click", closeMobileSidebar);
+  on(els.sidebarBackdrop, "click", closeMobileSidebar);
 
   // ---------- Theme (light/dark), persisted ----------
   const LS_THEME = "finscanner:theme";
@@ -136,7 +140,7 @@
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     applyTheme(prefersDark ? "dark" : "light");
   }
-  els.themeToggle.addEventListener("click", () => {
+  on(els.themeToggle, "click", () => {
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
     const next = isDark ? "light" : "dark";
     applyTheme(next);
@@ -146,6 +150,7 @@
 
   function updateGeneratedAt() {
     const src = state.activeView === "metals" ? state.metals : state.data;
+    if (!els.generatedAt) return;
     els.generatedAt.textContent = src
       ? "atualizado " + new Date(src.generated_at).toLocaleString("pt-PT")
       : "a carregar…";
@@ -232,13 +237,25 @@
     return `<span class="thesis-chip thesis-${slug}">${label}</span>`;
   }
 
+  function thesisDirectionBadge(r) {
+    const dir = r.thesis_direction || "baseline";
+    const label = r.thesis_direction_label || ({strengthening:"A reforçar", weakening:"A enfraquecer", changed:"Mudança de tese", stable:"Estável", baseline:"Baseline"}[dir] || dir);
+    const icon = ({strengthening:"↗", weakening:"↘", changed:"⇄", stable:"→", baseline:"•"}[dir] || "•");
+    return `<span class="trajectory-chip trajectory-${dir}">${icon} ${escapeHtml(label)}</span>`;
+  }
+
   function thesisPanelHtml(r) {
     if (!r.thesis_type) return "";
-    const evidence = (r.thesis_evidence || []).map(x => `<li>${x}</li>`).join("") || "<li>Sem evidência suficiente para destacar.</li>";
-    const risks = (r.thesis_risks || []).map(x => `<li>${x}</li>`).join("") || "<li>Sem risco quantitativo dominante identificado nos campos disponíveis.</li>";
+    const evidence = (r.thesis_evidence || []).map(x => `<li>${escapeHtml(x)}</li>`).join("") || "<li>Sem evidência suficiente para destacar.</li>";
+    const risks = (r.thesis_risks || []).map(x => `<li>${escapeHtml(x)}</li>`).join("") || "<li>Sem risco quantitativo dominante identificado nos campos disponíveis.</li>";
+    const drivers = (r.thesis_evolution_drivers || []).map(x => `<li>${escapeHtml(x)}</li>`).join("") || "<li>Ainda sem mudança material mensurável.</li>";
+    const obs = Object.keys(state.thesisHistory?.[r.ticker] || {}).length;
+    const previous = r.thesis_previous_type ? `<span>Anterior: <b>${escapeHtml(r.thesis_previous_type)}</b>${r.thesis_previous_date ? ` · ${escapeHtml(r.thesis_previous_date)}` : ""}</span>` : `<span>${obs ? `${obs} observação${obs === 1 ? "" : "ões"} persistida${obs === 1 ? "" : "s"}` : "histórico a iniciar"}</span>`;
     return `<div class="thesis-panel thesis-${r.thesis_slug || "watch"}">
-      <div class="thesis-panel__head"><div>${thesisBadge(r)}<strong>${r.thesis_summary || ""}</strong></div><span>confiança ${r.thesis_confidence || "—"}</span></div>
+      <div class="thesis-panel__head"><div>${thesisBadge(r)}<strong>${escapeHtml(r.thesis_summary || "")}</strong></div><span>confiança ${escapeHtml(r.thesis_confidence || "—")}</span></div>
+      <div class="trajectory-strip"><div>${thesisDirectionBadge(r)}<strong>${escapeHtml(r.thesis_evolution_summary || "Direção ainda não calculada.")}</strong></div>${previous}</div>
       <div class="thesis-panel__cols"><div><em>A favor</em><ul>${evidence}</ul></div><div><em>O que pode invalidar</em><ul>${risks}</ul></div></div>
+      <div class="trajectory-drivers"><em>O que está a mudar</em><ul>${drivers}</ul></div>
     </div>`;
   }
 
@@ -255,16 +272,28 @@
     return {label:"Fraco", cls:"weak", text:"O conjunto atual de métricas apresenta mais fragilidades do que vantagens relativas."};
   }
 
+  async function fetchJson(path) {
+    const url = new URL(path, document.baseURI);
+    url.searchParams.set("_", String(Date.now()));
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const res = await fetch(url.href, { cache: "no-store", signal: controller.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status} · ${url.pathname}`);
+      return await res.json();
+    } finally { clearTimeout(timer); }
+  }
+
   async function load() {
     try {
-      const res = await fetch("data/stocks.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      state.data = await res.json();
+      state.data = await fetchJson("data/stocks.json");
       if (state.activeView === "stocks") updateGeneratedAt();
       renderMarketOverview();
       applyFilters();
     } catch (e) {
-      els.list.innerHTML = `<p class="empty-state">Não foi possível carregar data/stocks.json.<br>Corre o pipeline (scripts/run.py) pelo menos uma vez.</p>`;
+      if (els.list) els.list.innerHTML = `<div class="load-error"><strong>Falha ao carregar os dados.</strong><p>O ficheiro <code>data/stocks.json</code> não está acessível nesta publicação do GitHub Pages.</p><button id="retry-data" class="import-btn import-btn--secondary">Tentar novamente</button><small>${escapeHtml(e?.message || e)}</small></div>`;
+      if (els.generatedAt) els.generatedAt.textContent = "dados indisponíveis";
+      document.getElementById("retry-data")?.addEventListener("click", load);
       console.error(e);
     }
   }
@@ -301,6 +330,17 @@
     } catch (e) {
       state.valuationHistory = {};
       console.warn("valuation_history.json unavailable yet", e);
+    }
+  }
+
+  async function loadThesisHistory() {
+    try {
+      const res = await fetch("data/thesis_history.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      state.thesisHistory = await res.json();
+    } catch (e) {
+      state.thesisHistory = {};
+      console.warn("thesis_history.json unavailable yet", e);
     }
   }
 
@@ -586,13 +626,13 @@
 
       <h3 class="dossier-title">Growth Intelligence</h3>
       <div class="growth-intel-grid">
-        <div><span>Receita YoY · último trimestre</span><strong>${fmtRawPct(r.revenue_yoy_latest)}</strong></div>
-        <div><span>Lucro líquido YoY · último trimestre</span><strong>${fmtRawPct(r.net_income_yoy_latest)}</strong></div>
+        <div><span>Receita YoY · último trimestre</span><strong>${fmtRawPct(r.revenue_yoy_latest)}</strong><small>${r.revenue_yoy_acceleration_pp == null ? 'aceleração: —' : `aceleração ${Number(r.revenue_yoy_acceleration_pp)>=0?'+':''}${Number(r.revenue_yoy_acceleration_pp).toFixed(1)} pp`}</small></div>
+        <div><span>Lucro líquido YoY · último trimestre</span><strong>${fmtRawPct(r.net_income_yoy_latest)}</strong><small>${r.net_income_yoy_acceleration_pp == null ? 'aceleração: —' : `aceleração ${Number(r.net_income_yoy_acceleration_pp)>=0?'+':''}${Number(r.net_income_yoy_acceleration_pp).toFixed(1)} pp`}</small></div>
         <div><span>Margem líquida · último trimestre</span><strong>${fmtRawPct(r.net_margin_latest)}</strong><small>${marginDeltaLabel} vs trimestre homólogo</small></div>
         <div class="${dilutionClass}"><span>Diluição de ações · YoY</span><strong>${dilutionLabel}</strong><small>${dilution != null && dilution > 0 ? 'mais ações em circulação diluída' : dilution != null && dilution < 0 ? 'redução do número diluído de ações' : 'sem sinal material'}</small></div>
         <div><span>Buybacks · último trimestre</span><strong>${fmtMoney(r.repurchases_last_quarter, r.currency)}</strong></div>
       </div>
-      <p class="detail-note">Comparação YoY usa o trimestre mais recente vs o trimestre homólogo, quando existem pelo menos 5 observações trimestrais.</p>
+      <p class="detail-note">Comparação YoY usa o trimestre mais recente vs o homólogo. A aceleração compara esse crescimento com o crescimento YoY do trimestre imediatamente anterior e requer 6 observações trimestrais.</p>
 
       <h3 class="dossier-title">Cash flow & balanço</h3>
       <div class="dossier-grid">
@@ -924,13 +964,20 @@
     if (!els.thesesList) return;
     const rows = (state.data?.stocks || []).filter(r => r.quote_type !== "ETF" && r.thesis_type);
     if (!rows.length) { els.thesesList.innerHTML = `<p class="empty-state">As teses serão geradas na próxima execução do pipeline.</p>`; return; }
+    const changing = rows.filter(r => ["changed","weakening","strengthening"].includes(r.thesis_direction))
+      .sort((a,b) => {
+        const rank={changed:3,weakening:2,strengthening:1};
+        return (rank[b.thesis_direction]||0)-(rank[a.thesis_direction]||0) || Math.abs(b.thesis_score_delta||0)-Math.abs(a.thesis_score_delta||0);
+      });
+    const radar = changing.length ? `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">THESIS CHANGE RADAR</span><h3>O que está a mudar</h3></div><span class="section-count">${changing.length}</span></div><div class="trajectory-cards">${changing.slice(0,12).map(r => `<button class="trajectory-card trajectory-card--${r.thesis_direction}" data-ticker="${r.ticker}"><div><strong>${escapeHtml(r.ticker)}</strong>${thesisDirectionBadge(r)}</div><small>${escapeHtml(r.name || "")}</small><p>${escapeHtml(r.thesis_evolution_summary || "")}</p>${r.thesis_score_delta == null ? "" : `<span>Δ score ${Number(r.thesis_score_delta)>=0?"+":""}${Number(r.thesis_score_delta).toFixed(1)}</span>`}</button>`).join("")}</div></section>` : `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">THESIS CHANGE RADAR</span><h3>O que está a mudar</h3></div></div><p class="empty-state">Ainda não há mudanças persistidas suficientes. O radar ganhará profundidade a cada execução diária.</p></section>`;
     const order = ["Quality Compounder","GARP","Deep Value","Turnaround","Insider Accumulation","Balanced Candidate","High Growth / High Dilution","Leveraged Growth","Value Trap Risk","Watch / No Edge"];
     const groups = new Map();
     rows.forEach(r => { if (!groups.has(r.thesis_type)) groups.set(r.thesis_type, []); groups.get(r.thesis_type).push(r); });
-    els.thesesList.innerHTML = order.filter(k => groups.has(k)).map(k => {
+    const grouped = order.filter(k => groups.has(k)).map(k => {
       const items = groups.get(k).sort((a,b)=>(b.score ?? -1)-(a.score ?? -1));
-      return `<section class="thesis-group"><div class="section-heading"><div>${thesisBadge(items[0])}<h3>${k}</h3></div><span class="section-count">${items.length}</span></div><div class="thesis-cards">${items.slice(0,12).map(r => `<button class="thesis-card" data-ticker="${r.ticker}"><div><strong>${r.ticker}</strong><small>${r.name || ""}</small></div><span>${r.score ?? "—"}</span><p>${r.thesis_summary || ""}</p></button>`).join("")}</div></section>`;
+      return `<section class="thesis-group"><div class="section-heading"><div>${thesisBadge(items[0])}<h3>${escapeHtml(k)}</h3></div><span class="section-count">${items.length}</span></div><div class="thesis-cards">${items.slice(0,12).map(r => `<button class="thesis-card" data-ticker="${r.ticker}"><div><strong>${escapeHtml(r.ticker)}</strong><small>${escapeHtml(r.name || "")}</small></div><span>${r.score ?? "—"}</span><p>${escapeHtml(r.thesis_summary || "")}</p>${thesisDirectionBadge(r)}</button>`).join("")}</div></section>`;
     }).join("");
+    els.thesesList.innerHTML = radar + grouped;
     els.thesesList.querySelectorAll("[data-ticker]").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
   }
 
@@ -942,16 +989,16 @@
     els.compareList.innerHTML = picks.map(r=>`<article class="compare-card"><span class="eyebrow">${escapeHtml(r.ticker)}</span><h3>${escapeHtml(r.name||r.ticker)}</h3><div class="compare-score">${r.score ?? '—'}</div><div class="detail-row"><span>Qualidade</span><b>${r.quality_score ?? '—'}</b></div><div class="detail-row"><span>Crescimento</span><b>${r.growth_score ?? '—'}</b></div><div class="detail-row"><span>Cash flow</span><b>${r.cashflow_score ?? '—'}</b></div><div class="detail-row"><span>Valor</span><b>${r.valuation_score ?? '—'}</b></div><div class="detail-row"><span>Estabilidade</span><b>${r.stability_score ?? '—'}</b></div><div class="detail-row"><span>P/E fwd</span><b>${fmtRatio(r.forward_pe)}</b></div></article>`).join('') || '<p class="empty-state">Nenhum ticker encontrado no universo atual.</p>';
   }
 
-  els.detailClose.addEventListener("click", () => { els.detail.hidden = true; });
-  els.detail.addEventListener("click", (e) => { if (e.target === els.detail) els.detail.hidden = true; });
+  on(els.detailClose, "click", () => { if (els.detail) els.detail.hidden = true; });
+  on(els.detail, "click", (e) => { if (e.target === els.detail) els.detail.hidden = true; });
 
-  els.portfolioFile.addEventListener("change", (e) => {
+  on(els.portfolioFile, "change", (e) => {
     const file = e.target.files[0];
     if (file) handlePortfolioFile(file);
     e.target.value = ""; // allow re-selecting the same file
   });
 
-  els.portfolioClear.addEventListener("click", () => {
+  on(els.portfolioClear, "click", () => {
     if (!confirm("Limpar todo o portfolio importado/marcado?")) return;
     lsSet(LS_PORTFOLIO, {});
     renderPortfolio();
@@ -959,7 +1006,7 @@
 
   els.compareInput?.addEventListener("input", renderCompare);
 
-  [els.search, els.marketFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].forEach(el => {
+  [els.search, els.marketFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].filter(Boolean).forEach(el => {
     el.addEventListener("input", applyFilters);
     el.addEventListener("change", applyFilters);
   });
@@ -974,4 +1021,5 @@
   loadMetals();
   loadHistory();
   loadValuationHistory();
+  loadThesisHistory();
 })();

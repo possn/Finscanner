@@ -1,0 +1,12 @@
+HOTFIX v0.8.1 — replace ALL of these together:
+
+index.html
+app.js
+style.css
+sw.js
+data/stocks.json
+.github/workflows/update-data.yml
+
+Keep/add the rest of v0.8 as already deployed. For the safest repair, upload the COMPLETE ZIP contents preserving folders.
+
+WORKFLOW-update-data.yml at the repository root is only a visible copy; GitHub Actions uses .github/workflows/update-data.yml.
