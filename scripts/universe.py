@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
+from io import StringIO
 
 import pandas as pd
 import requests
@@ -71,7 +72,7 @@ def _wikipedia_table(url: str, match: str, symbol_col_candidates: list[str]) -> 
         resp = requests.get(url, headers=HEADERS, timeout=20)
         log.info("Wikipedia GET %s -> HTTP %d, %d bytes", url, resp.status_code, len(resp.content))
         resp.raise_for_status()
-        tables = pd.read_html(resp.text, match=match)
+        tables = pd.read_html(StringIO(resp.text), match=match)
         log.info("%s: pd.read_html found %d table(s) matching %r", url, len(tables), match)
         df = tables[0]
         log.info("%s: first matching table columns = %s", url, list(df.columns))

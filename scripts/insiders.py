@@ -28,7 +28,15 @@ import requests
 
 log = logging.getLogger("insiders")
 
-HEADERS = {"User-Agent": "Finscanner/0.1 (personal research tool; contact: set-your-email-here)"}
+HEADERS = {
+    # SEC's fair-access policy requires a specific format: "<App/Company>
+    # <contact email>" — no parentheses, must be a real reachable
+    # contact. Requests with generic/placeholder User-Agents get a 403.
+    # >>> EDIT THIS to a real email before relying on insider signals. <<<
+    "User-Agent": "Finscanner research-tool contact@example.com",
+    "Accept-Encoding": "gzip, deflate",
+    "Host": "www.sec.gov",
+}
 TICKER_CIK_URL = "https://www.sec.gov/files/company_tickers.json"
 
 _ticker_to_cik: dict[str, str] | None = None

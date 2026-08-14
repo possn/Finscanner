@@ -42,7 +42,9 @@ _handler_console = logging.StreamHandler(sys.stdout)
 _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
-logging.basicConfig(level=logging.INFO, handlers=[_handler_stream, _handler_console], force=True)
+logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
+for _name in ("run", "universe", "fundamentals", "insiders", "score", "metals"):
+    logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
 
