@@ -68,21 +68,32 @@ def us_small_micro_cap(limit: int = 400) -> list[str]:
 
 
 def _wikipedia_table(url: str, match: str, symbol_col_candidates: list[str]) -> list[str]:
+    """Fetches every table on the page (no upfront regex filter — Wikipedia's
+    table headers/captions vary and shift over time, and a `match=` filter
+    that misses just means an empty, un-diagnosable result) and scans each
+    one for a column matching `symbol_col_candidates`. `match` is kept only
+    as a logging hint, not a hard filter."""
     try:
         resp = requests.get(url, headers=HEADERS, timeout=20)
         log.info("Wikipedia GET %s -> HTTP %d, %d bytes", url, resp.status_code, len(resp.content))
         resp.raise_for_status()
-        tables = pd.read_html(StringIO(resp.text), match=match)
-        log.info("%s: pd.read_html found %d table(s) matching %r", url, len(tables), match)
-        df = tables[0]
-        log.info("%s: first matching table columns = %s", url, list(df.columns))
-        col = next((c for c in df.columns if c in symbol_col_candidates), None)
-        if col is None:
-            log.warning("No symbol column found in table at %s (columns=%s, looked for=%s)", url, list(df.columns), symbol_col_candidates)
-            return []
-        vals = [str(s).strip() for s in df[col].dropna().tolist()]
-        log.info("%s: extracted %d raw symbols, e.g. %s", url, len(vals), vals[:5])
-        return vals
+        tables = pd.read_html(StringIO(resp.text))
+        log.info("%s: pd.read_html found %d table(s) total (hint pattern was %r)", url, len(tables), match)
+
+        for idx, df in enumerate(tables):
+            cols = [str(c) for c in df.columns]
+            col = next((c for c in df.columns if str(c) in symbol_col_candidates), None)
+            if col is not None:
+                vals = [str(s).strip() for s in df[col].dropna().tolist()]
+                log.info("%s: table[%d] columns=%s -> matched column %r, %d symbols, e.g. %s",
+                          url, idx, cols, col, len(vals), vals[:5])
+                if vals:
+                    return vals
+            else:
+                log.info("%s: table[%d] columns=%s -> no match", url, idx, cols)
+
+        log.warning("No table on %s had a column matching %s", url, symbol_col_candidates)
+        return []
     except Exception as e:
         log.warning("Wikipedia fetch failed for %s (%s: %s)", url, type(e).__name__, e)
         return []
@@ -101,7 +112,7 @@ def wig_constituents() -> list[str]:
     raw = _wikipedia_table(
         "https://en.wikipedia.org/wiki/WIG20",
         match="Ticker",
-        symbol_col_candidates=["Ticker", "Symbol"],
+        symbol_col_candidates=["Ticker", "Symbol", "WSE ticker", "Code"],
     )
     return [f"{s}.WA" for s in raw]
 
