@@ -62,6 +62,24 @@ def _safe_get(d: dict, *keys, default=None):
     return default
 
 
+def _as_float(x):
+    """yfinance's `.info` dict is loosely-typed JSON from Yahoo's backend —
+    numeric fields occasionally arrive as strings, 'Infinity', or other
+    non-numeric junk. Every numeric field pulled from it must go through
+    this: silently returns None for anything that isn't a real, finite
+    number rather than propagating a str/inf into downstream sorting and
+    percentile math, which crashes with a TypeError."""
+    if x is None:
+        return None
+    try:
+        f = float(x)
+    except (TypeError, ValueError):
+        return None
+    if f != f or f in (float("inf"), float("-inf")):  # NaN / inf
+        return None
+    return f
+
+
 def fetch_one(ticker: str) -> RawMetrics:
     m = RawMetrics(ticker=ticker)
     try:
@@ -70,20 +88,20 @@ def fetch_one(ticker: str) -> RawMetrics:
 
         m.name = info.get("shortName") or info.get("longName")
         m.sector = info.get("sector")
-        m.market_cap = info.get("marketCap")
         m.currency = info.get("currency")
         m.quote_type = info.get("quoteType")
 
-        m.roe = info.get("returnOnEquity")
-        m.profit_margin = info.get("profitMargins")
-        m.current_ratio = info.get("currentRatio")
-        m.debt_to_equity = info.get("debtToEquity")
-        m.trailing_pe = info.get("trailingPE")
-        m.price_to_book = info.get("priceToBook")
-        m.beta = info.get("beta")
+        m.roe = _as_float(info.get("returnOnEquity"))
+        m.profit_margin = _as_float(info.get("profitMargins"))
+        m.current_ratio = _as_float(info.get("currentRatio"))
+        m.debt_to_equity = _as_float(info.get("debtToEquity"))
+        m.trailing_pe = _as_float(info.get("trailingPE"))
+        m.price_to_book = _as_float(info.get("priceToBook"))
+        m.beta = _as_float(info.get("beta"))
+        m.market_cap = _as_float(info.get("marketCap"))
 
         if m.quote_type == "ETF":
-            m.expense_ratio = _safe_get(info, "annualReportExpenseRatio", "netExpenseRatio")
+            m.expense_ratio = _as_float(_safe_get(info, "annualReportExpenseRatio", "netExpenseRatio"))
             try:
                 funds_data = t.funds_data
                 if funds_data is not None and funds_data.top_holdings is not None:
