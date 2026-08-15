@@ -1,0 +1,19 @@
+Finscanner v0.9.0 — Mobile Intelligence Shell + Stock Dossier
+
+Scope desta release:
+- nova shell mobile-first inspirada na arquitetura funcional observada na Winston, mantendo identidade Finscanner;
+- Home/Briefing como entrada principal;
+- bottom navigation persistente: Home, Metals, Stocks, Funds, More;
+- preservação da sidebar/drawer para Portfolio, Notícias, Smart Money, Teses, Comparar e tema;
+- Stock Radar simplificado com presets High Quality, Value, Growth e Zombie Detector;
+- listagem de ações mais densa e legível em mobile;
+- Company Dossier passa a abrir em full-screen mobile com hierarquia editorial;
+- score, tese, growth intelligence, valuation, cash-flow e smart-money preservados;
+- correção de cache/versionamento para v0.9.0.
+
+Não foram removidos módulos existentes.
+
+Próxima fase proposta:
+- metric packs específicos por setor (bancos, REITs, seguradoras, utilities);
+- gráficos trimestrais por métrica e explicações automáticas por card;
+- Metals terminal e Funds explorer ao mesmo nível de detalhe visual.

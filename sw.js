@@ -1,9 +1,9 @@
-const CACHE_VERSION = "finscanner-v13-integrity-083";
+const CACHE_VERSION = "finscanner-v14-shell-stocks-090";
 const SHELL_FILES = [
   "./",
   "./index.html",
-  "./style.css?v=0.8.3",
-  "./app.js?v=0.8.3",
+  "./style.css?v=0.9.0",
+  "./app.js?v=0.9.0",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.9.0">
+<link rel="stylesheet" href="style.css?v=0.8.3">
 </head>
 <body>
 
@@ -26,11 +26,8 @@
 
     <div class="sidebar__nav">
       <div class="sidebar__grupo">
-        <button class="sidebar__item sidebar__item--ativo" data-view="home"><span class="sidebar__icon">⌂</span> Home</button>
-      </div>
-      <div class="sidebar__grupo">
         <span class="sidebar__grupo-titulo">Mercados</span>
-        <button class="sidebar__item" data-view="stocks">
+        <button class="sidebar__item sidebar__item--ativo" data-view="stocks">
           <span class="sidebar__icon">📊</span> Ações
         </button>
         <button class="sidebar__item" data-view="funds"><span class="sidebar__icon">◫</span> ETFs</button>
@@ -58,13 +55,9 @@
     </div>
   </nav>
 
-  <div class="app-shell__mobile-header fs-topbar">
-    <div class="fs-brand"><img src="icons/icon-192.png" alt="" class="fs-brand__mark"><strong>Finscanner</strong></div>
-    <div class="fs-topbar__actions">
-      <button class="fs-icon-btn" id="global-search-btn" aria-label="Pesquisar">⌕</button>
-      <button class="fs-icon-btn" id="menu-btn" aria-label="Mais opções">•••</button>
-    </div>
-    <span class="app-shell__mobile-title" id="mobile-title" hidden>Finscanner</span>
+  <div class="app-shell__mobile-header">
+    <button class="app-shell__menu-btn" id="menu-btn" aria-label="Abrir menu">☰</button>
+    <span class="app-shell__mobile-title" id="mobile-title">Finscanner</span>
   </div>
 
   <main class="app-shell__content">
@@ -79,23 +72,7 @@
       </div>
     </header>
 
-    <section id="view-home" class="view is-active">
-      <section class="briefing-hero">
-        <div class="briefing-hello"><img src="icons/icon-192.png" alt="" class="briefing-avatar"><div><span class="eyebrow">Finscanner Intelligence</span><p id="briefing-greeting">Bom dia</p><h2>Briefing</h2></div></div>
-        <article class="briefing-card" id="briefing-card"><span class="briefing-signal">A calcular sinais…</span><h3>O mercado em contexto.</h3><p>Assim que os dados carregarem, o Finscanner resume as alterações mais relevantes do universo, da tua carteira e da watchlist.</p></article>
-      </section>
-      <section class="home-tools">
-        <div class="section-heading"><div><span class="eyebrow">YOUR TOOLS</span><h3>Explorar</h3></div></div>
-        <div class="home-tool-grid">
-          <button class="home-tool-card" data-goto="stocks"><span>▥</span><strong>Stocks</strong><small>Radar, filtros e dossiers</small></button>
-          <button class="home-tool-card" data-goto="metals"><span>◆</span><strong>Metals</strong><small>Preço, tendência e stress</small></button>
-          <button class="home-tool-card" data-goto="funds"><span>▱</span><strong>Funds</strong><small>ETFs, temas e custos</small></button>
-          <button class="home-tool-card" data-goto="portfolio"><span>★</span><strong>Portfolio</strong><small>Posições e exposição</small></button>
-        </div>
-      </section>
-    </section>
-
-    <section id="view-stocks" class="view">
+    <section id="view-stocks" class="view is-active">
       <section class="market-hero" aria-label="Resumo de inteligência de mercado">
         <div class="market-hero__copy">
           <span class="eyebrow">MARKET INTELLIGENCE</span>
@@ -133,15 +110,7 @@
         <div id="opportunity-grid" class="opportunity-grid"></div>
       </section>
 
-      <section class="stock-radar-head">
-        <span class="eyebrow">STOCK RADAR</span>
-        <h2>Encontra empresas que merecem investigação.</h2>
-        <p>Score explicável, métricas fundamentais, valuation relativo e trajetória da tese.</p>
-        <div class="preset-filters" id="preset-filters">
-          <button data-preset="quality">High Quality</button><button data-preset="value">Value</button><button data-preset="growth">Growth</button><button data-preset="zombie">Zombie Detector</button>
-        </div>
-      </section>
-      <div class="section-heading fs-screener-heading">
+      <div class="section-heading">
         <div><span class="eyebrow">SCREENER</span><h3>Explorar empresas</h3></div>
         <span class="section-count" id="result-count">—</span>
       </div>
@@ -227,13 +196,6 @@
 
   </main>
 </div>
-  <nav class="bottom-nav" id="bottom-nav" aria-label="Navegação principal">
-    <button data-view="home" class="is-active"><span>▤</span><strong>Home</strong></button>
-    <button data-view="metals"><span>▱</span><strong>Metals</strong></button>
-    <button data-view="stocks"><span>▥</span><strong>Stocks</strong></button>
-    <button data-view="funds"><span>▰</span><strong>Funds</strong></button>
-    <button data-view="more"><span>•••</span><strong>More</strong></button>
-  </nav>
 
 <div id="detail" class="detail-overlay" hidden>
   <div class="detail-card">
@@ -242,6 +204,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.9.0"></script>
+<script src="app.js?v=0.8.3"></script>
 </body>
 </html>

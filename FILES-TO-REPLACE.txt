@@ -1,13 +1,13 @@
-Finscanner v0.8.3
+Finscanner v0.9.0
 
-For the integrity repair, replace these files together:
+SUBSTITUIR NO GITHUB:
 - index.html
 - app.js
 - style.css
 - sw.js
-- .github/workflows/update-data.yml
 
-Keep your existing accumulated data/history.json, data/valuation_history.json and data/thesis_history.json if they contain newer production history than this release.
-
-The workflow filename and location are exactly:
+NÃO É NECESSÁRIO SUBSTITUIR OS HISTÓRICOS DE DADOS.
+O workflow canónico continua em:
 .github/workflows/update-data.yml
+
+Para uma instalação limpa, pode também substituir todo o conteúdo do ZIP preservando a estrutura de pastas.

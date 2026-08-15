@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home" };
+  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "stocks" };
 
   const els = {
     list: document.getElementById("list"),
@@ -50,10 +50,6 @@
     thesesList: document.getElementById("theses-list"),
     compareInput: document.getElementById("compare-input"),
     compareList: document.getElementById("compare-list"),
-    bottomNavItems: document.querySelectorAll(".bottom-nav button[data-view]"),
-    globalSearchBtn: document.getElementById("global-search-btn"),
-    briefingCard: document.getElementById("briefing-card"),
-    briefingGreeting: document.getElementById("briefing-greeting"),
   };
 
   function on(el, event, handler) {
@@ -61,7 +57,6 @@
   }
 
   const VIEW_META = {
-    home: { title: "Home", sub: "briefing diário" },
     stocks: { title: "Ações", sub: "dossiê diário · fontes gratuitas" },
     metals: { title: "Metais", sub: "futuros e proxies · fontes gratuitas" },
     portfolio: { title: "O meu portfolio", sub: "guardado só neste dispositivo (localStorage)" },
@@ -107,7 +102,6 @@
     if (!VIEW_META[view]) return;
     state.activeView = view;
     els.sidenavItems.forEach(btn => btn.classList.toggle("sidebar__item--ativo", btn.dataset.view === view));
-    els.bottomNavItems?.forEach(btn => btn.classList.toggle("is-active", btn.dataset.view === view));
     els.views.forEach(sec => sec.classList.toggle("is-active", sec.id === `view-${view}`));
     if (els.viewTitle) els.viewTitle.textContent = VIEW_META[view].title;
     if (els.viewSub) els.viewSub.textContent = VIEW_META[view].sub;
@@ -176,8 +170,7 @@
 
   function renderActiveView() {
     const v = state.activeView;
-    if (v === "home") renderHome();
-    else if (v === "stocks") { renderMarketOverview(); applyFilters(); }
+    if (v === "stocks") { renderMarketOverview(); applyFilters(); }
     else if (v === "portfolio") renderPortfolio();
     else if (v === "funds") renderFunds();
     else if (v === "news") renderNews();
@@ -190,35 +183,9 @@
     btn.addEventListener("click", () => switchView(btn.dataset.view));
   });
 
-  els.bottomNavItems?.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const v = btn.dataset.view;
-      if (v === "more") return openMobileSidebar();
-      switchView(v);
-    });
-  });
-  on(els.globalSearchBtn, "click", () => { switchView("stocks"); setTimeout(() => { els.search?.focus(); window.scrollTo({top:0,behavior:"smooth"}); }, 50); });
-
   document.querySelectorAll(".orientation-card[data-goto]").forEach(btn => {
     btn.addEventListener("click", () => switchView(btn.dataset.goto));
   });
-
-  function renderHome() {
-    if (els.briefingGreeting) {
-      const h = new Date().getHours();
-      els.briefingGreeting.textContent = h < 12 ? "Bom dia" : h < 19 ? "Boa tarde" : "Boa noite";
-    }
-    if (!els.briefingCard || !state.data?.stocks?.length) return;
-    const rows = state.data.stocks.filter(r => r.quote_type !== "ETF" && Number.isFinite(Number(r.score)));
-    const strengthen = rows.filter(r => r.thesis_direction === "strengthening").sort((a,b)=>(b.thesis_score_delta||0)-(a.thesis_score_delta||0))[0];
-    const insider = rows.filter(r => Number(r.insider_net_value_30d) > 0).sort((a,b)=>(b.insider_net_value_30d||0)-(a.insider_net_value_30d||0))[0];
-    const top = strengthen || insider || rows.slice().sort((a,b)=>(b.score||0)-(a.score||0))[0];
-    if (!top) return;
-    const signal = strengthen ? "Tese a reforçar" : insider ? "Smart money" : "Qualidade em destaque";
-    const body = strengthen ? (top.thesis_evolution_summary || top.thesis_summary) : insider ? `Compras líquidas de insiders: ${fmtMoney(top.insider_net_value_30d, top.currency || "USD")}.` : `Score ${Math.round(top.score)} · qualidade ${Math.round(top.quality_pct ?? 0)} · crescimento ${Math.round(top.growth_pct ?? 0)}.`;
-    els.briefingCard.innerHTML = `<span class="briefing-signal">${escapeHtml(signal)}</span><small>${escapeHtml(top.ticker)}</small><h3>${escapeHtml(top.name || top.ticker)}</h3><p>${escapeHtml(body || "")}</p><button class="briefing-open" data-ticker="${escapeHtml(top.ticker)}">Abrir dossier →</button>`;
-    els.briefingCard.querySelector(".briefing-open")?.addEventListener("click", () => openDetail(top.ticker));
-  }
 
   function marketOf(ticker) {
     if (ticker.endsWith(".AX")) return "AU";
@@ -1325,17 +1292,6 @@
     els.compareList.innerHTML = (cards || '<p class="empty-state">Nenhum ticker ou nome encontrado no universo atual.</p>') + missNote;
   }
 
-
-  document.querySelectorAll("#preset-filters [data-preset]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#preset-filters [data-preset]").forEach(b => b.classList.toggle("is-active", b === btn));
-      const p = btn.dataset.preset;
-      if (p === "zombie") { els.zombieOnly.checked = true; els.sortBy.value = "score-desc"; }
-      else { els.zombieOnly.checked = false; els.sortBy.value = p === "quality" ? "quality-desc" : p === "growth" ? "growth-desc" : "value-desc"; }
-      applyFilters();
-    });
-  });
-
   on(els.detailClose, "click", () => { if (els.detail) els.detail.hidden = true; });
   on(els.detail, "click", (e) => { if (e.target === els.detail) els.detail.hidden = true; });
 
@@ -1368,7 +1324,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.9.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.8.3").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
