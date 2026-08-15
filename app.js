@@ -89,6 +89,7 @@
     smartmoneyTypeFilters: document.getElementById("smartmoney-type-filters"),
     insiderAlertToggle: document.getElementById("insider-alert-toggle"),
     insiderAlertStatus: document.getElementById("insider-alert-status"),
+    exportAlertWatchlist: document.getElementById("export-alert-watchlist"),
     thesesList: document.getElementById("theses-list"),
     compareInput: document.getElementById("compare-input"),
     compareList: document.getElementById("compare-list"),
@@ -154,6 +155,27 @@
     const w = lsGet(LS_WATCHLIST);
     if (w[ticker]) delete w[ticker]; else w[ticker] = true;
     lsSet(LS_WATCHLIST, w);
+  }
+
+  function exportAlertWatchlist() {
+    const tickers = Object.keys(lsGet(LS_WATCHLIST)).filter(Boolean).sort();
+    const payload = { schema_version: 1, generated_at: new Date().toISOString(), tickers };
+    const blob = new Blob([JSON.stringify(payload, null, 2)+"\n"], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download="alert_watchlist.json"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
+  function insiderSignalUi(r) {
+    const txs = Array.isArray(r.insider_transactions_365d) ? r.insider_transactions_365d : (Array.isArray(r.insider_transactions) ? r.insider_transactions : []);
+    const cutoff = Date.now() - 14*86400000;
+    const recentBuys = txs.filter(tx=>tx.type==='buy' && Date.parse(tx.date||'')>=cutoff);
+    const buyers = new Set(recentBuys.map(tx=>String(tx.owner||'Insider')));
+    const latest = txs[0] || null;
+    if (buyers.size >= 2) return {label:'CLUSTER BUYING', cls:'cluster'};
+    if (latest?.type==='buy' && Number(latest.value||0)>=500000 && /CEO|Chief Executive|CFO|Chief Financial|President|Chairman|Director/i.test(latest.role||'')) return {label:'STRONG BUY',cls:'strong'};
+    if (latest?.type==='sell' && Number(latest.value||0)>=1000000) return {label:'LARGE SALE',cls:'sale'};
+    return null;
   }
 
   function insiderAlertConfig() {
@@ -237,12 +259,15 @@
   // ---------- Theme (light/dark), persisted ----------
   const LS_THEME = "finscanner:theme";
   function applyTheme(theme) {
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
     if (theme === "dark") {
       document.documentElement.setAttribute("data-theme", "dark");
+      if (themeMeta) themeMeta.setAttribute("content", "#20241d");
       els.themeIcon.textContent = "☀";
       els.themeLabel.textContent = "Modo claro";
     } else {
       document.documentElement.removeAttribute("data-theme");
+      if (themeMeta) themeMeta.setAttribute("content", "#fef5e8");
       els.themeIcon.textContent = "☾";
       els.themeLabel.textContent = "Modo escuro";
     }
@@ -3964,7 +3989,8 @@
       const netText = net == null ? 'P/S indisponível' : `${net >= 0 ? '+' : '−'}${fmtMoney(Math.abs(net), r.currency || 'USD')}`;
       const latest = Array.isArray(r.insider_transactions) && r.insider_transactions.length ? r.insider_transactions[0] : null;
       const latestText = latest ? `${latest.type === 'buy' ? 'Compra' : 'Venda'} · ${latest.owner || 'Insider'}${latest.role ? ' · '+latest.role : ''}` : `${r.insider_form4_count_30d || 0} Form 4 nos últimos 30 dias`;
-      return `<article class="intel-card smartmoney-card ${signal}" data-ticker="${escapeHtml(r.ticker)}"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h3>${escapeHtml(r.name || r.ticker)}</h3><p>${escapeHtml(latestText)}</p></div><div class="smartmoney-stats"><div><strong>${r.insider_buy_count_30d ?? '—'}</strong><span>compras P</span></div><div><strong>${r.insider_sell_count_30d ?? '—'}</strong><span>vendas S</span></div><div><strong class="${net != null && net >= 0 ? 'positive-text' : net != null ? 'negative-text' : ''}">${netText}</strong><span>fluxo líquido</span></div></div></article>`;
+      const sigUi = insiderSignalUi(r);
+      return `<article class="intel-card smartmoney-card ${signal}" data-ticker="${escapeHtml(r.ticker)}"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span>${sigUi?`<span class="insider-signal-badge ${sigUi.cls}">${escapeHtml(sigUi.label)}</span>`:''}<h3>${escapeHtml(r.name || r.ticker)}</h3><p>${escapeHtml(latestText)}</p></div><div class="smartmoney-stats"><div><strong>${r.insider_buy_count_30d ?? '—'}</strong><span>compras P</span></div><div><strong>${r.insider_sell_count_30d ?? '—'}</strong><span>vendas S</span></div><div><strong class="${net != null && net >= 0 ? 'positive-text' : net != null ? 'negative-text' : ''}">${netText}</strong><span>fluxo líquido</span></div></div></article>`;
     }).join("") : `<p class="empty-state">${state.smartMoneyScope === 'portfolio' ? 'Nenhuma posição da carteira cumpre este filtro insider nos últimos 30 dias.' : 'Nenhuma empresa cumpre este filtro insider nos últimos 30 dias.'}</p>`;
     els.smartmoneyList.querySelectorAll('[data-ticker]').forEach(x=>x.addEventListener('click',()=>openDetail(x.dataset.ticker)));
   }
@@ -4163,6 +4189,7 @@
   }));
 
   on(els.insiderAlertToggle, "click", () => toggleInsiderAlerts().catch(err=>console.warn("notification permission failed",err)));
+  on(els.exportAlertWatchlist, "click", exportAlertWatchlist);
   refreshInsiderAlertUi();
 
   on(els.portfolioFile, "change", (e) => {

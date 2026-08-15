@@ -1259,3 +1259,153 @@ a { color: inherit; }
 @media(max-width:620px){.insider-alert-card{display:block}.insider-alert-card button{margin-top:12px;width:100%}.insider-activity-panel{padding:13px;margin-left:-2px;margin-right:-2px}.insider-ledger-row{grid-template-columns:1fr}.sector-compare-adder{display:grid;grid-template-columns:1fr auto}}
 
 /* v0.52.0 — Background insider push is handled by GitHub Actions + ntfy. */
+
+/* v0.53.0 — Dark Mode Accessibility & Dossier Readability
+   Mobile v0.10+ introduced a Winston-like light shell using literal white/navy
+   values. These overrides restore semantic design tokens when dark mode is on. */
+[data-theme="dark"] .app-shell{
+  --fs-navy:#f4efe5;
+  --fs-gold:#e0aa54;
+  --fs-gold-soft:#3b3323;
+  --fs-green:#5bc09b;
+  --fs-green-soft:#223a31;
+  --fs-red:#ef7a83;
+  --fs-red-soft:#42272b;
+  --fs-gray:#aab0bb;
+  --fs-line:#42483d;
+}
+[data-theme="dark"] body,
+[data-theme="dark"] html{background:var(--bg)!important;color:var(--ink)!important}
+[data-theme="dark"] .app-shell__content,
+[data-theme="dark"] .fs-topbar,
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .bottom-nav,
+[data-theme="dark"] .commandbar,
+[data-theme="dark"] .home-tool-card,
+[data-theme="dark"] .stock-card,
+[data-theme="dark"] .detail-overlay,
+[data-theme="dark"] .detail-card,
+[data-theme="dark"] .detail-close,
+[data-theme="dark"] .comparison-card,
+[data-theme="dark"] .score-history-card,
+[data-theme="dark"] .w-metric-card,
+[data-theme="dark"] .stock-change-card,
+[data-theme="dark"] .dossier-grid,
+[data-theme="dark"] .growth-intel-grid,
+[data-theme="dark"] .dimension-grid{
+  background:var(--surface)!important;
+  color:var(--ink)!important;
+  border-color:var(--border)!important;
+}
+[data-theme="dark"] .fs-topbar,
+[data-theme="dark"] .bottom-nav{background:color-mix(in srgb,var(--surface) 94%,transparent)!important}
+[data-theme="dark"] .fs-brand,
+[data-theme="dark"] .fs-icon-btn,
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .sidebar__item--ativo,
+[data-theme="dark"] .card-ticker,
+[data-theme="dark"] .detail-hero h2,
+[data-theme="dark"] .dossier-grid strong,
+[data-theme="dark"] .growth-intel-grid strong,
+[data-theme="dark"] .w-section-intro h3,
+[data-theme="dark"] .w-metric-main>strong,
+[data-theme="dark"] .metric-story-title h3,
+[data-theme="dark"] .score-history-card h3,
+[data-theme="dark"] .dossier-title{color:var(--ink)!important}
+[data-theme="dark"] .detail-hero p,
+[data-theme="dark"] .card-name,
+[data-theme="dark"] .dossier-grid span,
+[data-theme="dark"] .growth-intel-grid span,
+[data-theme="dark"] .growth-intel-grid small,
+[data-theme="dark"] .w-section-intro p,
+[data-theme="dark"] .w-metric-head,
+[data-theme="dark"] .w-metric-explain,
+[data-theme="dark"] .w-metric-sub,
+[data-theme="dark"] .metric-story-grid .w-metric-head>span,
+[data-theme="dark"] .score-history-card p{color:var(--ink-muted)!important}
+[data-theme="dark"] .eyebrow,
+[data-theme="dark"] .legacy-detail-title,
+[data-theme="dark"] .w-section-intro>span,
+[data-theme="dark"] .metric-story-title .eyebrow{color:var(--ink-faint)!important}
+[data-theme="dark"] .detail-score{background:var(--surface-sunken)!important;color:var(--ink)!important}
+[data-theme="dark"] .detail-hero,
+[data-theme="dark"] .metric-story-title,
+[data-theme="dark"] .w-metric-explain,
+[data-theme="dark"] .dossier-grid>div,
+[data-theme="dark"] .growth-intel-grid>div,
+[data-theme="dark"] .dimension{border-color:var(--border)!important}
+[data-theme="dark"] .dimension{background:transparent!important;color:var(--ink)!important}
+[data-theme="dark"] .dimension span{color:var(--ink-muted)!important}
+[data-theme="dark"] .dimension em{color:var(--ink-faint)!important}
+[data-theme="dark"] .dimension i{background:var(--surface-sunken)!important}
+[data-theme="dark"] .dimension i b{background:var(--accent)!important}
+[data-theme="dark"] .thesis-panel,
+[data-theme="dark"] .trajectory-strip,
+[data-theme="dark"] .trajectory-drivers li{background:var(--surface)!important;border-color:var(--border)!important;color:var(--ink)!important}
+[data-theme="dark"] .thesis-panel__head strong,
+[data-theme="dark"] .trajectory-strip strong{color:var(--ink)!important}
+[data-theme="dark"] .thesis-panel li,
+[data-theme="dark"] .thesis-panel__head>span,
+[data-theme="dark"] .thesis-panel em,
+[data-theme="dark"] .trajectory-strip>span{color:var(--ink-muted)!important}
+[data-theme="dark"] .trajectory-strip{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 70%,transparent)}
+[data-theme="dark"] .verdict-panel.excellent,
+[data-theme="dark"] .verdict-panel.good{background:#223a31!important;color:#e7f7ef!important}
+[data-theme="dark"] .verdict-panel.neutral{background:#3b3323!important;color:#f8e8c7!important}
+[data-theme="dark"] .verdict-panel.weak{background:#42272b!important;color:#ffe5e7!important}
+[data-theme="dark"] .score-model-note{background:var(--surface-sunken)!important;border-color:var(--border)!important}
+[data-theme="dark"] .score-model-note span{color:var(--ink-faint)!important}
+[data-theme="dark"] .score-model-note p{color:var(--ink-muted)!important}
+[data-theme="dark"] .w-metric-head b{border-color:var(--border)!important;color:var(--ink-faint)!important}
+[data-theme="dark"] .metric-mini-bars{border-color:var(--border)!important}
+[data-theme="dark"] .metric-no-trend{color:var(--ink-faint)!important}
+[data-theme="dark"] .stock-change-card.good{background:#223a31!important;border-color:#315a49!important}
+[data-theme="dark"] .stock-change-card.bad{background:#42272b!important;border-color:#6a3a40!important}
+[data-theme="dark"] .stock-change-card.warn{background:#3b3323!important;border-color:#635331!important}
+[data-theme="dark"] .stock-change-card p{color:var(--ink-muted)!important}
+[data-theme="dark"] .owned-toggle{color:var(--ink-muted)!important}
+[data-theme="dark"] .detail-note{color:var(--ink-muted)!important}
+[data-theme="dark"] .detail-close{box-shadow:0 1px 8px rgba(0,0,0,.22)!important}
+
+/* Prevent truncation/overlap in long thesis and score labels. */
+.detail-card,.thesis-panel,.trajectory-strip,.dimension-grid,.dimension{min-width:0}
+.thesis-panel__head strong,.trajectory-strip strong,.dossier-title,.dimension span,.dimension em{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.trajectory-strip>div{min-width:0;max-width:100%}
+.trajectory-strip>span{max-width:100%;white-space:normal}
+
+@media(max-width:760px){
+  [data-theme="dark"] body{background:var(--bg)!important;color:var(--ink)!important}
+  [data-theme="dark"] .app-shell__content{background:var(--bg)!important}
+  [data-theme="dark"] .sidebar__item--ativo{background:var(--surface-sunken)!important}
+  [data-theme="dark"] .bottom-nav button{color:var(--ink-muted)!important}
+  [data-theme="dark"] .bottom-nav button.is-active{background:var(--surface-sunken)!important;color:var(--accent-strong)!important}
+  [data-theme="dark"] .detail-overlay,[data-theme="dark"] .detail-card{background:var(--bg)!important}
+  [data-theme="dark"] .detail-close{background:var(--surface)!important;color:var(--ink)!important}
+  [data-theme="dark"] .dossier-grid,[data-theme="dark"] .growth-intel-grid,[data-theme="dark"] .dimension-grid{background:var(--surface)!important}
+  .dossier-title{font-size:clamp(22px,7.3vw,28px)!important;line-height:1.08!important;max-width:100%;overflow:visible!important}
+  .dimension{grid-template-columns:minmax(0,1fr) minmax(68px,90px) minmax(62px,78px) 42px!important;column-gap:7px!important;align-items:center!important}
+  .dimension span{font-size:13px!important;line-height:1.22!important;text-transform:none!important}
+  .dimension em{font-size:11px!important;line-height:1.2!important}
+  .dimension strong{font-size:17px!important;min-width:0!important}
+  .thesis-panel__head{gap:10px!important}
+  .thesis-panel__head strong{font-size:14px!important;line-height:1.45!important}
+  .trajectory-strip{padding:13px!important}
+  .trajectory-strip strong{font-size:13px!important;line-height:1.45!important}
+  .trajectory-strip>span{font-size:11px!important;line-height:1.35!important}
+}
+
+/* v0.54 Insider Signal Intelligence */
+.insider-intelligence-card{display:grid;gap:14px;margin:0 0 18px;padding:17px 18px;border:1px solid var(--border);border-radius:18px;background:var(--surface);color:var(--ink)}
+.insider-intelligence-card h3{margin:4px 0 6px}.insider-intelligence-card p{margin:0;color:var(--ink-muted);font-size:12px;line-height:1.55}
+.insider-signal-legend{display:flex;gap:7px;flex-wrap:wrap}.sig,.insider-signal-badge{display:inline-flex;width:max-content;align-items:center;border-radius:999px;padding:5px 8px;font-size:8px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--border)}
+.sig.strong,.insider-signal-badge.strong{background:color-mix(in srgb,#35a66f 16%,var(--surface));color:#26845a;border-color:color-mix(in srgb,#35a66f 38%,var(--border))}
+.sig.cluster,.insider-signal-badge.cluster{background:color-mix(in srgb,#2f86d8 15%,var(--surface));color:#2a72b5;border-color:color-mix(in srgb,#2f86d8 36%,var(--border))}
+.sig.reversal{background:color-mix(in srgb,#a873d9 15%,var(--surface));color:#8756b5}.sig.sale,.insider-signal-badge.sale{background:color-mix(in srgb,#d96060 14%,var(--surface));color:#b34040;border-color:color-mix(in srgb,#d96060 36%,var(--border))}
+.insider-watch-bridge{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:12px;border-top:1px solid var(--border)}.insider-watch-bridge>div{display:grid;gap:3px}.insider-watch-bridge small{color:var(--ink-muted);font-size:10px;line-height:1.45}.insider-watch-bridge code{color:var(--ink);background:var(--surface-sunken);padding:1px 4px;border-radius:4px}
+.smartmoney-card .insider-signal-badge{margin-left:7px;vertical-align:middle}
+[data-theme="dark"] .insider-alert-card{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 9%,var(--surface)),var(--surface));border-color:var(--border)}
+[data-theme="dark"] .insider-alert-card p{color:var(--ink-muted)}
+@media(max-width:620px){.insider-watch-bridge{display:grid}.insider-watch-bridge button{width:100%}.insider-intelligence-card{padding:14px}}

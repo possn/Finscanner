@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.52.0">
+<link rel="stylesheet" href="style.css?v=0.54.0">
 </head>
 <body>
 
@@ -346,6 +346,11 @@
       </div>
       <div id="smartmoney-health" class="data-health-card"></div>
       <div class="insider-alert-card"><div><span class="eyebrow">INSIDER ALERTS</span><h3>Alertas para portfolio + watchlist</h3><p id="insider-alert-status">Alertas locais desativados. O push em background via ntfy funciona separadamente através do GitHub Actions.</p></div><button id="insider-alert-toggle" class="import-btn">Ativar alertas</button></div>
+      <div class="insider-intelligence-card">
+        <div><span class="eyebrow">ALERT INTELLIGENCE</span><h3>Não tratar todas as operações como iguais</h3><p>O workflow em background passa a destacar compras fortes de gestores, cluster buying, reversões de comportamento e vendas muito grandes. Vendas pequenas são filtradas por defeito.</p></div>
+        <div class="insider-signal-legend"><span class="sig strong">Strong Buy</span><span class="sig cluster">Cluster</span><span class="sig reversal">Reversal</span><span class="sig sale">Large Sale</span></div>
+        <div class="insider-watch-bridge"><div><strong>Watchlist no push em background</strong><small>A PWA não pode escrever diretamente no GitHub Pages. Exporta a tua watchlist e substitui <code>data/alert_watchlist.json</code> no repositório.</small></div><button id="export-alert-watchlist" class="import-btn import-btn--secondary">Exportar watchlist</button></div>
+      </div>
       <div id="smartmoney-list" class="dossier"></div>
     </section>
     <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">INVESTMENT THESES</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section>
@@ -410,6 +415,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.52.0"></script>
+<script src="app.js?v=0.54.0"></script>
 </body>
 </html>

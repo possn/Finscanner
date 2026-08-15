@@ -384,3 +384,11 @@ A primeira execução faz baseline dos filings atuais, evitando uma avalanche de
 O universo background usa `data/extra_tickers.json` (portfolio) e, opcionalmente, `data/alert_watchlist.json`. A watchlist guardada apenas no localStorage do iPhone não é visível para GitHub Actions; para alertas remotos de watchlist, os tickers podem ser espelhados nesse ficheiro.
 
 O estado anti-duplicação é persistido em `data/insider_alert_state.json`. Só são publicados alertas para operações open-market `P`/`S`; grants, options, gifts e vesting não geram push.
+
+## v0.54.0 — Dark Mode Accessibility & Dossier Readability
+
+- Repara o modo escuro do dossier mobile: fundo, cards, headings, thesis panel, score breakdown, metric stories e navegação passam a respeitar os tokens dark em vez de valores brancos/navy fixos.
+- A barra de estado/PWA acompanha a mudança de tema através de `theme-color` dinâmico.
+- Corrige contraste insuficiente em `Tese quantitativa`, trajectory strip, score-model note e metric cards.
+- Corrige headings e textos cortados em ecrãs estreitos; o score breakdown passa a aceitar labels longos sem overflow.
+- Mantém todo o pipeline SEC/ntfy e Sector Intelligence da v0.52.x.
