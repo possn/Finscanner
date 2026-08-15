@@ -24,6 +24,7 @@ import history as history_mod
 import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
+from fx import build_fx_payload
 from news import fetch_news_for_universe
 from score import score_universe
 from thesis import classify as classify_thesis, evolve as evolve_thesis
@@ -32,6 +33,7 @@ from universe import build_universe, ETF_UNIVERSE, region_for_equity
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
+FX_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "fx.json")
 HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "history.json")
 VALUATION_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "valuation_history.json")
 THESIS_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "thesis_history.json")
@@ -52,7 +54,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "history", "valuation_history", "thesis_history", "news"):
+for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "fx", "history", "valuation_history", "thesis_history", "news"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -189,6 +191,11 @@ def main():
     with open(METALS_OUT_PATH, "w") as f:
         json.dump(_json_safe(metals_payload), f, indent=2)
     log.info("Wrote metals data to %s", METALS_OUT_PATH)
+
+    fx_payload = build_fx_payload()
+    with open(FX_OUT_PATH, "w") as f:
+        json.dump(_json_safe(fx_payload), f, indent=2)
+    log.info("Wrote FX data to %s", FX_OUT_PATH)
 
     history = history_mod.load(HISTORY_PATH)
     history = history_mod.update(history, rows, today)
