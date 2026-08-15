@@ -1,8 +1,0 @@
-Replace together:
-scripts/fundamentals.py
-scripts/score.py
-scripts/run.py
-.github/workflows/update-data.yml
-update-data.yml
-
-No frontend replacement is required for the coverage hotfix itself.
