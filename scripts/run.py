@@ -24,6 +24,7 @@ from analyst import fetch_many as fetch_analyst_many
 import history as history_mod
 import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
+from insider_prices import fetch_many as fetch_insider_prices
 from metals import build_metals_payload
 from metals_brief import build_metals_brief
 import metals_history as metals_history_mod
@@ -61,7 +62,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "analyst", "insiders", "score", "thesis", "metals", "fx", "fx_history", "history", "valuation_history", "thesis_history", "news"):
+for _name in ("run", "universe", "fundamentals", "analyst", "insiders", "insider_prices", "score", "thesis", "metals", "fx", "fx_history", "history", "valuation_history", "thesis_history", "news"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -136,6 +137,8 @@ def main():
 
     us_tickers = [s.ticker for s in scored if "." not in s.ticker and s.quote_type != "ETF"]
     insider_map = annotate_insiders(us_tickers)
+    insider_active_tickers = [t for t, info in insider_map.items() if info.get("transactions_365d")]
+    insider_price_map = fetch_insider_prices(insider_active_tickers)
     raw_by_ticker = {r.ticker: r for r in raw}
     today = datetime.date.today().isoformat()
     thesis_history = thesis_history_mod.load(THESIS_HISTORY_PATH)
@@ -170,6 +173,14 @@ def main():
         row["insider_sell_value_30d"] = insider.get("sell_value_30d")
         row["insider_net_value_30d"] = insider.get("net_value_30d")
         row["insider_transactions"] = insider.get("transactions", [])
+        row["insider_form4_count_365d"] = insider.get("form4_count_365d")
+        row["insider_buy_count_365d"] = insider.get("buy_count_365d")
+        row["insider_sell_count_365d"] = insider.get("sell_count_365d")
+        row["insider_buy_value_365d"] = insider.get("buy_value_365d")
+        row["insider_sell_value_365d"] = insider.get("sell_value_365d")
+        row["insider_net_value_365d"] = insider.get("net_value_365d")
+        row["insider_transactions_365d"] = insider.get("transactions_365d", [])
+        row["insider_price_history_1y"] = insider_price_map.get(s.ticker, [])
         row["insider_reason"] = insider.get("reason")
         row["insider_detail_filings_parsed"] = insider.get("detail_filings_parsed")
 
@@ -224,6 +235,10 @@ def main():
     us_equity_rows = [r for r in rows if r.get("quote_type") != "ETF" and "." not in (r.get("ticker") or "")]
     insider_ok_rows = sum(1 for r in us_equity_rows if r.get("insider_status") == "ok")
     insider_degraded_rows = sum(1 for r in us_equity_rows if r.get("insider_status") == "degraded")
+    # "degraded" means SEC submissions were reached but one or more Form 4 detail
+    # documents could not be parsed. It is still a successfully checked issuer and
+    # must not be confused with SEC being unavailable/no CIK mapping.
+    insider_checked_rows = insider_ok_rows + insider_degraded_rows
     insider_rows_with_form4 = sum(1 for r in us_equity_rows if isinstance(r.get("insider_form4_count_30d"), int) and r.get("insider_form4_count_30d", 0) > 0)
     insider_rows_with_ps = sum(1 for r in us_equity_rows if (r.get("insider_buy_count_30d") or 0) + (r.get("insider_sell_count_30d") or 0) > 0)
 
@@ -236,7 +251,7 @@ def main():
     analyst_earnings_within_14d = sum(1 for a in analyst_map.values() if isinstance(a.get("days_to_earnings"), int) and 0 <= a.get("days_to_earnings") <= 14)
 
     payload = {
-        "schema_version": 481,
+        "schema_version": 510,
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
         "data_quality": {
             "portfolio_extra_requested": len(portfolio_extra),
@@ -247,6 +262,8 @@ def main():
             "insider_us_equities": len(us_equity_rows),
             "insider_sec_ok": insider_ok_rows,
             "insider_sec_degraded": insider_degraded_rows,
+            "insider_sec_checked": insider_checked_rows,
+            "insider_sec_checked_coverage_pct": round((insider_checked_rows / len(us_equity_rows) * 100), 1) if us_equity_rows else 100.0,
             "insider_rows_with_form4_30d": insider_rows_with_form4,
             "insider_rows_with_open_market_ps_30d": insider_rows_with_ps,
             "insider_sec_coverage_pct": round((insider_ok_rows / len(us_equity_rows) * 100), 1) if us_equity_rows else 100.0,

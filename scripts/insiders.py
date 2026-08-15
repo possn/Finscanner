@@ -226,7 +226,7 @@ def _fetch_structured_filing(cik: str, filing: dict, ticker: str) -> tuple[list[
     return [], 0, last_error
 
 
-def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 10) -> dict:
+def insider_activity(ticker: str, days: int = 365, max_detail_filings: int = 12) -> dict:
     if "." in ticker:
         return {"status": "not_available", "reason": "non_us"}
     cik = _load_ticker_cik_map().get(ticker.upper())
@@ -252,13 +252,35 @@ def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 10) 
             if detail:
                 log.debug("%s %s detail unavailable: %s", ticker, filing["accession"], detail)
 
-    buys = [x for x in transactions if x["type"] == "buy"]
-    sells = [x for x in transactions if x["type"] == "sell"]
+    transactions.sort(key=lambda x: x.get("date") or "", reverse=True)
+    today = dt.date.today()
+    cutoff30 = today - dt.timedelta(days=30)
+
+    def tx_date(x):
+        try:
+            return dt.date.fromisoformat(x.get("date") or "")
+        except Exception:
+            return None
+
+    tx30 = [x for x in transactions if (tx_date(x) is not None and tx_date(x) >= cutoff30)]
+    buys30 = [x for x in tx30 if x["type"] == "buy"]
+    sells30 = [x for x in tx30 if x["type"] == "sell"]
+    buys365 = [x for x in transactions if x["type"] == "buy"]
+    sells365 = [x for x in transactions if x["type"] == "sell"]
+
     def sum_known(items):
         vals = [x["value"] for x in items if x.get("value") is not None]
         return sum(vals) if vals else 0.0
-    buy_value, sell_value = sum_known(buys), sum_known(sells)
-    transactions.sort(key=lambda x: x.get("date") or "", reverse=True)
+
+    buy30, sell30 = sum_known(buys30), sum_known(sells30)
+    buy365, sell365 = sum_known(buys365), sum_known(sells365)
+    form4_30d = 0
+    for filing in filings:
+        try:
+            if dt.date.fromisoformat(filing.get("filing_date") or "") >= cutoff30:
+                form4_30d += 1
+        except Exception:
+            pass
 
     # No recent filings is a valid, successfully checked state.
     # Filings present but zero structured docs parsed is a degraded state, not "zero activity".
@@ -266,13 +288,20 @@ def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 10) 
     return {
         "status": status,
         "reason": None if status == "ok" else "form4_xml_unavailable",
-        "form4_count_30d": len(filings),
-        "buy_count_30d": len(buys) if status == "ok" else None,
-        "sell_count_30d": len(sells) if status == "ok" else None,
-        "buy_value_30d": buy_value if status == "ok" else None,
-        "sell_value_30d": sell_value if status == "ok" else None,
-        "net_value_30d": (buy_value - sell_value) if status == "ok" else None,
-        "transactions": transactions[:12],
+        "form4_count_30d": form4_30d,
+        "buy_count_30d": len(buys30) if status == "ok" else None,
+        "sell_count_30d": len(sells30) if status == "ok" else None,
+        "buy_value_30d": buy30 if status == "ok" else None,
+        "sell_value_30d": sell30 if status == "ok" else None,
+        "net_value_30d": (buy30 - sell30) if status == "ok" else None,
+        "transactions": tx30[:12],
+        "form4_count_365d": len(filings),
+        "buy_count_365d": len(buys365) if status == "ok" else None,
+        "sell_count_365d": len(sells365) if status == "ok" else None,
+        "buy_value_365d": buy365 if status == "ok" else None,
+        "sell_value_365d": sell365 if status == "ok" else None,
+        "net_value_365d": (buy365 - sell365) if status == "ok" else None,
+        "transactions_365d": transactions[:40],
         "detail_filings_parsed": xml_documents,
         "raw_nonderivative_transactions": raw_tx_seen,
         "fetch_errors": fetch_errors,

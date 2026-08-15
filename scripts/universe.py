@@ -3,8 +3,8 @@ universe.py — builds the daily ticker universe from free sources only.
 
 US leg:      Yahoo Finance screener (via yfinance.screen), small/micro-cap,
              same approach as the existing stock-scanner project.
-Intl legs:   Index constituent tables scraped from Wikipedia (public,
-             no key, no rate limit). Suffixes map to Yahoo Finance's
+Intl legs:   UK + continental Europe constituent tables scraped from Wikipedia
+             (public, no key, no rate limit). Australia is intentionally excluded. Suffixes map to Yahoo Finance's
              exchange convention so the same fetch pipeline works for
              every market.
 
@@ -70,7 +70,6 @@ ETF_UNIVERSE: dict[str, dict[str, str]] = {
     "EWU": {"sector": "Broad Market", "region": "United Kingdom"},
     "EWG": {"sector": "Broad Market", "region": "Germany"},
     "EWJ": {"sector": "Broad Market", "region": "Japan"},
-    "EWA": {"sector": "Broad Market", "region": "Australia"},
     # Thematic / sector-adjacent (mostly US-listed & US-heavy holdings)
     "SMH": {"sector": "Semiconductors", "region": "Global"},
     "SOXX": {"sector": "Semiconductors", "region": "United States"},
@@ -139,7 +138,6 @@ class Market:
 
 MARKETS = {
     "US": Market("United States", ""),
-    "AU": Market("Australia", ".AX"),
     "PL": Market("Poland", ".WA"),
     "UK": Market("United Kingdom", ".L"),
     "EU": Market("Europe", "multi"),
@@ -245,13 +243,6 @@ def sp500_constituents() -> list[str]:
     return [s.replace(".", "-") for s in raw]
 
 
-def asx_constituents() -> list[str]:
-    raw = _wikipedia_table(
-        "https://en.wikipedia.org/wiki/S%26P/ASX_200",
-        match="Code",
-        symbol_col_candidates=["Code", "ASX code", "Ticker"],
-    )
-    return [f"{s}.AX" for s in raw]
 
 
 def wig_constituents() -> list[str]:
@@ -332,8 +323,6 @@ def build_universe() -> dict[str, list[str]]:
     universe = {
         "US": sorted(set(us_small_micro_cap()) | set(sp500_constituents()) | set(us_mid_large_cap())),
     }
-    time.sleep(1)
-    universe["AU"] = asx_constituents()
     time.sleep(1)
     universe["UK"] = ftse_constituents()
     time.sleep(1)
