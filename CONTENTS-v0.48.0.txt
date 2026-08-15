@@ -1,1 +1,0 @@
-Finscanner v0.48.0 complete application package.
