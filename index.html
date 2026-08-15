@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.54.0">
+<link rel="stylesheet" href="style.css?v=0.57.0">
 </head>
 <body>
 
@@ -342,6 +342,11 @@
           <button class="portfolio-filter-chip" data-smartmoney-type="sell">Vendas</button>
           <button class="portfolio-filter-chip" data-smartmoney-type="netbuy">Fluxo +</button>
           <button class="portfolio-filter-chip" data-smartmoney-type="netsell">Fluxo −</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="conviction">Conviction ≥60</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="strongbuy">Strong Buy</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="cluster">Cluster Buying</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="nearlow">Compra perto do mínimo</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="opportunity">Opportunity ≥65</button>
         </div>
       </div>
       <div id="smartmoney-health" class="data-health-card"></div>
@@ -349,7 +354,17 @@
       <div class="insider-intelligence-card">
         <div><span class="eyebrow">ALERT INTELLIGENCE</span><h3>Não tratar todas as operações como iguais</h3><p>O workflow em background passa a destacar compras fortes de gestores, cluster buying, reversões de comportamento e vendas muito grandes. Vendas pequenas são filtradas por defeito.</p></div>
         <div class="insider-signal-legend"><span class="sig strong">Strong Buy</span><span class="sig cluster">Cluster</span><span class="sig reversal">Reversal</span><span class="sig sale">Large Sale</span></div>
-        <div class="insider-watch-bridge"><div><strong>Watchlist no push em background</strong><small>A PWA não pode escrever diretamente no GitHub Pages. Exporta a tua watchlist e substitui <code>data/alert_watchlist.json</code> no repositório.</small></div><button id="export-alert-watchlist" class="import-btn import-btn--secondary">Exportar watchlist</button></div>
+        <div class="insider-watch-bridge"><div><strong>Watchlist no push em background</strong><small>A watchlist vive no teu iPhone; o GitHub Actions não consegue ler esse armazenamento local. É preciso exportá-la quando adicionares/removeres empresas que queres monitorizar 24/7.</small></div><button id="export-alert-watchlist" class="import-btn import-btn--secondary">Exportar watchlist</button></div>
+        <details class="insider-watch-guide">
+          <summary>Como ligar a minha watchlist aos alertas?</summary>
+          <ol>
+            <li>Marca normalmente as empresas com <strong>★ Watchlist</strong> no Finscanner.</li>
+            <li>Toca em <strong>Exportar watchlist</strong>. O iPhone descarrega <code>alert_watchlist.json</code>.</li>
+            <li>No GitHub abre o repositório Finscanner → <code>data</code> → <code>alert_watchlist.json</code> e substitui o conteúdo pelo ficheiro exportado.</li>
+            <li>Faz <strong>Commit changes</strong>. O workflow <code>Insider alerts</code> passa a incluir essa watchlist na execução horária seguinte.</li>
+          </ol>
+          <p><strong>Quando repetir?</strong> Só quando alterares a watchlist. O teu portfolio é monitorizado separadamente e não precisa deste passo.</p>
+        </details>
       </div>
       <div id="smartmoney-list" class="dossier"></div>
     </section>
@@ -415,6 +430,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.54.0"></script>
+<script src="app.js?v=0.57.0"></script>
 </body>
 </html>

@@ -1409,3 +1409,50 @@ a { color: inherit; }
 [data-theme="dark"] .insider-alert-card{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 9%,var(--surface)),var(--surface));border-color:var(--border)}
 [data-theme="dark"] .insider-alert-card p{color:var(--ink-muted)}
 @media(max-width:620px){.insider-watch-bridge{display:grid}.insider-watch-bridge button{width:100%}.insider-intelligence-card{padding:14px}}
+
+
+/* v0.55.0 — Insider Conviction + watchlist bridge guidance */
+.insider-watch-guide{border:1px solid var(--border);border-radius:14px;background:var(--surface-sunken);padding:0 13px;color:var(--ink)}
+.insider-watch-guide summary{cursor:pointer;padding:12px 0;font-weight:850;color:var(--ink)}
+.insider-watch-guide ol{margin:0 0 10px;padding-left:21px;color:var(--ink-muted);font-size:11px;line-height:1.65}
+.insider-watch-guide li{margin:5px 0}.insider-watch-guide p{margin:8px 0 13px!important;font-size:10px!important}.insider-watch-guide code{color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:1px 4px}
+.conviction-inline{display:grid;grid-template-columns:auto auto 1fr;gap:6px 9px;align-items:center;margin-top:10px;padding:8px 10px;border:1px solid var(--border);border-radius:11px;background:var(--surface-sunken)}
+.conviction-inline span{font-size:8px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}.conviction-inline strong{font-size:13px}.conviction-inline small{font-size:9px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conviction-inline.buy strong,.conviction-dossier.buy strong{color:#27855d}.conviction-inline.sell strong,.conviction-dossier.sell strong{color:#bd4747}
+.conviction-dossier{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin:10px 0 12px;padding:12px 14px;border:1px solid var(--border);border-radius:15px;background:var(--surface-sunken);color:var(--ink)}
+.conviction-dossier>div:first-child{display:grid;min-width:95px}.conviction-dossier span{font-size:8px;font-weight:900;letter-spacing:.08em;color:var(--ink-faint)}.conviction-dossier strong{font-size:28px;line-height:1}.conviction-dossier strong small{font-size:10px;color:var(--ink-faint)}.conviction-dossier b{font-size:11px}.conviction-dossier p{margin:4px 0 0;color:var(--ink-muted);font-size:9px;line-height:1.5}
+.smartmoney-stats{grid-template-columns:repeat(4,minmax(72px,1fr))}
+@media(max-width:720px){.smartmoney-stats{grid-template-columns:repeat(2,1fr)}.conviction-inline{grid-template-columns:auto auto}.conviction-inline small{grid-column:1/-1;white-space:normal}.conviction-dossier{grid-template-columns:1fr}.insider-watch-guide ol{font-size:10px}}
+
+
+/* v0.56.0 — Dark Mode Contrast Hardening + Insider Opportunity Scanner */
+[data-theme="dark"] .briefing-card,
+[data-theme="dark"] .home-opportunity-card,
+[data-theme="dark"] .home-tool-card,
+[data-theme="dark"] .sector-intelligence-shell,
+[data-theme="dark"] .sector-discover-card,
+[data-theme="dark"] .sector-lab-modes,
+[data-theme="dark"] .sector-intelligence-toolbar select,
+[data-theme="dark"] .sector-empty,
+[data-theme="dark"] .portfolio-simplification-panel,
+[data-theme="dark"] .simplification-core,
+[data-theme="dark"] .portfolio-opportunity-section,
+[data-theme="dark"] .portfolio-opportunity-card{background:var(--surface)!important;color:var(--ink)!important;border-color:var(--border)!important;box-shadow:none!important}
+[data-theme="dark"] .briefing-hello p,[data-theme="dark"] .briefing-card p,[data-theme="dark"] .briefing-card small,[data-theme="dark"] .home-opportunity-card>small,[data-theme="dark"] .home-tool-card small,[data-theme="dark"] .sector-intelligence-head p,[data-theme="dark"] .sector-rank,[data-theme="dark"] .sector-discover-score small,[data-theme="dark"] .sector-mini-grid span,[data-theme="dark"] .simplification-summary,[data-theme="dark"] .simplification-core small{color:var(--ink-muted)!important}
+[data-theme="dark"] .briefing-hello h2,[data-theme="dark"] .briefing-card h3,[data-theme="dark"] .home-opportunity-card>strong,[data-theme="dark"] .home-opportunity-card__meta b,[data-theme="dark"] .sector-intelligence-head h3,[data-theme="dark"] .sector-discover-card h4,[data-theme="dark"] .sector-discover-score,[data-theme="dark"] .sector-mini-grid b,[data-theme="dark"] .portfolio-simplification-panel strong{color:var(--ink)!important}
+[data-theme="dark"] .home-opportunity-card__axes i,[data-theme="dark"] .sector-mini-grid span,[data-theme="dark"] .simplification-kpis>div,[data-theme="dark"] .portfolio-opportunity-axes span{background:var(--surface-sunken)!important;border-color:var(--border)!important;color:var(--ink-muted)!important}
+[data-theme="dark"] .sector-lab-modes button,[data-theme="dark"] .sector-discover-actions button{color:var(--ink-muted)!important;background:transparent!important;border-color:var(--border)!important}
+[data-theme="dark"] .sector-lab-modes button.is-active,[data-theme="dark"] .sector-discover-actions button:first-child{background:var(--accent-strong)!important;color:#20241d!important;border-color:var(--accent-strong)!important}
+[data-theme="dark"] .home-opportunity-card__meta em{background:var(--accent-soft)!important;color:var(--accent-strong)!important}
+[data-theme="dark"] .briefing-card .briefing-signal{background:var(--warn-soft)!important;color:var(--warn-strong)!important;border-color:color-mix(in srgb,var(--warn) 45%,var(--border))!important}
+[data-theme="dark"] .briefing-open,[data-theme="dark"] .home-opportunity-card__open{color:var(--warn-strong)!important}
+[data-theme="dark"] .simplification-score,[data-theme="dark"] .simplification-core{color:var(--accent-strong)!important}
+[data-theme="dark"] .simplification-core{background:color-mix(in srgb,var(--accent) 10%,var(--surface-sunken))!important}
+[data-theme="dark"] .simplification-core small{color:var(--ink-muted)!important}
+[data-theme="dark"] .section-heading,[data-theme="dark"] .section-heading h3,[data-theme="dark"] .section-heading h4,[data-theme="dark"] .home-section-head h3{color:var(--ink)!important}
+[data-theme="dark"] .eyebrow{color:#b8bdad!important}
+[data-theme="dark"] .insider-signal-badge.near-low{background:color-mix(in srgb,#d6a84b 14%,var(--surface));color:#e7bd69;border-color:color-mix(in srgb,#d6a84b 38%,var(--border))}
+[data-theme="dark"] button,[data-theme="dark"] select,[data-theme="dark"] input{color:var(--ink)!important}
+[data-theme="dark"] ::placeholder{color:var(--ink-faint)!important;opacity:1}
+@media(max-width:760px){.briefing-card p{font-size:16px!important;line-height:1.52!important}.home-opportunity-card{flex-basis:min(84vw,320px)!important}.sector-discover-card{flex-basis:min(76vw,260px)!important}.portfolio-simplification-panel .section-heading{align-items:flex-start!important}.portfolio-simplification-panel .section-heading h3{font-size:18px!important;line-height:1.25!important}}
+\n\n/* v0.57.0 — Insider Opportunity Score */\n.insider-opportunity-leaders{margin:0 0 18px;padding:16px;border:1px solid var(--border);border-radius:20px;background:var(--surface)}\n.insider-opportunity-leaders .section-heading{margin-bottom:12px}.insider-opportunity-leaders .section-heading p{margin:.25rem 0 0;color:var(--ink-muted);font-size:.8rem;line-height:1.45}\n.insider-opportunity-scroll{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}\n.insider-opportunity-card{appearance:none;border:1px solid var(--border);border-radius:16px;background:var(--surface-sunken);color:var(--ink);padding:14px;text-align:left;display:grid;gap:6px;cursor:pointer}\n.insider-opportunity-card>span{font-size:.68rem;font-weight:800;letter-spacing:.08em;color:var(--ink-muted)}.insider-opportunity-card>strong{font-size:2rem;line-height:1;color:var(--positive,#2f7d4d)}.insider-opportunity-card>strong small{font-size:.72rem;color:var(--ink-muted)}\n.insider-opportunity-card>b{font-size:.84rem}.insider-opportunity-card p{margin:0;color:var(--ink-muted);font-size:.72rem;line-height:1.4}.insider-opportunity-card>div{display:flex;gap:6px;flex-wrap:wrap}.insider-opportunity-card em{font-style:normal;font-size:.66rem;padding:4px 7px;border:1px solid var(--border);border-radius:999px;color:var(--ink-muted)}\n.opportunity-inline{margin-top:8px;display:grid;grid-template-columns:auto auto;gap:2px 10px;align-items:center;padding:8px 10px;border:1px solid color-mix(in srgb,var(--positive,#2f7d4d) 28%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--positive,#2f7d4d) 7%,var(--surface))}.opportunity-inline span{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}.opportunity-inline strong{justify-self:end;color:var(--positive,#2f7d4d)}.opportunity-inline small{grid-column:1/-1;color:var(--ink-muted);line-height:1.35}\n@media(max-width:720px){.insider-opportunity-leaders{padding:14px 12px}.insider-opportunity-scroll{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}.insider-opportunity-card{min-width:78%;scroll-snap-align:start}.opportunity-inline{grid-template-columns:1fr auto}}\nhtml[data-theme="dark"] .insider-opportunity-leaders,html[data-theme="dark"] .insider-opportunity-card{box-shadow:none}\n

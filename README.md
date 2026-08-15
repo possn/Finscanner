@@ -392,3 +392,28 @@ O estado anti-duplicação é persistido em `data/insider_alert_state.json`. Só
 - Corrige contraste insuficiente em `Tese quantitativa`, trajectory strip, score-model note e metric cards.
 - Corrige headings e textos cortados em ecrãs estreitos; o score breakdown passa a aceitar labels longos sem overflow.
 - Mantém todo o pipeline SEC/ntfy e Sector Intelligence da v0.52.x.
+
+
+## v0.55.0 — Insider Conviction + Watchlist Guide
+- Insider Conviction 0–100 no Smart Money e dossier.
+- Combina dimensão da operação, cargo, recência, cluster/reversal e proximidade ao preço atual quando disponível.
+- Filtro `Conviction ≥60` e score nas notificações ntfy.
+- Guia passo a passo dentro da app para exportar e sincronizar `alert_watchlist.json`.
+- Dark mode preservado nos novos componentes.
+
+
+## v0.56.0
+- Dark-mode contrast hardening for Home Briefing, Opportunities, Sector Intelligence and Portfolio Simplification.
+- Smart Money adds Strong Buy, Cluster Buying and Buy Near 52W Low discovery filters.
+- Near-low signal uses existing 1-year price history for stocks with insider activity; scoring is unchanged.
+
+
+## v0.57.0 — Insider Opportunity Score
+
+Smart Money passa a distinguir tamanho de operação de qualidade de oportunidade. O `Insider Opportunity Score` (0–100) combina conviction da compra insider, Quality, Value, Growth, proximidade ao mínimo de 1 ano, direção da tese e penalização zombie.
+
+- novo filtro `Opportunity ≥65`;
+- ranking Top 3 no topo do Smart Money;
+- breakdown Conviction / Quality / Value em cada candidato;
+- o score é uma ferramenta de triagem e não altera o Finscanner Score fundamental.
+- componentes novos respeitam light/dark mode.

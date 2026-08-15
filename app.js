@@ -178,6 +178,92 @@
     return null;
   }
 
+  function insiderConviction(r) {
+    const txs = Array.isArray(r.insider_transactions_365d) ? r.insider_transactions_365d : (Array.isArray(r.insider_transactions) ? r.insider_transactions : []);
+    if (!txs.length) return {score:0,direction:'none',label:'Sem sinal',tx:null,reasons:[]};
+    const sorted = txs.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    const tx = sorted[0];
+    const isBuy = tx.type === 'buy';
+    const value = Math.max(0, Number(tx.value)||0);
+    const role = String(tx.role||'');
+    const senior = /CEO|Chief Executive|CFO|Chief Financial|President|Chairman/i.test(role);
+    const director = /Director/i.test(role);
+    const now = Date.now(), when = Date.parse(tx.date||'');
+    const age = Number.isFinite(when) ? Math.max(0,(now-when)/86400000) : 999;
+    let score = 0; const reasons=[];
+    if(value>=2000000){score+=35;reasons.push('operação ≥ $2M');}
+    else if(value>=1000000){score+=32;reasons.push('operação ≥ $1M');}
+    else if(value>=500000){score+=28;reasons.push('operação ≥ $500k');}
+    else if(value>=100000){score+=22;reasons.push('operação ≥ $100k');}
+    else if(value>=50000){score+=16;reasons.push('operação ≥ $50k');}
+    else if(value>0){score+=9;reasons.push('valor reduzido/moderado');}
+    else {score+=5;reasons.push('valor não reportado');}
+    if(senior){score+=20;reasons.push('executivo sénior');}
+    else if(director){score+=13;reasons.push('director');}
+    else {score+=7;}
+    if(age<=7){score+=15;reasons.push('≤7 dias');} else if(age<=30){score+=11;reasons.push('≤30 dias');} else if(age<=90){score+=6;}
+    const clusterCut=now-14*86400000;
+    const sameSideRecent=sorted.filter(x=>x.type===tx.type && Date.parse(x.date||'')>=clusterCut);
+    if(isBuy && new Set(sameSideRecent.map(x=>String(x.owner||''))).size>=2){score+=18;reasons.push('cluster buying');}
+    const prevOpp=sorted.slice(1).find(x=>x.owner===tx.owner && x.type!==tx.type && Number.isFinite(when) && (when-Date.parse(x.date||''))>=0 && (when-Date.parse(x.date||''))<=90*86400000);
+    if(prevOpp){score+=9;reasons.push('reversal');}
+    const txPrice=Number(tx.price), cur=Number(r.current_price);
+    if(Number.isFinite(txPrice)&&txPrice>0&&Number.isFinite(cur)&&cur>0){
+      const gap=Math.abs(cur/txPrice-1);
+      if(gap<=0.05){score+=10;reasons.push('preço atual ±5%');}
+      else if(gap<=0.10){score+=7;reasons.push('preço atual ±10%');}
+      else if(gap<=0.20){score+=4;}
+    }
+    score=Math.min(100,Math.round(score));
+    const label=score>=80?'Muito forte':score>=60?'Forte':score>=40?'Moderado':'Fraco';
+    return {score,direction:isBuy?'buy':'sell',label,tx,reasons};
+  }
+
+  function insiderNearLow(r) {
+    const hist = Array.isArray(r.insider_price_history_1y) ? r.insider_price_history_1y : [];
+    const vals = hist.map(x=>Number(x.close ?? x.price ?? x.value)).filter(Number.isFinite);
+    if (vals.length < 8) return null;
+    const low = Math.min(...vals), current = Number(r.current_price ?? vals[vals.length-1]);
+    if (!Number.isFinite(current) || low <= 0) return null;
+    const pct = (current/low - 1) * 100;
+    return {pct, isNear:pct <= 15, low, current};
+  }
+
+  function insiderOpportunityScore(r) {
+    const txs = Array.isArray(r.insider_transactions_365d) ? r.insider_transactions_365d : (Array.isArray(r.insider_transactions) ? r.insider_transactions : []);
+    const buys = txs.filter(tx => tx.type === 'buy');
+    if (!buys.length) return {score:0,label:'Sem compra',reasons:[],components:{}};
+    const buyConv = insiderConviction({...r, insider_transactions_365d: buys, insider_transactions: buys});
+    const quality = Math.max(0, Math.min(100, Number(r.quality_pct ?? r.profitability_pct ?? 50)));
+    const value = Math.max(0, Math.min(100, Number(r.value_pct ?? 50)));
+    const growth = Math.max(0, Math.min(100, Number(r.growth_pct ?? 50)));
+    const near = insiderNearLow(r);
+    const thesis = String(r.thesis_direction || '').toLowerCase();
+
+    let score = buyConv.score * 0.45 + quality * 0.20 + value * 0.15 + growth * 0.05;
+    const reasons = [];
+    if (buyConv.score >= 80) reasons.push('conviction insider muito forte');
+    else if (buyConv.score >= 60) reasons.push('conviction insider forte');
+    if (quality >= 75) reasons.push(`quality ${Math.round(quality)}`);
+    if (value >= 70) reasons.push(`value ${Math.round(value)}`);
+    if (near) {
+      if (near.pct <= 5) { score += 10; reasons.push(`preço +${near.pct.toFixed(1)}% do mínimo 1Y`); }
+      else if (near.pct <= 15) { score += 8; reasons.push(`perto do mínimo 1Y`); }
+      else if (near.pct <= 30) { score += 4; }
+    }
+    if (thesis === 'strengthening') { score += 5; reasons.push('tese a reforçar'); }
+    else if (thesis === 'stable' || thesis === 'baseline') score += 2;
+    else if (thesis === 'weakening') { score -= 6; reasons.push('tese a piorar'); }
+    if (Number(r.insider_net_value_30d || 0) > 0) score += 3;
+    if (String(r.zombie || '').toLowerCase() === 'yes') { score -= 12; reasons.push('penalização zombie'); }
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    const label = score >= 80 ? 'Excecional' : score >= 65 ? 'Forte' : score >= 50 ? 'Interessante' : score >= 35 ? 'Fraco' : 'Baixo';
+    return {
+      score, label, reasons,
+      components: {conviction:buyConv.score, quality:Math.round(quality), value:Math.round(value), growth:Math.round(growth), nearLowPct:near?.pct ?? null}
+    };
+  }
+
   function insiderAlertConfig() {
     try { return JSON.parse(localStorage.getItem(LS_INSIDER_ALERTS)||'{"enabled":false}'); } catch { return {enabled:false}; }
   }
@@ -1769,9 +1855,11 @@
     const sells = r.insider_sell_count_365d ?? r.insider_sell_count_30d;
     const buyV = r.insider_buy_value_365d ?? r.insider_buy_value_30d;
     const sellV = r.insider_sell_value_365d ?? r.insider_sell_value_30d;
+    const conviction = insiderConviction(r);
     const txList = txs.length ? txs.slice(0,16).map(tx=>`<button class="insider-ledger-row ${tx.type==='buy'?'buy':'sell'}" data-insider-ledger="${escapeHtml(insiderTxKey(r.ticker,tx))}"><span>${tx.type==='buy'?'▲ COMPRA':'▼ VENDA'} · ${escapeHtml(tx.date||'—')}</span><strong>${escapeHtml(tx.owner||'Insider')}</strong><small>${escapeHtml(tx.role||'')}${tx.shares!=null?` · ${Number(tx.shares).toLocaleString('pt-PT')} ações`:''}${tx.price!=null?` @ ${Number(tx.price).toFixed(2)}`:''}${tx.value!=null?` · ${fmtMoney(tx.value,r.currency||'USD')}`:''}</small></button>`).join('') : '<p class="detail-note">Sem transações P/S estruturadas disponíveis nos últimos 12 meses.</p>';
     return `<section class="insider-activity-panel">
       <div class="section-heading"><div><span class="eyebrow">SMART MONEY · SEC FORM 4</span><h3>Compras e vendas de insiders</h3><p>Preço da ação + transações open-market P/S observadas nos últimos 12 meses.</p></div><span class="insider-year-net ${(Number(buyV||0)-Number(sellV||0))>=0?'positive-text':'negative-text'}">${fmtMoney(Number(buyV||0)-Number(sellV||0),r.currency||'USD')}</span></div>
+      ${conviction.score?`<div class="conviction-dossier ${conviction.direction}"><div><span>INSIDER CONVICTION</span><strong>${conviction.score}<small>/100</small></strong></div><div><b>${escapeHtml(conviction.label)} · ${conviction.direction==='buy'?'compra':'venda'}</b><p>${escapeHtml(conviction.reasons.join(' · '))}</p></div></div>`:''}
       <div class="insider-year-summary"><span><b>${buys??'—'}</b> compras</span><span><b>${sells??'—'}</b> vendas</span><span>comprado <b>${fmtMoney(buyV,r.currency||'USD')}</b></span><span>vendido <b>${fmtMoney(sellV,r.currency||'USD')}</b></span></div>
       <div class="insider-chart-controls" data-insider-chart-controls><button class="is-active" data-insider-chart-filter="all">Todos</button><button data-insider-chart-filter="buy">Compras</button><button data-insider-chart-filter="sell">Vendas</button></div>
       <div class="insider-chart-wrap"><canvas id="insider-price-chart" class="insider-price-chart" height="220"></canvas><div id="insider-chart-tooltip" class="insider-chart-tooltip" hidden></div></div>
@@ -3975,22 +4063,42 @@
       if (state.smartMoneyType === 'sell') return sells > 0;
       if (state.smartMoneyType === 'netbuy') return net > 0;
       if (state.smartMoneyType === 'netsell') return net < 0;
+      if (state.smartMoneyType === 'conviction') return insiderConviction(r).score >= 60;
+      if (state.smartMoneyType === 'strongbuy') return insiderSignalUi(r)?.cls === 'strong';
+      if (state.smartMoneyType === 'cluster') return insiderSignalUi(r)?.cls === 'cluster';
+      if (state.smartMoneyType === 'nearlow') return buys > 0 && insiderNearLow(r)?.isNear;
+      if (state.smartMoneyType === 'opportunity') return insiderOpportunityScore(r).score >= 65;
       return Number(r.insider_form4_count_30d || 0) > 0 || buys > 0 || sells > 0;
     }).sort((a,b)=>{
       const an = Number(a.insider_net_value_30d || 0), bn = Number(b.insider_net_value_30d || 0);
+      if (state.smartMoneyType === 'opportunity') return insiderOpportunityScore(b).score - insiderOpportunityScore(a).score;
+      if (state.smartMoneyType === 'conviction' || state.smartMoneyType === 'strongbuy' || state.smartMoneyType === 'cluster') return insiderConviction(b).score - insiderConviction(a).score;
+      if (state.smartMoneyType === 'nearlow') return (insiderNearLow(a)?.pct ?? 999) - (insiderNearLow(b)?.pct ?? 999);
       if (state.smartMoneyType === 'sell' || state.smartMoneyType === 'netsell') return an - bn;
       if (bn !== an) return bn - an;
       return Number(b.insider_form4_count_30d||0)-Number(a.insider_form4_count_30d||0);
     }).slice(0,150);
 
-    els.smartmoneyList.innerHTML = rows.length ? rows.map(r => {
+    const opportunityLeaders = checkedRows
+      .filter(r => state.smartMoneyScope !== 'portfolio' || owned.has(r.ticker))
+      .map(r => ({r, opp: insiderOpportunityScore(r)}))
+      .filter(x => x.opp.score >= 50)
+      .sort((a,b) => b.opp.score - a.opp.score)
+      .slice(0,3);
+    const leadersHtml = opportunityLeaders.length ? `<section class="insider-opportunity-leaders"><div class="section-heading"><div><span class="eyebrow">INSIDER OPPORTUNITY RANKING</span><h3>Compras que merecem investigação</h3><p>Conviction insider + Quality + Value + Growth + contexto de preço. Não é recomendação de investimento.</p></div></div><div class="insider-opportunity-scroll">${opportunityLeaders.map(({r,opp},i)=>`<button class="insider-opportunity-card" data-ticker="${escapeHtml(r.ticker)}"><span>#${i+1} · ${escapeHtml(r.ticker)}</span><strong>${opp.score}<small>/100</small></strong><b>${escapeHtml(opp.label)}</b><p>${escapeHtml(opp.reasons.slice(0,3).join(' · '))}</p><div><em>Conv ${opp.components.conviction}</em><em>Q ${opp.components.quality}</em><em>V ${opp.components.value}</em></div></button>`).join('')}</div></section>` : '';
+
+    els.smartmoneyList.innerHTML = rows.length ? leadersHtml + rows.map(r => {
       const net = r.insider_net_value_30d;
       const signal = net == null ? 'activity' : net > 0 ? 'buy' : net < 0 ? 'sell' : 'flat';
       const netText = net == null ? 'P/S indisponível' : `${net >= 0 ? '+' : '−'}${fmtMoney(Math.abs(net), r.currency || 'USD')}`;
       const latest = Array.isArray(r.insider_transactions) && r.insider_transactions.length ? r.insider_transactions[0] : null;
       const latestText = latest ? `${latest.type === 'buy' ? 'Compra' : 'Venda'} · ${latest.owner || 'Insider'}${latest.role ? ' · '+latest.role : ''}` : `${r.insider_form4_count_30d || 0} Form 4 nos últimos 30 dias`;
       const sigUi = insiderSignalUi(r);
-      return `<article class="intel-card smartmoney-card ${signal}" data-ticker="${escapeHtml(r.ticker)}"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span>${sigUi?`<span class="insider-signal-badge ${sigUi.cls}">${escapeHtml(sigUi.label)}</span>`:''}<h3>${escapeHtml(r.name || r.ticker)}</h3><p>${escapeHtml(latestText)}</p></div><div class="smartmoney-stats"><div><strong>${r.insider_buy_count_30d ?? '—'}</strong><span>compras P</span></div><div><strong>${r.insider_sell_count_30d ?? '—'}</strong><span>vendas S</span></div><div><strong class="${net != null && net >= 0 ? 'positive-text' : net != null ? 'negative-text' : ''}">${netText}</strong><span>fluxo líquido</span></div></div></article>`;
+      const conviction = insiderConviction(r);
+      const nearLow = insiderNearLow(r);
+      const opportunity = insiderOpportunityScore(r);
+      const nearLowBadge = nearLow?.isNear ? `<span class="insider-signal-badge near-low">NEAR 52W LOW · +${nearLow.pct.toFixed(1)}%</span>` : '';
+      return `<article class="intel-card smartmoney-card ${signal}" data-ticker="${escapeHtml(r.ticker)}"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span>${sigUi?`<span class="insider-signal-badge ${sigUi.cls}">${escapeHtml(sigUi.label)}</span>`:''}${nearLowBadge}<h3>${escapeHtml(r.name || r.ticker)}</h3><p>${escapeHtml(latestText)}</p>${conviction.score?`<div class="conviction-inline ${conviction.direction}"><span>Conviction</span><strong>${conviction.score}/100</strong><small>${escapeHtml(conviction.label)} · ${escapeHtml(conviction.reasons.slice(0,3).join(' · '))}</small></div>`:''}${opportunity.score?`<div class="opportunity-inline"><span>Insider Opportunity</span><strong>${opportunity.score}/100</strong><small>${escapeHtml(opportunity.label)} · ${escapeHtml(opportunity.reasons.slice(0,3).join(' · '))}</small></div>`:''}</div><div class="smartmoney-stats"><div><strong>${r.insider_buy_count_30d ?? '—'}</strong><span>compras P</span></div><div><strong>${r.insider_sell_count_30d ?? '—'}</strong><span>vendas S</span></div><div><strong class="${net != null && net >= 0 ? 'positive-text' : net != null ? 'negative-text' : ''}">${netText}</strong><span>fluxo líquido</span></div><div><strong>${conviction.score||'—'}</strong><span>conviction</span></div></div></article>`;
     }).join("") : `<p class="empty-state">${state.smartMoneyScope === 'portfolio' ? 'Nenhuma posição da carteira cumpre este filtro insider nos últimos 30 dias.' : 'Nenhuma empresa cumpre este filtro insider nos últimos 30 dias.'}</p>`;
     els.smartmoneyList.querySelectorAll('[data-ticker]').forEach(x=>x.addEventListener('click',()=>openDetail(x.dataset.ticker)));
   }
@@ -4189,7 +4297,7 @@
   }));
 
   on(els.insiderAlertToggle, "click", () => toggleInsiderAlerts().catch(err=>console.warn("notification permission failed",err)));
-  on(els.exportAlertWatchlist, "click", exportAlertWatchlist);
+  on(els.exportAlertWatchlist, "click", () => { exportAlertWatchlist(); setTimeout(()=>alert('Watchlist exportada como alert_watchlist.json. Agora substitui data/alert_watchlist.json no GitHub e faz Commit changes. As instruções completas estão logo abaixo deste botão.'),120); });
   refreshInsiderAlertUi();
 
   on(els.portfolioFile, "change", (e) => {
