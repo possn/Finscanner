@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.57.0">
+<link rel="stylesheet" href="style.css?v=0.59.0">
 </head>
 <body>
 
@@ -48,12 +48,13 @@
         <button class="sidebar__item" data-view="portfolio">
           <span class="sidebar__icon">★</span> O meu portfolio
         </button>
+        <button class="sidebar__item" data-view="settings"><span class="sidebar__icon">⚙</span> Definições</button>
       </div>
     </div>
 
     <div class="sidebar__footer">
       <button class="sidebar__item sidebar__item--secundario" id="theme-toggle">
-        <span class="sidebar__icon" id="theme-icon">☾</span> <span id="theme-label">Modo escuro</span>
+        <span class="sidebar__icon" id="theme-icon">◐</span> <span id="theme-label">Aparência</span>
       </button>
     </div>
   </nav>
@@ -88,6 +89,29 @@
       <section class="home-opportunities" aria-label="Oportunidades em destaque">
         <div class="home-section-head"><div><span class="eyebrow">OPORTUNIDADES</span><h3>Ideias que merecem investigação</h3></div><span>desliza →</span></div>
         <div id="home-opportunity-strip" class="home-opportunity-strip"><div class="home-opportunity-loading">A selecionar oportunidades…</div></div>
+      </section>
+
+      <section class="daily-briefing-stack" aria-label="Briefing diário detalhado">
+        <details class="home-brief-detail" open>
+          <summary><span><b>Hoje merece atenção</b><small>O essencial do dia num único bloco</small></span><i>⌄</i></summary>
+          <div id="home-attention-summary" class="home-brief-body"><p class="home-brief-empty">A preparar o resumo diário…</p></div>
+        </details>
+        <details class="home-brief-detail">
+          <summary><span><b>Portfolio & teses</b><small>Posições cuja evidência melhorou ou piorou</small></span><i>⌄</i></summary>
+          <div id="home-portfolio-brief" class="home-brief-body"></div>
+        </details>
+        <details class="home-brief-detail">
+          <summary><span><b>Insider opportunities</b><small>Compras com maior conviction e contexto</small></span><i>⌄</i></summary>
+          <div id="home-insider-brief" class="home-brief-body"></div>
+        </details>
+        <details class="home-brief-detail">
+          <summary><span><b>Earnings próximos</b><small>Eventos que podem alterar a tese no curto prazo</small></span><i>⌄</i></summary>
+          <div id="home-earnings-brief" class="home-brief-body"></div>
+        </details>
+        <details class="home-brief-detail">
+          <summary><span><b>Mercados & metais</b><small>Contexto agregado sem ocupar o ecrã todo</small></span><i>⌄</i></summary>
+          <div id="home-market-brief" class="home-brief-body"></div>
+        </details>
       </section>
 
       <section class="home-tools" aria-label="Acessos rápidos">
@@ -149,14 +173,24 @@
         <h2>Encontra empresas que merecem investigação.</h2>
         <p>Score explicável, métricas fundamentais, valuation relativo e trajetória da tese.</p>
         <div class="preset-filters" id="preset-filters">
-          <button data-preset="quality">High Quality</button><button data-preset="value">Value</button><button data-preset="growth">Growth</button><button data-preset="garp">GARP</button><button data-preset="dividend">Dividend</button><button data-preset="insider">Insider Buying</button><button data-preset="revisions">Revisions ↑</button><button data-preset="earnings">Earnings ≤7d</button><button data-preset="zombie">Zombie Detector</button>
+          <button data-preset="compounders">Compounders</button><button data-preset="quality">High Quality</button><button data-preset="garp">GARP</button><button data-preset="growth">Growth</button><button data-preset="value">Value</button><button data-preset="dividend">Dividend</button><button data-preset="insider">Insider Buying</button><button data-preset="near-low">Near 52W Low</button><button data-preset="improving">Improving Thesis</button><button data-preset="earnings">Earnings Soon</button>
         </div>
+      </section>
+
+      <section class="stock-discover-hub" aria-label="Discover stocks">
+        <div class="section-heading"><div><span class="eyebrow">DISCOVER</span><h3>Descobrir por tese de investimento</h3><p>Escolhe uma lente e percorre os candidatos mais fortes sem entrar logo na tabela completa.</p></div></div>
+        <div id="stock-discover-categories" class="stock-discover-categories">
+          <button class="is-active" data-discover-preset="compounders">Compounders</button><button data-discover-preset="quality">Quality</button><button data-discover-preset="garp">GARP</button><button data-discover-preset="growth">Growth</button><button data-discover-preset="value">Value</button><button data-discover-preset="dividend">Dividend</button><button data-discover-preset="insider">Insider Buying</button><button data-discover-preset="near-low">Near 52W Low</button><button data-discover-preset="improving">Improving Thesis</button><button data-discover-preset="earnings">Earnings Soon</button>
+        </div>
+        <div id="stock-discover-body" class="stock-discover-body"><div class="sector-empty">A carregar oportunidades…</div></div>
       </section>
       <div class="section-heading fs-screener-heading">
         <div><span class="eyebrow">SCREENER</span><h3>Explorar empresas</h3></div>
         <span class="section-count" id="result-count">—</span>
       </div>
 
+      <details class="stock-dropbox stock-filters-dropbox">
+        <summary><span><b>Filtros e ordenação</b><small>Pesquisa detalhada, região, setor e ordenação</small></span><span class="stock-dropbox-chevron">⌄</span></summary>
       <div class="commandbar">
         <input id="search" type="text" placeholder="ticker ou nome…" autocomplete="off" spellcheck="false">
         <select id="market-filter">
@@ -189,8 +223,10 @@
           <span>★ watchlist</span>
         </label>
       </div>
+      </details>
 
-
+      <details class="stock-dropbox" open>
+        <summary><span><b>Sector Intelligence</b><small>Discover · Compare · Deep Dive por setor</small></span><span class="stock-dropbox-chevron">⌄</span></summary>
       <section id="sector-intelligence-lab" class="sector-intelligence-shell" aria-label="Sector Intelligence">
         <div class="sector-intelligence-head">
           <div><span class="eyebrow">SECTOR INTELLIGENCE</span><h3>Discover · Compare · Deep Dive</h3><p>Escolhe um setor, encontra os líderes e compara empresas lado a lado.</p></div>
@@ -206,7 +242,10 @@
         </div>
         <div id="sector-lab-body" class="sector-lab-body"><div class="sector-empty">A carregar setores…</div></div>
       </section>
+      </details>
 
+      <details class="stock-dropbox">
+        <summary><span><b>Perspetivas e colunas</b><small>Escolhe que métricas queres comparar na tabela</small></span><span class="stock-dropbox-chevron">⌄</span></summary>
       <section class="stock-perspective-shell" aria-label="Perspetiva do screener">
         <div class="stock-perspective-head">
           <div><span class="eyebrow">PERSPECTIVE</span><h3>Escolhe o que queres comparar</h3></div>
@@ -223,6 +262,7 @@
         </div>
         <div id="stock-columns-panel" class="stock-columns-panel" hidden></div>
       </section>
+      </details>
       <div id="stock-table-head" class="stock-table-head" aria-hidden="true"></div>
       <div id="list" class="dossier stock-radar-list">
         <p class="empty-state">A carregar dados…</p>
@@ -331,7 +371,12 @@
       <div id="news-list" class="dossier"></div>
     </section>
     <section id="view-smartmoney" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">SMART MONEY</span><h2>Onde os insiders estão ativos.</h2><p>SEC Form 4 · apenas compras P e vendas S em mercado aberto. Grants, opções, gifts e vesting não são classificados como compra.</p></div></section>
-      <div class="thesis-filter-panel smartmoney-controls">
+      <div id="smartmoney-hub-modes" class="smartmoney-hub-modes" aria-label="Smart Money Hub">
+        <button class="is-active" data-smartmoney-hub="feed">Feed</button>
+        <button data-smartmoney-hub="opportunities">Opportunities</button>
+        <button data-smartmoney-hub="alerts">Alerts</button>
+      </div>
+      <div id="smartmoney-controls" class="thesis-filter-panel smartmoney-controls">
         <div id="smartmoney-scope-filters" class="segmented-filter" aria-label="Âmbito de insiders">
           <button class="is-active" data-smartmoney-scope="all">Universo EUA</button>
           <button data-smartmoney-scope="portfolio">Meu portfolio</button>
@@ -350,8 +395,8 @@
         </div>
       </div>
       <div id="smartmoney-health" class="data-health-card"></div>
-      <div class="insider-alert-card"><div><span class="eyebrow">INSIDER ALERTS</span><h3>Alertas para portfolio + watchlist</h3><p id="insider-alert-status">Alertas locais desativados. O push em background via ntfy funciona separadamente através do GitHub Actions.</p></div><button id="insider-alert-toggle" class="import-btn">Ativar alertas</button></div>
-      <div class="insider-intelligence-card">
+      <div id="insider-alert-panel" class="insider-alert-card"><div><span class="eyebrow">INSIDER ALERTS</span><h3>Alertas para portfolio + watchlist</h3><p id="insider-alert-status">Alertas locais desativados. O push em background via ntfy funciona separadamente através do GitHub Actions.</p></div><button id="insider-alert-toggle" class="import-btn">Ativar alertas</button></div>
+      <div id="insider-intelligence-panel" class="insider-intelligence-card">
         <div><span class="eyebrow">ALERT INTELLIGENCE</span><h3>Não tratar todas as operações como iguais</h3><p>O workflow em background passa a destacar compras fortes de gestores, cluster buying, reversões de comportamento e vendas muito grandes. Vendas pequenas são filtradas por defeito.</p></div>
         <div class="insider-signal-legend"><span class="sig strong">Strong Buy</span><span class="sig cluster">Cluster</span><span class="sig reversal">Reversal</span><span class="sig sale">Large Sale</span></div>
         <div class="insider-watch-bridge"><div><strong>Watchlist no push em background</strong><small>A watchlist vive no teu iPhone; o GitHub Actions não consegue ler esse armazenamento local. É preciso exportá-la quando adicionares/removeres empresas que queres monitorizar 24/7.</small></div><button id="export-alert-watchlist" class="import-btn import-btn--secondary">Exportar watchlist</button></div>
@@ -409,6 +454,32 @@
       </div>
     </section>
 
+
+    <section id="view-settings" class="view settings-view">
+      <section class="market-hero settings-hero"><div class="market-hero__copy"><span class="eyebrow">DEFINIÇÕES</span><h2>Aparência e leitura.</h2><p>As preferências ficam guardadas apenas neste dispositivo.</p></div></section>
+      <section class="settings-panel">
+        <div class="settings-group">
+          <div><span class="eyebrow">APARÊNCIA</span><h3>Tema</h3><p>Escolhe manualmente ou segue automaticamente o iPhone.</p></div>
+          <div id="settings-theme" class="settings-segmented">
+            <button data-theme-choice="system">Sistema</button><button data-theme-choice="light">Claro</button><button data-theme-choice="dark">Escuro</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div><span class="eyebrow">LEGIBILIDADE</span><h3>Contraste</h3><p>O modo Alto reforça texto secundário, limites e cartões.</p></div>
+          <div id="settings-contrast" class="settings-segmented"><button data-contrast-choice="normal">Normal</button><button data-contrast-choice="high">Alto</button></div>
+        </div>
+        <div class="settings-group">
+          <div><span class="eyebrow">TEXTO</span><h3>Tamanho</h3><p>Grande aumenta a tipografia sem alterar os dados.</p></div>
+          <div id="settings-text-size" class="settings-segmented"><button data-text-choice="normal">Normal</button><button data-text-choice="large">Grande</button></div>
+        </div>
+        <div class="settings-group settings-toggle-row">
+          <div><span class="eyebrow">MOVIMENTO</span><h3>Reduzir animações</h3><p>Útil se preferires uma interface mais estática.</p></div>
+          <button id="settings-motion" class="settings-switch" role="switch" aria-checked="false"><span></span></button>
+        </div>
+        <div class="settings-note"><strong>Dark mode protegido</strong><p>Os novos módulos usam os mesmos tokens de contraste. Esta definição aplica-se a Home, Stocks, Funds, Portfolio, Smart Money e dossiers.</p></div>
+      </section>
+    </section>
+
     <footer class="foot-note">
       <p>Ferramenta pessoal de pesquisa. Não é aconselhamento financeiro. Score não validado/backtested — ver metodologia no repositório.</p>
     </footer>
@@ -430,6 +501,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.57.0"></script>
+<script src="app.js?v=0.59.0"></script>
 </body>
 </html>

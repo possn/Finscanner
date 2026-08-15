@@ -1,3 +1,16 @@
+## v0.59.0 — Company Dossier Architecture
+
+- Reorganiza o dossier individual numa sequência de investigação: Snapshot → Score → Mudanças → Growth → Profitability → Balance → Valuation → Dividendos → Insiders → Estimates → Catalysts → Tese.
+- Adiciona navegação horizontal sticky dentro do dossier, otimizada para iPhone.
+- Move a tese para o final como síntese, em vez de a mostrar antes da evidência.
+- Agrupa tabelas técnicas redundantes numa secção expansível “Ver tabela técnica completa”.
+- Mantém os módulos Winston-like e os modelos especiais (bancos/REITs/seguradoras), sem alterar o pipeline.
+- Compatível com modo claro/escuro, contraste alto, texto grande e redução de animações.
+
+## v0.58.0 — Appearance Settings + Smart Money Hub
+
+Tema Sistema/Claro/Escuro, alto contraste, texto maior, redução de animações e hardening de dark mode em todos os módulos principais. Smart Money passa a Feed / Opportunities / Alerts.
+
 # v0.50.0 — Sector Intelligence · Discover / Compare / Deep Dive
 
 Nova camada no Stock Scanner inspirada na navegação Winston: selecionar um setor, descobrir líderes, comparar até 6 empresas head-to-head e abrir um deep dive contextual sem sair da comparação.
@@ -417,3 +430,18 @@ Smart Money passa a distinguir tamanho de operação de qualidade de oportunidad
 - breakdown Conviction / Quality / Value em cada candidato;
 - o score é uma ferramenta de triagem e não altera o Finscanner Score fundamental.
 - componentes novos respeitam light/dark mode.
+
+
+## v0.60.0 — Discover Hub + Progressive Disclosure
+- Stocks ganha Discover por tese: Compounders, Quality, GARP, Growth, Value, Dividend, Insider Buying, Near 52W Low, Improving Thesis e Earnings Soon.
+- Resultados aparecem em carrossel horizontal mobile-first, com deep dive e salto para lista completa.
+- Blocos densos passam a usar disclosure/dropboxes: filtros, Sector Intelligence e perspectivas/colunas.
+- Mantém compatibilidade com temas Claro/Escuro/Sistema, contraste alto e texto grande.
+
+
+## v0.61.0 — Daily Briefing Hub
+- Home passa a funcionar como briefing diário operacional.
+- Secções expansíveis: Hoje merece atenção, Portfolio & teses, Insider opportunities, Earnings próximos e Mercados & metais.
+- Progressive disclosure por defeito para informação densa.
+- Mantém cards de oportunidade e acessos rápidos.
+- Dark mode/alto contraste compatíveis com os novos blocos.

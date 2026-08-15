@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", smartMoneyScope: "all", smartMoneyType: "all", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockPerspective: "overview", stockCustomColumns: null, sectorLabMode: "discover", sectorCompareSelection: [], sectorDeepDive: null, insiderChartFilter: "all" };
+  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", smartMoneyScope: "all", smartMoneyType: "all", smartMoneyHubMode: "feed", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockDiscoverPreset: "compounders", stockPerspective: "overview", stockCustomColumns: null, sectorLabMode: "discover", sectorCompareSelection: [], sectorDeepDive: null, insiderChartFilter: "all" };
 
   const els = {
     list: document.getElementById("list"),
@@ -20,6 +20,8 @@
     stockColumnsBtn: document.getElementById("stock-columns-btn"),
     stockColumnsPanel: document.getElementById("stock-columns-panel"),
     stockTableHead: document.getElementById("stock-table-head"),
+    stockDiscoverCategories: document.getElementById("stock-discover-categories"),
+    stockDiscoverBody: document.getElementById("stock-discover-body"),
     sectorLab: document.getElementById("sector-intelligence-lab"),
     sectorLabSector: document.getElementById("sector-lab-sector"),
     sectorLabModes: document.getElementById("sector-lab-modes"),
@@ -87,6 +89,14 @@
     smartmoneyHealth: document.getElementById("smartmoney-health"),
     smartmoneyScopeFilters: document.getElementById("smartmoney-scope-filters"),
     smartmoneyTypeFilters: document.getElementById("smartmoney-type-filters"),
+    smartmoneyHubModes: document.getElementById("smartmoney-hub-modes"),
+    smartmoneyControls: document.getElementById("smartmoney-controls"),
+    insiderAlertPanel: document.getElementById("insider-alert-panel"),
+    insiderIntelligencePanel: document.getElementById("insider-intelligence-panel"),
+    settingsTheme: document.getElementById("settings-theme"),
+    settingsContrast: document.getElementById("settings-contrast"),
+    settingsTextSize: document.getElementById("settings-text-size"),
+    settingsMotion: document.getElementById("settings-motion"),
     insiderAlertToggle: document.getElementById("insider-alert-toggle"),
     insiderAlertStatus: document.getElementById("insider-alert-status"),
     exportAlertWatchlist: document.getElementById("export-alert-watchlist"),
@@ -98,6 +108,11 @@
     briefingCard: document.getElementById("briefing-card"),
     briefingGreeting: document.getElementById("briefing-greeting"),
     homeOpportunityStrip: document.getElementById("home-opportunity-strip"),
+    homeAttentionSummary: document.getElementById("home-attention-summary"),
+    homePortfolioBrief: document.getElementById("home-portfolio-brief"),
+    homeInsiderBrief: document.getElementById("home-insider-brief"),
+    homeEarningsBrief: document.getElementById("home-earnings-brief"),
+    homeMarketBrief: document.getElementById("home-market-brief"),
   };
 
   function on(el, event, handler) {
@@ -114,6 +129,7 @@
     smartmoney: { title: "Smart Money", sub: "atividade de insiders · SEC Form 4" },
     theses: { title: "Teses", sub: "arquétipos quantitativos · hipóteses explicáveis" },
     compare: { title: "Comparar", sub: "comparação multifator lado a lado" },
+    settings: { title: "Definições", sub: "aparência · contraste · acessibilidade" },
   };
 
   // ---------- localStorage: portfolio (owned) + watchlist (starred) ----------
@@ -342,34 +358,48 @@
   on(els.sidebarClose, "click", closeMobileSidebar);
   on(els.sidebarBackdrop, "click", closeMobileSidebar);
 
-  // ---------- Theme (light/dark), persisted ----------
+  // ---------- Appearance settings, persisted ----------
   const LS_THEME = "finscanner:theme";
-  function applyTheme(theme) {
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
-    if (theme === "dark") {
-      document.documentElement.setAttribute("data-theme", "dark");
-      if (themeMeta) themeMeta.setAttribute("content", "#20241d");
-      els.themeIcon.textContent = "☀";
-      els.themeLabel.textContent = "Modo claro";
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-      if (themeMeta) themeMeta.setAttribute("content", "#fef5e8");
-      els.themeIcon.textContent = "☾";
-      els.themeLabel.textContent = "Modo escuro";
-    }
+  const LS_CONTRAST = "finscanner:contrast";
+  const LS_TEXT_SIZE = "finscanner:textSize";
+  const LS_REDUCE_MOTION = "finscanner:reduceMotion";
+  const systemThemeQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+  function currentThemePreference(){ return localStorage.getItem(LS_THEME) || "system"; }
+  function resolvedTheme(pref=currentThemePreference()) {
+    if (pref === "system") return systemThemeQuery?.matches ? "dark" : "light";
+    return pref === "dark" ? "dark" : "light";
   }
-  function initTheme() {
-    const saved = localStorage.getItem(LS_THEME);
-    if (saved) { applyTheme(saved); return; }
-    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    applyTheme(prefersDark ? "dark" : "light");
+  function syncSettingsUi(){
+    const themePref=currentThemePreference();
+    els.settingsTheme?.querySelectorAll('[data-theme-choice]').forEach(b=>b.classList.toggle('is-active',b.dataset.themeChoice===themePref));
+    const contrast=localStorage.getItem(LS_CONTRAST)||'normal';
+    els.settingsContrast?.querySelectorAll('[data-contrast-choice]').forEach(b=>b.classList.toggle('is-active',b.dataset.contrastChoice===contrast));
+    const text=localStorage.getItem(LS_TEXT_SIZE)||'normal';
+    els.settingsTextSize?.querySelectorAll('[data-text-choice]').forEach(b=>b.classList.toggle('is-active',b.dataset.textChoice===text));
+    const motion=localStorage.getItem(LS_REDUCE_MOTION)==='true';
+    if(els.settingsMotion){els.settingsMotion.classList.toggle('is-active',motion);els.settingsMotion.setAttribute('aria-checked',String(motion));}
   }
-  on(els.themeToggle, "click", () => {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    const next = isDark ? "light" : "dark";
-    applyTheme(next);
-    try { localStorage.setItem(LS_THEME, next); } catch (e) { /* ignore */ }
-  });
+  function applyAppearance() {
+    const pref=currentThemePreference(), theme=resolvedTheme(pref);
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.setAttribute("data-theme-preference", pref);
+    document.documentElement.setAttribute("data-contrast", localStorage.getItem(LS_CONTRAST)||"normal");
+    document.documentElement.setAttribute("data-text-size", localStorage.getItem(LS_TEXT_SIZE)||"normal");
+    document.documentElement.setAttribute("data-reduce-motion", localStorage.getItem(LS_REDUCE_MOTION)==='true'?'true':'false');
+    const themeMeta=document.querySelector('meta[name="theme-color"]');
+    if(themeMeta) themeMeta.setAttribute('content',theme==='dark'?'#20241d':'#fef5e8');
+    if(els.themeIcon) els.themeIcon.textContent=theme==='dark'?'☀':'☾';
+    if(els.themeLabel) els.themeLabel.textContent=`Aparência · ${pref==='system'?'Sistema':theme==='dark'?'Escuro':'Claro'}`;
+    syncSettingsUi();
+  }
+  function initTheme(){ applyAppearance(); }
+  on(els.themeToggle,"click",()=>switchView('settings'));
+  els.settingsTheme?.querySelectorAll('[data-theme-choice]').forEach(btn=>on(btn,'click',()=>{localStorage.setItem(LS_THEME,btn.dataset.themeChoice);applyAppearance();}));
+  els.settingsContrast?.querySelectorAll('[data-contrast-choice]').forEach(btn=>on(btn,'click',()=>{localStorage.setItem(LS_CONTRAST,btn.dataset.contrastChoice);applyAppearance();}));
+  els.settingsTextSize?.querySelectorAll('[data-text-choice]').forEach(btn=>on(btn,'click',()=>{localStorage.setItem(LS_TEXT_SIZE,btn.dataset.textChoice);applyAppearance();}));
+  on(els.settingsMotion,'click',()=>{const next=localStorage.getItem(LS_REDUCE_MOTION)!=='true';localStorage.setItem(LS_REDUCE_MOTION,String(next));applyAppearance();});
+  systemThemeQuery?.addEventListener?.('change',()=>{if(currentThemePreference()==='system')applyAppearance();});
   initTheme();
 
   function updateGeneratedAt() {
@@ -400,6 +430,7 @@
     else if (v === "smartmoney") renderSmartMoney();
     else if (v === "theses") renderTheses();
     else if (v === "compare") renderCompare();
+    else if (v === "settings") syncSettingsUi();
   }
 
   els.sidenavItems.forEach(btn => {
@@ -436,6 +467,59 @@
     els.briefingCard.querySelector(".briefing-open")?.addEventListener("click", () => openDetail(top.ticker));
 
     renderHomeOpportunities(rows, top.ticker);
+    renderHomeDailyBrief(rows);
+  }
+
+  function briefRowHtml(r, meta, tone="neutral") {
+    return `<button class="home-brief-row ${tone}" data-brief-ticker="${escapeHtml(r.ticker)}"><span><b>${escapeHtml(r.ticker)}</b><small>${escapeHtml(r.name || r.ticker)}</small></span><em>${escapeHtml(meta)}</em></button>`;
+  }
+
+  function renderHomeDailyBrief(rows) {
+    const owned = new Set(Object.keys(lsGet(LS_PORTFOLIO) || {}));
+    const portfolioRows = rows.filter(r => owned.has(r.ticker));
+    const strengthening = portfolioRows.filter(r => r.thesis_direction === "strengthening").sort((a,b)=>Number(b.thesis_score_delta||0)-Number(a.thesis_score_delta||0));
+    const weakening = portfolioRows.filter(r => r.thesis_direction === "weakening").sort((a,b)=>Number(a.thesis_score_delta||0)-Number(b.thesis_score_delta||0));
+    const earnings = rows.filter(r => { const d=Number(r.analyst_days_to_earnings); return Number.isFinite(d) && d>=0 && d<=7; }).sort((a,b)=>Number(a.analyst_days_to_earnings)-Number(b.analyst_days_to_earnings));
+    const insider = rows.filter(r => Number(r.insider_buy_count_365d||0)>0 || Number(r.insider_net_value_30d||0)>0)
+      .map(r => ({r, score: insiderOpportunityScore ? insiderOpportunityScore(r).score : Number(r.insider_conviction_score||0)}))
+      .filter(x => Number.isFinite(x.score) && x.score>0).sort((a,b)=>b.score-a.score);
+
+    if (els.homeAttentionSummary) {
+      const ownedCount = portfolioRows.length;
+      const highInsider = insider.filter(x=>x.score>=65).length;
+      els.homeAttentionSummary.innerHTML = `<div class="home-brief-kpis">
+        <div><b>${strengthening.length}</b><span>teses a melhorar</span></div>
+        <div><b>${weakening.length}</b><span>teses a piorar</span></div>
+        <div><b>${earnings.length}</b><span>earnings ≤7d</span></div>
+        <div><b>${highInsider}</b><span>insider opp. ≥65</span></div>
+      </div><p class="home-brief-note">${ownedCount ? `${ownedCount} posições do portfolio têm análise disponível neste briefing.` : 'Importa o portfolio para personalizar este resumo.'}</p>`;
+    }
+
+    if (els.homePortfolioBrief) {
+      const list = [...strengthening.slice(0,3).map(r=>({r,meta:`↑ ${Number(r.thesis_score_delta||0)>=0?'+':''}${Number(r.thesis_score_delta||0).toFixed(1)} score`,tone:'good'})), ...weakening.slice(0,3).map(r=>({r,meta:`↓ ${Number(r.thesis_score_delta||0).toFixed(1)} score`,tone:'bad'}))];
+      els.homePortfolioBrief.innerHTML = list.length ? list.map(x=>briefRowHtml(x.r,x.meta,x.tone)).join('') : `<p class="home-brief-empty">Sem mudanças materiais de tese nas posições analisadas.</p>`;
+    }
+
+    if (els.homeInsiderBrief) {
+      const list = insider.slice(0,5);
+      els.homeInsiderBrief.innerHTML = list.length ? list.map(x=>briefRowHtml(x.r,`Opportunity ${Math.round(x.score)}/100`,x.score>=75?'good':'neutral')).join('') : `<p class="home-brief-empty">Sem compras insider com contexto suficiente neste momento.</p>`;
+    }
+
+    if (els.homeEarningsBrief) {
+      els.homeEarningsBrief.innerHTML = earnings.length ? earnings.slice(0,6).map(r=>{ const d=Math.max(0,Math.round(Number(r.analyst_days_to_earnings))); return briefRowHtml(r,d===0?'hoje':d===1?'amanhã':`${d} dias`,d<=2?'bad':'neutral'); }).join('') : `<p class="home-brief-empty">Nenhum earnings relevante nos próximos 7 dias dentro do universo analisado.</p>`;
+    }
+
+    if (els.homeMarketBrief) {
+      const quality = rows.filter(r=>Number(r.score)>=75).length;
+      const median = rows.map(r=>Number(r.score)).filter(Number.isFinite).sort((a,b)=>a-b);
+      const med = median.length ? median[Math.floor(median.length/2)] : null;
+      const gold = state.metals?.metals?.find?.(m=>m.symbol==='GC=F') || state.metals?.find?.(m=>m.symbol==='GC=F');
+      const goldText = gold && Number.isFinite(Number(gold.price)) ? `Ouro ${Number(gold.price).toLocaleString('pt-PT',{maximumFractionDigits:0})}` : 'Metais disponíveis na tab Metals';
+      els.homeMarketBrief.innerHTML = `<div class="home-brief-kpis home-brief-kpis--three"><div><b>${rows.length}</b><span>ações analisadas</span></div><div><b>${quality}</b><span>score ≥75</span></div><div><b>${med==null?'—':Math.round(med)}</b><span>score mediano</span></div></div><button class="home-brief-link" data-brief-goto="metals">${escapeHtml(goldText)} · abrir Metals →</button>`;
+    }
+
+    document.querySelectorAll('[data-brief-ticker]').forEach(btn=>btn.addEventListener('click',()=>openDetail(btn.dataset.briefTicker)));
+    document.querySelectorAll('[data-brief-goto]').forEach(btn=>btn.addEventListener('click',()=>switchView(btn.dataset.briefGoto)));
   }
 
   function renderHomeOpportunities(rows, featuredTicker) {
@@ -1081,12 +1165,19 @@
     const g = Number(r.growth_pct ?? -1);
     const v = Number(r.value_pct ?? -1);
     const s = Number(r.score ?? -1);
+    if (preset === "compounders") return q >= 70 && g >= 65 && Number(r.stability_pct ?? 0) >= 60 && s >= 68 && r.zombie !== "yes";
     if (preset === "quality") return q >= 70 && s >= 65 && r.zombie !== "yes";
     if (preset === "value") return v >= 65 && s >= 55 && r.zombie !== "yes";
     if (preset === "growth") return g >= 70 && s >= 55 && r.zombie !== "yes";
     if (preset === "garp") return q >= 60 && g >= 60 && v >= 50 && s >= 60 && r.zombie !== "yes";
     if (preset === "dividend") return Number(r.dividend_yield ?? 0) >= 2.0 && Number(r.payout_ratio ?? 0) < 0.9 && s >= 50;
     if (preset === "insider") return Number(r.insider_net_value_30d ?? 0) > 0 || Number(r.insider_buy_count_30d ?? 0) > 0;
+    if (preset === "near-low") {
+      const px=Number(r.current_price), hist=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[];
+      const vals=hist.map(x=>Number(x.close ?? x.price ?? x.value)).filter(Number.isFinite);
+      if(!Number.isFinite(px)||!vals.length) return false; const lo=Math.min(...vals); return lo>0 && px <= lo*1.15 && s>=50 && r.zombie!=="yes";
+    }
+    if (preset === "improving") return r.thesis_direction === "strengthening" || Number(r.thesis_score_delta ?? 0) >= 5;
     if (preset === "revisions") {
       const qrev=Number(r.analyst_eps_next_q_revision_30d_pct);
       const yrev=Number(r.analyst_eps_next_y_revision_30d_pct);
@@ -1249,6 +1340,36 @@
     bindSectorLabActions(rows,sector);
   }
 
+  const DISCOVER_LABELS = {compounders:"Compounders",quality:"High Quality",garp:"GARP",growth:"Growth",value:"Value",dividend:"Dividend",insider:"Insider Buying","near-low":"Near 52W Low",improving:"Improving Thesis",earnings:"Earnings Soon"};
+  function discoverRankValue(r,preset){
+    if(preset==='compounders') return (Number(r.quality_pct||0)*.35)+(Number(r.growth_pct||0)*.30)+(Number(r.stability_pct||0)*.20)+(Number(r.score||0)*.15);
+    if(preset==='quality') return Number(r.quality_pct ?? r.profitability_pct ?? -1);
+    if(preset==='garp') return Number(r.quality_pct||0)+Number(r.growth_pct||0)+Number(r.value_pct||0);
+    if(preset==='growth') return Number(r.growth_pct??-1); if(preset==='value') return Number(r.value_pct??-1);
+    if(preset==='dividend') return Number(r.dividend_yield??-1);
+    if(preset==='insider') return Math.log10(Math.abs(Number(r.insider_net_value_30d||0))+1)*10+Number(r.insider_buy_count_30d||0)*4;
+    if(preset==='near-low'){const px=Number(r.current_price),h=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[],v=h.map(x=>Number(x.close??x.price??x.value)).filter(Number.isFinite); if(!Number.isFinite(px)||!v.length)return -999; const lo=Math.min(...v); return lo>0?100-(px/lo-1)*100:-999;}
+    if(preset==='improving') return Number(r.thesis_score_delta??0)*10+Number(r.score??0);
+    if(preset==='earnings'){const d=Number(r.analyst_days_to_earnings); return Number.isFinite(d)?100-Math.min(100,Math.max(0,d)*10):-999;}
+    return Number(r.score??-1);
+  }
+  function discoverReason(r,preset){
+    if(preset==='compounders') return `Q ${Math.round(Number(r.quality_pct||0))} · G ${Math.round(Number(r.growth_pct||0))} · estabilidade ${Math.round(Number(r.stability_pct||0))}`;
+    if(preset==='insider') return `${Number(r.insider_buy_count_30d||0)} compra(s) · ${fmtMoney(Math.abs(Number(r.insider_net_value_30d||0)),r.currency||'USD')} net 30d`;
+    if(preset==='improving') return `tese ↑ · score ${Number(r.thesis_score_delta||0)>=0?'+':''}${Number(r.thesis_score_delta||0).toFixed(1)}`;
+    if(preset==='earnings') return `${Number.isFinite(Number(r.analyst_days_to_earnings))?Math.max(0,Math.round(Number(r.analyst_days_to_earnings)))+' dias':'—'} até earnings`;
+    return `Q ${Math.round(Number(r.quality_pct||0))} · G ${Math.round(Number(r.growth_pct||0))} · V ${Math.round(Number(r.value_pct||0))}`;
+  }
+  function renderStockDiscover(rows){
+    if(!els.stockDiscoverBody) return; const p=state.stockDiscoverPreset||'compounders';
+    const pool=rows.filter(r=>stockPresetMatch(r,p)).sort((a,b)=>discoverRankValue(b,p)-discoverRankValue(a,p)).slice(0,12);
+    els.stockDiscoverCategories?.querySelectorAll('[data-discover-preset]').forEach(b=>b.classList.toggle('is-active',b.dataset.discoverPreset===p));
+    if(!pool.length){els.stockDiscoverBody.innerHTML=`<div class="sector-empty">Sem candidatos com dados suficientes para ${escapeHtml(DISCOVER_LABELS[p]||p)}.</div>`;return;}
+    els.stockDiscoverBody.innerHTML=`<div class="stock-discover-strip">${pool.map((r,i)=>`<article class="stock-discover-card" data-discover-open="${escapeHtml(r.ticker)}"><div class="stock-discover-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4><div class="stock-discover-score">${r.score==null?'—':Math.round(r.score)}<small>/100</small></div><p>${escapeHtml(discoverReason(r,p))}</p><div class="stock-discover-actions"><button data-discover-open="${escapeHtml(r.ticker)}">Deep dive</button><button data-discover-filter="${escapeHtml(p)}">Ver lista</button></div></article>`).join('')}</div>`;
+    els.stockDiscoverBody.querySelectorAll('[data-discover-open]').forEach(el=>el.addEventListener('click',e=>{if(e.target.closest('[data-discover-filter]'))return;openDetail(el.dataset.discoverOpen);}));
+    els.stockDiscoverBody.querySelectorAll('[data-discover-filter]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();state.stockPreset=btn.dataset.discoverFilter;document.querySelectorAll('#preset-filters [data-preset]').forEach(b=>b.classList.toggle('is-active',b.dataset.preset===state.stockPreset));applyFilters();els.list?.scrollIntoView({behavior:'smooth',block:'start'});}));
+  }
+
   function applyFilters() {
     if (!state.data) return;
     const equities = state.data.stocks.filter(r => r.quote_type !== "ETF" && !isAustralianScannerRow(r));
@@ -1311,6 +1432,7 @@
     });
 
     state.filtered = rows;
+    renderStockDiscover(equities);
     renderSectorIntelligence(equities);
     if (els.resultCount) els.resultCount.textContent = `${rows.length} resultados`;
     renderStockTableHead();
@@ -1717,10 +1839,10 @@
     return `<section class="w-metric-section"><div class="w-section-intro"><span>${bank ? 'BANK METRICS' : reit ? 'REIT METRICS' : insurance ? 'INSURANCE METRICS' : 'COMPANY METRICS'}</span><h3>Os números que importam</h3><p>Cada métrica combina valor atual, tendência quando disponível e contexto. Valores ausentes são mostrados como ausentes — nunca estimados sem fonte.</p></div><div class="w-metric-stack">${cards.join('')}</div></section>`;
   }
 
-  function metricStorySection(title, eyebrow, cards) {
+  function metricStorySection(title, eyebrow, cards, id='') {
     const valid = cards.filter(Boolean);
     if (!valid.length) return '';
-    return `<section class="metric-story-section"><div class="metric-story-title"><span class="eyebrow">${escapeHtml(eyebrow)}</span><h3>${escapeHtml(title)}</h3></div><div class="metric-story-grid">${valid.join('')}</div></section>`;
+    return `<section class="metric-story-section dossier-block"${id?` id="${escapeHtml(id)}"`:''}><div class="metric-story-title"><span class="eyebrow">${escapeHtml(eyebrow)}</span><h3>${escapeHtml(title)}</h3></div><div class="metric-story-grid">${valid.join('')}</div></section>`;
   }
 
   function winstonMetricStoriesHtml(r) {
@@ -1763,7 +1885,24 @@
       metricCardHtml({title:'Valuation vs Sector', value:r.forward_pe_vs_sector_pct==null?'—':fmtSignedPct(r.forward_pe_vs_sector_pct), subtitle:'forward P/E vs mediana', explanation:`Benchmark construído com ${r.peer_count??0} pares do mesmo setor quando existe cobertura suficiente.`, tone:r.forward_pe_vs_sector_pct==null?'neutral':Number(r.forward_pe_vs_sector_pct)<0?'positive':'negative'})
     ];
 
-    return `<section class="winston-dossier-flow"><div class="w-section-intro dossier-flow-intro"><span>FINANCIAL STORY</span><h3>Leitura por blocos</h3><p>A mesma lógica visual em todas as métricas: valor atual, tendência, contexto e interpretação.</p></div>${metricStorySection('Growth Profile','GROWTH',growthCards)}${metricStorySection('Profitability & Capital','QUALITY',qualityCards)}${metricStorySection('Cash, Balance Sheet & Dividends','FINANCIAL STRENGTH',cashCards)}${metricStorySection('Valuation & Smart Money','MARKET CONTEXT',marketCards)}</section>`;
+    return `<section class="winston-dossier-flow"><div class="w-section-intro dossier-flow-intro"><span>FINANCIAL STORY</span><h3>Leitura por blocos</h3><p>Valor atual, tendência, contexto e interpretação — organizados numa sequência única para investigação.</p></div>${metricStorySection('Growth Profile','GROWTH',growthCards,'dossier-growth')}${metricStorySection('Profitability & Capital','QUALITY',qualityCards,'dossier-profitability')}${metricStorySection('Cash & Balance Sheet','FINANCIAL STRENGTH',cashCards,'dossier-balance')}${metricStorySection('Valuation','MARKET CONTEXT',marketCards,'dossier-valuation')}</section>`;
+  }
+
+  function dossierNavHtml() {
+    const items = [
+      ['dossier-overview','Snapshot'],['dossier-score','Score'],['dossier-changes','Mudanças'],
+      ['dossier-growth','Growth'],['dossier-profitability','Profit'],['dossier-balance','Balanço'],
+      ['dossier-valuation','Valuation'],['dossier-dividends','Dividendos'],['dossier-insiders','Insiders'],
+      ['dossier-estimates','Estimates'],['dossier-catalysts','Catalysts'],['dossier-thesis','Tese']
+    ];
+    return `<nav class="dossier-nav" aria-label="Navegação do dossier">${items.map(([id,label])=>`<button type="button" data-dossier-jump="${id}">${label}</button>`).join('')}</nav>`;
+  }
+
+  function bindDossierNav() {
+    els.detailContent.querySelectorAll('[data-dossier-jump]').forEach(btn=>btn.addEventListener('click',()=>{
+      const target=els.detailContent.querySelector('#'+btn.dataset.dossierJump);
+      if(target) target.scrollIntoView({behavior: appSettings().reduceMotion?'auto':'smooth', block:'start'});
+    }));
   }
 
   function scoreDescriptor(v) {
@@ -1941,29 +2080,28 @@
     const dimHtml = dimensions.map(([label,val]) => `<div class="dimension"><span>${label}</span><em>${scoreDescriptor(val)}</em><strong>${val == null ? "—" : Math.round(val)}</strong><i><b style="width:${Math.max(0,Math.min(100,Number(val)||0))}%"></b></i></div>`).join("");
 
     els.detailContent.innerHTML = `
-      <div class="detail-hero stock-detail-hero">
+      <div class="detail-hero stock-detail-hero dossier-block" id="dossier-overview">
         <div class="stock-detail-brand"><div class="company-mark detail-company-mark">${r.ticker.replace(/\..*/, '').slice(0,2)}</div><div><span class="eyebrow">STOCK DETAIL</span><h2>${r.name || r.ticker} <small>${r.ticker}</small></h2><p>${r.sector || "—"}${r.industry ? " · " + r.industry : ""}</p></div></div>
         <button class="detail-watch star-btn ${starred ? 'is-active' : ''}" data-ticker="${r.ticker}" aria-label="Watchlist">${starred ? '★ Saved' : '☆ Save'}</button>
         <div class="stock-facts"><div><span>PRICE</span><strong>${r.current_price ?? '—'} ${r.currency || ''}</strong></div><div><span>MARKET CAP</span><strong>${fmtCap(r.market_cap)}</strong></div><div><span>EXCHANGE</span><strong>${escapeHtml(r.exchange || r.full_exchange_name || marketOf(r.ticker) || '—')}</strong></div></div>
         <div class="stock-score-hero"><span class="eyebrow">FINSCANNER SCORE</span><strong>${r.score ?? "—"}</strong>${scoreOrbs(r.score)}<p>${verdict.label}</p><small>${verdict.text}</small></div>
       </div>
+      ${dossierNavHtml()}
       <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
-      ${stockChangeSignalsHtml(r)}
-      ${catalystIntelligenceHtml(r)}
-      ${analystIntelligenceHtml(r)}
+      <section class="dossier-block" id="dossier-changes">${stockChangeSignalsHtml(r)}</section>
       <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário nativo: acrescenta eficiência, provisões de crédito, capital contabilístico e crescimento do net interest income; CET1/NPL continuam dependentes de fonte regulatória." : scoreModelFor(r) === "reit" ? "Modelo REIT nativo por proxy: FFO, P/FFO, payout FFO e net-debt/EBITDA entram no score; AFFO, NAV e ocupação continuam dependentes de fontes especializadas." : scoreModelFor(r) === "insurance" ? "Modelo Insurance Native por proxy: qualidade, sinistros/custos, capitalização, valuation e rendimento. Combined ratio e solvência regulatória só aparecem quando houver fonte estruturada fiável." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
-      <h3 class="dossier-title">Tese quantitativa</h3>
-      ${thesisPanelHtml(r)}
       <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
-      ${hasHistory ? `<section class="score-history-card"><div><span class="eyebrow">SCORE HISTORY</span><h3>Trajetória do score</h3><p>${Object.keys(series).length} observações disponíveis</p></div><canvas id="sparkline" width="340" height="70" class="sparkline"></canvas></section>` : ""}
 
-      <h3 class="dossier-title">How the score breaks down</h3>
-      <div class="dimension-grid">${dimHtml}</div>
+      <section class="dossier-block" id="dossier-score">
+        <h3 class="dossier-title">How the score breaks down</h3>
+        <div class="dimension-grid">${dimHtml}</div>
+        ${companyMetricPackHtml(r)}
+      </section>
 
-      ${companyMetricPackHtml(r)}
       ${winstonMetricStoriesHtml(r)}
-      ${capitalAllocationIntelligenceHtml(r)}
+      <section class="dossier-block" id="dossier-dividends">${capitalAllocationIntelligenceHtml(r)}</section>
 
+      <details class="legacy-metrics"><summary>Ver tabela técnica completa</summary>
       <h3 class="dossier-title legacy-detail-title">Dados complementares</h3>
       <h3 class="dossier-title">Qualidade & crescimento</h3>
       <div class="dossier-grid">
@@ -2010,8 +2148,16 @@
         <div><span>PEG</span><strong>${r.peg_ratio == null ? "—" : Number(r.peg_ratio).toFixed(2)}</strong></div><div><span>Dividend yield</span><strong>${fmtDividendYield(r.dividend_yield)}</strong></div>
         <div><span>Payout ratio</span><strong>${fmtRawPct(r.payout_ratio)}</strong></div><div><span>Beta</span><strong>${r.beta == null ? "—" : Number(r.beta).toFixed(2)}</strong></div>
       </div>
+      </details>
 
-      ${insiderActivitySectionHtml(r)}
+      <section class="dossier-block" id="dossier-insiders">${insiderActivitySectionHtml(r)}</section>
+      <section class="dossier-block" id="dossier-estimates">${analystIntelligenceHtml(r)}</section>
+      <section class="dossier-block" id="dossier-catalysts">${catalystIntelligenceHtml(r)}</section>
+      <section class="dossier-block dossier-thesis-final" id="dossier-thesis">
+        <h3 class="dossier-title">Tese quantitativa</h3>
+        ${thesisPanelHtml(r)}
+        ${hasHistory ? `<section class="score-history-card"><div><span class="eyebrow">SCORE HISTORY</span><h3>Trajetória do score</h3><p>${Object.keys(series).length} observações disponíveis</p></div><canvas id="sparkline" width="340" height="70" class="sparkline"></canvas></section>` : ""}
+      </section>
 
       <h3 class="dossier-title">Risco & contexto</h3>
       <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
@@ -2023,6 +2169,7 @@
     `;
     els.detail.hidden = false;
     bindInsiderChart(r);
+    bindDossierNav();
 
     document.getElementById("owned-checkbox").addEventListener("change", () => {
       toggleOwned(r.ticker);
@@ -4035,6 +4182,15 @@
   }
 
   function renderSmartMoney() {
+    const hub=state.smartMoneyHubMode||'feed';
+    els.smartmoneyHubModes?.querySelectorAll('[data-smartmoney-hub]').forEach(b=>b.classList.toggle('is-active',b.dataset.smartmoneyHub===hub));
+    if(els.smartmoneyControls) els.smartmoneyControls.hidden = hub==='alerts';
+    if(els.smartmoneyHealth) els.smartmoneyHealth.hidden = hub==='alerts';
+    if(els.insiderAlertPanel) els.insiderAlertPanel.hidden = hub!=='alerts';
+    if(els.insiderIntelligencePanel) els.insiderIntelligencePanel.hidden = hub!=='alerts';
+    if(els.smartmoneyList) els.smartmoneyList.hidden = hub==='alerts';
+    if(hub==='opportunities' && state.smartMoneyType==='all') state.smartMoneyType='opportunity';
+    if(hub==='feed' && state.smartMoneyType==='opportunity') state.smartMoneyType='all';
     if (!state.data || !els.smartmoneyList) return;
     const quality = state.data.data_quality || {};
     const portfolio = lsGet(LS_PORTFOLIO);
@@ -4250,6 +4406,11 @@
     renderSectorIntelligence((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
   }));
 
+  els.stockDiscoverCategories?.querySelectorAll('[data-discover-preset]').forEach(btn=>btn.addEventListener('click',()=>{
+    state.stockDiscoverPreset=btn.dataset.discoverPreset||'compounders';
+    renderStockDiscover((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
+  }));
+
   document.querySelectorAll("#preset-filters [data-preset]").forEach(btn => {
     btn.addEventListener("click", () => {
       const p = btn.dataset.preset;
@@ -4285,6 +4446,13 @@
   if (els.thesisDirectionFilters) els.thesisDirectionFilters.querySelectorAll("[data-thesis-direction]").forEach(btn => btn.addEventListener("click", () => {
     state.thesisDirectionFilter = btn.dataset.thesisDirection;
     renderTheses();
+  }));
+
+  els.smartmoneyHubModes?.querySelectorAll('[data-smartmoney-hub]').forEach(btn => btn.addEventListener('click', () => {
+    state.smartMoneyHubMode = btn.dataset.smartmoneyHub || 'feed';
+    if (state.smartMoneyHubMode === 'opportunities') state.smartMoneyType = 'opportunity';
+    else if (state.smartMoneyHubMode === 'feed' && state.smartMoneyType === 'opportunity') state.smartMoneyType = 'all';
+    renderSmartMoney();
   }));
 
   if (els.smartmoneyScopeFilters) els.smartmoneyScopeFilters.querySelectorAll("[data-smartmoney-scope]").forEach(btn => btn.addEventListener("click", () => {
