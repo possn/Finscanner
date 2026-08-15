@@ -1,49 +1,95 @@
 """
 insiders.py — US insider transactions from SEC EDGAR (official, free, no API key).
 
-v0.6 corrects an important methodological flaw in the earlier implementation:
-"30 days" now really means filings whose filingDate is within the trailing 30 days.
-It also parses recent ownership XML and separates open-market purchase (P) from
-sale (S). Option exercises, awards, gifts and other transaction codes are NOT
-mislabelled as purchases/sales.
+v0.36 fixes the main reason Smart Money could look empty: SEC submissions often
+identify the Form 4 primary document as HTML even though the structured ownership
+XML lives beside it with the same basename. Older code fetched the HTML and tried
+to parse it as ownership XML, so valid Form 4 filings could yield zero P/S rows.
 
-Coverage remains US-only. Missing SEC coverage is emitted as not_available,
-never as zero activity.
+This implementation:
+- resolves ticker -> CIK once;
+- uses a persistent Session with retry/backoff and SEC-compliant throttling;
+- tries the structured XML companion before the HTML primary document;
+- distinguishes open-market P (purchase) and S (sale) only;
+- emits diagnostics/coverage so the UI and workflow can distinguish "no activity"
+  from "SEC data unavailable";
+- keeps coverage US-only and never turns missing data into zero activity.
 """
 from __future__ import annotations
 
 import datetime as dt
 import logging
 import os
+import random
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import PurePosixPath
 from xml.etree import ElementTree as ET
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 log = logging.getLogger("insiders")
 
 SEC_USER_AGENT = os.getenv("SEC_USER_AGENT") or "Finscanner research-tool finscanner-app@proton.me"
-# NOTE: SEC's bot-filtering appears to reject User-Agent strings containing
-# "/" or ":" (they read as library-generated signatures like
-# "Python-urllib/3.9" rather than a genuine app identity) — confirmed by
-# testing: "Finscanner/0.6 research app contact: ..." got a 403, while
-# "Finscanner research-tool <contact>" (no slash, no colon) succeeded on a
-# real run. Keep this format if you ever change it. A GitHub secret named
-# SEC_USER_AGENT overrides this default if set.
 HEADERS = {
     "User-Agent": SEC_USER_AGENT,
     "Accept-Encoding": "gzip, deflate",
-    "Accept": "application/json, application/xml, text/xml, */*",
+    "Accept": "application/json, application/xml, text/xml, text/html, */*",
 }
 TICKER_CIK_URL = "https://www.sec.gov/files/company_tickers.json"
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
-ARCHIVE_URL = "https://www.sec.gov/Archives/edgar/data/{cik_int}/{accession}/{primary_document}"
+ARCHIVE_URL = "https://www.sec.gov/Archives/edgar/data/{cik_int}/{accession}/{document}"
 
 _ticker_to_cik: dict[str, str] | None = None
+_lock = threading.Lock()
+_last_request_at = 0.0
+# We deliberately stay well below SEC's 10 req/s fair-access ceiling.
+MIN_REQUEST_INTERVAL = float(os.getenv("FINSCANNER_SEC_MIN_INTERVAL", "0.13"))
+SEC_WORKERS = max(1, min(4, int(os.getenv("FINSCANNER_SEC_WORKERS", "3"))))
 
 
-def _get(url: str, timeout: int = 20):
-    r = requests.get(url, headers=HEADERS, timeout=timeout)
+def _session() -> requests.Session:
+    s = requests.Session()
+    retry = Retry(
+        total=4,
+        connect=4,
+        read=4,
+        status=4,
+        backoff_factor=0.8,
+        status_forcelist=(403, 408, 429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET"]),
+        respect_retry_after_header=True,
+    )
+    s.mount("https://", HTTPAdapter(max_retries=retry, pool_connections=8, pool_maxsize=8))
+    s.headers.update(HEADERS)
+    return s
+
+
+_TLS = threading.local()
+
+
+def _get_session() -> requests.Session:
+    if not hasattr(_TLS, "session"):
+        _TLS.session = _session()
+    return _TLS.session
+
+
+def _throttle():
+    global _last_request_at
+    with _lock:
+        now = time.monotonic()
+        wait = MIN_REQUEST_INTERVAL - (now - _last_request_at)
+        if wait > 0:
+            time.sleep(wait)
+        _last_request_at = time.monotonic()
+
+
+def _get(url: str, timeout: int = 25):
+    _throttle()
+    r = _get_session().get(url, timeout=timeout)
     r.raise_for_status()
     return r
 
@@ -57,6 +103,7 @@ def _load_ticker_cik_map() -> dict[str, str]:
         _ticker_to_cik = {
             row["ticker"].upper(): str(row["cik_str"]).zfill(10)
             for row in data.values()
+            if row.get("ticker") and row.get("cik_str") is not None
         }
     except Exception as e:
         log.warning("Could not load SEC ticker->CIK map (%s)", e)
@@ -86,36 +133,25 @@ def _bool_text(root, path: str) -> bool:
     return v in {"1", "true", "yes", "x"}
 
 
-def _parse_ownership_xml(content: bytes, ticker: str, accession: str) -> list[dict]:
-    """Return only economically interpretable P/S transactions.
-
-    SEC ownership XML has no namespace in most Form 4 filings; if one exists,
-    strip it locally so the parser remains resilient.
-    """
+def _parse_ownership_xml(content: bytes, ticker: str, accession: str) -> tuple[list[dict], int]:
     try:
         root = ET.fromstring(content)
     except Exception:
-        return []
-
+        return [], 0
     for elem in root.iter():
         if "}" in elem.tag:
             elem.tag = elem.tag.split("}", 1)[1]
-
+    raw = root.findall("./nonDerivativeTable/nonDerivativeTransaction")
     owner = _text(root, "./reportingOwner/reportingOwnerId/rptOwnerName")
     rel = root.find("./reportingOwner/reportingOwnerRelationship")
     roles = []
     if rel is not None:
-        if _bool_text(rel, "./isDirector"):
-            roles.append("Director")
-        if _bool_text(rel, "./isOfficer"):
-            roles.append(_text(rel, "./officerTitle") or "Officer")
-        if _bool_text(rel, "./isTenPercentOwner"):
-            roles.append("10% owner")
-        if _bool_text(rel, "./isOther"):
-            roles.append("Other")
-
+        if _bool_text(rel, "./isDirector"): roles.append("Director")
+        if _bool_text(rel, "./isOfficer"): roles.append(_text(rel, "./officerTitle") or "Officer")
+        if _bool_text(rel, "./isTenPercentOwner"): roles.append("10% owner")
+        if _bool_text(rel, "./isOther"): roles.append("Other")
     out = []
-    for tx in root.findall("./nonDerivativeTable/nonDerivativeTransaction"):
+    for tx in raw:
         code = _text(tx, "./transactionCoding/transactionCode")
         if code not in {"P", "S"}:
             continue
@@ -137,129 +173,127 @@ def _parse_ownership_xml(content: bytes, ticker: str, accession: str) -> list[di
             "value": value,
             "acquired_disposed": acq_disp,
         })
-    return out
-
-
-def _parse_ownership_xml_diag(content: bytes, ticker: str, accession: str) -> tuple[list[dict], int]:
-    """Same parse as _parse_ownership_xml, but also returns the raw count
-    of <nonDerivativeTransaction> elements found before the P/S filter —
-    lets us tell apart 'fetch/parse is broken' (raw_count would be 0 even
-    though the filing definitely has transactions) from 'this filing
-    genuinely has no open-market P/S transactions' (raw_count > 0 but all
-    codes are grants/vesting/tax-withholding, e.g. A/F/M — legitimate)."""
-    try:
-        root = ET.fromstring(content)
-    except Exception as e:
-        log.info("%s: XML parse failed for accession %s (%s: %s)", ticker, accession, type(e).__name__, e)
-        return [], 0
-    for elem in root.iter():
-        if "}" in elem.tag:
-            elem.tag = elem.tag.split("}", 1)[1]
-    raw = root.findall("./nonDerivativeTable/nonDerivativeTransaction")
-    parsed = _parse_ownership_xml(content, ticker, accession)
-    return parsed, len(raw)
+    return out, len(raw)
 
 
 def _recent_form4_rows(cik: str, days: int) -> list[dict]:
     data = _get(SUBMISSIONS_URL.format(cik=cik)).json()
     recent = (data.get("filings") or {}).get("recent") or {}
-    forms = recent.get("form") or []
-    dates = recent.get("filingDate") or []
-    accessions = recent.get("accessionNumber") or []
-    docs = recent.get("primaryDocument") or []
     cutoff = dt.date.today() - dt.timedelta(days=days)
     rows = []
-    for form, date_s, acc, doc in zip(forms, dates, accessions, docs):
-        if form not in {"4", "4/A"}:
-            continue
-        try:
-            filing_date = dt.date.fromisoformat(date_s)
-        except Exception:
-            continue
-        if filing_date < cutoff:
-            continue
-        rows.append({
-            "filing_date": date_s,
-            "accession": acc,
-            "primary_document": doc,
-        })
+    for form, date_s, acc, doc in zip(
+        recent.get("form") or [], recent.get("filingDate") or [],
+        recent.get("accessionNumber") or [], recent.get("primaryDocument") or []
+    ):
+        if form not in {"4", "4/A"}: continue
+        try: filing_date = dt.date.fromisoformat(date_s)
+        except Exception: continue
+        if filing_date < cutoff: continue
+        rows.append({"filing_date": date_s, "accession": acc, "primary_document": doc})
     return rows
 
 
-def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 6) -> dict:
-    if "." in ticker:
-        return {"status": "not_available"}
+def _document_candidates(primary: str) -> list[str]:
+    """Structured XML is commonly the same basename as the HTML primary doc."""
+    primary = (primary or "").strip()
+    if not primary:
+        return []
+    p = PurePosixPath(primary)
+    out = []
+    if p.suffix.lower() in {".htm", ".html"}:
+        out.append(str(p.with_suffix(".xml")))
+    if p.suffix.lower() == ".xml":
+        out.append(primary)
+    else:
+        out.append(primary)
+    # stable dedupe
+    return list(dict.fromkeys(out))
 
+
+def _fetch_structured_filing(cik: str, filing: dict, ticker: str) -> tuple[list[dict], int, str | None]:
+    cik_int = str(int(cik))
+    accession_no_dash = filing["accession"].replace("-", "")
+    last_error = None
+    for document in _document_candidates(filing.get("primary_document") or ""):
+        url = ARCHIVE_URL.format(cik_int=cik_int, accession=accession_no_dash, document=document)
+        try:
+            resp = _get(url)
+            parsed, raw_count = _parse_ownership_xml(resp.content, ticker, filing["accession"])
+            if raw_count > 0 or parsed:
+                return parsed, raw_count, document
+        except Exception as e:
+            last_error = f"{type(e).__name__}: {e}"
+    return [], 0, last_error
+
+
+def insider_activity(ticker: str, days: int = 30, max_detail_filings: int = 10) -> dict:
+    if "." in ticker:
+        return {"status": "not_available", "reason": "non_us"}
     cik = _load_ticker_cik_map().get(ticker.upper())
     if not cik:
-        return {"status": "not_available"}
-
+        return {"status": "not_available", "reason": "no_cik"}
     try:
         filings = _recent_form4_rows(cik, days)
     except Exception as e:
-        log.debug("%s: submissions fetch failed (%s)", ticker, e)
-        return {"status": "not_available"}
+        return {"status": "not_available", "reason": "submissions_error", "error": str(e)[:160]}
 
-    transactions: list[dict] = []
-    cik_int = str(int(cik))
-    fetch_errors = 0
-    fetch_ok = 0
-    raw_tx_seen = 0
+    transactions = []
+    fetch_ok = raw_tx_seen = fetch_errors = 0
+    xml_documents = 0
     for filing in filings[:max_detail_filings]:
-        accession_no_dash = filing["accession"].replace("-", "")
-        primary = filing["primary_document"]
-        url = ARCHIVE_URL.format(
-            cik_int=cik_int,
-            accession=accession_no_dash,
-            primary_document=primary,
-        )
-        try:
-            resp = _get(url)
+        parsed, raw_count, detail = _fetch_structured_filing(cik, filing, ticker)
+        if raw_count > 0:
             fetch_ok += 1
-            parsed, raw_count = _parse_ownership_xml_diag(resp.content, ticker, filing["accession"])
             raw_tx_seen += raw_count
+            xml_documents += 1
             transactions.extend(parsed)
-        except Exception as e:
+        else:
             fetch_errors += 1
-            log.info("%s: filing fetch failed for %s (%s: %s)", ticker, url, type(e).__name__, e)
-        time.sleep(0.12)
-
-    if fetch_errors or (fetch_ok and not transactions):
-        log.info(
-            "%s: insider detail diagnostics — filings_tried=%d fetch_ok=%d fetch_errors=%d raw_nonderiv_tx=%d parsed_ps_tx=%d",
-            ticker, len(filings[:max_detail_filings]), fetch_ok, fetch_errors, raw_tx_seen, len(transactions),
-        )
+            if detail:
+                log.debug("%s %s detail unavailable: %s", ticker, filing["accession"], detail)
 
     buys = [x for x in transactions if x["type"] == "buy"]
     sells = [x for x in transactions if x["type"] == "sell"]
-
     def sum_known(items):
         vals = [x["value"] for x in items if x.get("value") is not None]
         return sum(vals) if vals else 0.0
-
-    buy_value = sum_known(buys)
-    sell_value = sum_known(sells)
+    buy_value, sell_value = sum_known(buys), sum_known(sells)
     transactions.sort(key=lambda x: x.get("date") or "", reverse=True)
+
+    # No recent filings is a valid, successfully checked state.
+    # Filings present but zero structured docs parsed is a degraded state, not "zero activity".
+    status = "ok" if not filings or xml_documents > 0 else "degraded"
     return {
-        "status": "ok",
+        "status": status,
+        "reason": None if status == "ok" else "form4_xml_unavailable",
         "form4_count_30d": len(filings),
-        "buy_count_30d": len(buys),
-        "sell_count_30d": len(sells),
-        "buy_value_30d": buy_value,
-        "sell_value_30d": sell_value,
-        "net_value_30d": buy_value - sell_value,
-        "transactions": transactions[:8],
-        "detail_filings_parsed": min(len(filings), max_detail_filings),
+        "buy_count_30d": len(buys) if status == "ok" else None,
+        "sell_count_30d": len(sells) if status == "ok" else None,
+        "buy_value_30d": buy_value if status == "ok" else None,
+        "sell_value_30d": sell_value if status == "ok" else None,
+        "net_value_30d": (buy_value - sell_value) if status == "ok" else None,
+        "transactions": transactions[:12],
+        "detail_filings_parsed": xml_documents,
+        "raw_nonderivative_transactions": raw_tx_seen,
+        "fetch_errors": fetch_errors,
     }
 
 
-def annotate(tickers: list[str], pause: float = 0.18) -> dict[str, dict]:
+def annotate(tickers: list[str], pause: float = 0.0) -> dict[str, dict]:
     cik_map = _load_ticker_cik_map()
     log.info("SEC ticker->CIK map loaded with %d entries", len(cik_map))
+    unique = sorted(set(t.upper() for t in tickers if t and "." not in t))
     out: dict[str, dict] = {}
-    for i, tk in enumerate(tickers):
-        out[tk] = insider_activity(tk)
-        time.sleep(pause)
-        if (i + 1) % 25 == 0:
-            log.info("insider intelligence %d/%d", i + 1, len(tickers))
+    if not unique:
+        return out
+    with ThreadPoolExecutor(max_workers=SEC_WORKERS) as pool:
+        futs = {pool.submit(insider_activity, tk): tk for tk in unique}
+        for i, fut in enumerate(as_completed(futs), 1):
+            tk = futs[fut]
+            try:
+                out[tk] = fut.result()
+            except Exception as e:
+                out[tk] = {"status": "not_available", "reason": "worker_error", "error": str(e)[:160]}
+            if i % 50 == 0 or i == len(unique):
+                log.info("insider intelligence %d/%d", i, len(unique))
     return out

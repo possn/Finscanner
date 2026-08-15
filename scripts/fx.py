@@ -1,22 +1,46 @@
-"""Daily FX snapshot for portfolio weighting.
+"""Reliable daily FX snapshot for portfolio valuation.
 
-Stores conversion factors to EUR so browser-side portfolio analytics can compare
-positions quoted in different currencies. Yahoo symbols are queried through
-`yfinance`; when a direct CUR->EUR pair is unavailable we try the inverse
-EUR->CUR pair and invert it.
+Primary source: ECB euro reference rates. Yahoo Finance is used as fallback for
+currencies not published by the ECB. Stored values are EUR value of 1 currency
+unit, so browser-side portfolio math is simply local_value * rate_to_eur.
 """
 from __future__ import annotations
 
 import datetime as _dt
 import logging
 import math
+import xml.etree.ElementTree as ET
 from typing import Iterable
 
+import requests
 import yfinance as yf
 
 log = logging.getLogger(__name__)
-
 DEFAULT_CURRENCIES = ("USD", "GBP", "CHF", "CAD", "PLN", "SEK", "DKK", "AUD", "JPY", "NOK")
+ECB_DAILY_XML = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+
+
+def _ecb_rates() -> tuple[dict[str, float], str | None]:
+    """Return currency->EUR value from ECB quotes (ECB publishes units per EUR)."""
+    try:
+        r = requests.get(ECB_DAILY_XML, timeout=20, headers={"User-Agent": "Finscanner/1.0"})
+        r.raise_for_status()
+        root = ET.fromstring(r.content)
+        rates = {"EUR": 1.0}
+        ref_date = None
+        for elem in root.iter():
+            if elem.tag.endswith("Cube") and elem.attrib.get("time"):
+                ref_date = elem.attrib.get("time")
+            c = elem.attrib.get("currency")
+            raw = elem.attrib.get("rate")
+            if c and raw:
+                q = float(raw)
+                if q > 0 and math.isfinite(q):
+                    rates[c.upper()] = 1.0 / q
+        return rates, ref_date
+    except Exception as exc:
+        log.warning("ECB FX fetch failed: %s", exc)
+        return {"EUR": 1.0}, None
 
 
 def _last_close(symbol: str) -> float | None:
@@ -31,7 +55,7 @@ def _last_close(symbol: str) -> float | None:
         return None
 
 
-def _to_eur(currency: str) -> tuple[float | None, str | None]:
+def _yahoo_to_eur(currency: str) -> tuple[float | None, str | None]:
     c = currency.upper()
     if c == "EUR":
         return 1.0, "identity"
@@ -44,21 +68,40 @@ def _to_eur(currency: str) -> tuple[float | None, str | None]:
     return None, None
 
 
-def build_fx_payload(currencies: Iterable[str] = DEFAULT_CURRENCIES) -> dict:
+def build_fx_payload(currencies: Iterable[str] = DEFAULT_CURRENCIES, previous: dict | None = None) -> dict:
+    requested = [str(c).upper() for c in currencies]
+    ecb, ecb_date = _ecb_rates()
     rates = {"EUR": 1.0}
     sources = {"EUR": "identity"}
-    for currency in currencies:
-        c = currency.upper()
+    stale = []
+    previous_rates = (previous or {}).get("rates_to_eur") or {}
+
+    for c in requested:
         if c == "EUR":
             continue
-        rate, source = _to_eur(c)
+        if c in ecb and ecb[c] > 0:
+            rates[c] = ecb[c]
+            sources[c] = f"ECB {ecb_date or 'latest'}"
+            continue
+        rate, source = _yahoo_to_eur(c)
         if rate is not None:
             rates[c] = rate
-            sources[c] = source
+            sources[c] = source or "Yahoo Finance"
+            continue
+        old = previous_rates.get(c)
+        if old is not None and float(old) > 0:
+            rates[c] = float(old)
+            sources[c] = "previous snapshot fallback"
+            stale.append(c)
+
+    missing = [c for c in requested if c != "EUR" and c not in rates]
     return {
-        "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "generated_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
         "base": "EUR",
         "rates_to_eur": rates,
         "sources": sources,
-        "note": "rate = EUR value of 1 unit of the quoted currency; GBp/GBX are handled browser-side as 1/100 GBP",
+        "ecb_reference_date": ecb_date,
+        "missing": missing,
+        "stale_fallback": stale,
+        "note": "rate = EUR value of 1 currency unit; GBp/GBX are handled browser-side as 1/100 GBP",
     }

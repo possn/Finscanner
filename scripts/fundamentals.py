@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import logging
 import time
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 
 import yfinance as yf
@@ -41,6 +43,8 @@ class RawMetrics:
     quarterly_revenue: list[dict] = field(default_factory=list)
     quarterly_net_income: list[dict] = field(default_factory=list)
     quarterly_diluted_shares: list[dict] = field(default_factory=list)
+    quarterly_eps: list[dict] = field(default_factory=list)
+    quarterly_rnd: list[dict] = field(default_factory=list)
     revenue_yoy_latest: float | None = None
     revenue_yoy_prior: float | None = None
     revenue_yoy_acceleration_pp: float | None = None
@@ -52,6 +56,16 @@ class RawMetrics:
     net_margin_yoy_change_pp: float | None = None
     net_margin_yoy_change_prior_pp: float | None = None
     repurchases_last_quarter: float | None = None
+    eps_yoy_latest: float | None = None
+    eps_yoy_prior: float | None = None
+    eps_yoy_acceleration_pp: float | None = None
+    rnd_latest_quarter: float | None = None
+    rnd_yoy: float | None = None
+    rnd_to_revenue: float | None = None
+    roce_proxy: float | None = None
+    dividend_fcf_coverage: float | None = None
+    annual_quality_history: list[dict] = field(default_factory=list)
+    annual_dividend_history: list[dict] = field(default_factory=list)
 
     # cash flow
     free_cash_flow: float | None = None
@@ -305,6 +319,8 @@ def fetch_one(ticker: str) -> RawMetrics:
                     m.quarterly_revenue = series_for(("Total Revenue", "Operating Revenue"))
                     m.quarterly_net_income = series_for(("Net Income", "Net Income Common Stockholders"))
                     m.quarterly_diluted_shares = series_for(("Diluted Average Shares", "Basic Average Shares"))
+                    m.quarterly_eps = series_for(("Diluted EPS", "Basic EPS"))
+                    m.quarterly_rnd = series_for(("Research And Development", "Research Development"))
 
                     def yoy_at(series, offset=0):
                         old = offset + 4
@@ -321,6 +337,15 @@ def fetch_one(ticker: str) -> RawMetrics:
                     if m.net_income_yoy_latest is not None and m.net_income_yoy_prior is not None:
                         m.net_income_yoy_acceleration_pp = (m.net_income_yoy_latest - m.net_income_yoy_prior) * 100.0
                     m.diluted_shares_yoy = yoy_at(m.quarterly_diluted_shares, 0)
+                    m.eps_yoy_latest = yoy_at(m.quarterly_eps, 0)
+                    m.eps_yoy_prior = yoy_at(m.quarterly_eps, 1)
+                    if m.eps_yoy_latest is not None and m.eps_yoy_prior is not None:
+                        m.eps_yoy_acceleration_pp = (m.eps_yoy_latest - m.eps_yoy_prior) * 100.0
+                    m.rnd_yoy = yoy_at(m.quarterly_rnd, 0)
+                    if m.quarterly_rnd and m.quarterly_rnd[0].get("value") is not None:
+                        m.rnd_latest_quarter = abs(m.quarterly_rnd[0]["value"])
+                        if m.quarterly_revenue and m.quarterly_revenue[0].get("value") not in (None, 0):
+                            m.rnd_to_revenue = m.rnd_latest_quarter / abs(m.quarterly_revenue[0]["value"])
 
                     if m.quarterly_revenue and m.quarterly_net_income and m.quarterly_revenue[0]["value"] not in (None, 0) and m.quarterly_net_income[0]["value"] is not None:
                         m.net_margin_latest = m.quarterly_net_income[0]["value"] / m.quarterly_revenue[0]["value"]
@@ -369,6 +394,86 @@ def fetch_one(ticker: str) -> RawMetrics:
                             break
             except Exception as e:
                 log.debug("%s: financials unavailable (%s)", ticker, e)
+
+            # Capital efficiency proxy: EBIT / (Total Assets - Current Liabilities).
+            # This is labelled ROCE proxy in the UI because statement taxonomy and
+            # capital definitions vary across issuers. It is never used for banks/REITs.
+            try:
+                bs = t.balance_sheet
+                if bs is not None and not bs.empty and m.ebit is not None:
+                    total_assets = _row_value(bs, ("Total Assets",))
+                    current_liab = _row_value(bs, ("Current Liabilities", "Total Current Liabilities"))
+                    capital_employed = None
+                    if total_assets is not None and current_liab is not None:
+                        capital_employed = total_assets - current_liab
+                    if capital_employed not in (None, 0) and capital_employed > 0:
+                        m.roce_proxy = m.ebit / capital_employed
+            except Exception as e:
+                log.debug("%s: ROCE proxy unavailable (%s)", ticker, e)
+
+            # Annual quality context for Winston-style "current / 1Y / 3Y" cards.
+            # These are statement-derived historical observations, not estimates.
+            try:
+                fin = t.financials
+                bs = t.balance_sheet
+                if fin is not None and not fin.empty:
+                    cols = list(fin.columns)[:4]
+                    def row_at(frame, labels, col):
+                        if frame is None or frame.empty:
+                            return None
+                        for label in labels:
+                            if label in frame.index and col in frame.columns:
+                                return _as_float(frame.loc[label, col])
+                        return None
+                    hist=[]
+                    for c in cols:
+                        revenue=row_at(fin,("Total Revenue","Operating Revenue"),c)
+                        gross=row_at(fin,("Gross Profit",),c)
+                        op=row_at(fin,("Operating Income","EBIT"),c)
+                        net=row_at(fin,("Net Income","Net Income Common Stockholders"),c)
+                        ebit=row_at(fin,("EBIT","Operating Income"),c)
+                        assets=row_at(bs,("Total Assets",),c) if bs is not None else None
+                        equity=row_at(bs,("Stockholders Equity","Total Stockholder Equity","Common Stock Equity"),c) if bs is not None else None
+                        cur_liab=row_at(bs,("Current Liabilities","Total Current Liabilities"),c) if bs is not None else None
+                        item={"date": str(getattr(c,"date",lambda:c)())}
+                        if revenue not in (None,0):
+                            if gross is not None: item["gross_margin"]=gross/revenue
+                            if op is not None: item["operating_margin"]=op/revenue
+                            if net is not None: item["net_margin"]=net/revenue
+                        if equity not in (None,0) and net is not None:
+                            item["roe"]=net/equity
+                        if assets is not None and cur_liab is not None and ebit is not None and (assets-cur_liab)>0:
+                            item["roce_proxy"]=ebit/(assets-cur_liab)
+                        if len(item)>1: hist.append(item)
+                    m.annual_quality_history=hist
+            except Exception as e:
+                log.debug("%s: annual quality history unavailable (%s)", ticker, e)
+
+            # Dividend-per-share history from actual Yahoo dividend events.
+            try:
+                div=t.dividends
+                if div is not None and len(div):
+                    by_year={}
+                    for idx,val in div.items():
+                        yr=str(getattr(idx,"year", ""))
+                        v=_as_float(val)
+                        if yr and v is not None:
+                            by_year[yr]=by_year.get(yr,0.0)+v
+                    m.annual_dividend_history=[{"year":y,"value":round(by_year[y],8)} for y in sorted(by_year, reverse=True)[:4]]
+            except Exception as e:
+                log.debug("%s: dividend history unavailable (%s)", ticker, e)
+
+            # Dividend safety proxy: annual FCF divided by the market-implied
+            # annual dividend cash requirement. Only emitted when both sides are
+            # positive and available; missing data remain missing.
+            try:
+                if (m.free_cash_flow is not None and m.free_cash_flow > 0 and
+                        m.market_cap and m.market_cap > 0 and m.dividend_yield and m.dividend_yield > 0):
+                    implied_dividends = m.market_cap * m.dividend_yield
+                    if implied_dividends > 0:
+                        m.dividend_fcf_coverage = m.free_cash_flow / implied_dividends
+            except Exception:
+                pass
 
             # Bank-native proxies from public financial statements. These are
             # intentionally labelled proxies: CET1 and NPL ratios require
@@ -522,12 +627,46 @@ def fetch_one(ticker: str) -> RawMetrics:
     return m
 
 
-def fetch_many(tickers: list[str], pause: float = 0.15) -> list[RawMetrics]:
-    results = []
-    for i, tk in enumerate(tickers):
-        results.append(fetch_one(tk))
-        if pause:
-            time.sleep(pause)
-        if (i + 1) % 50 == 0:
-            log.info("fetched %d/%d", i + 1, len(tickers))
-    return results
+def fetch_many(tickers: list[str], pause: float = 0.0) -> list[RawMetrics]:
+    """Fetch fundamentals concurrently but conservatively.
+
+    Portfolio coverage expanded the universe materially; the old sequential loop
+    could take longer than the GitHub Action budget and left the UI on an old
+    stocks.json even though newer front-end releases were deployed. A small
+    worker pool keeps Yahoo request pressure bounded while making a full refresh
+    practical. Failed rows are retried once after the parallel pass.
+    """
+    tickers = list(dict.fromkeys(tickers))
+    if not tickers:
+        return []
+    workers = max(1, min(8, int(os.getenv("FINSCANNER_FETCH_WORKERS", "5"))))
+    results_by_ticker: dict[str, RawMetrics] = {}
+    completed = 0
+    log.info("Fetching %d tickers with %d workers", len(tickers), workers)
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="yf") as pool:
+        future_map = {pool.submit(fetch_one, tk): tk for tk in tickers}
+        for fut in as_completed(future_map):
+            tk = future_map[fut]
+            try:
+                results_by_ticker[tk] = fut.result()
+            except Exception as exc:
+                log.warning("%s: worker failed (%s)", tk, exc)
+                results_by_ticker[tk] = RawMetrics(ticker=tk, error=str(exc))
+            completed += 1
+            if completed % 50 == 0 or completed == len(tickers):
+                log.info("fetched %d/%d", completed, len(tickers))
+
+    failed = [tk for tk in tickers if getattr(results_by_ticker.get(tk), "error", None)]
+    if failed:
+        log.info("Retrying %d failed ticker(s) once", len(failed))
+        time.sleep(1.5)
+        for i, tk in enumerate(failed):
+            retry = fetch_one(tk)
+            if not getattr(retry, "error", None):
+                results_by_ticker[tk] = retry
+            if pause:
+                time.sleep(pause)
+            if (i + 1) % 50 == 0:
+                log.info("retry %d/%d", i + 1, len(failed))
+
+    return [results_by_ticker[tk] for tk in tickers if tk in results_by_ticker]

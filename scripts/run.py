@@ -20,12 +20,15 @@ import sys
 import traceback
 
 from fundamentals import fetch_many
+from analyst import fetch_many as fetch_analyst_many
 import history as history_mod
 import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
+from metals_brief import build_metals_brief
 import metals_history as metals_history_mod
 from fx import build_fx_payload
+from fx_history import build_fx_history_payload
 from news import fetch_news_for_universe
 from score import score_universe
 from thesis import classify as classify_thesis, evolve as evolve_thesis
@@ -35,7 +38,9 @@ from universe import build_universe, ETF_UNIVERSE, region_for_equity
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
 METALS_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals_history.json")
+METALS_BRIEF_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals_brief.json")
 FX_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "fx.json")
+FX_HISTORY_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "fx_history.json")
 HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "history.json")
 VALUATION_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "valuation_history.json")
 THESIS_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "thesis_history.json")
@@ -56,7 +61,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "insiders", "score", "thesis", "metals", "fx", "history", "valuation_history", "thesis_history", "news"):
+for _name in ("run", "universe", "fundamentals", "analyst", "insiders", "score", "thesis", "metals", "fx", "fx_history", "history", "valuation_history", "thesis_history", "news"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -113,7 +118,12 @@ def main():
     raw = fetch_many(all_tickers)
     scored = score_universe(raw)
 
-    us_tickers = [s.ticker for s in scored if "." not in s.ticker]
+    analyst_map = fetch_analyst_many(
+        [dataclasses.asdict(s) for s in scored],
+        priority_tickers=set(universe.get("EXTRA", [])),
+    )
+
+    us_tickers = [s.ticker for s in scored if "." not in s.ticker and s.quote_type != "ETF"]
     insider_map = annotate_insiders(us_tickers)
     raw_by_ticker = {r.ticker: r for r in raw}
     today = datetime.date.today().isoformat()
@@ -129,6 +139,15 @@ def main():
             row["region"] = etf_meta.get("region", "Global")
         else:
             row["region"] = region_for_equity(s.ticker)
+        analyst = analyst_map.get(s.ticker)
+        if analyst:
+            for key, value in analyst.items():
+                if key != "ticker":
+                    row[f"analyst_{key}"] = value
+        else:
+            row["analyst_status"] = "not_requested"
+            row["analyst_coverage_pct"] = 0.0
+
         insider = insider_map.get(s.ticker, {"status": "not_available"})
         row["insider_status"] = insider.get("status", "not_available")
         row["insider_form4_count_30d"] = insider.get("form4_count_30d", "not_available")
@@ -138,6 +157,8 @@ def main():
         row["insider_sell_value_30d"] = insider.get("sell_value_30d")
         row["insider_net_value_30d"] = insider.get("net_value_30d")
         row["insider_transactions"] = insider.get("transactions", [])
+        row["insider_reason"] = insider.get("reason")
+        row["insider_detail_filings_parsed"] = insider.get("detail_filings_parsed")
 
         rm = raw_by_ticker.get(s.ticker)
         if rm is not None:
@@ -154,6 +175,18 @@ def main():
             row["quarterly_revenue"] = rm.quarterly_revenue
             row["quarterly_net_income"] = rm.quarterly_net_income
             row["quarterly_diluted_shares"] = rm.quarterly_diluted_shares
+            row["quarterly_eps"] = rm.quarterly_eps
+            row["quarterly_rnd"] = rm.quarterly_rnd
+            row["eps_yoy_latest"] = rm.eps_yoy_latest
+            row["eps_yoy_prior"] = rm.eps_yoy_prior
+            row["eps_yoy_acceleration_pp"] = rm.eps_yoy_acceleration_pp
+            row["rnd_latest_quarter"] = rm.rnd_latest_quarter
+            row["rnd_yoy"] = rm.rnd_yoy
+            row["rnd_to_revenue"] = rm.rnd_to_revenue
+            row["roce_proxy"] = rm.roce_proxy
+            row["dividend_fcf_coverage"] = rm.dividend_fcf_coverage
+            row["annual_quality_history"] = rm.annual_quality_history
+            row["annual_dividend_history"] = rm.annual_dividend_history
             row["revenue_yoy_latest"] = rm.revenue_yoy_latest
             row["revenue_yoy_prior"] = rm.revenue_yoy_prior
             row["revenue_yoy_acceleration_pp"] = rm.revenue_yoy_acceleration_pp
@@ -170,8 +203,49 @@ def main():
         row.update(evolve_thesis(row, prev_snapshot, prev_date))
         rows.append(row)
 
+    portfolio_extra = set(universe.get("EXTRA", []))
+    row_tickers = {r.get("ticker") for r in rows}
+    portfolio_covered = len(portfolio_extra & row_tickers)
+    etf_rows = [r for r in rows if r.get("quote_type") == "ETF"]
+    etf_holdings_rows = sum(1 for r in etf_rows if r.get("top_holdings"))
+    us_equity_rows = [r for r in rows if r.get("quote_type") != "ETF" and "." not in (r.get("ticker") or "")]
+    insider_ok_rows = sum(1 for r in us_equity_rows if r.get("insider_status") == "ok")
+    insider_degraded_rows = sum(1 for r in us_equity_rows if r.get("insider_status") == "degraded")
+    insider_rows_with_form4 = sum(1 for r in us_equity_rows if isinstance(r.get("insider_form4_count_30d"), int) and r.get("insider_form4_count_30d", 0) > 0)
+    insider_rows_with_ps = sum(1 for r in us_equity_rows if (r.get("insider_buy_count_30d") or 0) + (r.get("insider_sell_count_30d") or 0) > 0)
+
+    analyst_requested = len(analyst_map)
+    analyst_ok = sum(1 for a in analyst_map.values() if a.get("status") == "ok")
+    analyst_partial = sum(1 for a in analyst_map.values() if a.get("status") == "partial")
+    analyst_with_revisions = sum(1 for a in analyst_map.values() if a.get("eps_next_q_revision_30d_pct") is not None or a.get("eps_next_y_revision_30d_pct") is not None)
+    analyst_with_surprise = sum(1 for a in analyst_map.values() if a.get("latest_eps_surprise_pct") is not None)
+    analyst_with_next_earnings = sum(1 for a in analyst_map.values() if a.get("next_earnings_date"))
+    analyst_earnings_within_14d = sum(1 for a in analyst_map.values() if isinstance(a.get("days_to_earnings"), int) and 0 <= a.get("days_to_earnings") <= 14)
+
     payload = {
+        "schema_version": 48,
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "data_quality": {
+            "portfolio_extra_requested": len(portfolio_extra),
+            "portfolio_extra_covered": portfolio_covered,
+            "portfolio_extra_coverage_pct": round((portfolio_covered / len(portfolio_extra) * 100), 1) if portfolio_extra else 100.0,
+            "etf_rows": len(etf_rows),
+            "etf_rows_with_holdings": etf_holdings_rows,
+            "insider_us_equities": len(us_equity_rows),
+            "insider_sec_ok": insider_ok_rows,
+            "insider_sec_degraded": insider_degraded_rows,
+            "insider_rows_with_form4_30d": insider_rows_with_form4,
+            "insider_rows_with_open_market_ps_30d": insider_rows_with_ps,
+            "insider_sec_coverage_pct": round((insider_ok_rows / len(us_equity_rows) * 100), 1) if us_equity_rows else 100.0,
+            "analyst_rows_requested": analyst_requested,
+            "analyst_rows_ok": analyst_ok,
+            "analyst_rows_partial": analyst_partial,
+            "analyst_rows_with_revisions": analyst_with_revisions,
+            "analyst_rows_with_surprise": analyst_with_surprise,
+            "analyst_rows_with_next_earnings": analyst_with_next_earnings,
+            "analyst_earnings_within_14d": analyst_earnings_within_14d,
+            "analyst_coverage_pct": round(((analyst_ok + analyst_partial) / analyst_requested * 100), 1) if analyst_requested else 0.0,
+        },
         "universe_counts": {k: len(v) for k, v in universe.items()},
         "category_benchmarks": CATEGORY_BENCHMARKS,
         "methodology_note": (
@@ -188,7 +262,11 @@ def main():
             "for documented data limitations. The thesis taxonomy is deterministic and "
             "explainable (scripts/thesis.py), not a recommendation or forecast. Insider P/S signals are limited to "
             "open-market Form 4 transaction codes and quarterly growth/dilution and acceleration "
-            "use up to the latest six Yahoo Finance quarters when available."
+            "use up to the latest six Yahoo Finance quarters when available. Analyst estimates, "
+            "EPS/revenue revisions, earnings surprises, recommendation counts and price targets are "
+            "contextual evidence only and are not included in the core Finscanner score because "
+            "coverage is uneven across markets. Upcoming earnings dates and recent beat/miss history are "
+            "presented as catalyst/event-risk context and do not alter the core score."
         ),
         "stocks": rows,
     }
@@ -208,9 +286,32 @@ def main():
         json.dump(_json_safe(metals_payload), f, indent=2)
     log.info("Wrote metals data to %s", METALS_OUT_PATH)
 
-    fx_payload = build_fx_payload()
+    metals_brief = build_metals_brief(metals_payload)
+    with open(METALS_BRIEF_PATH, "w") as f:
+        json.dump(_json_safe(metals_brief), f, indent=2)
+    log.info("Wrote daily metals brief to %s", METALS_BRIEF_PATH)
+
+    previous_fx = None
+    try:
+        if os.path.exists(FX_OUT_PATH):
+            with open(FX_OUT_PATH, "r", encoding="utf-8") as f:
+                previous_fx = json.load(f)
+    except Exception:
+        previous_fx = None
+    fx_payload = build_fx_payload(previous=previous_fx)
     with open(FX_OUT_PATH, "w") as f:
         json.dump(_json_safe(fx_payload), f, indent=2)
+
+    previous_fx_history = None
+    try:
+        if os.path.exists(FX_HISTORY_OUT_PATH):
+            with open(FX_HISTORY_OUT_PATH) as f:
+                previous_fx_history = json.load(f)
+    except Exception:
+        previous_fx_history = None
+    fx_history_payload = build_fx_history_payload(previous=previous_fx_history)
+    with open(FX_HISTORY_OUT_PATH, "w") as f:
+        json.dump(_json_safe(fx_history_payload), f, separators=(",", ":"))
     log.info("Wrote FX data to %s", FX_OUT_PATH)
 
     history = history_mod.load(HISTORY_PATH)

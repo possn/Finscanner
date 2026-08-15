@@ -89,6 +89,11 @@ class ScoredTicker:
     sector_ev_ebitda_median: float | None = None
     ev_ebitda_vs_sector_pct: float | None = None
     quality_value_score: float | None = None
+    sector_roe_median: float | None = None
+    sector_operating_margin_median: float | None = None
+    sector_gross_margin_median: float | None = None
+    sector_roce_proxy_median: float | None = None
+    sector_dividend_yield_median: float | None = None
     score_model: str = "general"
     score_model_note: str | None = None
     score_dimensions: dict[str, float | None] | None = None
@@ -137,6 +142,14 @@ def _percentile_rank(value: float | None, all_values: list[float | None], invert
 def _avg(values):
     vals = [v for v in values if v is not None]
     return sum(vals) / len(vals) if vals else None
+
+
+def _median_any(values):
+    clean = sorted(float(v) for v in values if v is not None)
+    if not clean:
+        return None
+    n=len(clean); mid=n//2
+    return clean[mid] if n%2 else (clean[mid-1]+clean[mid])/2
 
 
 def _median_positive(values):
@@ -388,6 +401,11 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
         sector_fpe = _median_positive([x.forward_pe for x in peers]) if peer_count >= 4 else None
         sector_pb = _median_positive([x.price_to_book for x in peers]) if peer_count >= 4 else None
         sector_ev = _median_positive([x.enterprise_to_ebitda for x in peers]) if peer_count >= 4 else None
+        sector_roe = _median_any([x.roe for x in peers]) if peer_count >= 4 else None
+        sector_opm = _median_any([x.operating_margin for x in peers]) if peer_count >= 4 else None
+        sector_gm = _median_any([x.gross_margin for x in peers]) if peer_count >= 4 else None
+        sector_roce = _median_any([x.roce_proxy for x in peers]) if peer_count >= 4 else None
+        sector_div = _median_any([x.dividend_yield for x in peers]) if peer_count >= 4 else None
         quality_value = _avg([quality, value])
 
         net_cash = net_cash_values[idx]
@@ -427,6 +445,11 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             sector_ev_ebitda_median=round(sector_ev, 2) if sector_ev is not None else None,
             ev_ebitda_vs_sector_pct=round(_relative_pct(r.enterprise_to_ebitda, sector_ev), 1) if _relative_pct(r.enterprise_to_ebitda, sector_ev) is not None else None,
             quality_value_score=round(quality_value, 1) if quality_value is not None else None,
+            sector_roe_median=round(sector_roe,4) if sector_roe is not None else None,
+            sector_operating_margin_median=round(sector_opm,4) if sector_opm is not None else None,
+            sector_gross_margin_median=round(sector_gm,4) if sector_gm is not None else None,
+            sector_roce_proxy_median=round(sector_roce,4) if sector_roce is not None else None,
+            sector_dividend_yield_median=round(sector_div,4) if sector_div is not None else None,
             score_model=model, score_model_note=model_note,
             score_dimensions={k: (round(v,1) if v is not None else None) for k,v in score_dimensions.items()},
             net_interest_income=r.net_interest_income, net_interest_income_yoy=r.net_interest_income_yoy,
@@ -453,8 +476,35 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
     for r in etfs:
         ai_pct = None
         if r.top_holdings:
-            ai_pct = sum(w for sym, w in r.top_holdings if sym.upper() in AI_EXPOSED_TICKERS)
-            ai_pct = round(ai_pct * 100, 1)
+            # top_holdings is stored by fundamentals.py as a list of dicts:
+            # {"symbol": ..., "name": ..., "weight": ...}. Older cached data
+            # may still contain tuple/list pairs, so accept both representations.
+            ai_weight = 0.0
+            found_weight = False
+            for holding in r.top_holdings:
+                sym = None
+                weight = None
+                if isinstance(holding, dict):
+                    sym = holding.get("symbol") or holding.get("ticker")
+                    weight = holding.get("weight")
+                    if weight is None:
+                        weight = holding.get("holding_percent")
+                    if weight is None:
+                        weight = holding.get("Holding Percent")
+                elif isinstance(holding, (list, tuple)) and len(holding) >= 2:
+                    sym, weight = holding[0], holding[1]
+
+                try:
+                    w = float(weight) if weight is not None else None
+                except (TypeError, ValueError):
+                    w = None
+
+                if sym and w is not None and str(sym).upper() in AI_EXPOSED_TICKERS:
+                    ai_weight += w
+                    found_weight = True
+
+            if found_weight:
+                ai_pct = round(ai_weight * 100, 1)
         out.append(ScoredTicker(
             ticker=r.ticker, name=r.name, sector=r.sector, industry=r.industry,
             market_cap=r.market_cap, currency=r.currency, quote_type="ETF",
