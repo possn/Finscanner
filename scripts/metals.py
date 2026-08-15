@@ -30,6 +30,8 @@ import logging
 
 import yfinance as yf
 
+from physical_metals import build_physical_payload
+
 log = logging.getLogger("metals")
 
 INSTRUMENTS = [
@@ -75,6 +77,11 @@ def fetch_metal(ticker: str, days: int = 365):
         vol_annualized_pct = float(returns.std() * (252 ** 0.5) * 100) if len(returns) > 5 else None
 
         closes_90d = closes.tail(90)
+        sma_200 = float(closes.tail(200).mean()) if len(closes) >= 60 else None
+        vs_200d_pct = ((last - sma_200) / sma_200 * 100) if sma_200 else None
+        low_1y = float(closes.min())
+        high_1y = float(closes.max())
+        position_52w_pct = ((last - low_1y) / (high_1y - low_1y) * 100) if high_1y > low_1y else None
         first_of_year = closes[closes.index.year == closes.index[-1].year]
         change_ytd_pct = ((last - float(first_of_year.iloc[0])) / float(first_of_year.iloc[0]) * 100) if len(first_of_year) > 1 else None
         change_1y_pct = ((last - float(closes.iloc[0])) / float(closes.iloc[0]) * 100) if len(closes) > 200 else None
@@ -84,8 +91,11 @@ def fetch_metal(ticker: str, days: int = 365):
             "day_change_pct": round(day_change_pct, 2) if day_change_pct is not None else None,
             "range_90d_low": round(float(closes_90d.min()), 3),
             "range_90d_high": round(float(closes_90d.max()), 3),
-            "range_1y_low": round(float(closes.min()), 3),
-            "range_1y_high": round(float(closes.max()), 3),
+            "range_1y_low": round(low_1y, 3),
+            "range_1y_high": round(high_1y, 3),
+            "sma_200": round(sma_200, 3) if sma_200 is not None else None,
+            "vs_200d_pct": round(vs_200d_pct, 1) if vs_200d_pct is not None else None,
+            "position_52w_pct": round(position_52w_pct, 1) if position_52w_pct is not None else None,
             "change_ytd_pct": round(change_ytd_pct, 1) if change_ytd_pct is not None else None,
             "change_1y_pct": round(change_1y_pct, 1) if change_1y_pct is not None else None,
             "volatility_annualized_pct": round(vol_annualized_pct, 1) if vol_annualized_pct is not None else None,
@@ -101,15 +111,49 @@ def build_metals_payload() -> dict:
         data = fetch_metal(inst["ticker"])
         rows.append({**inst, "data": data})
 
+    physical = build_physical_payload()
+
+    # Shanghai premium proxy: SGE SHAUs benchmark (CNY/g) converted to USD/oz
+    # against the COMEX front-month gold future. This is NOT a true Shanghai-London
+    # premium; it is explicitly labelled as a cross-market proxy.
+    sge = physical.get("shanghai", {}).get("gold_benchmark", {})
+    gold = next((r for r in rows if r.get("ticker") == "GC=F"), None)
+    try:
+        fx_hist = yf.Ticker("CNY=X").history(period="5d")
+        cny_per_usd = float(fx_hist["Close"].dropna().iloc[-1]) if not fx_hist.empty else None
+    except Exception:
+        cny_per_usd = None
+    if sge.get("status") == "ok" and cny_per_usd and gold and gold.get("data", {}).get("price"):
+        sge_usd_oz = float(sge["benchmark_cny_per_g"]) * 31.1034768 / cny_per_usd
+        comex = float(gold["data"]["price"])
+        sge["cny_per_usd"] = round(cny_per_usd, 4)
+        sge["benchmark_usd_per_oz_proxy"] = round(sge_usd_oz, 2)
+        sge["premium_vs_comex_front_pct"] = round((sge_usd_oz / comex - 1) * 100, 2) if comex else None
+        sge["premium_method"] = "SGE benchmark converted at CNY/USD vs COMEX front-month future; proxy, not Shanghai-London spot premium."
+
+    gaps = []
+    if physical.get("comex", {}).get("gold", {}).get("status") != "ok": gaps.append("COMEX gold registered/eligible inventory")
+    if physical.get("comex", {}).get("silver", {}).get("status") != "ok": gaps.append("COMEX silver registered/eligible inventory")
+    if physical.get("positioning", {}).get("gold", {}).get("status") != "ok": gaps.append("CFTC managed-money positioning")
+    if sge.get("status") != "ok": gaps.append("Shanghai Gold Exchange benchmark")
+    if physical.get("central_banks", {}).get("status") != "ok": gaps.append("central-bank monthly flows (WGC workbook)")
+    gaps.append("COMEX delivery coverage / paper-to-physical leverage: not derived without a defensible denominator")
+
     return {
-        "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "note": (
             "Preços de futuros (não spot) para ouro/prata/cobre/platina/paládio. "
-            "Urânio é um proxy via ETF de mineradoras (URA), não o preço do metal "
-            "— não existe fonte gratuita de preço spot de urânio. Sem indicador "
-            "de stress/tensão de mercado: exigiria dados de inventário/lease rates "
-            "que não estão disponíveis gratuitamente; nenhum número é inventado."
+            "Urânio é um proxy via ETF de mineradoras. A camada física usa fontes "
+            "oficiais/gratuitas (CME, CFTC, SGE e, quando acessível, WGC). Cada bloco "
+            "expõe a fonte e o estado; dados indisponíveis não são estimados."
         ),
+        "ways_to_play": {
+            "own_metal": ["GLD", "IAU", "GLDM"],
+            "miners": ["GDX", "GDXJ", "NEM", "AEM", "KGC"],
+            "royalty_streaming": ["FNV", "WPM", "RGLD"],
+        },
+        "physical": physical,
+        "data_gaps": gaps,
         "instruments": rows,
     }
 

@@ -104,6 +104,18 @@ class RawMetrics:
     reit_gain_loss_sale_adjustment: float | None = None
     reit_metric_coverage_pct: float | None = None
 
+    # Insurance-specific statement-derived proxies. These are deliberately
+    # labelled proxies because generic Yahoo statements do not expose
+    # regulator-specific solvency metrics consistently across jurisdictions.
+    insurance_net_investment_income: float | None = None
+    insurance_claims_benefits: float | None = None
+    insurance_claims_to_revenue: float | None = None
+    insurance_operating_expense: float | None = None
+    insurance_operating_ratio_proxy: float | None = None
+    insurance_book_value_per_share_proxy: float | None = None
+    insurance_equity_to_assets: float | None = None
+    insurance_metric_coverage_pct: float | None = None
+
     # ETF-specific
     expense_ratio: float | None = None
     top_holdings: list[tuple[str, float]] = field(default_factory=list)
@@ -345,6 +357,62 @@ def fetch_one(ticker: str) -> RawMetrics:
                     m.bank_metric_coverage_pct = sum(v is not None for v in bank_vals) / len(bank_vals) * 100.0
                 except Exception as e:
                     log.debug("%s: bank proxy metrics unavailable (%s)", ticker, e)
+
+            # Insurance-native public-statement proxies. Generic Yahoo statements
+            # vary materially between life, P&C and reinsurance businesses, so
+            # these are intentionally conservative and never presented as
+            # regulatory solvency ratios or as a reported combined ratio.
+            is_insurance = "financial" in sector and any(k in industry for k in ("insurance", "insur"))
+            if is_insurance:
+                try:
+                    fin = t.financials
+                    bs = t.balance_sheet
+
+                    latest_revenue = _row_value(fin, ("Total Revenue", "Operating Revenue"))
+                    m.insurance_net_investment_income = _row_value(fin, (
+                        "Net Investment Income", "Investment Income", "Net Investment Income Net"
+                    ))
+                    claims = _row_value(fin, (
+                        "Policyholder Benefits", "Policyholder Benefits And Claims Payable",
+                        "Losses And Loss Adjustment Expenses", "Loss And Loss Adjustment Expense",
+                        "Insurance And Claims"
+                    ))
+                    if claims is not None:
+                        m.insurance_claims_benefits = abs(claims)
+                        if latest_revenue not in (None, 0):
+                            m.insurance_claims_to_revenue = abs(claims) / abs(latest_revenue)
+
+                    opex = _row_value(fin, (
+                        "Operating Expense", "Total Operating Expenses",
+                        "Selling General And Administration", "General And Administrative Expense"
+                    ))
+                    if opex is not None:
+                        m.insurance_operating_expense = abs(opex)
+                    # This ratio is a broad cost-load proxy only. It is NOT a
+                    # statutory combined ratio because generic statements do not
+                    # reliably separate earned premium, claims and acquisition costs.
+                    if latest_revenue not in (None, 0) and claims is not None and opex is not None:
+                        m.insurance_operating_ratio_proxy = (abs(claims) + abs(opex)) / abs(latest_revenue)
+
+                    total_assets = _row_value(bs, ("Total Assets",))
+                    equity = _row_value(bs, (
+                        "Stockholders Equity", "Total Equity Gross Minority Interest", "Common Stock Equity"
+                    ))
+                    if total_assets not in (None, 0) and equity is not None:
+                        m.insurance_equity_to_assets = equity / total_assets
+
+                    diluted = _row_value(fin, ("Diluted Average Shares", "Basic Average Shares"))
+                    if equity is not None and diluted not in (None, 0):
+                        m.insurance_book_value_per_share_proxy = equity / diluted
+
+                    ins_vals = [
+                        m.insurance_net_investment_income, m.insurance_claims_to_revenue,
+                        m.insurance_operating_ratio_proxy, m.insurance_book_value_per_share_proxy,
+                        m.insurance_equity_to_assets,
+                    ]
+                    m.insurance_metric_coverage_pct = sum(v is not None for v in ins_vals) / len(ins_vals) * 100.0
+                except Exception as e:
+                    log.debug("%s: insurance proxy metrics unavailable (%s)", ticker, e)
 
             # REIT-native public-statement proxies. NAREIT FFO requires net income
             # adjusted for real-estate depreciation/amortisation and gains/losses

@@ -114,6 +114,16 @@ class ScoredTicker:
     reit_gain_loss_sale_adjustment: float | None = None
     reit_metric_coverage_pct: float | None = None
 
+    # insurance-native statement-derived proxies
+    insurance_net_investment_income: float | None = None
+    insurance_claims_benefits: float | None = None
+    insurance_claims_to_revenue: float | None = None
+    insurance_operating_expense: float | None = None
+    insurance_operating_ratio_proxy: float | None = None
+    insurance_book_value_per_share_proxy: float | None = None
+    insurance_equity_to_assets: float | None = None
+    insurance_metric_coverage_pct: float | None = None
+
 
 def _percentile_rank(value: float | None, all_values: list[float | None], invert: bool = False) -> float | None:
     clean = sorted(v for v in all_values if v is not None)
@@ -315,20 +325,32 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             score_dimensions = {"REIT Quality": reit_quality, "Growth": growth, "Leverage": reit_leverage, "P/FFO Value": reit_value, "Distribution": reit_distribution, "Stability": stability}
             model_note = "REIT-native proxy model: statement-derived FFO proxy, P/FFO proxy, FFO payout proxy, net-debt/EBITDA, growth and distributions. AFFO, NAV and occupancy remain unavailable rather than inferred."
         elif model == "insurance":
+            insurance_peers = [x for x in equities if _score_model_for(x) == "insurance"]
             ins_quality = _avg([
-                _percentile_rank(r.roe, arr("roe")),
-                _percentile_rank(r.roa, arr("roa")),
-                _percentile_rank(r.profit_margin, arr("profit_margin")),
+                _percentile_rank(r.roe, [x.roe for x in insurance_peers]),
+                _percentile_rank(r.roa, [x.roa for x in insurance_peers]),
+                _percentile_rank(r.profit_margin, [x.profit_margin for x in insurance_peers]),
             ])
-            ins_balance = _percentile_rank(r.debt_to_equity, arr("debt_to_equity"), invert=True)
+            ins_underwriting = _avg([
+                _percentile_rank(r.insurance_claims_to_revenue, [x.insurance_claims_to_revenue for x in insurance_peers], invert=True),
+                _percentile_rank(r.insurance_operating_ratio_proxy, [x.insurance_operating_ratio_proxy for x in insurance_peers], invert=True),
+            ])
+            ins_capital = _avg([
+                _percentile_rank(r.insurance_equity_to_assets, [x.insurance_equity_to_assets for x in insurance_peers]),
+                _percentile_rank(r.debt_to_equity, [x.debt_to_equity for x in insurance_peers], invert=True),
+            ])
             ins_value = _avg([
-                _percentile_rank(r.price_to_book, arr("price_to_book"), invert=True) if r.price_to_book and r.price_to_book > 0 else None,
-                _percentile_rank(r.trailing_pe, arr("trailing_pe"), invert=True) if r.trailing_pe and r.trailing_pe > 0 else None,
+                _percentile_rank(r.price_to_book, [x.price_to_book for x in insurance_peers], invert=True) if r.price_to_book and r.price_to_book > 0 else None,
+                _percentile_rank(r.trailing_pe, [x.trailing_pe for x in insurance_peers], invert=True) if r.trailing_pe and r.trailing_pe > 0 else None,
             ])
-            composite = _weighted([(ins_quality,.30),(growth,.15),(ins_balance,.15),(ins_value,.20),(income,.10),(stability,.10)])
-            quality, balance, value = ins_quality, ins_balance, ins_value
-            score_dimensions = {"Insurance Quality": ins_quality, "Growth": growth, "Balance": ins_balance, "Valuation": ins_value, "Income": income, "Stability": stability}
-            model_note = "Insurance proxy model: profitability, growth, leverage, P/B-P/E valuation, income and stability. Combined ratio and solvency capital are not yet in the dataset."
+            ins_income_quality = _avg([
+                income,
+                _positive_score(r.insurance_net_investment_income),
+            ])
+            composite = _weighted([(ins_quality,.22),(ins_underwriting,.18),(ins_capital,.18),(growth,.12),(ins_value,.17),(ins_income_quality,.08),(stability,.05)])
+            quality, balance, value = _avg([ins_quality, ins_underwriting]), ins_capital, ins_value
+            score_dimensions = {"Insurance Quality": ins_quality, "Underwriting Proxy": ins_underwriting, "Capital Proxy": ins_capital, "Growth": growth, "Valuation": ins_value, "Income": ins_income_quality, "Stability": stability}
+            model_note = "Insurance-native proxy model: profitability, claims/cost-load proxies, accounting capitalisation, growth, P/B-P/E valuation and income. It does not fabricate statutory combined ratio or solvency capital."
         else:
             composite = _weighted([(quality,.25),(growth,.20),(balance,.20),(cashflow,.10),(value,.15),(stability,.10)])
             score_dimensions = {"Quality": quality, "Growth": growth, "Balance": balance, "Cash Flow": cashflow, "Valuation": value, "Stability": stability}
@@ -346,8 +368,13 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
         ]
         metric_coverage = sum(v is not None for v in metric_values) / len(metric_values) * 100
         confidence = "high" if metric_coverage >= 70 else "medium" if metric_coverage >= 40 else "low"
-        if model in ("bank", "insurance") and confidence == "high":
+        if model == "bank" and confidence == "high":
             confidence = "medium"
+        if model == "insurance":
+            if (r.insurance_metric_coverage_pct or 0) < 40:
+                confidence = "low"
+            elif confidence == "high":
+                confidence = "medium"
         if model == "reit" and confidence == "high" and (r.reit_metric_coverage_pct or 0) < 60:
             confidence = "medium"
 
@@ -413,6 +440,14 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             reit_depreciation_amortization=r.reit_depreciation_amortization,
             reit_gain_loss_sale_adjustment=r.reit_gain_loss_sale_adjustment,
             reit_metric_coverage_pct=r.reit_metric_coverage_pct,
+            insurance_net_investment_income=r.insurance_net_investment_income,
+            insurance_claims_benefits=r.insurance_claims_benefits,
+            insurance_claims_to_revenue=r.insurance_claims_to_revenue,
+            insurance_operating_expense=r.insurance_operating_expense,
+            insurance_operating_ratio_proxy=r.insurance_operating_ratio_proxy,
+            insurance_book_value_per_share_proxy=r.insurance_book_value_per_share_proxy,
+            insurance_equity_to_assets=r.insurance_equity_to_assets,
+            insurance_metric_coverage_pct=r.insurance_metric_coverage_pct,
         ))
 
     for r in etfs:
