@@ -78,7 +78,7 @@ jobs:
           stocks = payload.get("stocks")
           if not isinstance(stocks, list) or not stocks:
               raise SystemExit("data/stocks.json has no non-empty stocks array")
-          if int(payload.get("schema_version", 0)) < 48:
+          if int(payload.get("schema_version", 0)) < 481:
               raise SystemExit(f"Old stocks schema: {payload.get('schema_version')}")
           fx = json.loads(Path("data/fx.json").read_text())
           rates = fx.get("rates_to_eur") or {}
@@ -97,6 +97,11 @@ jobs:
           etf_rows = int(quality.get("etf_rows", 0) or 0)
           etf_holdings = int(quality.get("etf_rows_with_holdings", 0) or 0)
           if requested and pct < 50:
+              extras = json.loads(Path("data/extra_tickers.json").read_text())
+              requested_symbols = set(extras.get("tickers", extras) if isinstance(extras, dict) else extras)
+              got_symbols = {str(r.get("ticker") or "") for r in stocks}
+              missing = sorted(requested_symbols - got_symbols)
+              print("Portfolio symbols still missing (first 80):", ", ".join(missing[:80]))
               raise SystemExit(f"Portfolio coverage too low: {covered}/{requested} ({pct:.1f}%)")
           if etf_rows and etf_holdings == 0:
               raise SystemExit(f"ETF metadata regression: 0/{etf_rows} ETF rows have holdings")
