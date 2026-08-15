@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: finscanner-data-update-main
+  group: finscanner-repo-writes-main
   cancel-in-progress: false
 
 jobs:
@@ -78,7 +78,7 @@ jobs:
           stocks = payload.get("stocks")
           if not isinstance(stocks, list) or not stocks:
               raise SystemExit("data/stocks.json has no non-empty stocks array")
-          if int(payload.get("schema_version", 0)) < 481:
+          if int(payload.get("schema_version", 0)) < 510:
               raise SystemExit(f"Old stocks schema: {payload.get('schema_version')}")
           fx = json.loads(Path("data/fx.json").read_text())
           rates = fx.get("rates_to_eur") or {}
