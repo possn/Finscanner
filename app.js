@@ -245,7 +245,7 @@
       els.briefingGreeting.textContent = h < 12 ? "Bom dia" : h < 19 ? "Boa tarde" : "Boa noite";
     }
     if (!els.briefingCard || !state.data?.stocks?.length) return;
-    const rows = state.data.stocks.filter(r => r.quote_type !== "ETF" && Number.isFinite(Number(r.score)));
+    const rows = state.data.stocks.filter(r => r.quote_type !== "ETF" && !isAustralianScannerRow(r) && Number.isFinite(Number(r.score)));
     const strengthen = rows.filter(r => r.thesis_direction === "strengthening").sort((a,b)=>(b.thesis_score_delta||0)-(a.thesis_score_delta||0))[0];
     const insider = rows.filter(r => Number(r.insider_net_value_30d) > 0).sort((a,b)=>(b.insider_net_value_30d||0)-(a.insider_net_value_30d||0))[0];
     const top = strengthen || insider || rows.slice().sort((a,b)=>(b.score||0)-(a.score||0))[0];
@@ -796,7 +796,7 @@
 
   function renderMarketOverview() {
     if (!state.data?.stocks?.length) return;
-    const rows = state.data.stocks;
+    const rows = state.data.stocks.filter(r => !isAustralianScannerRow(r));
     const scored = rows.filter(r => Number.isFinite(r.score));
     const sortedScores = scored.map(r => r.score).sort((a,b)=>a-b);
     const median = sortedScores.length ? sortedScores[Math.floor(sortedScores.length/2)] : null;
@@ -864,6 +864,10 @@
   };
   function regionLabel(region) { return REGION_LABELS_PT[region] || region; }
 
+  function isAustralianScannerRow(r) {
+    return r?.region === "Australia" || String(r?.ticker || "").toUpperCase().endsWith(".AX");
+  }
+
   function populateRegionFilter(selectEl, rows, populatedFlagSetter) {
     if (!selectEl) return;
     const regions = [...new Set(rows.map(r => r.region).filter(Boolean))]
@@ -906,7 +910,7 @@
 
   function applyFilters() {
     if (!state.data) return;
-    const equities = state.data.stocks.filter(r => r.quote_type !== "ETF");
+    const equities = state.data.stocks.filter(r => r.quote_type !== "ETF" && !isAustralianScannerRow(r));
     if (!stocksRegionsPopulated) {
       populateRegionFilter(els.marketFilter, equities, () => { stocksRegionsPopulated = true; });
     }
@@ -930,6 +934,7 @@
 
     let rows = state.data.stocks.filter(r => {
       if (r.quote_type === "ETF") return false;
+      if (isAustralianScannerRow(r)) return false;
       if (region && r.region !== region) return false;
       if (sector && r.sector !== sector) return false;
       if (zombieOnly && r.zombie !== "yes") return false;
@@ -1255,6 +1260,39 @@
     return Number(v) > positiveAbove ? "positive" : Number(v) < positiveAbove ? "negative" : "neutral";
   }
 
+  function capitalAllocationIntelligenceHtml(r) {
+    const hist=(r.annual_dividend_history||[]).filter(x=>Number.isFinite(Number(x?.value)) && Number(x.value)>=0);
+    const currentDiv=hist[0]?.value ?? null;
+    const oldDiv=hist[Math.min(3, hist.length-1)]?.value ?? null;
+    const years=Math.max(1, Math.min(3, hist.length-1));
+    const divCagr=(Number.isFinite(Number(currentDiv)) && Number.isFinite(Number(oldDiv)) && Number(oldDiv)>0)
+      ? (Math.pow(Number(currentDiv)/Number(oldDiv),1/years)-1) : null;
+    let streak=0;
+    for(let i=0;i<hist.length-1;i++){
+      if(Number(hist[i].value) >= Number(hist[i+1].value)) streak++; else break;
+    }
+    const mcap=Number(r.market_cap), rep=Number(r.repurchases_last_quarter);
+    const annualisedBuybackYield=(Number.isFinite(rep)&&rep>0&&Number.isFinite(mcap)&&mcap>0) ? (rep*4/mcap) : null;
+    const dy=Number(r.dividend_yield), dilution=Number(r.dilution_yoy), fcfCov=Number(r.dividend_fcf_coverage), payout=Number(r.payout_ratio);
+    const shareholderYield=(Number.isFinite(dy)?dy:0) + (Number.isFinite(annualisedBuybackYield)?annualisedBuybackYield:0) - (Number.isFinite(dilution)&&dilution>0?dilution:0);
+    const hasAny=[dy,annualisedBuybackYield,dilution,fcfCov,payout,divCagr].some(Number.isFinite);
+    if(!hasAny) return '';
+    const allocationTone = Number.isFinite(shareholderYield) ? (shareholderYield>0.04?'positive':shareholderYield<0?'negative':'neutral') : 'neutral';
+    return `<section class="capital-allocation-block">
+      <div class="section-kicker">CAPITAL ALLOCATION</div>
+      <h3>Dividendos, buybacks & diluição</h3>
+      <p class="section-sub">Como a empresa distribui — ou dilui — o valor económico por ação.</p>
+      <div class="w-metric-grid">
+        ${metricCardHtml({title:'Dividend Growth', value:divCagr==null?'—':`${divCagr>=0?'+':''}${(divCagr*100).toFixed(1)}%`, subtitle:hist.length>=2?`${streak} período(s) sem corte no histórico observado`:'histórico insuficiente', explanation:divCagr==null?'Requer vários anos de dividendos por ação.':'CAGR observado do dividendo por ação; crescimento sustentável é mais útil do que yield elevado isolado.', series:hist.slice().reverse().map(x=>x.value), tone:divCagr==null?'neutral':divCagr>0.05?'positive':divCagr<0?'negative':'neutral'} )}
+        ${metricCardHtml({title:'Buyback Yield · annualizado', value:annualisedBuybackYield==null?'—':fmtRawPct(annualisedBuybackYield), subtitle:r.repurchases_last_quarter==null?'sem recompra observada':`${fmtMoney(r.repurchases_last_quarter,r.currency)} no último trimestre`, explanation:'Proxy anualizado a partir do último trimestre. Recompras só criam valor quando não são anuladas por emissão/diluição excessiva.', tone:annualisedBuybackYield==null?'neutral':annualisedBuybackYield>0.02?'positive':'neutral'} )}
+        ${metricCardHtml({title:'Shareholder Yield · proxy', value:Number.isFinite(shareholderYield)?fmtRawPct(shareholderYield):'—', subtitle:'dividend yield + buyback yield − diluição positiva', explanation:'Mede retorno de capital observável ao acionista. É um proxy: buybacks são annualizados a partir do último trimestre.', tone:allocationTone} )}
+        ${metricCardHtml({title:'Dilution / Share Count', value:Number.isFinite(dilution)?`${dilution>=0?'+':''}${(dilution*100).toFixed(1)}%`:'—', subtitle:Number.isFinite(dilution)?(dilution>0.03?'diluição material':dilution<-.03?'redução líquida do share count':'estável'):'sem histórico suficiente', explanation:'Crescimento do número de ações reduz o valor económico por ação e pode neutralizar buybacks anunciados.', series:r.quarterly_diluted_shares, tone:Number.isFinite(dilution)?(dilution>.03?'negative':dilution<-.03?'positive':'neutral'):'neutral'} )}
+        ${metricCardHtml({title:'Dividend Safety', value:Number.isFinite(fcfCov)?`${fcfCov.toFixed(1)}×`:Number.isFinite(payout)?fmtRawPct(payout):'—', subtitle:Number.isFinite(fcfCov)?'cobertura por FCF':Number.isFinite(payout)?'payout contabilístico':'sem cobertura suficiente', explanation:Number.isFinite(fcfCov)?(fcfCov>=1.5?'FCF dá margem confortável ao dividendo.':fcfCov>=1?'FCF cobre o dividendo, mas com margem limitada.':'FCF atual não cobre integralmente o dividendo implícito.'):'Payout e FCF ajudam a distinguir rendimento sustentável de yield potencialmente frágil.', tone:Number.isFinite(fcfCov)?(fcfCov>=1.5?'positive':fcfCov<1?'negative':'neutral'):'neutral'} )}
+      </div>
+      <p class="detail-note">Buyback yield é uma proxy anualizada a partir do último trimestre; não assume que o ritmo se mantenha. Shareholder yield desconta apenas diluição positiva observada e não substitui uma análise completa de emissão de opções ou M&A.</p>
+    </section>`;
+  }
+
   function companyMetricPackHtml(r) {
     const revAccel = r.revenue_yoy_acceleration_pp;
     const niAccel = r.net_income_yoy_acceleration_pp;
@@ -1511,6 +1549,7 @@
 
       ${companyMetricPackHtml(r)}
       ${winstonMetricStoriesHtml(r)}
+      ${capitalAllocationIntelligenceHtml(r)}
 
       <h3 class="dossier-title legacy-detail-title">Dados complementares</h3>
       <h3 class="dossier-title">Qualidade & crescimento</h3>
@@ -2948,7 +2987,7 @@
     const sectorPct=sec=>(sectorWeights.get(sec)||0)/total*100;
     const geoPct=geo=>(geographyWeights.get(geo)||0)/total*100;
     const isZombie=r=>String(r.zombie||'').toLowerCase()==='yes';
-    const candidates=state.data.stocks.filter(r=>r.quote_type!=='ETF' && !held.has(r.ticker) && r.score!=null && !isZombie(r));
+    const candidates=state.data.stocks.filter(r=>r.quote_type!=='ETF' && !isAustralianScannerRow(r) && !held.has(r.ticker) && r.score!=null && !isZombie(r));
     const ranked=candidates.map(r=>{
       const q=Number(r.quality_pct??r.profitability_pct??0), v=Number(r.value_pct??0), g=Number(r.growth_pct??0), score=Number(r.score??0);
       const thesis=r.thesis_direction==='strengthening'?8:r.thesis_direction==='weakening'?-8:0;
@@ -3860,7 +3899,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.48.1").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.49.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

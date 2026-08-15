@@ -1,3 +1,11 @@
+# v0.49.1 — SEC Validation Hotfix
+
+- SEC insider coverage is now treated as auxiliary/degradable data and no longer blocks publication of an otherwise valid daily dataset.
+- `degraded` SEC rows count as checked issuers for diagnostics, but remain distinct from fully parsed (`ok`) rows.
+- The workflow emits GitHub warnings when SEC coverage is low instead of exiting with code 1.
+- Updated GitHub Actions runtime to `actions/checkout@v5` and `actions/setup-python@v6` to remove the Node 20 deprecation warning.
+- No scoring or frontend behavior changed.
+
 # Finscanner v0.47.1 — Earnings & Estimate Intelligence + ETF Holdings Hotfix
 
 ## v0.47.1 hotfix
@@ -320,3 +328,12 @@ Company dossiers now add a Winston-style context strip to key general-company me
 - Novo preset `Earnings ≤7d` e perspetiva `Catalysts` no Stock Radar.
 - A camada de catalisadores é contextual e não altera o Finscanner Score.
 - Schema de dados 48.
+
+
+## v0.49.0 — Capital Allocation Intelligence + Australia Universe Removal
+
+- Removes the Australian/ASX discovery universe from the daily stock scanner.
+- Removes curated EWA from the default ETF discovery list.
+- Australian tickers explicitly present in the user's portfolio remain supported through `data/extra_tickers.json`; they are analysed for portfolio accounting but are not surfaced as scanner-universe opportunities.
+- Adds Capital Allocation Intelligence to stock dossiers: dividend growth, annualised buyback-yield proxy, shareholder-yield proxy, dilution/share-count context and dividend safety.
+- Scanner/Home additionally exclude stale `.AX` rows client-side until the next workflow rebuild, so the change is visible immediately after deploying the frontend.

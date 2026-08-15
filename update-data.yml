@@ -36,13 +36,13 @@ jobs:
       - name: Checkout
         if: steps.portugal_clock.outputs.run == 'yes'
 
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up Python
         if: steps.portugal_clock.outputs.run == 'yes'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"
@@ -57,6 +57,10 @@ jobs:
         env:
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
           FINSCANNER_FETCH_WORKERS: "5"
+          FINSCANNER_SEC_WORKERS: "3"
+          FINSCANNER_SEC_MIN_INTERVAL: "0.13"
+          FINSCANNER_ANALYST_MAX: "800"
+          FINSCANNER_ANALYST_WORKERS: "8"
         run: python scripts/run.py
 
       - name: Validate generated data
@@ -65,7 +69,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          required = [Path("data/stocks.json"), Path("data/metals.json"), Path("data/metals_brief.json"), Path("data/fx.json"), Path("data/metals_history.json")]
+          required = [Path("data/stocks.json"), Path("data/metals.json"), Path("data/metals_brief.json"), Path("data/fx.json"), Path("data/fx_history.json"), Path("data/metals_history.json")]
           for path in required:
               if not path.exists() or path.stat().st_size == 0:
                   raise SystemExit(f"Missing/empty generated file: {path}")
@@ -74,8 +78,18 @@ jobs:
           stocks = payload.get("stocks")
           if not isinstance(stocks, list) or not stocks:
               raise SystemExit("data/stocks.json has no non-empty stocks array")
-          if int(payload.get("schema_version", 0)) < 30:
+          if int(payload.get("schema_version", 0)) < 481:
               raise SystemExit(f"Old stocks schema: {payload.get('schema_version')}")
+          fx = json.loads(Path("data/fx.json").read_text())
+          rates = fx.get("rates_to_eur") or {}
+          fx_hist = json.loads(Path("data/fx_history.json").read_text())
+          hist_series = fx_hist.get("series") or {}
+          if len(hist_series.get("USD") or []) < 100:
+              raise SystemExit("Historical FX coverage incomplete: USD series missing/too short")
+          required_fx = ["USD", "GBP", "CHF", "CAD", "PLN", "SEK", "DKK"]
+          missing_fx = [c for c in required_fx if not isinstance(rates.get(c), (int, float)) or float(rates[c]) <= 0]
+          if missing_fx:
+              raise SystemExit(f"FX coverage incomplete: {', '.join(missing_fx)}")
           quality = payload.get("data_quality") or {}
           requested = int(quality.get("portfolio_extra_requested", 0) or 0)
           covered = int(quality.get("portfolio_extra_covered", 0) or 0)
@@ -83,10 +97,37 @@ jobs:
           etf_rows = int(quality.get("etf_rows", 0) or 0)
           etf_holdings = int(quality.get("etf_rows_with_holdings", 0) or 0)
           if requested and pct < 50:
+              extras = json.loads(Path("data/extra_tickers.json").read_text())
+              requested_symbols = set(extras.get("tickers", extras) if isinstance(extras, dict) else extras)
+              got_symbols = {str(r.get("ticker") or "") for r in stocks}
+              missing = sorted(requested_symbols - got_symbols)
+              print("Portfolio symbols still missing (first 80):", ", ".join(missing[:80]))
               raise SystemExit(f"Portfolio coverage too low: {covered}/{requested} ({pct:.1f}%)")
           if etf_rows and etf_holdings == 0:
               raise SystemExit(f"ETF metadata regression: 0/{etf_rows} ETF rows have holdings")
-          print(f"Validated {len(stocks)} instruments · portfolio {covered}/{requested} ({pct:.1f}%) · ETF holdings {etf_holdings}/{etf_rows}")
+          insider_us = int(quality.get("insider_us_equities", 0) or 0)
+          insider_ok = int(quality.get("insider_sec_ok", 0) or 0)
+          insider_degraded = int(quality.get("insider_sec_degraded", 0) or 0)
+          insider_checked = int(quality.get("insider_sec_checked", insider_ok + insider_degraded) or 0)
+          insider_cov = float(quality.get("insider_sec_coverage_pct", 0) or 0)
+          insider_checked_cov = float(quality.get("insider_sec_checked_coverage_pct", 0) or 0)
+          insider_ps = int(quality.get("insider_rows_with_open_market_ps_30d", 0) or 0)
+          # SEC/EDGAR is an auxiliary external source. A temporary SEC outage or a
+          # degraded Form 4 detail document must not block publication of otherwise
+          # valid prices/fundamentals/portfolio data. Emit a warning instead.
+          if insider_us and insider_checked_cov < 50:
+              print(f"::warning::SEC insider checked coverage low: {insider_checked}/{insider_us} ({insider_checked_cov:.1f}%). Publishing core dataset with insider_status diagnostics.")
+          if insider_us and insider_cov < 50:
+              print(f"::warning::SEC fully parsed insider coverage low: {insider_ok}/{insider_us} ({insider_cov:.1f}%). Degraded issuers: {insider_degraded}.")
+          analyst_req = int(quality.get("analyst_rows_requested", 0) or 0)
+          analyst_ok = int(quality.get("analyst_rows_ok", 0) or 0)
+          analyst_partial = int(quality.get("analyst_rows_partial", 0) or 0)
+          analyst_rev = int(quality.get("analyst_rows_with_revisions", 0) or 0)
+          analyst_earn = int(quality.get("analyst_rows_with_next_earnings", 0) or 0)
+          analyst_cov = float(quality.get("analyst_coverage_pct", 0) or 0)
+          if analyst_req >= 50 and (analyst_ok + analyst_partial) == 0:
+              raise SystemExit(f"Analyst intelligence regression: 0/{analyst_req} rows returned any estimate data")
+          print(f"Validated {len(stocks)} instruments · portfolio {covered}/{requested} ({pct:.1f}%) · ETF holdings {etf_holdings}/{etf_rows} · SEC insiders parsed {insider_ok}/{insider_us} ({insider_cov:.1f}%), checked {insider_checked}/{insider_us} ({insider_checked_cov:.1f}%), P/S signals {insider_ps} · analyst {analyst_ok+analyst_partial}/{analyst_req} ({analyst_cov:.1f}%), revisions {analyst_rev}, earnings dates {analyst_earn} · FX OK")
           PY
 
       - name: Publish generated data
@@ -105,6 +146,7 @@ jobs:
             data/metals_history.json \
             data/metals_brief.json \
             data/fx.json \
+            data/fx_history.json \
             data/history.json \
             data/valuation_history.json \
             data/thesis_history.json \
@@ -126,6 +168,7 @@ jobs:
               data/metals_history.json \
               data/metals_brief.json \
               data/fx.json \
+              data/fx_history.json \
               data/history.json \
               data/valuation_history.json \
               data/thesis_history.json \
