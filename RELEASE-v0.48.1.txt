@@ -1,0 +1,9 @@
+Finscanner v0.48.1 — Portfolio Coverage Reliability Repair
+
+Fixes GitHub Action validation failure caused by transient Yahoo coverage collapse.
+- Portfolio holdings fetched first with a conservative worker pool and two retry passes.
+- Heavy Yahoo info endpoint failure now falls back to fast_info/history for price/identity.
+- DivTracker crypto symbols such as BTC.CC map to Yahoo BTC-USD while preserving canonical portfolio ticker.
+- Crypto rows are retained as non-scored assets rather than being dropped.
+- Validation prints missing portfolio symbols before failing.
+- Portfolio coverage gate remains at 50%; this fix improves the data rather than hiding the failure.

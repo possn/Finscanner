@@ -1,10 +1,8 @@
-Finscanner v0.33.0 — files to replace in GitHub
-
 Replace together:
-- index.html
-- app.js
-- style.css
-- sw.js
-- README.md
+scripts/fundamentals.py
+scripts/score.py
+scripts/run.py
+.github/workflows/update-data.yml
+update-data.yml
 
-No pipeline, workflow, or data files changed in this release. Preserve all data/*.json history files.
+No frontend replacement is required for the coverage hotfix itself.

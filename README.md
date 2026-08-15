@@ -312,7 +312,7 @@ Stock Radar gains selectable perspectives (Overview, Profitability, Growth, Valu
 Company dossiers now add a Winston-style context strip to key general-company metrics: **Current · 1Y ago · 3Y trend · Sector median**. Annual statement history powers Gross Margin, Operating Margin, ROE and ROCE proxy; actual dividend events power dividend-per-share history; valuation uses the scanner's own rolling valuation history for 1Y/self-relative context. Missing history remains explicitly unavailable.
 
 
-## v0.48.0 — Earnings Calendar & Catalyst Intelligence
+## v0.48.1 — Earnings Calendar & Catalyst Intelligence
 
 - Próxima data de resultados e dias até ao evento.
 - Classificação explícita do risco de evento: iminente / esta semana / próximo / calendarizado.
