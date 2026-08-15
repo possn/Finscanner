@@ -33,6 +33,7 @@ EXTRA_TICKERS = ROOT / "data" / "extra_tickers.json"
 ALERT_WATCHLIST = ROOT / "data" / "alert_watchlist.json"
 ALERT_CONFIG = ROOT / "data" / "insider_alert_config.json"
 STATE_PATH = ROOT / "data" / "insider_alert_state.json"
+STOCKS_PATH = ROOT / "data" / "stocks.json"
 
 LOOKBACK_DAYS = max(3, min(30, int(os.getenv("FINSCANNER_INSIDER_ALERT_LOOKBACK_DAYS", "10"))))
 MAX_NEW_FILINGS_PER_TICKER = max(1, min(20, int(os.getenv("FINSCANNER_INSIDER_ALERT_MAX_NEW", "8"))))
@@ -80,6 +81,66 @@ def _event_date(value: str | None):
 def _is_senior(role: str | None, cfg: dict) -> bool:
     text = str(role or "").lower()
     return any(str(x).lower() in text for x in (cfg.get("senior_roles") or []))
+
+
+
+def _current_price_map() -> dict[str, float]:
+    raw = _load_json(STOCKS_PATH, {})
+    rows = raw.get("stocks") if isinstance(raw, dict) else []
+    out = {}
+    for r in rows or []:
+        try:
+            price = float(r.get("current_price"))
+            if price > 0:
+                out[str(r.get("ticker") or "").upper()] = price
+        except Exception:
+            pass
+    return out
+
+
+def _conviction_score(group: dict, history: list[dict], cfg: dict, current_price: float | None = None) -> tuple[int, list[str]]:
+    value = float(group.get("value") or 0) if group.get("known_value") else 0.0
+    role = str(group.get("role") or "")
+    when = _event_date(group.get("date")) or dt.date.today()
+    age = max(0, (dt.date.today() - when).days)
+    score = 0
+    reasons: list[str] = []
+    if value >= 2_000_000: score += 35; reasons.append("$2M+")
+    elif value >= 1_000_000: score += 32; reasons.append("$1M+")
+    elif value >= 500_000: score += 28; reasons.append("$500k+")
+    elif value >= 100_000: score += 22; reasons.append("$100k+")
+    elif value >= 50_000: score += 16; reasons.append("$50k+")
+    elif value > 0: score += 9
+    else: score += 5
+    if _is_senior(role, cfg): score += 20; reasons.append("senior")
+    elif "director" in role.lower(): score += 13; reasons.append("director")
+    else: score += 7
+    if age <= 7: score += 15; reasons.append("≤7d")
+    elif age <= 30: score += 11; reasons.append("≤30d")
+    elif age <= 90: score += 6
+    owner = str(group.get("owner") or "Insider")
+    if group.get("type") == "buy":
+        buyers = {owner}
+        window = int(cfg.get("cluster_window_days") or 14)
+        for e in history:
+            d = _event_date(e.get("date"))
+            if e.get("type") == "buy" and d and 0 <= (when-d).days <= window:
+                buyers.add(str(e.get("owner") or "Insider"))
+        if len(buyers) >= 2: score += 18; reasons.append("cluster")
+    rev_days = int(cfg.get("reversal_window_days") or 90)
+    for e in reversed(history):
+        if str(e.get("owner") or "") != owner or e.get("type") == group.get("type"): continue
+        d = _event_date(e.get("date"))
+        if d and 0 <= (when-d).days <= rev_days:
+            score += 9; reasons.append("reversal"); break
+    prices = group.get("prices") or []
+    tx_price = sum(prices)/len(prices) if prices else None
+    if tx_price and current_price and tx_price > 0 and current_price > 0:
+        gap = abs(current_price/tx_price - 1)
+        if gap <= .05: score += 10; reasons.append("price ±5%")
+        elif gap <= .10: score += 7; reasons.append("price ±10%")
+        elif gap <= .20: score += 4
+    return min(100, int(round(score))), reasons
 
 
 def _signal_for_group(ticker: str, group: dict, history: list[dict], cfg: dict) -> dict:
@@ -268,7 +329,7 @@ def _group_transactions(transactions: Iterable[dict]) -> list[dict]:
     return list(groups.values())
 
 
-def _send_transaction_alert(ticker: str, group: dict, filing_url: str | None, signal: dict) -> None:
+def _send_transaction_alert(ticker: str, group: dict, filing_url: str | None, signal: dict, conviction: int, reasons: list[str]) -> None:
     is_buy = group["type"] == "buy"
     verb = "COMPROU" if is_buy else "VENDEU"
     role = f" · {group['role']}" if group.get("role") else ""
@@ -285,11 +346,12 @@ def _send_transaction_alert(ticker: str, group: dict, filing_url: str | None, si
     message = (
         f"{group['owner']}{role}\n"
         f"{shares} ações · {value} · {price_txt}\n"
-        f"Data da transação: {group.get('date') or '—'} · Form 4 SEC"
+        f"Data da transação: {group.get('date') or '—'} · Form 4 SEC\n"
+        f"Conviction: {conviction}/100"
     )
     _post_ntfy(
         f"{signal.get('label', 'INSIDER ACTIVITY')} · {ticker}",
-        f"{message}\nClassificação: {signal.get('label', '—')}",
+        f"{message}\nClassificação: {signal.get('label', '—')} · {' · '.join(reasons[:3])}",
         priority=int(signal.get("priority") or (4 if is_buy else 3)),
         tags=str(signal.get("tags") or ("chart_with_upwards_trend,moneybag" if is_buy else "chart_with_downwards_trend,money_with_wings")),
         click=filing_url,
@@ -315,6 +377,7 @@ def run() -> int:
     us_tickers = [tk for tk in all_requested if tk in cik_map]
     state = _load_state()
     cfg = _load_alert_config()
+    price_map = _current_price_map()
     per_ticker = state["tickers"]
     state_changed = False
 
@@ -362,12 +425,13 @@ def run() -> int:
                 history = previous.get("event_history") if isinstance(previous.get("event_history"), list) else []
                 for group in groups:
                     signal = _signal_for_group(ticker, group, history, cfg)
+                    conviction, conviction_reasons = _conviction_score(group, history, cfg, price_map.get(ticker))
                     event = {
                         "type": group.get("type"), "owner": group.get("owner"), "role": group.get("role"),
-                        "date": group.get("date"), "value": group.get("value"), "signal": signal.get("code"),
+                        "date": group.get("date"), "value": group.get("value"), "signal": signal.get("code"), "conviction": conviction,
                     }
                     if _should_alert(group, cfg):
-                        _send_transaction_alert(ticker, group, url, signal)
+                        _send_transaction_alert(ticker, group, url, signal, conviction, conviction_reasons)
                         alerts_sent += 1
                     else:
                         log.info("%s %s suppressed by alert thresholds (%s)", ticker, accession, group.get("type"))
