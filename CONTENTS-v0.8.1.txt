@@ -1,2 +1,0 @@
-Full release contents. The functional GitHub Actions workflow is at .github/workflows/update-data.yml.
-This hotfix must be deployed as a coherent shell: index.html + app.js + style.css + sw.js.
