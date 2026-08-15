@@ -1,8 +1,0 @@
-Release completa Finscanner v0.9.0.
-A pasta oculta .github está incluída no ZIP.
-Workflow canónico: .github/workflows/update-data.yml
-Entrada PWA: index.html
-Frontend: app.js + style.css
-Service Worker: sw.js
-Pipeline: scripts/
-Dados: data/
