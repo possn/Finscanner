@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home" };
+  const state = { data: null, filtered: [], metals: null, fx: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", thesisScope: "all", thesisDirectionFilter: "all" };
 
   const els = {
     list: document.getElementById("list"),
@@ -25,6 +25,10 @@
     exposurePanel: document.getElementById("exposure-panel"),
     portfolioFile: document.getElementById("portfolio-file"),
     portfolioClear: document.getElementById("portfolio-clear"),
+    portfolioFilters: document.getElementById("portfolio-filters"),
+    portfolioThesisMonitor: document.getElementById("portfolio-thesis-monitor"),
+    thesisScopeFilters: document.getElementById("thesis-scope-filters"),
+    thesisDirectionFilters: document.getElementById("thesis-direction-filters"),
     sidenavItems: document.querySelectorAll(".sidebar__item[data-view]"),
     views: document.querySelectorAll(".view"),
     sidebar: document.getElementById("sidebar"),
@@ -385,6 +389,16 @@
       state.metals = null;
       if (els.metalsList) els.metalsList.innerHTML = `<p class="empty-state">Não foi possível carregar <code>data/metals.json</code>.</p>`;
       console.warn("metals.json unavailable", e);
+    }
+  }
+
+  async function loadFx() {
+    try {
+      state.fx = await fetchJson("data/fx.json", 10000);
+      if (state.activeView === "portfolio") renderPortfolio();
+    } catch (e) {
+      state.fx = { base: "EUR", rates_to_eur: { EUR: 1 } };
+      console.warn("fx.json unavailable; EUR-only weighting until next pipeline run", e);
     }
   }
 
@@ -1006,17 +1020,27 @@
     return mapped ? t.slice(0, dot) + mapped : t;
   }
 
-  function accumulatePosition(portfolio, ticker, qty, value) {
+  function accumulatePosition(portfolio, ticker, qty, value, sourceCurrency = null) {
     const existing = portfolio[ticker];
     if (!existing) {
-      portfolio[ticker] = { qty: Number.isFinite(qty) ? qty : null, value: Number.isFinite(value) ? value : null };
+      portfolio[ticker] = { qty: Number.isFinite(qty) ? qty : null, value: Number.isFinite(value) ? value : null, sourceCurrency: sourceCurrency || null };
       return;
     }
+    if (!existing.sourceCurrency && sourceCurrency) existing.sourceCurrency = sourceCurrency;
     // Same ticker appearing again (multiple purchase lots) — accumulate
     // rather than overwrite, so a position bought in 4 tranches doesn't
     // end up recorded as only the last tranche's quantity.
     if (Number.isFinite(qty)) existing.qty = (existing.qty || 0) + qty;
     if (Number.isFinite(value)) existing.value = (existing.value || 0) + value;
+  }
+
+  function finalizePortfolio(portfolio) {
+    // Combined transaction exports contain historical buys and sells. The
+    // portfolio is the net position today, not every ticker ever traded.
+    for (const [ticker, entry] of Object.entries(portfolio)) {
+      if (entry && typeof entry === "object" && Number.isFinite(entry.qty) && entry.qty <= 1e-9) delete portfolio[ticker];
+    }
+    return portfolio;
   }
 
   function parseCsvPortfolio(text) {
@@ -1026,6 +1050,7 @@
     const tickerIdx = header.findIndex(h => ["ticker", "symbol"].includes(h));
     const qtyIdx = header.findIndex(h => ["quantity", "qty", "shares", "units"].includes(h));
     const valueIdx = header.findIndex(h => ["value", "amount", "market_value"].includes(h));
+    const currencyIdx = header.findIndex(h => ["currency", "ccy"].includes(h));
     if (tickerIdx === -1) throw new Error("Coluna 'ticker' ou 'symbol' não encontrada no cabeçalho do CSV.");
 
     const portfolio = {};
@@ -1036,9 +1061,10 @@
       const ticker = normalizeTicker(rawTicker);
       const qty = qtyIdx !== -1 ? parseFloat(cols[qtyIdx]) : null;
       const value = valueIdx !== -1 ? parseFloat(cols[valueIdx]) : null;
-      accumulatePosition(portfolio, ticker, qty, value);
+      const sourceCurrency = currencyIdx !== -1 ? String(cols[currencyIdx] || "").toUpperCase() : null;
+      accumulatePosition(portfolio, ticker, qty, value, sourceCurrency);
     }
-    return portfolio;
+    return finalizePortfolio(portfolio);
   }
 
   function parseJsonPortfolio(text) {
@@ -1065,7 +1091,7 @@
         }
       }
     }
-    return portfolio;
+    return finalizePortfolio(portfolio);
   }
 
   function handlePortfolioFile(file) {
@@ -1097,15 +1123,55 @@
     reader.readAsText(file);
   }
 
-  // Position value: explicit `value` wins; otherwise qty × current_price
-  // from stocks.json (when we have a price for that ticker); otherwise
-  // null (position is counted but excluded from the value-weighted bars).
-  function positionValue(entry, stockRow) {
-    if (entry && typeof entry === "object") {
-      if (entry.value != null) return entry.value;
-      if (entry.qty != null && stockRow?.current_price != null) return entry.qty * stockRow.current_price;
+  // ---------- Portfolio valuation / FX ----------
+  // data/fx.json stores the EUR value of one unit of each currency.
+  // LSE instruments can be quoted in pence (GBp/GBX), which is 1/100 GBP.
+  function fxToEur(currency) {
+    const raw = String(currency || "EUR");
+    if (raw === "GBp" || raw === "GBX") {
+      const gbp = Number(state.fx?.rates_to_eur?.GBP);
+      return Number.isFinite(gbp) ? gbp / 100 : null;
     }
-    return null;
+    const code = raw.toUpperCase();
+    const rate = Number(state.fx?.rates_to_eur?.[code]);
+    return Number.isFinite(rate) && rate > 0 ? rate : (code === "EUR" ? 1 : null);
+  }
+
+  function positionValue(entry, stockRow, convertToEur = true) {
+    let value = null;
+    let currency = stockRow?.currency || entry?.sourceCurrency || "EUR";
+    if (entry && typeof entry === "object") {
+      if (entry.value != null) value = Number(entry.value);
+      else if (entry.qty != null && stockRow?.current_price != null) value = Number(entry.qty) * Number(stockRow.current_price);
+    }
+    if (!Number.isFinite(value)) return null;
+    if (!convertToEur) return value;
+    const rate = fxToEur(currency);
+    return rate == null ? null : value * rate;
+  }
+
+  function portfolioWeightedStats(portfolio, rows) {
+    const byTicker = Object.fromEntries(rows.map(r => [r.ticker, r]));
+    const valued = Object.entries(portfolio).map(([ticker, entry]) => {
+      const row = byTicker[ticker];
+      const eur = row ? positionValue(entry, row, true) : null;
+      return { ticker, row, eur };
+    }).filter(x => x.row && x.eur != null && x.eur > 0);
+    const total = valued.reduce((s,x)=>s+x.eur,0);
+    const weightSum = pred => total ? valued.filter(x=>pred(x.row)).reduce((s,x)=>s+x.eur,0) / total * 100 : null;
+    const scored = valued.filter(x => x.row.score != null);
+    const scoredTotal = scored.reduce((s,x)=>s+x.eur,0);
+    const weightedScore = scoredTotal ? scored.reduce((s,x)=>s+x.eur*Number(x.row.score),0)/scoredTotal : null;
+    return {
+      total,
+      count: valued.length,
+      weightedScore,
+      growthPct: weightSum(r=>r.quote_type!=="ETF" && Number(r.growth_pct ?? -1)>=65),
+      qualityPct: weightSum(r=>r.quote_type!=="ETF" && Number(r.quality_pct ?? r.profitability_pct ?? -1)>=70),
+      zombiePct: weightSum(r=>r.quote_type!=="ETF" && r.zombie==="yes"),
+      improvingPct: weightSum(r=>r.quote_type!=="ETF" && r.thesis_direction==="strengthening"),
+      worseningPct: weightSum(r=>r.quote_type!=="ETF" && r.thesis_direction==="weakening"),
+    };
   }
 
   // ---------- donut chart (plain <canvas>, no chart library) ----------
@@ -1250,7 +1316,7 @@
       </div>
       <div class="exposure-block">
         <p class="unmatched-note">
-          Valor total considerado: ${totalValue.toLocaleString("pt-PT", {maximumFractionDigits:0})}
+          Valor total considerado: €${totalValue.toLocaleString("pt-PT", {maximumFractionDigits:0})}
           (${valued.length} de ${entries.length} posições com valor calculável).
           ${unmatchedCount ? `${unmatchedCount} posição(ões) ainda aguardam análise.` : ""}
           ${noValueCount ? `${noValueCount} posição(ões) sem quantidade nem valor explícito — não entram no peso.` : ""}
@@ -1263,6 +1329,80 @@
   }
 
   // ---------- Portfolio view ----------
+  function portfolioFilterMatches(r, filter) {
+    if (filter === "all") return true;
+    if (filter === "growth") return r.quote_type !== "ETF" && Number(r.growth_pct ?? -1) >= 65;
+    if (filter === "quality") return r.quote_type !== "ETF" && Number(r.quality_pct ?? r.profitability_pct ?? -1) >= 70;
+    if (filter === "value") return r.quote_type !== "ETF" && Number(r.value_pct ?? -1) >= 65;
+    if (filter === "zombie") return r.quote_type !== "ETF" && r.zombie === "yes";
+    if (filter === "etf") return r.quote_type === "ETF";
+    if (filter === "thesis-up") return r.quote_type !== "ETF" && r.thesis_direction === "strengthening";
+    if (filter === "thesis-down") return r.quote_type !== "ETF" && r.thesis_direction === "weakening";
+    if (filter === "thesis-changed") return r.quote_type !== "ETF" && r.thesis_direction === "changed";
+    return true;
+  }
+
+  function portfolioFilterCounts(rows) {
+    const filters = ["all","growth","quality","value","zombie","etf","thesis-up","thesis-down","thesis-changed"];
+    return Object.fromEntries(filters.map(f => [f, rows.filter(r => portfolioFilterMatches(r, f)).length]));
+  }
+
+  function renderPortfolioThesisMonitor(rows) {
+    if (!els.portfolioThesisMonitor) return;
+    const equities = rows.filter(r => r.quote_type !== "ETF" && r.thesis_type);
+    const improving = equities.filter(r => r.thesis_direction === "strengthening")
+      .sort((a,b)=>(b.thesis_score_delta ?? 0)-(a.thesis_score_delta ?? 0));
+    const worsening = equities.filter(r => r.thesis_direction === "weakening")
+      .sort((a,b)=>(a.thesis_score_delta ?? 0)-(b.thesis_score_delta ?? 0));
+    const changed = equities.filter(r => r.thesis_direction === "changed")
+      .sort((a,b)=>Math.abs(b.thesis_score_delta ?? 0)-Math.abs(a.thesis_score_delta ?? 0));
+
+    const miniCards = (items, cls) => items.slice(0,5).map(r => `
+      <button class="portfolio-thesis-card ${cls}" data-ticker="${escapeHtml(r.ticker)}">
+        <div><strong>${escapeHtml(r.ticker)}</strong>${thesisDirectionBadge(r)}</div>
+        <small>${escapeHtml(r.name || "")}</small>
+        <p>${escapeHtml(r.thesis_evolution_summary || r.thesis_summary || "")}</p>
+        ${r.thesis_score_delta == null ? "" : `<span>Δ score ${Number(r.thesis_score_delta)>=0?"+":""}${Number(r.thesis_score_delta).toFixed(1)}</span>`}
+      </button>`).join("");
+
+    els.portfolioThesisMonitor.innerHTML = `
+      <section class="portfolio-thesis-monitor__head">
+        <div><span class="eyebrow">PORTFOLIO THESIS MONITOR</span><h3>O que está a melhorar e a piorar</h3></div>
+        <button class="text-link-btn" data-open-theses>Ver todas as teses</button>
+      </section>
+      <div class="portfolio-thesis-stats">
+        <button data-portfolio-filter="thesis-up"><strong>${improving.length}</strong><span>↑ a melhorar</span></button>
+        <button data-portfolio-filter="thesis-down"><strong>${worsening.length}</strong><span>↓ a piorar</span></button>
+        <button data-portfolio-filter="thesis-changed"><strong>${changed.length}</strong><span>⇄ mudança</span></button>
+      </div>
+      ${(improving.length || worsening.length || changed.length) ? `<div class="portfolio-thesis-columns">
+        <div><h4>↑ A melhorar</h4>${miniCards(improving,"is-improving") || '<p class="empty-state compact">Nenhuma.</p>'}</div>
+        <div><h4>↓ A piorar</h4>${miniCards(worsening,"is-worsening") || '<p class="empty-state compact">Nenhuma.</p>'}</div>
+      </div>` : `<p class="empty-state compact">Ainda não existe histórico suficiente para medir a direção das teses da carteira. O monitor ganha informação a cada execução do pipeline.</p>`}`;
+
+    els.portfolioThesisMonitor.querySelectorAll("[data-ticker]").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
+    els.portfolioThesisMonitor.querySelectorAll("[data-portfolio-filter]").forEach(btn => btn.addEventListener("click", () => {
+      state.portfolioFilter = btn.dataset.portfolioFilter;
+      renderPortfolio();
+    }));
+    const open = els.portfolioThesisMonitor.querySelector("[data-open-theses]");
+    if (open) open.addEventListener("click", () => { state.thesisScope = "portfolio"; state.thesisDirectionFilter = "all"; switchView("theses"); });
+  }
+
+  function renderPortfolioFilterBar(rows) {
+    if (!els.portfolioFilters) return;
+    const c = portfolioFilterCounts(rows);
+    const defs = [
+      ["all","Todos"], ["growth","Growth"], ["quality","Quality"], ["value","Value"], ["zombie","Zombies"],
+      ["etf","ETFs"], ["thesis-up","Tese ↑"], ["thesis-down","Tese ↓"], ["thesis-changed","Mudou"]
+    ];
+    els.portfolioFilters.innerHTML = defs.map(([id,label]) => `<button class="portfolio-filter-chip ${state.portfolioFilter===id?"is-active":""}" data-filter="${id}">${label}<span>${c[id]}</span></button>`).join("");
+    els.portfolioFilters.querySelectorAll("[data-filter]").forEach(btn => btn.addEventListener("click", () => {
+      state.portfolioFilter = btn.dataset.filter;
+      renderPortfolio();
+    }));
+  }
+
   function renderPortfolio() {
     if (!state.data) return;
     const portfolio = lsGet(LS_PORTFOLIO);
@@ -1272,10 +1412,12 @@
     renderExposure(portfolio, rows);
 
     if (!rows.length) {
+      if (els.portfolioFilters) els.portfolioFilters.innerHTML = "";
+      if (els.portfolioThesisMonitor) els.portfolioThesisMonitor.innerHTML = "";
       els.portfolioSummary.innerHTML = "";
       els.portfolioList.innerHTML = ownedTickers.length
-        ? `<p class="empty-state">${ownedTickers.length} posição(ões) importada(s), mas ainda não há análise disponível para estes símbolos. A cobertura foi alargada para incluir tickers Yahoo adicionais e será preenchida após o próximo workflow.</p>`
-        : `<p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Ações e toca em "Tenho esta posição".</p>`;
+        ? `<p class="empty-state">${ownedTickers.length} posição(ões) importada(s), mas ainda não há análise disponível. O ficheiro importado foi aceite; corre o workflow para incorporar esses símbolos no universo analisado.</p>`
+        : `<p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Stocks e toca em "Tenho esta posição".</p>`;
       return;
     }
 
@@ -1284,22 +1426,41 @@
     const scored = equities.filter(r => r.score != null);
     const avgScore = scored.length ? (scored.reduce((s, r) => s + r.score, 0) / scored.length).toFixed(1) : "—";
     const zombieCount = equities.filter(r => r.zombie === "yes").length;
+    const growthCount = equities.filter(r => Number(r.growth_pct ?? -1) >= 65).length;
+    const qualityCount = equities.filter(r => Number(r.quality_pct ?? r.profitability_pct ?? -1) >= 70).length;
+    const improvingCount = equities.filter(r => r.thesis_direction === "strengthening").length;
+    const worseningCount = equities.filter(r => r.thesis_direction === "weakening").length;
     const feesWithData = etfs.filter(r => r.expense_ratio != null);
     const avgFee = feesWithData.length ? (feesWithData.reduce((s, r) => s + r.expense_ratio, 0) / feesWithData.length) : null;
-    const aiWithData = etfs.filter(r => r.ai_exposure_pct != null);
-    const avgAi = aiWithData.length ? (aiWithData.reduce((s, r) => s + r.ai_exposure_pct, 0) / aiWithData.length) : null;
+    const weighted = portfolioWeightedStats(portfolio, rows);
+    const pctOrDash = v => v == null ? "—" : `${v.toFixed(1)}%`;
 
     els.portfolioSummary.innerHTML = `
-      <div class="summary-grid">
-        <div class="summary-item"><span class="summary-label">posições marcadas</span><span class="summary-value">${rows.length}</span></div>
+      <div class="summary-grid portfolio-summary-grid">
+        <div class="summary-item"><span class="summary-label">posições analisadas</span><span class="summary-value">${rows.length}<small> / ${ownedTickers.length}</small></span></div>
         <div class="summary-item"><span class="summary-label">score médio (ações)</span><span class="summary-value">${avgScore}</span></div>
-        <div class="summary-item"><span class="summary-label">zombies na carteira</span><span class="summary-value ${zombieCount > 0 ? 'alert' : ''}">${zombieCount}</span></div>
+        <div class="summary-item"><span class="summary-label">score ponderado (€)</span><span class="summary-value">${weighted.weightedScore == null ? "—" : weighted.weightedScore.toFixed(1)}</span></div>
+        <div class="summary-item"><span class="summary-label">Growth</span><span class="summary-value">${growthCount}</span></div>
+        <div class="summary-item"><span class="summary-label">Quality</span><span class="summary-value">${qualityCount}</span></div>
+        <div class="summary-item"><span class="summary-label">zombies</span><span class="summary-value ${zombieCount > 0 ? 'alert' : ''}">${zombieCount}</span></div>
+        <div class="summary-item"><span class="summary-label">teses ↑ / ↓</span><span class="summary-value thesis-split"><b>${improvingCount}</b><i>${worseningCount}</i></span></div>
+        <div class="summary-item"><span class="summary-label">Growth · peso</span><span class="summary-value">${pctOrDash(weighted.growthPct)}</span></div>
+        <div class="summary-item"><span class="summary-label">Quality · peso</span><span class="summary-value">${pctOrDash(weighted.qualityPct)}</span></div>
+        <div class="summary-item"><span class="summary-label">Zombies · peso</span><span class="summary-value ${weighted.zombiePct > 0 ? 'alert' : ''}">${pctOrDash(weighted.zombiePct)}</span></div>
+        <div class="summary-item"><span class="summary-label">Teses ↑ / ↓ · peso</span><span class="summary-value thesis-split"><b>${pctOrDash(weighted.improvingPct)}</b><i>${pctOrDash(weighted.worseningPct)}</i></span></div>
         <div class="summary-item"><span class="summary-label">expense ratio médio (ETFs)</span><span class="summary-value">${avgFee != null ? fmtExpenseRatio(avgFee) : "sem dados"}</span></div>
-        <div class="summary-item"><span class="summary-label">exposição AI média (ETFs)</span><span class="summary-value">${avgAi != null ? avgAi.toFixed(1) + "%" : "sem dados"}</span></div>
       </div>
-      <p class="detail-note">Cálculo simples (não ponderado por quantidade — o Finscanner não pede número de unidades, só se possuis ou não).</p>
+      <p class="detail-note">Ponderação económica convertida para EUR com data/fx.json. O score médio simples continua disponível para comparação; o score ponderado e as exposições por estilo/tese usam o valor atual de cada posição.</p>
     `;
-    render(els.portfolioList, rows);
+
+    renderPortfolioThesisMonitor(rows);
+    renderPortfolioFilterBar(rows);
+    const filteredRows = rows.filter(r => portfolioFilterMatches(r, state.portfolioFilter));
+    if (!filteredRows.length) {
+      els.portfolioList.innerHTML = `<p class="empty-state">Nenhuma posição da tua carteira cumpre este filtro.</p>`;
+      return;
+    }
+    render(els.portfolioList, filteredRows);
   }
 
 
@@ -1389,7 +1550,23 @@
 
   function renderTheses() {
     if (!els.thesesList) return;
-    const rows = (state.data?.stocks || []).filter(r => r.quote_type !== "ETF" && r.thesis_type);
+    const portfolio = lsGet(LS_PORTFOLIO);
+    const owned = new Set(Object.keys(portfolio));
+    const baseRows = (state.data?.stocks || []).filter(r => r.quote_type !== "ETF" && r.thesis_type);
+    const scopedRows = state.thesisScope === "portfolio" ? baseRows.filter(r => owned.has(r.ticker)) : baseRows;
+    const rows = state.thesisDirectionFilter === "all" ? scopedRows : scopedRows.filter(r => {
+      if (state.thesisDirectionFilter === "up") return r.thesis_direction === "strengthening";
+      if (state.thesisDirectionFilter === "down") return r.thesis_direction === "weakening";
+      if (state.thesisDirectionFilter === "changed") return r.thesis_direction === "changed";
+      if (state.thesisDirectionFilter === "stable") return ["stable","baseline"].includes(r.thesis_direction);
+      return true;
+    });
+    if (els.thesisScopeFilters) {
+      els.thesisScopeFilters.querySelectorAll("[data-thesis-scope]").forEach(btn => btn.classList.toggle("is-active", btn.dataset.thesisScope === state.thesisScope));
+    }
+    if (els.thesisDirectionFilters) {
+      els.thesisDirectionFilters.querySelectorAll("[data-thesis-direction]").forEach(btn => btn.classList.toggle("is-active", btn.dataset.thesisDirection === state.thesisDirectionFilter));
+    }
     if (!rows.length) { els.thesesList.innerHTML = `<p class="empty-state">As teses serão geradas na próxima execução do pipeline.</p>`; return; }
     const changing = rows.filter(r => ["changed","weakening","strengthening"].includes(r.thesis_direction))
       .sort((a,b) => {
@@ -1481,6 +1658,15 @@
   on(els.detailClose, "click", () => { if (els.detail) els.detail.hidden = true; });
   on(els.detail, "click", (e) => { if (e.target === els.detail) els.detail.hidden = true; });
 
+  if (els.thesisScopeFilters) els.thesisScopeFilters.querySelectorAll("[data-thesis-scope]").forEach(btn => btn.addEventListener("click", () => {
+    state.thesisScope = btn.dataset.thesisScope;
+    renderTheses();
+  }));
+  if (els.thesisDirectionFilters) els.thesisDirectionFilters.querySelectorAll("[data-thesis-direction]").forEach(btn => btn.addEventListener("click", () => {
+    state.thesisDirectionFilter = btn.dataset.thesisDirection;
+    renderTheses();
+  }));
+
   on(els.portfolioFile, "change", (e) => {
     const file = e.target.files[0];
     if (file) handlePortfolioFile(file);
@@ -1510,12 +1696,13 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.9.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.16.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
   load();
   loadMetals();
+  loadFx();
   loadHistory();
   loadValuationHistory();
   loadThesisHistory();

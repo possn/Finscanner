@@ -131,3 +131,19 @@ Para maior conformidade com a política de fair access da SEC, cria no repositó
 - Added `data/extra_tickers.json` as an explicit Yahoo-symbol coverage extension.
 - Added common country-export to Yahoo suffix normalisation (PT/FR/GB/ES/NL/IT/CH/SE/DK/CA/NO/FI/AT/BE).
 - Portfolio holdings that are valid Yahoo symbols but absent from index-based discovery can now be included in the next data workflow without expanding the full expensive universe indiscriminately.
+
+
+## v0.15.0 — Portfolio Intelligence
+- Portfolio Radar filters: Growth, Quality, Value, Zombies, ETFs and thesis trajectory.
+- Portfolio Thesis Monitor: improving, worsening and changed theses.
+- Thesis page can be scoped to the whole universe or only the imported portfolio.
+- Explicit portfolio coverage comes from the complete 266-ticker DivTracker export supplied by the user.
+
+## v0.16.0 — Correct Portfolio + FX-Weighted Intelligence
+
+- Rebuilt explicit portfolio coverage from the correct DivTracker Combined export: 1,934 transaction rows, 489 historical tickers and 479 currently positive net positions.
+- Closed/sold positions are removed after transaction aggregation instead of remaining as portfolio holdings.
+- Added `data/fx.json` generated daily from Yahoo Finance FX pairs and converted all portfolio market values to EUR before calculating sector/geographic/style/thesis exposure.
+- Handles LSE pence quotes (`GBp`/`GBX`) correctly as 1/100 GBP.
+- Portfolio summary now includes value-weighted score, Growth/Quality/Zombie exposure and strengthening/weakening thesis exposure.
+- The simple unweighted figures remain visible for comparison.

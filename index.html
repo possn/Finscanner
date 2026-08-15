@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.14.0">
+<link rel="stylesheet" href="style.css?v=0.16.0">
 </head>
 <body>
 
@@ -202,7 +202,21 @@
       <div id="news-list" class="dossier"></div>
     </section>
     <section id="view-smartmoney" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">SMART MONEY</span><h2>Onde os insiders estão ativos.</h2><p>Atividade Form 4 da SEC nos EUA, distinguindo compras e vendas open-market quando disponível.</p></div></section><div id="smartmoney-list" class="dossier"></div></section>
-    <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">INVESTMENT THESES</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section><div id="theses-list" class="dossier"></div></section>
+    <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">INVESTMENT THESES</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section>
+      <div class="thesis-filter-panel">
+        <div id="thesis-scope-filters" class="segmented-filter" aria-label="Âmbito das teses">
+          <button class="is-active" data-thesis-scope="all">Universo</button>
+          <button data-thesis-scope="portfolio">Meu portfolio</button>
+        </div>
+        <div id="thesis-direction-filters" class="portfolio-filter-bar" aria-label="Direção das teses">
+          <button class="portfolio-filter-chip is-active" data-thesis-direction="all">Todas</button>
+          <button class="portfolio-filter-chip" data-thesis-direction="up">↑ A melhorar</button>
+          <button class="portfolio-filter-chip" data-thesis-direction="down">↓ A piorar</button>
+          <button class="portfolio-filter-chip" data-thesis-direction="changed">⇄ Mudança</button>
+          <button class="portfolio-filter-chip" data-thesis-direction="stable">→ Estáveis</button>
+        </div>
+      </div>
+      <div id="theses-list" class="dossier theses-view"></div></section>
     <section id="view-compare" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">COMPARE</span><h2>Compara até 4 empresas lado a lado.</h2><p>Score, qualidade, crescimento, cash flow, valuation e risco no mesmo quadro.</p></div></section><div class="commandbar"><input id="compare-input" type="text" placeholder="AAPL, MSFT, ASML.AS, BMW.DE"></div><div id="compare-list" class="compare-grid"></div></section>
 
     <section id="view-portfolio" class="view">
@@ -215,6 +229,11 @@
       </div>
       <div id="exposure-panel" class="exposure-panel"></div>
       <div id="portfolio-summary" class="portfolio-summary"></div>
+      <div id="portfolio-thesis-monitor" class="portfolio-thesis-monitor"></div>
+      <section class="portfolio-filter-section">
+        <div class="section-heading"><div><span class="eyebrow">PORTFOLIO RADAR</span><h3>Filtrar as minhas posições</h3></div></div>
+        <div id="portfolio-filters" class="portfolio-filter-bar" aria-label="Filtros do portfolio"></div>
+      </section>
       <div id="portfolio-list" class="dossier">
         <p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Ações e toca em "Tenho esta posição".</p>
       </div>
@@ -241,6 +260,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.14.0"></script>
+<script src="app.js?v=0.16.0"></script>
 </body>
 </html>
