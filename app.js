@@ -640,14 +640,7 @@
       ["Região", r.region ? regionLabel(r.region) : null],
       ["Preço", r.current_price ?? null],
       ["Categoria", r.kind === "etf_proxy" ? "proxy" : "ETF"],
-    ] : [
-      ["Qualidade", r.quality_pct ?? r.profitability_pct],
-      ["Crescimento", r.growth_pct],
-      ["Balanço", r.balance_pct ?? r.leverage_pct],
-      ["Cash flow", r.cashflow_pct],
-      ["Valor", r.value_pct],
-      ["Estabilidade", r.stability_pct],
-    ];
+    ] : scoreDimensionsFor(r).slice(0,6);
     return `
       <article class="card stock-card" data-ticker="${r.ticker}" tabindex="0">
         <div class="stock-card__identity">
@@ -702,6 +695,131 @@
     </div>`;
   }
 
+
+  function scoreModelFor(r) {
+    if (r && r.score_model) return String(r.score_model);
+    if (isReitStock(r)) return "reit";
+    if (isBankStock(r)) return "bank";
+    const sector = String((r && r.sector) || "").toLowerCase();
+    const industry = String((r && r.industry) || "").toLowerCase();
+    if (sector.includes("financial") && (industry.includes("insurance") || industry.includes("insur"))) return "insurance";
+    return "general";
+  }
+
+  function scoreModelLabel(r) {
+    return ({bank:"BANK MODEL", reit:"REIT MODEL", insurance:"INSURANCE MODEL", general:"GENERAL MODEL"})[scoreModelFor(r)] || "GENERAL MODEL";
+  }
+
+  function scoreDimensionsFor(r) {
+    if (r && r.score_dimensions && typeof r.score_dimensions === "object") {
+      return Object.entries(r.score_dimensions);
+    }
+    const model = scoreModelFor(r);
+    if (model === "bank") return [["Bank Quality", r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
+    if (model === "reit") return [["REIT Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
+    if (model === "insurance") return [["Insurance Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
+    return [["Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Cash Flow",r.cashflow_pct],["Valuation",r.value_pct],["Stability",r.stability_pct]];
+  }
+
+  function isBankStock(r) {
+    const sector = String(r.sector || "").toLowerCase();
+    const industry = String(r.industry || "").toLowerCase();
+    return sector.includes("financial") && (industry.includes("bank") || industry.includes("credit") || industry.includes("savings"));
+  }
+
+  function isReitStock(r) {
+    const sector = String(r.sector || "").toLowerCase();
+    const industry = String(r.industry || "").toLowerCase();
+    return sector.includes("real estate") || industry.includes("reit");
+  }
+
+  function miniBarsHtml(series, tone = "positive") {
+    const pts = (Array.isArray(series) ? series : [])
+      .filter(x => x && Number.isFinite(Number(x.value)))
+      .slice(0, 8)
+      .reverse();
+    if (pts.length < 2) return '<span class="metric-no-trend">sem histórico</span>';
+    const vals = pts.map(x => Number(x.value));
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const range = max - min || 1;
+    return `<span class="metric-mini-bars ${tone}">${vals.map((v,i) => {
+      const h = 28 + ((v-min)/range)*44;
+      const prev = i ? vals[i-1] : v;
+      const cls = v >= prev ? 'up' : 'down';
+      return `<i class="${cls}" style="height:${h.toFixed(0)}%"></i>`;
+    }).join('')}</span>`;
+  }
+
+  function scoreWord(v) {
+    if (v == null || !Number.isFinite(Number(v))) return "Sem dados";
+    const n = Number(v);
+    if (n >= 80) return "Excecional";
+    if (n >= 65) return "Forte";
+    if (n >= 50) return "Bom";
+    if (n >= 35) return "Misto";
+    return "Fraco";
+  }
+
+  function scoreTone(v) {
+    if (v == null || !Number.isFinite(Number(v))) return "neutral";
+    const n = Number(v);
+    if (n >= 65) return "positive";
+    if (n < 35) return "negative";
+    return "neutral";
+  }
+
+  function metricCardHtml({title, value, subtitle, explanation, series, tone="neutral", badge}) {
+    return `<article class="w-metric-card ${tone}">
+      <div class="w-metric-head"><span>${escapeHtml(title)}</span>${badge ? `<b>${escapeHtml(badge)}</b>` : ''}</div>
+      <div class="w-metric-main"><strong>${value}</strong>${miniBarsHtml(series, tone)}</div>
+      ${subtitle ? `<p class="w-metric-sub">${escapeHtml(subtitle)}</p>` : ''}
+      ${explanation ? `<p class="w-metric-explain">${escapeHtml(explanation)}</p>` : ''}
+    </article>`;
+  }
+
+  function pctTone(v, positiveAbove = 0) {
+    if (v == null || !Number.isFinite(Number(v))) return "neutral";
+    return Number(v) > positiveAbove ? "positive" : Number(v) < positiveAbove ? "negative" : "neutral";
+  }
+
+  function companyMetricPackHtml(r) {
+    const revAccel = r.revenue_yoy_acceleration_pp;
+    const niAccel = r.net_income_yoy_acceleration_pp;
+    const dilution = r.diluted_shares_yoy;
+    const bank = scoreModelFor(r) === "bank";
+    const reit = scoreModelFor(r) === "reit";
+    const insurance = scoreModelFor(r) === "insurance";
+    const cards = [];
+
+    if (bank) {
+      cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle: scoreWord(r.quality_pct), explanation:"Rentabilidade do capital próprio. Em bancos deve ser lida em conjunto com capitalização e qualidade dos ativos.", tone:scoreTone(r.quality_pct)}));
+      cards.push(metricCardHtml({title:"Return on Assets", value:fmtRawPct(r.roa), subtitle:"Eficiência do balanço", explanation:"Lucro gerado por unidade de ativos. Útil para comparar bancos com modelos de balanço semelhantes.", tone:pctTone(r.roa)}));
+      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "benchmark setorial indisponível" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"Para bancos, P/B é geralmente mais informativo do que EV/EBITDA.", tone:r.pb_vs_sector_pct == null ? 'neutral' : Number(r.pb_vs_sector_pct) < 0 ? 'positive' : 'neutral'}));
+      cards.push(metricCardHtml({title:"Capital & Asset Quality", value:"—", subtitle:"dados regulatórios ainda não integrados", explanation:"CET1, NPL, net charge-offs e efficiency ratio exigem fontes bancárias específicas; a app não inventa estes valores.", tone:"neutral", badge:"BANK PACK"}));
+    } else if (reit) {
+      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:"rendimento distribuído", explanation:"Em REITs deve ser validado contra FFO/AFFO payout; esse módulo específico será integrado separadamente.", tone:pctTone(r.dividend_yield)}));
+      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "sem benchmark" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"Métrica auxiliar; NAV e P/AFFO serão preferidos quando estiverem disponíveis.", tone:"neutral"}));
+      cards.push(metricCardHtml({title:"FFO / AFFO", value:"—", subtitle:"dataset ainda não integrado", explanation:"Para REITs, FFO/AFFO e NAV são preferíveis ao lucro GAAP e ao P/E. O score specialist evita tratar FCF como se fosse equivalente a AFFO.", tone:"neutral", badge:"REIT PACK"}));
+    } else if (insurance) {
+      cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle:scoreWord(r.quality_pct), explanation:"Rentabilidade do capital próprio; deve ser lida com solvência e qualidade da subscrição.", tone:scoreTone(r.quality_pct)}));
+      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "sem benchmark" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"P/B é uma referência útil para seguradoras, em conjunto com ROE e qualidade do capital.", tone:r.pb_vs_sector_pct == null ? "neutral" : Number(r.pb_vs_sector_pct) < 0 ? "positive" : "neutral"}));
+      cards.push(metricCardHtml({title:"Combined Ratio & Solvency", value:"—", subtitle:"dados especializados ainda não integrados", explanation:"Combined ratio e solvency capital são métricas essenciais para seguradoras e não são inferidas a partir de dados genéricos.", tone:"neutral", badge:"INSURANCE PACK"}));
+    } else {
+      cards.push(metricCardHtml({title:"Gross Margin", value:fmtRawPct(r.gross_margin), subtitle:scoreWord(r.profitability_pct), explanation:"Quanto da receita sobra depois do custo direto dos produtos/serviços.", tone:scoreTone(r.profitability_pct)}));
+      cards.push(metricCardHtml({title:"Operating Margin", value:fmtRawPct(r.operating_margin), subtitle:r.net_margin_yoy_change_pp == null ? "margem operacional" : `${Number(r.net_margin_yoy_change_pp)>=0?'+':''}${Number(r.net_margin_yoy_change_pp).toFixed(1)} pp na margem líquida YoY`, explanation:"Eficiência operacional antes de juros e impostos.", tone:scoreTone(r.profitability_pct)}));
+      cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle:"rentabilidade do capital", explanation:"Retorno contabilístico sobre o capital dos acionistas.", tone:pctTone(r.roe)}));
+    }
+
+    cards.push(metricCardHtml({title:"Revenue Growth", value:fmtRawPct(r.revenue_yoy_latest), subtitle:revAccel == null ? "YoY último trimestre" : `${Number(revAccel)>=0?'+':''}${Number(revAccel).toFixed(1)} pp de aceleração`, explanation:revAccel == null ? "Crescimento do trimestre mais recente face ao homólogo." : Number(revAccel) >= 0 ? "O crescimento das receitas está a acelerar." : "O crescimento das receitas está a desacelerar.", series:r.quarterly_revenue, tone:pctTone(r.revenue_yoy_latest)}));
+    cards.push(metricCardHtml({title:"Earnings Growth", value:fmtRawPct(r.net_income_yoy_latest), subtitle:niAccel == null ? "YoY último trimestre" : `${Number(niAccel)>=0?'+':''}${Number(niAccel).toFixed(1)} pp de aceleração`, explanation:niAccel == null ? "Crescimento do lucro líquido vs trimestre homólogo." : Number(niAccel) >= 0 ? "O crescimento dos lucros está a acelerar." : "O crescimento dos lucros está a desacelerar.", series:r.quarterly_net_income, tone:pctTone(r.net_income_yoy_latest)}));
+    cards.push(metricCardHtml({title:"Share Count", value:dilution == null ? "—" : `${Number(dilution)>=0?'+':''}${(Number(dilution)*100).toFixed(1)}%`, subtitle:dilution == null ? "sem dados suficientes" : Number(dilution) > .03 ? "diluição material" : Number(dilution) < -.03 ? "buyback líquido" : "estável", explanation:dilution == null ? "É necessário histórico comparável de ações diluídas." : Number(dilution) > 0 ? "Mais ações em circulação reduzem a participação económica de cada ação existente." : "Menos ações em circulação aumentam a participação económica por ação.", series:r.quarterly_diluted_shares, tone:dilution == null ? 'neutral' : Number(dilution) > .03 ? 'negative' : Number(dilution) < -.03 ? 'positive' : 'neutral'}));
+    cards.push(metricCardHtml({title:"Free Cash Flow", value:fmtMoney(r.free_cash_flow, r.currency), subtitle:`FCF yield ${fmtRawPct(r.fcf_yield)}`, explanation:"Caixa disponível depois do investimento necessário no negócio.", tone:scoreTone(r.cashflow_pct)}));
+    cards.push(metricCardHtml({title:"Forward P/E", value:fmtRatio(r.forward_pe), subtitle:r.forward_pe_vs_sector_pct == null ? "sem benchmark setorial" : `${fmtSignedPct(r.forward_pe_vs_sector_pct)} vs setor`, explanation:"Preço atual relativo ao lucro esperado. Deve ser lido com crescimento e qualidade.", tone:r.forward_pe_vs_sector_pct == null ? 'neutral' : Number(r.forward_pe_vs_sector_pct) < -10 ? 'positive' : Number(r.forward_pe_vs_sector_pct) > 20 ? 'negative' : 'neutral'}));
+    cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:r.payout_ratio == null ? "payout indisponível" : `payout ${fmtRawPct(r.payout_ratio)}`, explanation:"Rendimento anual distribuído; sustentabilidade depende de payout, cash flow e balanço.", tone:"neutral"}));
+
+    return `<section class="w-metric-section"><div class="w-section-intro"><span>${bank ? 'BANK METRICS' : reit ? 'REIT METRICS' : insurance ? 'INSURANCE METRICS' : 'COMPANY METRICS'}</span><h3>Os números que importam</h3><p>Cada métrica combina valor atual, tendência quando disponível e contexto. Valores ausentes são mostrados como ausentes — nunca estimados sem fonte.</p></div><div class="w-metric-stack">${cards.join('')}</div></section>`;
+  }
+
   function openDetail(ticker) {
     const r = state.data.stocks.find(s => s.ticker === ticker);
     if (!r) return;
@@ -734,14 +852,7 @@
     const ownEv = ownValuationContext(r.ticker, "ev", r.enterprise_to_ebitda);
     const hasHistory = Object.keys(series).length >= 2;
     const verdict = investmentVerdict(r);
-    const dimensions = [
-      ["Qualidade", r.quality_pct ?? r.profitability_pct],
-      ["Crescimento", r.growth_pct],
-      ["Balanço", r.balance_pct ?? r.leverage_pct],
-      ["Cash flow", r.cashflow_pct],
-      ["Valor", r.value_pct],
-      ["Estabilidade", r.stability_pct],
-    ];
+    const dimensions = scoreDimensionsFor(r);
     const dimHtml = dimensions.map(([label,val]) => `<div class="dimension"><span>${label}</span><strong>${val == null ? "—" : Math.round(val)}</strong><i><b style="width:${Math.max(0,Math.min(100,Number(val)||0))}%"></b></i></div>`).join("");
 
     els.detailContent.innerHTML = `
@@ -750,6 +861,7 @@
         <div class="detail-score ${verdict.cls}"><strong>${r.score ?? "—"}</strong><span>${verdict.label}</span></div>
       </div>
       <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
+      <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário provisório: evita métricas industriais inadequadas; capital regulatório e qualidade de ativos ainda não estão integrados." : scoreModelFor(r) === "reit" ? "Modelo REIT provisório: evita equiparar FCF a AFFO; FFO/AFFO, NAV e ocupação ainda não estão integrados." : scoreModelFor(r) === "insurance" ? "Modelo de seguradora provisório: combined ratio e solvência ainda não estão integrados." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
       <h3 class="dossier-title">Tese quantitativa</h3>
       ${thesisPanelHtml(r)}
       <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
@@ -758,6 +870,9 @@
       <h3 class="dossier-title">Score por dimensão</h3>
       <div class="dimension-grid">${dimHtml}</div>
 
+      ${companyMetricPackHtml(r)}
+
+      <h3 class="dossier-title legacy-detail-title">Dados complementares</h3>
       <h3 class="dossier-title">Qualidade & crescimento</h3>
       <div class="dossier-grid">
         <div><span>ROE</span><strong>${fmtRawPct(r.roe)}</strong></div><div><span>ROA</span><strong>${fmtRawPct(r.roa)}</strong></div>

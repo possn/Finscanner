@@ -1,3 +1,7 @@
+## v0.11.0 — Sector-Aware Scoring
+
+Banks, REITs and insurers now use explicit specialist proxy score packs instead of being forced through the general-company factor mix. The UI states which model is active and its limitations. Specialist confidence is capped at medium until native metrics (CET1/NPL, FFO/AFFO/NAV, combined ratio/solvency) are integrated.
+
 # Finscanner
 
 PWA pessoal de scanning/scoring de ações e ETFs, inspirada na app Winston,
