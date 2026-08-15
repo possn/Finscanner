@@ -1,3 +1,18 @@
+# Finscanner v0.47.1 — Earnings & Estimate Intelligence + ETF Holdings Hotfix
+
+## v0.47.1 hotfix
+
+Corrige um crash do pipeline em `scripts/score.py`: `top_holdings` é atualmente armazenado como lista de objetos `{symbol, name, weight}`, enquanto o scoring de exposição temática ainda tentava desempacotar cada holding como `(symbol, weight)`. O parser passa a aceitar ambos os formatos e ignora entradas malformadas sem abortar o run diário.
+
+
+Esta release acrescenta ao Stock Scanner uma camada Winston-like de expectativas: consenso de EPS e revenue, revisões a 30 dias, última surpresa de resultados, distribuição de recomendações e price targets. Estes dados são **contexto** e não entram no score principal, porque a cobertura de analistas varia materialmente entre mercados e empresas.
+
+No screener existem agora o preset **Revisions ↑**, a perspetiva **Estimates** e colunas selecionáveis para revisão de EPS, surpresa, target upside e crescimento forward. O dossier individual inclui um bloco **Analyst Intelligence** com cobertura explícita e nunca interpreta ausência de dados como sinal negativo.
+
+O pipeline faz esta recolha numa segunda passagem limitada: posições do portfolio têm prioridade e o restante orçamento é preenchido com empresas de maior score/market cap. Isto mantém o workflow diário finito.
+
+# Finscanner v0.45.0 — Financial Story Dossier
+
 # Finscanner v0.32.0 — Portfolio Action Layer
 
 Esta release transforma a análise estrutural do portfolio numa camada de prioridades de revisão. O motor cruza peso económico, concentração setorial, clusters de ETFs, teses a piorar e exposição zombie para ordenar onde uma revisão pode ter maior impacto. Não executa ordens nem apresenta as prioridades como recomendações automáticas de compra/venda.
@@ -231,3 +246,77 @@ Portfolio Intelligence now identifies cross-dimensional concentrations such as g
 ## v0.33.0 — Portfolio Rebalancing Lab
 
 Adds an interactive, non-persistent portfolio scenario lab. Select a source position, a destination (cash or another existing holding), and the percentage to move. The app recalculates observed concentration metrics without changing the saved portfolio: largest position, Top-5 concentration, dominant sector, HHI, weighted score, zombie exposure, weakening-thesis exposure, and quality exposure. The simulation keeps prices, FX rates, ETF holdings and fundamentals fixed; it is a structural what-if tool, not trade execution or investment advice.
+
+## v0.34.0 — Multi-step Portfolio Scenario Builder
+- O Portfolio Rebalancing Lab passa a aceitar várias alterações simultâneas no mesmo cenário.
+- Cada operação pode reduzir uma posição e transferir o valor para cash/reserva ou para outra posição existente.
+- As operações são aplicadas sequencialmente, permitindo simular consolidação de vários ETFs num núcleo e reduções de risco em simultâneo.
+- Comparação Atual vs Proposta para maior posição, Top 5, HHI, maior setor, score ponderado, zombies, tese a piorar, Growth, Quality e cash.
+- Nenhuma alteração é guardada ou executada; é apenas um laboratório de estrutura.
+
+
+## v0.35.0 — Auto Simplification Scenario
+
+O Portfolio Rebalancing Lab ganhou **Gerar cenário de simplificação**. O modelo cria automaticamente uma proposta editável a partir de três camadas observáveis: (1) consolidação de clusters de ETFs redundantes no candidato a núcleo, (2) redução parcial de uma concentração individual >=10% e (3) revisão parcial de até duas posições materiais (>2%) com tese a piorar ou classificadas como zombie.
+
+A proposta é apenas um cenário de análise. Não executa ordens e não incorpora fiscalidade, spreads, tracking difference, moeda, distribuição/acumulação ou objetivos pessoais. Cada operação criada mostra a razão objetiva que a originou e pode ser removida ou alterada manualmente.
+
+## v0.36.0 — Smart Money / SEC Integrity Repair
+- Corrige parsing de Form 4: o `primaryDocument` da SEC é frequentemente HTML; o pipeline passa a procurar primeiro o XML estruturado companheiro.
+- Retry/backoff + throttling global abaixo do limite de fair access da SEC.
+- Smart Money com filtros Universo/Portfolio e Compras/Vendas/Fluxo líquido.
+- Data Readiness SEC: distingue ausência real de atividade de falha de cobertura.
+- O workflow recusa publicar um dataset com cobertura SEC gravemente degradada.
+
+
+## v0.38.0 — Portfolio Opportunity Engine
+
+O Portfolio passa a cruzar as melhores oportunidades do universo com a estrutura atual da carteira. O Portfolio Fit combina score, Quality, Value, Growth e trajetória da tese com concentração setorial/geográfica e exposição indireta já existente via ETFs. Os candidatos que aumentariam riscos já dominantes ou que já estejam materialmente presentes através de fundos são penalizados.
+
+
+## v0.39.0 — Portfolio Valuation & Allocation Repair
+- DivTracker Combined is parsed as a transaction ledger: every row contributes to the net quantity by ticker.
+- Current value uses net quantity × current Yahoo price × FX to EUR; historical Cost Per Share is not mislabelled as current value.
+- ECB reference rates are now the primary FX source, with Yahoo and the previous snapshot as fallbacks.
+- The workflow refuses to publish if USD/GBP/CHF/CAD/PLN/SEK/DKK FX coverage is missing.
+- Portfolio exposure is selectable: Positions, Sectors, Geography, Themes and Trading Currency, with %/€ display toggle. AI/Digital is no longer a privileged standalone exposure.
+- Portfolio allocation now shows the total current value and top positions + Others.
+
+
+## v0.40.0 — Portfolio Cost Basis & Performance
+
+- O import DivTracker Combined é tratado como ledger cronológico, incluindo compras e vendas (quantidades negativas).
+- Calcula custo médio remanescente por posição e P/L não realizado.
+- Novo separador Portfolio → Rentabilidade com maiores ganhos/perdas.
+- O topo do Portfolio mostra valor atual, custo base coberto, P/L e rentabilidade.
+- Limitação explícita: o custo histórico é convertido com o FX atual; a rentabilidade cambial histórica exata exigirá FX por data de transação.
+
+## v0.41.0 — Historical FX Cost Basis
+
+Portfolio P/L can now use the ECB reference FX rate applicable on each transaction date instead of converting the entire historical cost basis at today's exchange rate. `scripts/fx_history.py` builds `data/fx_history.json` from the ECB historical euro reference series. The browser uses the latest available ECB business-day rate on or before each trade date, handles GBp/GBX as 1/100 GBP, and falls back explicitly to current FX only when a historical point is unavailable.
+
+After deploying v0.41.0, run **Update stock data** once and then re-import the DivTracker Combined CSV once so the locally stored portfolio includes its transaction ledger. The Portfolio screen reports how many valued positions use full historical FX versus partial/current-FX fallback.
+
+
+## v0.42.0 — Portfolio Positions Ledger
+
+Portfolio now includes a sortable positions ledger inspired by dedicated portfolio trackers. It shows quantity, covered invested capital, current EUR value, unrealized P/L in EUR and %, economic weight, and Finscanner score for every imported position. Sorting supports value, weight, P/L, return, invested capital, score and ticker. Positions without a current quote remain visible instead of disappearing from the portfolio.
+
+
+## v0.44.0 — Selectable Stock Screener Perspectives
+
+Stock Radar gains selectable perspectives (Overview, Profitability, Growth, Valuation, Income, Smart Money) plus a custom column picker with up to four metrics. The results table now changes metrics without opening each company dossier, while preserving filters, presets and sector-aware scoring.
+
+
+## v0.46.0 — Temporal Metric Context
+Company dossiers now add a Winston-style context strip to key general-company metrics: **Current · 1Y ago · 3Y trend · Sector median**. Annual statement history powers Gross Margin, Operating Margin, ROE and ROCE proxy; actual dividend events power dividend-per-share history; valuation uses the scanner's own rolling valuation history for 1Y/self-relative context. Missing history remains explicitly unavailable.
+
+
+## v0.48.0 — Earnings Calendar & Catalyst Intelligence
+
+- Próxima data de resultados e dias até ao evento.
+- Classificação explícita do risco de evento: iminente / esta semana / próximo / calendarizado.
+- Histórico visual dos últimos 4 trimestres: beats, misses, surpresa média e beat streak.
+- Novo preset `Earnings ≤7d` e perspetiva `Catalysts` no Stock Radar.
+- A camada de catalisadores é contextual e não altera o Finscanner Score.
+- Schema de dados 48.

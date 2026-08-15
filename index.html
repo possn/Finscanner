@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.33.0">
+<link rel="stylesheet" href="style.css?v=0.48.0">
 </head>
 <body>
 
@@ -115,17 +115,22 @@
         </div>
       </section>
 
-      <section class="orientation-guide" aria-label="Guia rápido">
-        <div class="section-heading"><div><span class="eyebrow">GUIA RÁPIDO</span><h3>O que é cada secção</h3></div></div>
-        <div class="orientation-grid">
-          <button class="orientation-card" data-goto="stocks"><strong>📊 Ações</strong><span>Scanner + score 0–100 de ações individuais. Estás aqui agora.</span></button>
-          <button class="orientation-card" data-goto="funds"><strong>◫ ETFs</strong><span>Fundos cotados: comissão (expense ratio), setor, região, exposição a IA.</span></button>
-          <button class="orientation-card" data-goto="metals"><strong>◆ Metais</strong><span>Ouro, prata, cobre, platina, paládio e urânio — preços e volatilidade.</span></button>
-          <button class="orientation-card" data-goto="news"><strong>◉ Notícias</strong><span>Notícias das tuas posições, watchlist, ou qualquer ticker pesquisado.</span></button>
-          <button class="orientation-card" data-goto="smartmoney"><strong>↗ Smart Money</strong><span>Compras/vendas de insiders (Form 4 da SEC) — só ações dos EUA.</span></button>
-          <button class="orientation-card" data-goto="theses"><strong>◎ Teses</strong><span>Cada ação classificada num arquétipo (Value Trap, Quality Compounder…) e se está a melhorar ou piorar.</span></button>
-          <button class="orientation-card" data-goto="compare"><strong>⇄ Comparar</strong><span>Até 4 ações ou ETFs lado a lado, por ticker ou nome.</span></button>
-          <button class="orientation-card" data-goto="portfolio"><strong>★ O meu portfolio</strong><span>Importa CSV/JSON das tuas posições reais: exposição por setor, região e IA.</span></button>
+      <section class="stock-search-shell" aria-label="Pesquisa de ações">
+        <div class="stock-search-row">
+          <span class="stock-search-icon">⌕</span>
+          <input id="stock-hero-search" type="search" placeholder="Pesquisar ticker ou empresa…" autocomplete="off" spellcheck="false">
+          <button id="stock-filters-btn" class="stock-filter-btn" type="button">☷ <span>Filtros</span></button>
+        </div>
+        <div id="stock-advanced-filters" class="stock-advanced-filters" hidden>
+          <label>Score mínimo<input id="stock-min-score" type="number" min="0" max="100" step="5" placeholder="0"></label>
+          <label>Quality mínima<input id="stock-min-quality" type="number" min="0" max="100" step="5" placeholder="0"></label>
+          <label>Growth mínimo<input id="stock-min-growth" type="number" min="0" max="100" step="5" placeholder="0"></label>
+          <label>Value mínimo<input id="stock-min-value" type="number" min="0" max="100" step="5" placeholder="0"></label>
+          <label>Market cap
+            <select id="stock-min-cap"><option value="0">qualquer</option><option value="1000000000">≥ 1B</option><option value="10000000000">≥ 10B</option><option value="50000000000">≥ 50B</option></select>
+          </label>
+          <label>P/E forward máximo<input id="stock-max-fpe" type="number" min="0" step="1" placeholder="sem limite"></label>
+          <button id="stock-clear-filters" type="button" class="stock-clear-filters">Limpar filtros</button>
         </div>
       </section>
 
@@ -144,7 +149,7 @@
         <h2>Encontra empresas que merecem investigação.</h2>
         <p>Score explicável, métricas fundamentais, valuation relativo e trajetória da tese.</p>
         <div class="preset-filters" id="preset-filters">
-          <button data-preset="quality">High Quality</button><button data-preset="value">Value</button><button data-preset="growth">Growth</button><button data-preset="zombie">Zombie Detector</button>
+          <button data-preset="quality">High Quality</button><button data-preset="value">Value</button><button data-preset="growth">Growth</button><button data-preset="garp">GARP</button><button data-preset="dividend">Dividend</button><button data-preset="insider">Insider Buying</button><button data-preset="revisions">Revisions ↑</button><button data-preset="earnings">Earnings ≤7d</button><button data-preset="zombie">Zombie Detector</button>
         </div>
       </section>
       <div class="section-heading fs-screener-heading">
@@ -171,6 +176,8 @@
           <option value="stability-desc">estabilidade ↓</option>
           <option value="ticker-asc">ticker A–Z</option>
           <option value="cap-desc">market cap ↓</option>
+          <option value="revision-desc">EPS revisions 30d ↓</option>
+          <option value="earnings-asc">próximos earnings ↑</option>
         </select>
         <label class="toggle">
           <input type="checkbox" id="zombie-only">
@@ -182,7 +189,24 @@
         </label>
       </div>
 
-      <div id="list" class="dossier">
+      <section class="stock-perspective-shell" aria-label="Perspetiva do screener">
+        <div class="stock-perspective-head">
+          <div><span class="eyebrow">PERSPECTIVE</span><h3>Escolhe o que queres comparar</h3></div>
+          <button id="stock-columns-btn" class="stock-columns-btn" type="button">⚙ Colunas</button>
+        </div>
+        <div id="stock-perspectives" class="stock-perspectives">
+          <button class="is-active" data-stock-perspective="overview">Overview</button>
+          <button data-stock-perspective="profitability">Profitability</button>
+          <button data-stock-perspective="growth">Growth</button>
+          <button data-stock-perspective="valuation">Valuation</button>
+          <button data-stock-perspective="income">Income</button>
+          <button data-stock-perspective="smartmoney">Smart Money</button>
+          <button data-stock-perspective="estimates">Estimates</button><button data-stock-perspective="catalysts">Catalysts</button>
+        </div>
+        <div id="stock-columns-panel" class="stock-columns-panel" hidden></div>
+      </section>
+      <div id="stock-table-head" class="stock-table-head" aria-hidden="true"></div>
+      <div id="list" class="dossier stock-radar-list">
         <p class="empty-state">A carregar dados…</p>
       </div>
     </section>
@@ -288,7 +312,23 @@
       <div class="commandbar"><input id="news-search" type="text" placeholder="pesquisar notícias de um ticker…" autocomplete="off" spellcheck="false"></div>
       <div id="news-list" class="dossier"></div>
     </section>
-    <section id="view-smartmoney" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">SMART MONEY</span><h2>Onde os insiders estão ativos.</h2><p>Atividade Form 4 da SEC nos EUA, distinguindo compras e vendas open-market quando disponível.</p></div></section><div id="smartmoney-list" class="dossier"></div></section>
+    <section id="view-smartmoney" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">SMART MONEY</span><h2>Onde os insiders estão ativos.</h2><p>SEC Form 4 · apenas compras P e vendas S em mercado aberto. Grants, opções, gifts e vesting não são classificados como compra.</p></div></section>
+      <div class="thesis-filter-panel smartmoney-controls">
+        <div id="smartmoney-scope-filters" class="segmented-filter" aria-label="Âmbito de insiders">
+          <button class="is-active" data-smartmoney-scope="all">Universo EUA</button>
+          <button data-smartmoney-scope="portfolio">Meu portfolio</button>
+        </div>
+        <div id="smartmoney-type-filters" class="portfolio-filter-bar" aria-label="Tipo de transação insider">
+          <button class="portfolio-filter-chip is-active" data-smartmoney-type="all">Todos</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="buy">Compras</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="sell">Vendas</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="netbuy">Fluxo +</button>
+          <button class="portfolio-filter-chip" data-smartmoney-type="netsell">Fluxo −</button>
+        </div>
+      </div>
+      <div id="smartmoney-health" class="data-health-card"></div>
+      <div id="smartmoney-list" class="dossier"></div>
+    </section>
     <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">INVESTMENT THESES</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section>
       <div class="thesis-filter-panel">
         <div id="thesis-scope-filters" class="segmented-filter" aria-label="Âmbito das teses">
@@ -316,7 +356,9 @@
       </div>
       <div id="exposure-panel" class="exposure-panel"></div>
       <div id="portfolio-summary" class="portfolio-summary"></div>
+      <div id="portfolio-positions-table" class="portfolio-positions-table"></div>
       <div id="portfolio-structure-intel" class="portfolio-structure-intel"></div>
+      <div id="portfolio-opportunity-engine" class="portfolio-opportunity-engine"></div>
       <div id="portfolio-rebalancing-lab" class="portfolio-rebalancing-lab"></div>
       <div id="portfolio-thesis-monitor" class="portfolio-thesis-monitor"></div>
       <section class="portfolio-filter-section">
@@ -349,6 +391,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.33.0"></script>
+<script src="app.js?v=0.48.0"></script>
 </body>
 </html>

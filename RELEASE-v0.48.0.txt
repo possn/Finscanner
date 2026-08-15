@@ -1,0 +1,11 @@
+Finscanner v0.48.0 — Earnings Calendar & Catalyst Intelligence
+
+Stock Scanner:
+- upcoming earnings date + days to earnings
+- explicit event-risk window
+- 4-quarter beat/miss history and beat streak
+- Catalyst Intelligence dossier block
+- Earnings <=7d screener preset
+- Catalysts selectable screener perspective
+
+The v0.47.1 ETF holdings hotfix remains included.
