@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import logging
 import time
+import json
+import os
 from dataclasses import dataclass
 from io import StringIO
 
@@ -108,6 +110,15 @@ EQUITY_REGION_BY_SUFFIX: dict[str, str] = {
     ".MC": "Spain",
     ".MI": "Italy",
     ".SW": "Switzerland",
+    ".LS": "Portugal",
+    ".ST": "Sweden",
+    ".CO": "Denmark",
+    ".WA": "Poland",
+    ".TO": "Canada",
+    ".OL": "Norway",
+    ".HE": "Finland",
+    ".VI": "Austria",
+    ".BR": "Belgium",
 }
 
 
@@ -287,6 +298,34 @@ def europe_constituents() -> list[str]:
         time.sleep(0.4)
     return sorted(set(out))
 
+
+
+def extra_portfolio_tickers() -> list[str]:
+    """Load optional extra Yahoo symbols from data/extra_tickers.json.
+
+    The base universe is discovered from screeners/indices and is intentionally
+    finite. A valid Yahoo ticker can therefore exist without being selected by
+    those discovery sources. Keeping a small explicit extension list prevents
+    real portfolio holdings from being incorrectly labelled as unknown while
+    avoiding the cost of fetching fundamentals for every symbol on every
+    exchange. Invalid/stale symbols simply fail later in fetch_many and are
+    skipped by the normal pipeline safeguards.
+    """
+    path = os.path.join(os.path.dirname(__file__), "..", "data", "extra_tickers.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            payload = json.load(f)
+        values = payload.get("tickers", payload) if isinstance(payload, dict) else payload
+        out = sorted({str(x).strip().upper() for x in values if str(x).strip()})
+        log.info("Extra portfolio coverage: %d ticker(s) loaded", len(out))
+        return out
+    except FileNotFoundError:
+        log.info("No data/extra_tickers.json found; continuing without explicit portfolio extension")
+        return []
+    except Exception as e:
+        log.warning("Could not load extra_tickers.json (%s)", e)
+        return []
+
 def build_universe() -> dict[str, list[str]]:
     """Returns {market_code: [tickers]}. Each leg is independent — one
     source failing does not block the others."""
@@ -300,6 +339,7 @@ def build_universe() -> dict[str, list[str]]:
     time.sleep(1)
     universe["EU"] = europe_constituents()
     universe["ETF"] = sorted(ETF_UNIVERSE.keys())
+    universe["EXTRA"] = extra_portfolio_tickers()
 
     for market, tickers in universe.items():
         log.info("%s: %d tickers", market, len(tickers))

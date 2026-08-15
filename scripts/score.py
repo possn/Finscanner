@@ -93,6 +93,27 @@ class ScoredTicker:
     score_model_note: str | None = None
     score_dimensions: dict[str, float | None] | None = None
 
+    # bank-native statement-derived proxies
+    net_interest_income: float | None = None
+    net_interest_income_yoy: float | None = None
+    efficiency_ratio_proxy: float | None = None
+    provision_for_credit_losses: float | None = None
+    provision_to_revenue: float | None = None
+    equity_to_assets: float | None = None
+    total_assets: float | None = None
+    stockholders_equity: float | None = None
+    bank_metric_coverage_pct: float | None = None
+
+    # REIT-native statement-derived proxies
+    reit_ffo_proxy: float | None = None
+    reit_ffo_per_share_proxy: float | None = None
+    reit_p_ffo_proxy: float | None = None
+    reit_ffo_payout_proxy: float | None = None
+    reit_net_debt_to_ebitda: float | None = None
+    reit_depreciation_amortization: float | None = None
+    reit_gain_loss_sale_adjustment: float | None = None
+    reit_metric_coverage_pct: float | None = None
+
 
 def _percentile_rank(value: float | None, all_values: list[float | None], invert: bool = False) -> float | None:
     clean = sorted(v for v in all_values if v is not None)
@@ -250,34 +271,49 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
                 _percentile_rank(r.roa, arr("roa")),
                 _percentile_rank(r.profit_margin, arr("profit_margin")),
             ])
+            bank_efficiency = _percentile_rank(r.efficiency_ratio_proxy, arr("efficiency_ratio_proxy"), invert=True)
+            bank_asset_quality = _percentile_rank(r.provision_to_revenue, arr("provision_to_revenue"), invert=True)
+            bank_capital = _percentile_rank(r.equity_to_assets, arr("equity_to_assets"))
+            bank_nii_growth = _percentile_rank(r.net_interest_income_yoy, arr("net_interest_income_yoy"))
+            bank_growth = _avg([growth, bank_nii_growth])
             bank_value = _avg([
                 _percentile_rank(r.price_to_book, arr("price_to_book"), invert=True) if r.price_to_book and r.price_to_book > 0 else None,
                 _percentile_rank(r.trailing_pe, arr("trailing_pe"), invert=True) if r.trailing_pe and r.trailing_pe > 0 else None,
                 _percentile_rank(r.forward_pe, arr("forward_pe"), invert=True) if r.forward_pe and r.forward_pe > 0 else None,
             ])
-            composite = _weighted([(bank_quality,.30),(growth,.20),(bank_value,.25),(income,.10),(stability,.15)])
-            quality = bank_quality
+            composite = _weighted([(bank_quality,.22),(bank_efficiency,.13),(bank_asset_quality,.10),(bank_capital,.15),(bank_growth,.15),(bank_value,.15),(income,.05),(stability,.05)])
+            quality = _avg([bank_quality, bank_efficiency, bank_asset_quality, bank_capital])
+            growth = bank_growth
             value = bank_value
-            score_dimensions = {"Bank Quality": bank_quality, "Growth": growth, "Valuation": bank_value, "Income": income, "Stability": stability}
-            model_note = "Bank proxy model: ROE/ROA, growth, P/B-P/E valuation, income and stability. CET1, NPL, charge-offs and efficiency ratio are not yet in the dataset."
+            balance = bank_capital
+            score_dimensions = {"Bank Quality": bank_quality, "Efficiency": bank_efficiency, "Asset Quality": bank_asset_quality, "Capital Proxy": bank_capital, "Growth": bank_growth, "Valuation": bank_value, "Income": income, "Stability": stability}
+            model_note = "Bank-native proxy model: profitability, statement-derived efficiency, credit-loss provision intensity, equity/assets capital proxy, net-interest-income growth, P/B-P/E valuation and income. CET1 and NPL remain unavailable because they require regulatory filings."
         elif model == "reit":
+            # Compare REIT-native metrics against REIT peers only. This avoids
+            # ranking P/FFO or payout against structurally unrelated companies.
+            reit_peers = [x for x in equities if _score_model_for(x) == "reit"]
+            reit_ffo_quality = _percentile_rank(r.reit_ffo_per_share_proxy, [x.reit_ffo_per_share_proxy for x in reit_peers])
             reit_quality = _avg([
-                _percentile_rank(r.roe, arr("roe")),
-                _percentile_rank(r.roa, arr("roa")),
-                _percentile_rank(r.profit_margin, arr("profit_margin")),
+                reit_ffo_quality,
+                _percentile_rank(r.roe, [x.roe for x in reit_peers]),
+                _percentile_rank(r.profit_margin, [x.profit_margin for x in reit_peers]),
             ])
-            reit_balance = _avg([
-                _percentile_rank(r.debt_to_equity, arr("debt_to_equity"), invert=True),
+            reit_leverage = _avg([
+                _percentile_rank(r.reit_net_debt_to_ebitda, [x.reit_net_debt_to_ebitda for x in reit_peers], invert=True),
                 coverage_pct,
             ])
             reit_value = _avg([
-                _percentile_rank(r.price_to_book, arr("price_to_book"), invert=True) if r.price_to_book and r.price_to_book > 0 else None,
-                _percentile_rank(r.forward_pe, arr("forward_pe"), invert=True) if r.forward_pe and r.forward_pe > 0 else None,
+                _percentile_rank(r.reit_p_ffo_proxy, [x.reit_p_ffo_proxy for x in reit_peers], invert=True) if r.reit_p_ffo_proxy and r.reit_p_ffo_proxy > 0 else None,
+                _percentile_rank(r.price_to_book, [x.price_to_book for x in reit_peers], invert=True) if r.price_to_book and r.price_to_book > 0 else None,
             ])
-            composite = _weighted([(reit_quality,.20),(growth,.20),(reit_balance,.20),(reit_value,.20),(income,.15),(stability,.05)])
-            quality, balance, value = reit_quality, reit_balance, reit_value
-            score_dimensions = {"REIT Quality": reit_quality, "Growth": growth, "Balance": reit_balance, "Valuation": reit_value, "Income": income, "Stability": stability}
-            model_note = "REIT proxy model: profitability, growth, leverage, valuation and income. FFO/AFFO, NAV and occupancy are not yet in the dataset."
+            reit_distribution = _avg([
+                income,
+                _percentile_rank(r.reit_ffo_payout_proxy, [x.reit_ffo_payout_proxy for x in reit_peers], invert=True) if r.reit_ffo_payout_proxy is not None and r.reit_ffo_payout_proxy >= 0 else None,
+            ])
+            composite = _weighted([(reit_quality,.22),(growth,.16),(reit_leverage,.20),(reit_value,.20),(reit_distribution,.17),(stability,.05)])
+            quality, balance, value = reit_quality, reit_leverage, reit_value
+            score_dimensions = {"REIT Quality": reit_quality, "Growth": growth, "Leverage": reit_leverage, "P/FFO Value": reit_value, "Distribution": reit_distribution, "Stability": stability}
+            model_note = "REIT-native proxy model: statement-derived FFO proxy, P/FFO proxy, FFO payout proxy, net-debt/EBITDA, growth and distributions. AFFO, NAV and occupancy remain unavailable rather than inferred."
         elif model == "insurance":
             ins_quality = _avg([
                 _percentile_rank(r.roe, arr("roe")),
@@ -310,7 +346,9 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
         ]
         metric_coverage = sum(v is not None for v in metric_values) / len(metric_values) * 100
         confidence = "high" if metric_coverage >= 70 else "medium" if metric_coverage >= 40 else "low"
-        if model in ("bank", "reit", "insurance") and confidence == "high":
+        if model in ("bank", "insurance") and confidence == "high":
+            confidence = "medium"
+        if model == "reit" and confidence == "high" and (r.reit_metric_coverage_pct or 0) < 60:
             confidence = "medium"
 
         # Peer-relative valuation context. We deliberately compare within sector,
@@ -364,6 +402,17 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             quality_value_score=round(quality_value, 1) if quality_value is not None else None,
             score_model=model, score_model_note=model_note,
             score_dimensions={k: (round(v,1) if v is not None else None) for k,v in score_dimensions.items()},
+            net_interest_income=r.net_interest_income, net_interest_income_yoy=r.net_interest_income_yoy,
+            efficiency_ratio_proxy=r.efficiency_ratio_proxy,
+            provision_for_credit_losses=r.provision_for_credit_losses, provision_to_revenue=r.provision_to_revenue,
+            equity_to_assets=r.equity_to_assets, total_assets=r.total_assets, stockholders_equity=r.stockholders_equity,
+            bank_metric_coverage_pct=r.bank_metric_coverage_pct,
+            reit_ffo_proxy=r.reit_ffo_proxy, reit_ffo_per_share_proxy=r.reit_ffo_per_share_proxy,
+            reit_p_ffo_proxy=r.reit_p_ffo_proxy, reit_ffo_payout_proxy=r.reit_ffo_payout_proxy,
+            reit_net_debt_to_ebitda=r.reit_net_debt_to_ebitda,
+            reit_depreciation_amortization=r.reit_depreciation_amortization,
+            reit_gain_loss_sale_adjustment=r.reit_gain_loss_sale_adjustment,
+            reit_metric_coverage_pct=r.reit_metric_coverage_pct,
         ))
 
     for r in etfs:

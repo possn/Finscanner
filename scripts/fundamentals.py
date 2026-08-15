@@ -81,6 +81,29 @@ class RawMetrics:
     # market risk
     beta: float | None = None
 
+    # bank-specific statement-derived metrics (proxies, not regulatory ratios)
+    net_interest_income: float | None = None
+    net_interest_income_yoy: float | None = None
+    efficiency_ratio_proxy: float | None = None
+    provision_for_credit_losses: float | None = None
+    provision_to_revenue: float | None = None
+    equity_to_assets: float | None = None
+    total_assets: float | None = None
+    stockholders_equity: float | None = None
+    bank_metric_coverage_pct: float | None = None
+
+    # REIT-specific statement-derived metrics. FFO is an explicit proxy built
+    # from public GAAP statements; AFFO/NAV/occupancy are never fabricated.
+    ebitda: float | None = None
+    reit_ffo_proxy: float | None = None
+    reit_ffo_per_share_proxy: float | None = None
+    reit_p_ffo_proxy: float | None = None
+    reit_ffo_payout_proxy: float | None = None
+    reit_net_debt_to_ebitda: float | None = None
+    reit_depreciation_amortization: float | None = None
+    reit_gain_loss_sale_adjustment: float | None = None
+    reit_metric_coverage_pct: float | None = None
+
     # ETF-specific
     expense_ratio: float | None = None
     top_holdings: list[tuple[str, float]] = field(default_factory=list)
@@ -106,6 +129,35 @@ def _as_float(x):
     if f != f or f in (float("inf"), float("-inf")):
         return None
     return f
+
+
+
+def _row_value(frame, labels, col_index=0):
+    if frame is None or getattr(frame, "empty", True):
+        return None
+    for label in labels:
+        if label in frame.index:
+            try:
+                return _as_float(frame.loc[label].iloc[col_index])
+            except Exception:
+                return None
+    return None
+
+
+def _row_series(frame, labels, limit=6):
+    if frame is None or getattr(frame, "empty", True):
+        return []
+    for label in labels:
+        if label in frame.index:
+            vals=[]
+            for c in list(frame.columns)[:limit]:
+                try:
+                    v=_as_float(frame.loc[label, c])
+                    vals.append(v)
+                except Exception:
+                    vals.append(None)
+            return vals
+    return []
 
 
 def fetch_one(ticker: str) -> RawMetrics:
@@ -144,6 +196,7 @@ def fetch_one(ticker: str) -> RawMetrics:
         m.debt_to_equity = _as_float(info.get("debtToEquity"))
         m.total_cash = _as_float(info.get("totalCash"))
         m.total_debt = _as_float(info.get("totalDebt"))
+        m.ebitda = _as_float(info.get("ebitda"))
 
         # valuation
         m.trailing_pe = _as_float(info.get("trailingPE"))
@@ -252,6 +305,95 @@ def fetch_one(ticker: str) -> RawMetrics:
                             break
             except Exception as e:
                 log.debug("%s: financials unavailable (%s)", ticker, e)
+
+            # Bank-native proxies from public financial statements. These are
+            # intentionally labelled proxies: CET1 and NPL ratios require
+            # regulatory filings and are NOT inferred from generic statements.
+            sector = (m.sector or "").lower()
+            industry = (m.industry or "").lower()
+            is_bank = "financial" in sector and any(k in industry for k in ("bank", "credit", "savings", "thrift"))
+            if is_bank:
+                try:
+                    qfin = t.quarterly_financials
+                    fin = t.financials
+                    bs = t.balance_sheet
+
+                    nii_series = _row_series(qfin, ("Net Interest Income", "Net Interest Income After Provision"), 6)
+                    if nii_series:
+                        m.net_interest_income = nii_series[0]
+                        if len(nii_series) >= 5 and nii_series[0] is not None and nii_series[4] not in (None, 0):
+                            m.net_interest_income_yoy = nii_series[0] / nii_series[4] - 1.0
+
+                    latest_revenue = _row_value(fin, ("Total Revenue", "Operating Revenue"))
+                    latest_opex = _row_value(fin, ("Operating Expense", "Total Operating Expenses", "Non Interest Expense"))
+                    if latest_revenue not in (None, 0) and latest_opex is not None:
+                        m.efficiency_ratio_proxy = abs(latest_opex) / abs(latest_revenue)
+
+                    provision = _row_value(fin, ("Provision For Loan Losses", "Provision for Credit Losses", "Credit Losses Provision"))
+                    if provision is not None:
+                        m.provision_for_credit_losses = abs(provision)
+                        if latest_revenue not in (None, 0):
+                            m.provision_to_revenue = abs(provision) / abs(latest_revenue)
+
+                    m.total_assets = _row_value(bs, ("Total Assets",))
+                    m.stockholders_equity = _row_value(bs, ("Stockholders Equity", "Total Equity Gross Minority Interest", "Common Stock Equity"))
+                    if m.total_assets not in (None, 0) and m.stockholders_equity is not None:
+                        m.equity_to_assets = m.stockholders_equity / m.total_assets
+
+                    bank_vals = [m.net_interest_income, m.net_interest_income_yoy, m.efficiency_ratio_proxy,
+                                 m.provision_to_revenue, m.equity_to_assets]
+                    m.bank_metric_coverage_pct = sum(v is not None for v in bank_vals) / len(bank_vals) * 100.0
+                except Exception as e:
+                    log.debug("%s: bank proxy metrics unavailable (%s)", ticker, e)
+
+            # REIT-native public-statement proxies. NAREIT FFO requires net income
+            # adjusted for real-estate depreciation/amortisation and gains/losses
+            # on property sales. Yahoo does not consistently expose every
+            # component, so this remains explicitly labelled an FFO proxy. AFFO,
+            # NAV and occupancy are not inferred.
+            is_reit = "real estate" in sector or "reit" in industry
+            if is_reit:
+                try:
+                    fin = t.financials
+                    cf = t.cashflow
+                    net_income = _row_value(fin, ("Net Income", "Net Income Common Stockholders"))
+                    dep_amort = _row_value(cf, (
+                        "Depreciation And Amortization",
+                        "Depreciation Amortization Depletion",
+                        "Depreciation",
+                    ))
+                    sale_adj = _row_value(cf, (
+                        "Gain Loss On Sale Of PPE",
+                        "Gain Loss On Sale Of Property Plant Equipment",
+                        "Gain Loss On Sale Of Assets",
+                    ))
+                    m.reit_depreciation_amortization = abs(dep_amort) if dep_amort is not None else None
+                    m.reit_gain_loss_sale_adjustment = sale_adj
+                    if net_income is not None and dep_amort is not None:
+                        # Cash-flow reconciliation normally reports gains as a
+                        # negative adjustment and losses as positive, matching
+                        # the FFO add-back/subtraction direction.
+                        m.reit_ffo_proxy = net_income + abs(dep_amort) + (sale_adj or 0.0)
+
+                    diluted = _row_value(fin, ("Diluted Average Shares", "Basic Average Shares"))
+                    if m.reit_ffo_proxy is not None and diluted not in (None, 0):
+                        m.reit_ffo_per_share_proxy = m.reit_ffo_proxy / diluted
+                        if m.current_price is not None and m.reit_ffo_per_share_proxy > 0:
+                            m.reit_p_ffo_proxy = m.current_price / m.reit_ffo_per_share_proxy
+
+                    dividends_paid = _row_value(cf, ("Cash Dividends Paid", "Common Stock Dividend Paid"))
+                    if m.reit_ffo_proxy not in (None, 0) and dividends_paid is not None and m.reit_ffo_proxy > 0:
+                        m.reit_ffo_payout_proxy = abs(dividends_paid) / m.reit_ffo_proxy
+
+                    if m.ebitda not in (None, 0) and m.ebitda > 0 and (m.total_debt is not None or m.total_cash is not None):
+                        net_debt = (m.total_debt or 0.0) - (m.total_cash or 0.0)
+                        m.reit_net_debt_to_ebitda = net_debt / m.ebitda
+
+                    reit_vals = [m.reit_ffo_proxy, m.reit_p_ffo_proxy, m.reit_ffo_payout_proxy,
+                                 m.reit_net_debt_to_ebitda, m.dividend_yield]
+                    m.reit_metric_coverage_pct = sum(v is not None for v in reit_vals) / len(reit_vals) * 100.0
+                except Exception as e:
+                    log.debug("%s: REIT proxy metrics unavailable (%s)", ticker, e)
 
     except Exception as e:
         m.error = str(e)

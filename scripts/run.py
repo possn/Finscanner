@@ -163,7 +163,9 @@ def main():
         "methodology_note": (
             "Composite score is an unvalidated, explainable multi-factor blend of public "
             "fundamentals. The factor mix is sector-aware: general companies, banks, REITs "
-            "and insurers use distinct proxy score packs; specialist packs explicitly omit "
+            "and insurers use distinct score packs. The REIT pack now uses statement-derived "
+            "FFO/P-FFO/payout and leverage proxies while explicitly keeping AFFO, NAV and occupancy "
+            "unavailable when specialist source data are absent. Other specialist packs omit "
             "industry-native metrics that are not yet available rather than fabricating them. "
             "Valuation context compares positive multiples with same-sector medians and also "
             "accumulates the scanner's own daily valuation observations over time. "
