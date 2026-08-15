@@ -89,6 +89,9 @@ class ScoredTicker:
     sector_ev_ebitda_median: float | None = None
     ev_ebitda_vs_sector_pct: float | None = None
     quality_value_score: float | None = None
+    score_model: str = "general"
+    score_model_note: str | None = None
+    score_dimensions: dict[str, float | None] | None = None
 
 
 def _percentile_rank(value: float | None, all_values: list[float | None], invert: bool = False) -> float | None:
@@ -124,6 +127,28 @@ def _positive_score(value: float | None) -> float | None:
     if value is None:
         return None
     return 100.0 if value > 0 else 0.0
+
+
+
+def _score_model_for(r: RawMetrics) -> str:
+    sector = (r.sector or "").lower()
+    industry = (r.industry or "").lower()
+    if "real estate" in sector or "reit" in industry:
+        return "reit"
+    if "financial" in sector:
+        if any(k in industry for k in ("bank", "credit", "savings", "thrift")):
+            return "bank"
+        if any(k in industry for k in ("insurance", "insur")):
+            return "insurance"
+    return "general"
+
+
+def _weighted(parts):
+    present = [(value, weight) for value, weight in parts if value is not None]
+    if not present:
+        return None
+    wsum = sum(weight for _, weight in present)
+    return sum(value * weight for value, weight in present) / wsum
 
 
 AI_EXPOSED_TICKERS = {
@@ -213,15 +238,68 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
 
         stability = _percentile_rank(r.beta, arr("beta"), invert=True) if r.beta is not None else None
 
-        dims = [quality, growth, balance, cashflow, value, stability]
-        weights = [0.25, 0.20, 0.20, 0.10, 0.15, 0.10]
-        present = [(d, w) for d, w in zip(dims, weights) if d is not None]
-        composite = None
-        if present:
-            wsum = sum(w for _, w in present)
-            composite = sum(d * w for d, w in present) / wsum
-            if zombie == "yes":
-                composite = min(composite, 45.0)
+        model = _score_model_for(r)
+        income = _percentile_rank(r.dividend_yield, arr("dividend_yield")) if r.dividend_yield is not None else None
+
+        # Sector-aware score packs. These deliberately use only metrics that are
+        # economically meaningful for the business model. Specialist packs are
+        # marked as proxy models until regulatory / FFO-AFFO datasets are added.
+        if model == "bank":
+            bank_quality = _avg([
+                _percentile_rank(r.roe, arr("roe")),
+                _percentile_rank(r.roa, arr("roa")),
+                _percentile_rank(r.profit_margin, arr("profit_margin")),
+            ])
+            bank_value = _avg([
+                _percentile_rank(r.price_to_book, arr("price_to_book"), invert=True) if r.price_to_book and r.price_to_book > 0 else None,
+                _percentile_rank(r.trailing_pe, arr("trailing_pe"), invert=True) if r.trailing_pe and r.trailing_pe > 0 else None,
+                _percentile_rank(r.forward_pe, arr("forward_pe"), invert=True) if r.forward_pe and r.forward_pe > 0 else None,
+            ])
+            composite = _weighted([(bank_quality,.30),(growth,.20),(bank_value,.25),(income,.10),(stability,.15)])
+            quality = bank_quality
+            value = bank_value
+            score_dimensions = {"Bank Quality": bank_quality, "Growth": growth, "Valuation": bank_value, "Income": income, "Stability": stability}
+            model_note = "Bank proxy model: ROE/ROA, growth, P/B-P/E valuation, income and stability. CET1, NPL, charge-offs and efficiency ratio are not yet in the dataset."
+        elif model == "reit":
+            reit_quality = _avg([
+                _percentile_rank(r.roe, arr("roe")),
+                _percentile_rank(r.roa, arr("roa")),
+                _percentile_rank(r.profit_margin, arr("profit_margin")),
+            ])
+            reit_balance = _avg([
+                _percentile_rank(r.debt_to_equity, arr("debt_to_equity"), invert=True),
+                coverage_pct,
+            ])
+            reit_value = _avg([
+                _percentile_rank(r.price_to_book, arr("price_to_book"), invert=True) if r.price_to_book and r.price_to_book > 0 else None,
+                _percentile_rank(r.forward_pe, arr("forward_pe"), invert=True) if r.forward_pe and r.forward_pe > 0 else None,
+            ])
+            composite = _weighted([(reit_quality,.20),(growth,.20),(reit_balance,.20),(reit_value,.20),(income,.15),(stability,.05)])
+            quality, balance, value = reit_quality, reit_balance, reit_value
+            score_dimensions = {"REIT Quality": reit_quality, "Growth": growth, "Balance": reit_balance, "Valuation": reit_value, "Income": income, "Stability": stability}
+            model_note = "REIT proxy model: profitability, growth, leverage, valuation and income. FFO/AFFO, NAV and occupancy are not yet in the dataset."
+        elif model == "insurance":
+            ins_quality = _avg([
+                _percentile_rank(r.roe, arr("roe")),
+                _percentile_rank(r.roa, arr("roa")),
+                _percentile_rank(r.profit_margin, arr("profit_margin")),
+            ])
+            ins_balance = _percentile_rank(r.debt_to_equity, arr("debt_to_equity"), invert=True)
+            ins_value = _avg([
+                _percentile_rank(r.price_to_book, arr("price_to_book"), invert=True) if r.price_to_book and r.price_to_book > 0 else None,
+                _percentile_rank(r.trailing_pe, arr("trailing_pe"), invert=True) if r.trailing_pe and r.trailing_pe > 0 else None,
+            ])
+            composite = _weighted([(ins_quality,.30),(growth,.15),(ins_balance,.15),(ins_value,.20),(income,.10),(stability,.10)])
+            quality, balance, value = ins_quality, ins_balance, ins_value
+            score_dimensions = {"Insurance Quality": ins_quality, "Growth": growth, "Balance": ins_balance, "Valuation": ins_value, "Income": income, "Stability": stability}
+            model_note = "Insurance proxy model: profitability, growth, leverage, P/B-P/E valuation, income and stability. Combined ratio and solvency capital are not yet in the dataset."
+        else:
+            composite = _weighted([(quality,.25),(growth,.20),(balance,.20),(cashflow,.10),(value,.15),(stability,.10)])
+            score_dimensions = {"Quality": quality, "Growth": growth, "Balance": balance, "Cash Flow": cashflow, "Valuation": value, "Stability": stability}
+            model_note = "General company model: quality, growth, balance sheet, cash flow, valuation and stability."
+
+        if composite is not None and zombie == "yes" and model not in ("bank", "insurance"):
+            composite = min(composite, 45.0)
 
         metric_values = [
             r.roe, r.roa, r.profit_margin, r.operating_margin, r.gross_margin,
@@ -232,6 +310,8 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
         ]
         metric_coverage = sum(v is not None for v in metric_values) / len(metric_values) * 100
         confidence = "high" if metric_coverage >= 70 else "medium" if metric_coverage >= 40 else "low"
+        if model in ("bank", "reit", "insurance") and confidence == "high":
+            confidence = "medium"
 
         # Peer-relative valuation context. We deliberately compare within sector,
         # not across the full market, because structurally different sectors trade
@@ -282,6 +362,8 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             sector_ev_ebitda_median=round(sector_ev, 2) if sector_ev is not None else None,
             ev_ebitda_vs_sector_pct=round(_relative_pct(r.enterprise_to_ebitda, sector_ev), 1) if _relative_pct(r.enterprise_to_ebitda, sector_ev) is not None else None,
             quality_value_score=round(quality_value, 1) if quality_value is not None else None,
+            score_model=model, score_model_note=model_note,
+            score_dimensions={k: (round(v,1) if v is not None else None) for k,v in score_dimensions.items()},
         ))
 
     for r in etfs:

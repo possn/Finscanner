@@ -162,7 +162,9 @@ def main():
         "category_benchmarks": CATEGORY_BENCHMARKS,
         "methodology_note": (
             "Composite score is an unvalidated, explainable multi-factor blend of public "
-            "fundamentals (quality, growth, balance sheet, cash flow, valuation and stability). "
+            "fundamentals. The factor mix is sector-aware: general companies, banks, REITs "
+            "and insurers use distinct proxy score packs; specialist packs explicitly omit "
+            "industry-native metrics that are not yet available rather than fabricating them. "
             "Valuation context compares positive multiples with same-sector medians and also "
             "accumulates the scanner's own daily valuation observations over time. "
             "Not investment advice. See scripts/score.py for the exact "
