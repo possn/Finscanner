@@ -18,6 +18,7 @@
     detailClose: document.getElementById("detail-close"),
     viewTitle: document.getElementById("view-title"),
     viewSub: document.getElementById("view-sub"),
+    metalsDashboard: document.getElementById("metals-dashboard"),
     metalsList: document.getElementById("metals-list"),
     metalsNote: document.getElementById("metals-note"),
     portfolioList: document.getElementById("portfolio-list"),
@@ -417,69 +418,157 @@
     catch (e) { state.thesisHistory = {}; console.warn("thesis_history.json unavailable yet", e); }
   }
 
+  function fmtSigned(v, digits=1) {
+    if (v == null || !Number.isFinite(Number(v))) return "—";
+    const n = Number(v);
+    return `${n >= 0 ? "+" : ""}${n.toFixed(digits)}%`;
+  }
+
+  function metalInstrument(ticker) {
+    return state.metals?.instruments?.find(i => i.ticker === ticker) || null;
+  }
+
+  function ratioValue(aTicker, bTicker) {
+    const a = metalInstrument(aTicker)?.data?.price;
+    const b = metalInstrument(bTicker)?.data?.price;
+    return Number.isFinite(Number(a)) && Number.isFinite(Number(b)) && Number(b) !== 0 ? Number(a) / Number(b) : null;
+  }
+
+  function relativeSignal(value, low, high, lowLabel, fairLabel, highLabel) {
+    if (!Number.isFinite(Number(value))) return { label: "sem dados", cls: "neutral" };
+    if (value < low) return { label: lowLabel, cls: "good" };
+    if (value > high) return { label: highLabel, cls: "weak" };
+    return { label: fairLabel, cls: "neutral" };
+  }
+
   function renderMetals() {
     if (!state.metals || !state.metals.instruments || !state.metals.instruments.length) {
-      els.metalsList.innerHTML = `<p class="empty-state">Sem dados de metais ainda. Corre o pipeline.</p>`;
+      if (els.metalsDashboard) els.metalsDashboard.innerHTML = `<p class="empty-state">Sem dados de metais ainda. Corre o pipeline.</p>`;
+      els.metalsList.innerHTML = "";
       els.metalsNote.textContent = "";
       return;
     }
+    const gold = metalInstrument("GC=F");
+    const silver = metalInstrument("SI=F");
+    const platinum = metalInstrument("PL=F");
+    const palladium = metalInstrument("PA=F");
+    const gsr = ratioValue("GC=F", "SI=F");
+    const gpr = ratioValue("GC=F", "PL=F");
+    const gpdr = ratioValue("GC=F", "PA=F");
+    const gsrSig = relativeSignal(gsr, 55, 85, "prata relativamente cara", "faixa intermédia", "prata relativamente barata");
+    const gprSig = relativeSignal(gpr, 1.4, 2.6, "platina relativamente cara", "faixa intermédia", "platina relativamente barata");
+    const gpdrSig = relativeSignal(gpdr, 1.2, 3.2, "paládio relativamente caro", "faixa intermédia", "paládio relativamente barato");
+
+    const physical = state.metals.physical || {};
+    const comexGold = physical.comex?.gold || {};
+    const comexSilver = physical.comex?.silver || {};
+    const cotGold = physical.positioning?.gold || {};
+    const sgeGold = physical.shanghai?.gold_benchmark || {};
+    const centralBanks = physical.central_banks || {};
+    const ways = state.metals.ways_to_play || {};
+    const pills = (ways.own_metal || []).map(x => `<button class="metal-pill" data-open-stock="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join("");
+    const minerPills = (ways.miners || []).map(x => `<button class="metal-pill" data-open-stock="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join("");
+    const royaltyPills = (ways.royalty_streaming || []).map(x => `<button class="metal-pill" data-open-stock="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join("");
+
+    if (els.metalsDashboard) els.metalsDashboard.innerHTML = `
+      ${gold?.data ? `<section class="metal-primary-card">
+        <div class="metal-primary-head"><div><span class="eyebrow">GOLD · FUTURES</span><h3>Ouro <small>${escapeHtml(gold.unit)}</small></h3></div><span class="metal-live-badge">${fmtSigned(gold.data.day_change_pct)}</span></div>
+        <div class="metal-primary-price">${Number(gold.data.price).toLocaleString("pt-PT", {maximumFractionDigits:2})}</div>
+        <div class="metal-primary-facts">
+          <span><strong>${fmtSigned(gold.data.change_1y_pct)}</strong> em 12 meses</span>
+          <span><strong>${fmtSigned(gold.data.vs_200d_pct)}</strong> vs média 200d</span>
+          <span><strong>${gold.data.position_52w_pct != null ? Math.round(gold.data.position_52w_pct) + "%" : "—"}</strong> da faixa 52s</span>
+        </div>
+        <div class="range-track"><span style="width:${Math.max(0,Math.min(100,Number(gold.data.position_52w_pct)||0))}%"></span></div>
+        <div class="range-labels"><span>mínimo 52s</span><span>máximo 52s</span></div>
+      </section>` : ""}
+
+      <section class="metals-section-block">
+        <div class="section-heading compact"><div><span class="eyebrow">THE THREE FORCES</span><h3>O que está a mover o metal</h3></div></div>
+        <div class="force-grid">
+          <article class="force-card"><span>TENDÊNCIA</span><strong>${gold?.data?.vs_200d_pct != null ? (gold.data.vs_200d_pct >= 0 ? "Acima" : "Abaixo") + " da média 200d" : "—"}</strong><small>${fmtSigned(gold?.data?.vs_200d_pct)} vs tendência longa</small></article>
+          <article class="force-card"><span>VOLATILIDADE</span><strong>${gold?.data?.volatility_annualized_pct != null ? gold.data.volatility_annualized_pct.toFixed(1) + "%" : "—"}</strong><small>volatilidade anualizada</small></article>
+          <article class="force-card force-card--locked"><span>MERCADO FÍSICO</span><strong>Fonte não ligada</strong><small>inventários, deliveries e positioning não são inferidos</small></article>
+        </div>
+      </section>
+
+      <section class="metals-section-block physical-intelligence">
+        <div class="section-heading compact"><div><span class="eyebrow">PHYSICAL & POSITIONING</span><h3>O que o preço não mostra</h3></div></div>
+        <div class="physical-grid">
+          <article class="physical-card">
+            <div class="physical-card-head"><span>CFTC · MANAGED MONEY</span><span class="source-state ${cotGold.status === "ok" ? "ok" : "off"}">${cotGold.status === "ok" ? "oficial" : "indisponível"}</span></div>
+            ${cotGold.status === "ok" ? `<div class="positioning-gauge"><span style="--gauge:${Math.max(0,Math.min(100,Number(cotGold.display_gauge_0_100)||0))}%"></span></div><strong class="physical-big">${Number(cotGold.managed_money_net_pct_oi).toFixed(1)}% <small>net / OI</small></strong><p>${escapeHtml(cotGold.label || "")}</p><small>Δ semanal líquido: ${Number(cotGold.weekly_change_net || 0).toLocaleString("pt-PT")} contratos · ${escapeHtml(cotGold.report_date || "")}</small>` : `<strong class="physical-big">—</strong><p>O pipeline tenta a publicação semanal oficial da CFTC. Não é inferido a partir do preço.</p>`}
+          </article>
+          <article class="physical-card">
+            <div class="physical-card-head"><span>COMEX · GOLD STOCKS</span><span class="source-state ${comexGold.status === "ok" ? "ok" : "off"}">${comexGold.status === "ok" ? "CME" : "indisponível"}</span></div>
+            ${comexGold.status === "ok" ? `<strong class="physical-big">${(Number(comexGold.registered_oz || 0)/1e6).toFixed(2)} <small>Moz registered</small></strong><div class="physical-split"><span>Eligible <b>${(Number(comexGold.eligible_oz || 0)/1e6).toFixed(2)} Moz</b></span><span>Total <b>${(Number(comexGold.total_oz || 0)/1e6).toFixed(2)} Moz</b></span></div>` : `<strong class="physical-big">—</strong><p>Inventário registered/eligible só aparece quando o XLS oficial da CME é lido com sucesso.</p>`}
+          </article>
+          <article class="physical-card">
+            <div class="physical-card-head"><span>SHANGHAI BENCHMARK</span><span class="source-state ${sgeGold.status === "ok" ? "ok" : "off"}">${sgeGold.status === "ok" ? "SGE" : "indisponível"}</span></div>
+            ${sgeGold.status === "ok" ? `<strong class="physical-big">¥${Number(sgeGold.benchmark_cny_per_g).toFixed(2)} <small>/g</small></strong>${sgeGold.premium_vs_comex_front_pct != null ? `<p class="${Number(sgeGold.premium_vs_comex_front_pct)>=0 ? "good" : "weak"}">${fmtSigned(sgeGold.premium_vs_comex_front_pct)} vs COMEX front-month</p>` : ""}<small>${escapeHtml(sgeGold.trade_date || "")} · proxy cross-market, não Shanghai-London spot premium</small>` : `<strong class="physical-big">—</strong><p>Benchmark oficial SGE. Sem valor se a página não puder ser processada no workflow.</p>`}
+          </article>
+          <article class="physical-card">
+            <div class="physical-card-head"><span>CENTRAL BANKS</span><span class="source-state ${centralBanks.status === "ok" ? "ok" : "off"}">${centralBanks.status === "ok" ? "WGC/IMF" : "indisponível"}</span></div>
+            ${centralBanks.status === "ok" && (centralBanks.buyers || []).length ? `<strong class="physical-big">${escapeHtml(centralBanks.buyers[0].country)} <small>${fmtSigned(centralBanks.buyers[0].tonnes,1)}t</small></strong><p>Maior comprador no período disponível</p><div class="flow-mini">${(centralBanks.buyers || []).slice(0,3).map(x=>`<span>↑ ${escapeHtml(x.country)} <b>${fmtSigned(x.tonnes,1)}t</b></span>`).join("")}${(centralBanks.sellers || []).slice(0,2).map(x=>`<span class="weak">↓ ${escapeHtml(x.country)} <b>${fmtSigned(x.tonnes,1)}t</b></span>`).join("")}</div>` : `<strong class="physical-big">—</strong><p>O workbook público do WGC pode exigir sessão/login. Se bloquear, o Finscanner não inventa fluxos.</p>`}
+          </article>
+        </div>
+        ${comexSilver.status === "ok" ? `<div class="silver-strip"><span>COMEX SILVER</span><strong>${(Number(comexSilver.registered_oz || 0)/1e6).toFixed(1)} Moz registered</strong><small>${(Number(comexSilver.eligible_oz || 0)/1e6).toFixed(1)} Moz eligible</small></div>` : ""}
+        <p class="method-note">CFTC: posições semanais reportadas; CME: stocks dos depositários; SGE: benchmark oficial. O gauge é uma visualização do net managed-money como % do open interest — não é um score preditivo.</p>
+      </section>
+
+      <section class="metals-section-block">
+        <div class="section-heading compact"><div><span class="eyebrow">KEY RATIOS</span><h3>Valor relativo</h3></div></div>
+        <div class="ratio-grid">
+          <article><span>GOLD / SILVER</span><strong>${gsr ? gsr.toFixed(1)+":1" : "—"}</strong><small class="${gsrSig.cls}">${gsrSig.label}</small></article>
+          <article><span>GOLD / PLATINUM</span><strong>${gpr ? gpr.toFixed(2)+":1" : "—"}</strong><small class="${gprSig.cls}">${gprSig.label}</small></article>
+          <article><span>GOLD / PALLADIUM</span><strong>${gpdr ? gpdr.toFixed(2)+":1" : "—"}</strong><small class="${gpdrSig.cls}">${gpdrSig.label}</small></article>
+        </div>
+        <p class="method-note">Os rótulos são heurísticas de valor relativo, não “fair value”. Servem para contexto; não são sinais de compra/venda.</p>
+      </section>
+
+      <section class="metals-section-block ways-card">
+        <div class="section-heading compact"><div><span class="eyebrow">WAYS TO PLAY</span><h3>Formas de obter exposição</h3></div></div>
+        <div class="ways-row"><strong>Metal / ETFs</strong><div>${pills || "—"}</div></div>
+        <div class="ways-row"><strong>Mineradoras</strong><div>${minerPills || "—"}</div></div>
+        <div class="ways-row"><strong>Royalty & streaming</strong><div>${royaltyPills || "—"}</div></div>
+      </section>
+    `;
+    els.metalsDashboard?.querySelectorAll("[data-open-stock]").forEach(btn => btn.addEventListener("click", () => {
+      const ticker = btn.dataset.openStock;
+      const row = state.data?.stocks?.find(x => x.ticker === ticker);
+      if (row) openDetail(row);
+      else { state.activeView = "stocks"; switchView("stocks"); if (els.search) { els.search.value = ticker; applyFilters(); } }
+    }));
+
     els.metalsNote.textContent = state.metals.note || "";
     els.metalsList.innerHTML = state.metals.instruments.map(metalCardHtml).join("");
-    els.metalsList.querySelectorAll(".metal-card[data-ticker]").forEach(card => {
-      card.addEventListener("click", () => openMetalDetail(card.dataset.ticker));
-    });
+    els.metalsList.querySelectorAll(".metal-card[data-ticker]").forEach(card => card.addEventListener("click", () => openMetalDetail(card.dataset.ticker)));
   }
 
   function metalCardHtml(inst) {
     const d = inst.data;
-    if (!d) {
-      return `
-        <div class="metal-card">
-          <div class="metal-head"><span class="metal-label">${inst.label}</span></div>
-          <p class="empty-state" style="padding:0.5rem 0;">sem dados</p>
-        </div>`;
-    }
+    if (!d) return `<div class="metal-card"><div class="metal-head"><span class="metal-label">${inst.label}</span></div><p class="empty-state" style="padding:0.5rem 0;">sem dados</p></div>`;
     const changeClass = d.day_change_pct == null ? "" : d.day_change_pct >= 0 ? "up" : "down";
-    const changeSign = d.day_change_pct == null ? "" : d.day_change_pct >= 0 ? "+" : "";
-    return `
-      <div class="metal-card" data-ticker="${escapeHtml(inst.ticker)}" tabindex="0" role="button">
-        <div class="metal-head">
-          <span class="metal-label">${inst.label}</span>
-          <span>
-            <span class="metal-price">${d.price} <span style="font-size:0.65rem;color:var(--ink-muted);">${inst.unit}</span></span>
-            <span class="metal-change ${changeClass}">${changeSign}${d.day_change_pct ?? "—"}%</span>
-          </span>
-        </div>
-        <div class="metal-meta">
-          <span>90d: ${d.range_90d_low}–${d.range_90d_high}</span>
-          <span>vol. anualizada: ${d.volatility_annualized_pct ?? "—"}%</span>
-        </div>
-        ${inst.kind === "etf_proxy" ? `<span class="metal-proxy-tag">proxy ETF, não é preço spot</span>` : ""}
-        <span class="metal-expand-hint">toca para mais detalhe →</span>
-      </div>`;
+    return `<div class="metal-card" data-ticker="${escapeHtml(inst.ticker)}" tabindex="0" role="button">
+      <div class="metal-head"><span class="metal-label">${inst.label}</span><span><span class="metal-price">${d.price} <span class="metal-unit">${inst.unit}</span></span><span class="metal-change ${changeClass}">${fmtSigned(d.day_change_pct,2)}</span></span></div>
+      <div class="metal-meta"><span>12m ${fmtSigned(d.change_1y_pct)}</span><span>vs 200d ${fmtSigned(d.vs_200d_pct)}</span><span>vol ${d.volatility_annualized_pct ?? "—"}%</span></div>
+      ${inst.kind === "etf_proxy" ? `<span class="metal-proxy-tag">proxy ETF, não é preço spot</span>` : ""}<span class="metal-expand-hint">ver detalhe →</span>
+    </div>`;
   }
 
   function openMetalDetail(ticker) {
     const inst = state.metals?.instruments?.find(i => i.ticker === ticker);
     if (!inst || !inst.data) return;
     const d = inst.data;
-    const yChange = (v, label) => v != null
-      ? `<div class="detail-row"><span>${label}</span><span>${v >= 0 ? "+" : ""}${v}%</span></div>` : "";
-
-    els.detailContent.innerHTML = `
-      <h2 style="font-family:var(--font-display, inherit);margin:0 0 0.9rem;">${inst.label}</h2>
-      <div class="detail-row"><span>Preço</span><span>${d.price} ${inst.unit}</span></div>
-      <div class="detail-row"><span>Variação diária</span><span>${d.day_change_pct != null ? (d.day_change_pct >= 0 ? "+" : "") + d.day_change_pct + "%" : "—"}</span></div>
-      ${yChange(d.change_ytd_pct, "Variação no ano (YTD)")}
-      ${yChange(d.change_1y_pct, "Variação em 12 meses")}
-      <div class="detail-row"><span>Intervalo 90 dias</span><span>${d.range_90d_low}–${d.range_90d_high}</span></div>
-      ${d.range_1y_low != null && d.range_1y_high != null ? `<div class="detail-row"><span>Intervalo 12 meses</span><span>${d.range_1y_low}–${d.range_1y_high}</span></div>` : ""}
-      <div class="detail-row"><span>Volatilidade anualizada</span><span>${d.volatility_annualized_pct ?? "—"}%</span></div>
-      ${inst.kind === "etf_proxy" ? `<p class="detail-note">Proxy via ETF de mineradoras — não é o preço spot do metal. Não existe fonte gratuita de preço spot de urânio.</p>` : ""}
-      ${inst.context ? `<p class="detail-note" style="margin-top:0.9rem;">${escapeHtml(inst.context)}</p>` : ""}
-      ${inst.context_links ? `<div class="news-actions" style="margin-top:0.6rem;">${inst.context_links.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>`).join("")}</div>` : ""}
-      <p class="detail-note" style="margin-top:0.9rem;">Preço de futuros (não spot). Sem indicador de stress de mercado calculado — exigiria dados de inventário/lease rates que não estão disponíveis gratuitamente.</p>
-    `;
+    const yChange = (v, label) => v != null ? `<div class="detail-row"><span>${label}</span><span>${fmtSigned(v)}</span></div>` : "";
+    els.detailContent.innerHTML = `<h2 style="font-family:var(--font-display, inherit);margin:0 0 0.9rem;">${inst.label}</h2>
+      <div class="detail-row"><span>Preço</span><span>${d.price} ${inst.unit}</span></div><div class="detail-row"><span>Variação diária</span><span>${fmtSigned(d.day_change_pct,2)}</span></div>
+      ${yChange(d.change_ytd_pct,"Variação no ano (YTD)")}${yChange(d.change_1y_pct,"Variação em 12 meses")}${yChange(d.vs_200d_pct,"Distância da média 200d")}
+      <div class="detail-row"><span>Posição na faixa 52 semanas</span><span>${d.position_52w_pct != null ? Math.round(d.position_52w_pct)+"%" : "—"}</span></div>
+      <div class="detail-row"><span>Intervalo 12 meses</span><span>${d.range_1y_low}–${d.range_1y_high}</span></div><div class="detail-row"><span>Volatilidade anualizada</span><span>${d.volatility_annualized_pct ?? "—"}%</span></div>
+      ${inst.kind === "etf_proxy" ? `<p class="detail-note">Proxy via ETF — não é o preço spot do metal.</p>` : ""}${inst.context ? `<p class="detail-note">${escapeHtml(inst.context)}</p>` : ""}
+      ${inst.context_links ? `<div class="news-actions">${inst.context_links.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>`).join("")}</div>` : ""}
+      <p class="detail-note">Não são apresentados inventários COMEX, deliveries, Shanghai premium ou positioning sem uma fonte de dados efetivamente ligada ao pipeline.</p>`;
     els.detail.hidden = false;
   }
 
@@ -731,7 +820,7 @@
     const model = scoreModelFor(r);
     if (model === "bank") return [["Bank Quality", r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
     if (model === "reit") return [["REIT Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Leverage",r.balance_pct ?? r.leverage_pct],["P/FFO Value",r.value_pct],["Distribution",null],["Stability",r.stability_pct]];
-    if (model === "insurance") return [["Insurance Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
+    if (model === "insurance") return [["Insurance Quality",r.quality_pct ?? r.profitability_pct],["Underwriting Proxy",null],["Capital Proxy",r.balance_pct ?? r.leverage_pct],["Growth",r.growth_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
     return [["Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Cash Flow",r.cashflow_pct],["Valuation",r.value_pct],["Stability",r.stability_pct]];
   }
 
@@ -833,9 +922,20 @@
       cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:ffoPayout == null ? "payout FFO indisponível" : `FFO payout ${fmtRawPct(ffoPayout)}`, explanation:"Rendimento distribuído contextualizado pelo payout sobre FFO proxy, quando disponível.", tone:pctTone(r.dividend_yield)}));
       cards.push(metricCardHtml({title:"AFFO · NAV · Occupancy", value:"—", subtitle:reitCoverage == null ? "fontes especializadas não integradas" : `${Number(reitCoverage).toFixed(0)}% cobertura do REIT Native Pack`, explanation:"AFFO, NAV e ocupação exigem dados específicos do REIT e continuam deliberadamente ausentes. A app não os inventa nem transforma capex total em AFFO.", tone:"neutral", badge:"DATA INTEGRITY"}));
     } else if (insurance) {
-      cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle:scoreWord(r.quality_pct), explanation:"Rentabilidade do capital próprio; deve ser lida com solvência e qualidade da subscrição.", tone:scoreTone(r.quality_pct)}));
-      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "sem benchmark" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"P/B é uma referência útil para seguradoras, em conjunto com ROE e qualidade do capital.", tone:r.pb_vs_sector_pct == null ? "neutral" : Number(r.pb_vs_sector_pct) < 0 ? "positive" : "neutral"}));
-      cards.push(metricCardHtml({title:"Combined Ratio & Solvency", value:"—", subtitle:"dados especializados ainda não integrados", explanation:"Combined ratio e solvency capital são métricas essenciais para seguradoras e não são inferidas a partir de dados genéricos.", tone:"neutral", badge:"INSURANCE PACK"}));
+      const claims = r.insurance_claims_to_revenue;
+      const opRatio = r.insurance_operating_ratio_proxy;
+      const capProxy = r.insurance_equity_to_assets;
+      const bvps = r.insurance_book_value_per_share_proxy;
+      const invIncome = r.insurance_net_investment_income;
+      const insCoverage = r.insurance_metric_coverage_pct;
+      cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle:scoreWord(r.quality_pct), explanation:"Rentabilidade do capital próprio; deve ser lida com capitalização, qualidade da subscrição e mix de negócio.", tone:scoreTone(r.quality_pct)}));
+      cards.push(metricCardHtml({title:"Claims / Revenue · proxy", value:fmtRawPct(claims), subtitle:claims == null ? "sem dados" : "carga de sinistros/benefícios", explanation:"Sinistros ou benefícios identificados nas demonstrações divididos pela receita. É um proxy transversal e não substitui o loss ratio reportado.", tone:claims == null ? "neutral" : Number(claims) < .65 ? "positive" : Number(claims) > .85 ? "negative" : "neutral", badge:"INSURANCE NATIVE"}));
+      cards.push(metricCardHtml({title:"Insurance Operating Ratio · proxy", value:fmtRawPct(opRatio), subtitle:opRatio == null ? "sem dados" : "sinistros + custos / receita", explanation:"Proxy amplo da carga operacional. Não é o combined ratio estatutário: fontes genéricas não separam de forma consistente prémios ganhos, sinistros e acquisition costs.", tone:opRatio == null ? "neutral" : Number(opRatio) < .90 ? "positive" : Number(opRatio) > 1.05 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"Equity / Assets · capital proxy", value:fmtRawPct(capProxy), subtitle:"capitalização contabilística", explanation:"Capital próprio sobre ativos. Ajuda a comparar colchões contabilísticos, mas não substitui Solvency II, RBC ou outros rácios regulatórios.", tone:capProxy == null ? "neutral" : Number(capProxy) >= .10 ? "positive" : Number(capProxy) < .05 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"Book Value / Share · proxy", value:bvps == null ? "—" : fmtMoney(bvps, r.currency), subtitle:"equity / ações diluídas", explanation:"Valor contabilístico por ação calculado a partir das demonstrações. Deve ser lido em conjunto com P/B e ROE.", tone:"neutral"}));
+      cards.push(metricCardHtml({title:"Net Investment Income", value:fmtMoney(invIncome, r.currency), subtitle:invIncome == null ? "sem dados" : "rendimento da carteira de investimentos", explanation:"Quando disponível, mostra a contribuição do portefólio financeiro para os resultados da seguradora.", tone:invIncome == null ? "neutral" : Number(invIncome) > 0 ? "positive" : "negative"}));
+      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "sem benchmark" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"P/B é especialmente relevante em seguradoras quando interpretado com ROE, crescimento do book value e qualidade da subscrição.", tone:r.pb_vs_sector_pct == null ? "neutral" : Number(r.pb_vs_sector_pct) < 0 ? "positive" : "neutral"}));
+      cards.push(metricCardHtml({title:"Regulatory data gap", value:insCoverage == null ? "—" : `${Number(insCoverage).toFixed(0)}%`, subtitle:"cobertura do Insurance Native Pack", explanation:"Combined ratio reportado, loss ratio estatutário e solvência regulatória continuam ausentes quando não existem em fonte pública estruturada. A app não os fabrica.", tone:"neutral", badge:"DATA INTEGRITY"}));
     } else {
       cards.push(metricCardHtml({title:"Gross Margin", value:fmtRawPct(r.gross_margin), subtitle:scoreWord(r.profitability_pct), explanation:"Quanto da receita sobra depois do custo direto dos produtos/serviços.", tone:scoreTone(r.profitability_pct)}));
       cards.push(metricCardHtml({title:"Operating Margin", value:fmtRawPct(r.operating_margin), subtitle:r.net_margin_yoy_change_pp == null ? "margem operacional" : `${Number(r.net_margin_yoy_change_pp)>=0?'+':''}${Number(r.net_margin_yoy_change_pp).toFixed(1)} pp na margem líquida YoY`, explanation:"Eficiência operacional antes de juros e impostos.", tone:scoreTone(r.profitability_pct)}));
@@ -895,7 +995,7 @@
         <div class="detail-score ${verdict.cls}"><strong>${r.score ?? "—"}</strong><span>${verdict.label}</span></div>
       </div>
       <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
-      <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário nativo: acrescenta eficiência, provisões de crédito, capital contabilístico e crescimento do net interest income; CET1/NPL continuam dependentes de fonte regulatória." : scoreModelFor(r) === "reit" ? "Modelo REIT nativo por proxy: FFO, P/FFO, payout FFO e net-debt/EBITDA entram no score; AFFO, NAV e ocupação continuam dependentes de fontes especializadas." : scoreModelFor(r) === "insurance" ? "Modelo de seguradora provisório: combined ratio e solvência ainda não estão integrados." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
+      <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário nativo: acrescenta eficiência, provisões de crédito, capital contabilístico e crescimento do net interest income; CET1/NPL continuam dependentes de fonte regulatória." : scoreModelFor(r) === "reit" ? "Modelo REIT nativo por proxy: FFO, P/FFO, payout FFO e net-debt/EBITDA entram no score; AFFO, NAV e ocupação continuam dependentes de fontes especializadas." : scoreModelFor(r) === "insurance" ? "Modelo Insurance Native por proxy: qualidade, sinistros/custos, capitalização, valuation e rendimento. Combined ratio e solvência regulatória só aparecem quando houver fonte estruturada fiável." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
       <h3 class="dossier-title">Tese quantitativa</h3>
       ${thesisPanelHtml(r)}
       <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
@@ -1696,7 +1796,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.16.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.17.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

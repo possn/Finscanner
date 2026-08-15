@@ -147,3 +147,12 @@ Para maior conformidade com a política de fair access da SEC, cria no repositó
 - Handles LSE pence quotes (`GBp`/`GBX`) correctly as 1/100 GBP.
 - Portfolio summary now includes value-weighted score, Growth/Quality/Zombie exposure and strengthening/weakening thesis exposure.
 - The simple unweighted figures remain visible for comparison.
+
+## v0.17.0 — Insurance Native Pack
+
+Insurance companies now use a dedicated statement-derived metric pack instead of the provisional generic financial-sector model. The pipeline attempts to extract net investment income, claims/benefits, a broad claims-to-revenue proxy, an insurance operating-ratio proxy, accounting capitalisation (equity/assets), and book value per share. These metrics are peer-ranked only against other insurers and feed the insurance score dimensions.
+
+Data-integrity boundary: the operating ratio is **not** presented as a statutory combined ratio, and equity/assets is **not** presented as Solvency II/RBC capital. Those regulatory metrics remain unavailable until a reliable structured source is integrated.
+
+## v0.19.0 — Physical Metals Intelligence
+The Metals dashboard now consumes official/public physical-market sources where automation is feasible: CME COMEX warehouse stock reports, CFTC weekly Disaggregated COT positioning, and the Shanghai Gold Exchange benchmark. A World Gold Council central-bank-flow adapter is included but deliberately fails closed if the public workbook requires a logged-in session. Physical data blocks carry source/status metadata; the app does not fabricate delivery coverage, paper/physical leverage, or institutional-positioning scores from price data.
