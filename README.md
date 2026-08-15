@@ -1,3 +1,7 @@
+# Finscanner v0.32.0 — Portfolio Action Layer
+
+Esta release transforma a análise estrutural do portfolio numa camada de prioridades de revisão. O motor cruza peso económico, concentração setorial, clusters de ETFs, teses a piorar e exposição zombie para ordenar onde uma revisão pode ter maior impacto. Não executa ordens nem apresenta as prioridades como recomendações automáticas de compra/venda.
+
 # Finscanner v0.23.0 — Fund Holdings Intelligence
 
 This release deepens the Funds experience with Yahoo/yfinance FundsData metadata, a fund-specific dossier, observed top-holdings overlap, asset/sector mix, AUM/family/category metadata, and a more defensible Fee Saver. Overlap is explicitly a lower bound over the holdings returned by the source, never presented as full-portfolio overlap unless full holdings are available.
@@ -207,3 +211,23 @@ A carteira passa a ser analisada economicamente, combinando posições diretas c
 A análise é deliberadamente conservadora: holdings de ETF que a fonte não devolve não são inventadas. Por isso, as métricas de concentração e hidden overlap devem ser lidas como a parte observável da estrutura, com cobertura explicitamente indicada.
 
 Foi também acrescentado o filtro **Ações** ao Portfolio Radar, mantendo Growth, Quality, Value, Zombies, ETFs e direção das teses.
+
+## v0.29.0 — Concentration & Risk Intelligence
+
+Portfolio Structure Intelligence now adds an explainable concentration layer across observed economic exposures. It surfaces single-name, sector, geography, trading-currency and thematic concentration, plus a compact factor/thesis strip. ETF sector look-through is used only when sector weights are available. Trading currency is explicitly not presented as true underlying FX exposure. The concentration score is structural and descriptive; it is not a volatility or loss forecast.
+
+
+## v0.29.0 — Portfolio Risk Map
+Portfolio Intelligence now identifies cross-dimensional concentrations such as geography × sector and sector × theme. Direct-equity intersections are observed; ETF intersections are conservative proxies based only on source-provided sector weights/metadata.
+
+## v0.31.0 — Morning Metals Brief & Opportunity Repair
+
+- Home Opportunities repaired: candidates are no longer accidentally removed when `zombie` is the string `"no"`.
+- Metals uses a mobile-first Gold / Silver / Copper selector. Gold retains the full physical-intelligence stack; Silver exposes available COMEX warehouse/delivery context; Copper remains price/trend/volatility until official physical feeds are integrated.
+- `data/metals_brief.json` is generated deterministically from the daily metals payload and rendered at the bottom of Metals.
+- The GitHub Action is scheduled for **06:00 Europe/Lisbon every day**. Because GitHub cron is UTC, both 05:00 and 06:00 UTC are scheduled and a timezone gate runs only the invocation corresponding to 06:00 in Portugal, including DST changes. Manual runs bypass the gate.
+
+
+## v0.33.0 — Portfolio Rebalancing Lab
+
+Adds an interactive, non-persistent portfolio scenario lab. Select a source position, a destination (cash or another existing holding), and the percentage to move. The app recalculates observed concentration metrics without changing the saved portfolio: largest position, Top-5 concentration, dominant sector, HHI, weighted score, zombie exposure, weakening-thesis exposure, and quality exposure. The simulation keeps prices, FX rates, ETF holdings and fundamentals fixed; it is a structural what-if tool, not trade execution or investment advice.

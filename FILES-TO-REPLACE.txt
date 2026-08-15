@@ -1,15 +1,10 @@
-Finscanner v0.27.0 — ficheiros a substituir no GitHub
+Finscanner v0.33.0 — files to replace in GitHub
 
-SUBSTITUIR:
+Replace together:
 - index.html
 - app.js
 - style.css
 - sw.js
 - README.md
 
-NÃO É NECESSÁRIO ALTERAR:
-- .github/workflows/update-data.yml
-- scripts/*
-- data/*
-
-Preserva os históricos existentes em data/.
+No pipeline, workflow, or data files changed in this release. Preserve all data/*.json history files.
