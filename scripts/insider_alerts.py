@@ -31,6 +31,7 @@ from insiders import (
 ROOT = Path(__file__).resolve().parents[1]
 EXTRA_TICKERS = ROOT / "data" / "extra_tickers.json"
 ALERT_WATCHLIST = ROOT / "data" / "alert_watchlist.json"
+ALERT_CONFIG = ROOT / "data" / "insider_alert_config.json"
 STATE_PATH = ROOT / "data" / "insider_alert_state.json"
 
 LOOKBACK_DAYS = max(3, min(30, int(os.getenv("FINSCANNER_INSIDER_ALERT_LOOKBACK_DAYS", "10"))))
@@ -49,6 +50,87 @@ def _load_json(path: Path, fallback):
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return fallback
+
+
+def _load_alert_config() -> dict:
+    defaults = {
+        "alert_buys": True,
+        "alert_sells": True,
+        "min_buy_value_usd": 0,
+        "min_sell_value_usd": 100000,
+        "strong_buy_value_usd": 500000,
+        "large_sale_value_usd": 1000000,
+        "cluster_window_days": 14,
+        "reversal_window_days": 90,
+        "senior_roles": ["CEO", "Chief Executive", "CFO", "Chief Financial", "President", "Chairman", "Director"],
+    }
+    raw = _load_json(ALERT_CONFIG, {})
+    if isinstance(raw, dict):
+        defaults.update(raw)
+    return defaults
+
+
+def _event_date(value: str | None):
+    try:
+        return dt.date.fromisoformat(str(value or "")[:10])
+    except Exception:
+        return None
+
+
+def _is_senior(role: str | None, cfg: dict) -> bool:
+    text = str(role or "").lower()
+    return any(str(x).lower() in text for x in (cfg.get("senior_roles") or []))
+
+
+def _signal_for_group(ticker: str, group: dict, history: list[dict], cfg: dict) -> dict:
+    is_buy = group.get("type") == "buy"
+    value = float(group.get("value") or 0) if group.get("known_value") else 0.0
+    owner = str(group.get("owner") or "Insider")
+    role = str(group.get("role") or "")
+    today = _event_date(group.get("date")) or dt.date.today()
+
+    # Previous opposite-side action by the same insider = behavioural reversal.
+    reversal = False
+    rev_days = int(cfg.get("reversal_window_days") or 90)
+    for e in reversed(history):
+        if str(e.get("owner") or "") != owner or e.get("type") == group.get("type"):
+            continue
+        d = _event_date(e.get("date"))
+        if d and 0 <= (today-d).days <= rev_days:
+            reversal = True
+            break
+
+    # Cluster buying = at least two unique insiders buying within the configured window.
+    cluster = False
+    cluster_days = int(cfg.get("cluster_window_days") or 14)
+    if is_buy:
+        buyers = {owner}
+        for e in history:
+            if e.get("type") != "buy":
+                continue
+            d = _event_date(e.get("date"))
+            if d and 0 <= (today-d).days <= cluster_days:
+                buyers.add(str(e.get("owner") or "Insider"))
+        cluster = len(buyers) >= 2
+
+    if is_buy and cluster:
+        return {"code":"cluster_buy", "label":"CLUSTER BUYING", "priority":5, "tags":"people_holding_hands,chart_with_upwards_trend"}
+    if is_buy and _is_senior(role, cfg) and value >= float(cfg.get("strong_buy_value_usd") or 500000):
+        return {"code":"strong_buy", "label":"STRONG BUY SIGNAL", "priority":5, "tags":"large_green_circle,moneybag"}
+    if reversal and is_buy:
+        return {"code":"buy_reversal", "label":"INSIDER REVERSAL → BUY", "priority":5, "tags":"arrows_counterclockwise,chart_with_upwards_trend"}
+    if reversal and not is_buy:
+        return {"code":"sell_reversal", "label":"INSIDER REVERSAL → SELL", "priority":4, "tags":"arrows_counterclockwise,warning"}
+    if (not is_buy) and value >= float(cfg.get("large_sale_value_usd") or 1000000):
+        return {"code":"large_sale", "label":"LARGE INSIDER SALE", "priority":4, "tags":"large_red_circle,money_with_wings"}
+    return {"code":"buy" if is_buy else "sell", "label":"INSIDER BUY" if is_buy else "INSIDER SELL", "priority":4 if is_buy else 3, "tags":"chart_with_upwards_trend,moneybag" if is_buy else "chart_with_downwards_trend,money_with_wings"}
+
+
+def _should_alert(group: dict, cfg: dict) -> bool:
+    value = float(group.get("value") or 0) if group.get("known_value") else 0.0
+    if group.get("type") == "buy":
+        return bool(cfg.get("alert_buys", True)) and value >= float(cfg.get("min_buy_value_usd") or 0)
+    return bool(cfg.get("alert_sells", True)) and value >= float(cfg.get("min_sell_value_usd") or 0)
 
 
 def _load_alert_tickers() -> list[str]:
@@ -186,7 +268,7 @@ def _group_transactions(transactions: Iterable[dict]) -> list[dict]:
     return list(groups.values())
 
 
-def _send_transaction_alert(ticker: str, group: dict, filing_url: str | None) -> None:
+def _send_transaction_alert(ticker: str, group: dict, filing_url: str | None, signal: dict) -> None:
     is_buy = group["type"] == "buy"
     verb = "COMPROU" if is_buy else "VENDEU"
     role = f" · {group['role']}" if group.get("role") else ""
@@ -206,10 +288,10 @@ def _send_transaction_alert(ticker: str, group: dict, filing_url: str | None) ->
         f"Data da transação: {group.get('date') or '—'} · Form 4 SEC"
     )
     _post_ntfy(
-        f"{ticker}: insider {verb}",
-        message,
-        priority=4 if is_buy else 3,
-        tags="chart_with_upwards_trend,moneybag" if is_buy else "chart_with_downwards_trend,money_with_wings",
+        f"{signal.get('label', 'INSIDER ACTIVITY')} · {ticker}",
+        f"{message}\nClassificação: {signal.get('label', '—')}",
+        priority=int(signal.get("priority") or (4 if is_buy else 3)),
+        tags=str(signal.get("tags") or ("chart_with_upwards_trend,moneybag" if is_buy else "chart_with_downwards_trend,money_with_wings")),
         click=filing_url,
     )
 
@@ -232,6 +314,7 @@ def run() -> int:
     cik_map = _load_ticker_cik_map()
     us_tickers = [tk for tk in all_requested if tk in cik_map]
     state = _load_state()
+    cfg = _load_alert_config()
     per_ticker = state["tickers"]
     state_changed = False
 
@@ -254,6 +337,7 @@ def run() -> int:
             per_ticker[ticker] = {
                 "seen_accessions": sorted(current.keys()),
                 "last_checked": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "event_history": [],
             }
             baselined += 1
             state_changed = True
@@ -275,9 +359,22 @@ def run() -> int:
             url = _filing_url(cik, filing)
             groups = _group_transactions(txs)
             try:
+                history = previous.get("event_history") if isinstance(previous.get("event_history"), list) else []
                 for group in groups:
-                    _send_transaction_alert(ticker, group, url)
-                    alerts_sent += 1
+                    signal = _signal_for_group(ticker, group, history, cfg)
+                    event = {
+                        "type": group.get("type"), "owner": group.get("owner"), "role": group.get("role"),
+                        "date": group.get("date"), "value": group.get("value"), "signal": signal.get("code"),
+                    }
+                    if _should_alert(group, cfg):
+                        _send_transaction_alert(ticker, group, url, signal)
+                        alerts_sent += 1
+                    else:
+                        log.info("%s %s suppressed by alert thresholds (%s)", ticker, accession, group.get("type"))
+                    history.append(event)
+                # Keep only a bounded intelligence history for cluster/reversal detection.
+                previous["event_history"] = history[-120:]
+                per_ticker[ticker] = previous
                 # Mark seen after notifications succeed. A Form 4 with no P/S (award,
                 # option, gift...) is also safely marked seen once parsed.
                 seen.add(accession)
