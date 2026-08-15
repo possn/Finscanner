@@ -1,9 +1,9 @@
-const CACHE_VERSION = "finscanner-v15-company-dossier-010";
+const CACHE_VERSION = "finscanner-v18-portfolio-coverage-014";
 const SHELL_FILES = [
   "./",
   "./index.html",
-  "./style.css?v=0.11.0",
-  "./app.js?v=0.11.0",
+  "./style.css?v=0.14.0",
+  "./app.js?v=0.14.0",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"

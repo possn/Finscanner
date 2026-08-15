@@ -1011,3 +1011,5 @@ a { color: inherit; }
 .score-model-note{margin:12px 0 20px;padding:14px 16px;border:1px solid var(--line,#e6e2db);border-radius:14px;background:var(--surface-soft,#faf8f4)}
 .score-model-note span{display:inline-flex;font-size:.68rem;font-weight:800;letter-spacing:.12em;color:var(--muted,#706a60);margin-bottom:6px}
 .score-model-note p{margin:0;font-size:.86rem;line-height:1.45;color:var(--text-secondary,#5d584f)}
+
+/* v0.12.0 — Bank Native Pack: statement-derived banking metrics, no fabricated regulatory ratios */

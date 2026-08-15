@@ -716,7 +716,7 @@
     }
     const model = scoreModelFor(r);
     if (model === "bank") return [["Bank Quality", r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
-    if (model === "reit") return [["REIT Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
+    if (model === "reit") return [["REIT Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Leverage",r.balance_pct ?? r.leverage_pct],["P/FFO Value",r.value_pct],["Distribution",null],["Stability",r.stability_pct]];
     if (model === "insurance") return [["Insurance Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Valuation",r.value_pct],["Income",null],["Stability",r.stability_pct]];
     return [["Quality",r.quality_pct ?? r.profitability_pct],["Growth",r.growth_pct],["Balance",r.balance_pct ?? r.leverage_pct],["Cash Flow",r.cashflow_pct],["Valuation",r.value_pct],["Stability",r.stability_pct]];
   }
@@ -792,14 +792,32 @@
     const cards = [];
 
     if (bank) {
-      cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle: scoreWord(r.quality_pct), explanation:"Rentabilidade do capital próprio. Em bancos deve ser lida em conjunto com capitalização e qualidade dos ativos.", tone:scoreTone(r.quality_pct)}));
-      cards.push(metricCardHtml({title:"Return on Assets", value:fmtRawPct(r.roa), subtitle:"Eficiência do balanço", explanation:"Lucro gerado por unidade de ativos. Útil para comparar bancos com modelos de balanço semelhantes.", tone:pctTone(r.roa)}));
-      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "benchmark setorial indisponível" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"Para bancos, P/B é geralmente mais informativo do que EV/EBITDA.", tone:r.pb_vs_sector_pct == null ? 'neutral' : Number(r.pb_vs_sector_pct) < 0 ? 'positive' : 'neutral'}));
-      cards.push(metricCardHtml({title:"Capital & Asset Quality", value:"—", subtitle:"dados regulatórios ainda não integrados", explanation:"CET1, NPL, net charge-offs e efficiency ratio exigem fontes bancárias específicas; a app não inventa estes valores.", tone:"neutral", badge:"BANK PACK"}));
+      const eff = r.efficiency_ratio_proxy;
+      const provisions = r.provision_to_revenue;
+      const capitalProxy = r.equity_to_assets;
+      const niiGrowth = r.net_interest_income_yoy;
+      const bankCoverage = r.bank_metric_coverage_pct;
+      cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle: scoreWord(r.quality_pct), explanation:"Rentabilidade do capital próprio. Em bancos deve ser lida com capitalização e qualidade do crédito.", tone:scoreTone(r.quality_pct)}));
+      cards.push(metricCardHtml({title:"Return on Assets", value:fmtRawPct(r.roa), subtitle:"Eficiência do balanço", explanation:"Lucro gerado por unidade de ativos; útil para comparar bancos com modelos semelhantes.", tone:pctTone(r.roa)}));
+      cards.push(metricCardHtml({title:"Net Interest Income", value:fmtMoney(r.net_interest_income, r.currency), subtitle:niiGrowth == null ? "crescimento YoY indisponível" : `${Number(niiGrowth)>=0?'+':''}${(Number(niiGrowth)*100).toFixed(1)}% YoY`, explanation:"Evolução da principal margem económica de muitos bancos: rendimento líquido de juros antes do restante negócio.", tone:pctTone(niiGrowth), badge:"BANK NATIVE"}));
+      cards.push(metricCardHtml({title:"Efficiency Ratio · proxy", value:fmtRawPct(eff), subtitle:eff == null ? "sem dados" : Number(eff) < .55 ? "eficiência forte" : Number(eff) > .70 ? "custos elevados" : "intermédio", explanation:"Despesas operacionais / receita a partir das demonstrações públicas. Menor tende a ser melhor. Não é o efficiency ratio regulatório reportado pelo banco.", tone:eff == null ? "neutral" : Number(eff) < .55 ? "positive" : Number(eff) > .70 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"Credit-loss provision · proxy", value:fmtRawPct(provisions), subtitle:provisions == null ? "sem dados" : "provisões / receita", explanation:"Intensidade das provisões para perdas de crédito relativamente à receita. Menor tende a ser melhor, mas deve ser contextualizado pelo ciclo de crédito.", tone:provisions == null ? "neutral" : Number(provisions) < .08 ? "positive" : Number(provisions) > .20 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"Equity / Assets · capital proxy", value:fmtRawPct(capitalProxy), subtitle:"não substitui CET1", explanation:"Capital contabilístico sobre ativos. É apenas um proxy de capitalização; CET1/Tier 1 exigem dados regulatórios próprios.", tone:capitalProxy == null ? "neutral" : Number(capitalProxy) >= .08 ? "positive" : Number(capitalProxy) < .05 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "benchmark setorial indisponível" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"Para bancos, P/B é especialmente útil quando interpretado em conjunto com ROE e qualidade do balanço.", tone:r.pb_vs_sector_pct == null ? 'neutral' : Number(r.pb_vs_sector_pct) < 0 ? 'positive' : 'neutral'}));
+      cards.push(metricCardHtml({title:"Regulatory data gap", value:bankCoverage == null ? "—" : `${Number(bankCoverage).toFixed(0)}%`, subtitle:"cobertura do Bank Native Pack", explanation:"CET1, NPL ratio e net charge-offs continuam deliberadamente ausentes até existir uma fonte regulatória fiável. A app não os estima.", tone:"neutral", badge:"DATA INTEGRITY"}));
     } else if (reit) {
-      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:"rendimento distribuído", explanation:"Em REITs deve ser validado contra FFO/AFFO payout; esse módulo específico será integrado separadamente.", tone:pctTone(r.dividend_yield)}));
-      cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "sem benchmark" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"Métrica auxiliar; NAV e P/AFFO serão preferidos quando estiverem disponíveis.", tone:"neutral"}));
-      cards.push(metricCardHtml({title:"FFO / AFFO", value:"—", subtitle:"dataset ainda não integrado", explanation:"Para REITs, FFO/AFFO e NAV são preferíveis ao lucro GAAP e ao P/E. O score specialist evita tratar FCF como se fosse equivalente a AFFO.", tone:"neutral", badge:"REIT PACK"}));
+      const ffo = r.reit_ffo_proxy;
+      const ffoPs = r.reit_ffo_per_share_proxy;
+      const pFfo = r.reit_p_ffo_proxy;
+      const ffoPayout = r.reit_ffo_payout_proxy;
+      const ndEbitda = r.reit_net_debt_to_ebitda;
+      const reitCoverage = r.reit_metric_coverage_pct;
+      cards.push(metricCardHtml({title:"FFO · proxy", value:fmtMoney(ffo, r.currency), subtitle:ffoPs == null ? "FFO/share indisponível" : `${Number(ffoPs).toFixed(2)} por ação`, explanation:"Proxy construído a partir de lucro líquido + depreciação/amortização + ajuste disponível de ganhos/perdas de venda. Não é AFFO nem substitui o FFO reportado pela empresa.", tone:ffo != null && Number(ffo) > 0 ? "positive" : "neutral", badge:"REIT NATIVE"}));
+      cards.push(metricCardHtml({title:"Price / FFO · proxy", value:fmtRatio(pFfo), subtitle:"valuation REIT-native", explanation:"Preço dividido pelo FFO por ação proxy. É geralmente mais informativo para REITs do que P/E, mas deve ser confirmado contra FFO/AFFO reportado.", tone:pFfo == null ? "neutral" : Number(pFfo) < 15 ? "positive" : Number(pFfo) > 25 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"FFO payout · proxy", value:fmtRawPct(ffoPayout), subtitle:"dividendos pagos / FFO proxy", explanation:"Mede quanto do FFO proxy é consumido pelos dividendos. Valores muito elevados reduzem a margem de segurança da distribuição.", tone:ffoPayout == null ? "neutral" : Number(ffoPayout) <= .80 ? "positive" : Number(ffoPayout) > 1 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"Net Debt / EBITDA", value:fmtRatio(ndEbitda), subtitle:"alavancagem", explanation:"Proxy de alavancagem financeira. Em REITs deve ser complementado por maturidades, custo da dívida e dívida garantida/não garantida.", tone:ndEbitda == null ? "neutral" : Number(ndEbitda) < 5 ? "positive" : Number(ndEbitda) > 7 ? "negative" : "neutral"}));
+      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:ffoPayout == null ? "payout FFO indisponível" : `FFO payout ${fmtRawPct(ffoPayout)}`, explanation:"Rendimento distribuído contextualizado pelo payout sobre FFO proxy, quando disponível.", tone:pctTone(r.dividend_yield)}));
+      cards.push(metricCardHtml({title:"AFFO · NAV · Occupancy", value:"—", subtitle:reitCoverage == null ? "fontes especializadas não integradas" : `${Number(reitCoverage).toFixed(0)}% cobertura do REIT Native Pack`, explanation:"AFFO, NAV e ocupação exigem dados específicos do REIT e continuam deliberadamente ausentes. A app não os inventa nem transforma capex total em AFFO.", tone:"neutral", badge:"DATA INTEGRITY"}));
     } else if (insurance) {
       cards.push(metricCardHtml({title:"Return on Equity", value:fmtRawPct(r.roe), subtitle:scoreWord(r.quality_pct), explanation:"Rentabilidade do capital próprio; deve ser lida com solvência e qualidade da subscrição.", tone:scoreTone(r.quality_pct)}));
       cards.push(metricCardHtml({title:"Price / Book", value:fmtRatio(r.price_to_book), subtitle:r.pb_vs_sector_pct == null ? "sem benchmark" : `${fmtSignedPct(r.pb_vs_sector_pct)} vs setor`, explanation:"P/B é uma referência útil para seguradoras, em conjunto com ROE e qualidade do capital.", tone:r.pb_vs_sector_pct == null ? "neutral" : Number(r.pb_vs_sector_pct) < 0 ? "positive" : "neutral"}));
@@ -813,9 +831,11 @@
     cards.push(metricCardHtml({title:"Revenue Growth", value:fmtRawPct(r.revenue_yoy_latest), subtitle:revAccel == null ? "YoY último trimestre" : `${Number(revAccel)>=0?'+':''}${Number(revAccel).toFixed(1)} pp de aceleração`, explanation:revAccel == null ? "Crescimento do trimestre mais recente face ao homólogo." : Number(revAccel) >= 0 ? "O crescimento das receitas está a acelerar." : "O crescimento das receitas está a desacelerar.", series:r.quarterly_revenue, tone:pctTone(r.revenue_yoy_latest)}));
     cards.push(metricCardHtml({title:"Earnings Growth", value:fmtRawPct(r.net_income_yoy_latest), subtitle:niAccel == null ? "YoY último trimestre" : `${Number(niAccel)>=0?'+':''}${Number(niAccel).toFixed(1)} pp de aceleração`, explanation:niAccel == null ? "Crescimento do lucro líquido vs trimestre homólogo." : Number(niAccel) >= 0 ? "O crescimento dos lucros está a acelerar." : "O crescimento dos lucros está a desacelerar.", series:r.quarterly_net_income, tone:pctTone(r.net_income_yoy_latest)}));
     cards.push(metricCardHtml({title:"Share Count", value:dilution == null ? "—" : `${Number(dilution)>=0?'+':''}${(Number(dilution)*100).toFixed(1)}%`, subtitle:dilution == null ? "sem dados suficientes" : Number(dilution) > .03 ? "diluição material" : Number(dilution) < -.03 ? "buyback líquido" : "estável", explanation:dilution == null ? "É necessário histórico comparável de ações diluídas." : Number(dilution) > 0 ? "Mais ações em circulação reduzem a participação económica de cada ação existente." : "Menos ações em circulação aumentam a participação económica por ação.", series:r.quarterly_diluted_shares, tone:dilution == null ? 'neutral' : Number(dilution) > .03 ? 'negative' : Number(dilution) < -.03 ? 'positive' : 'neutral'}));
-    cards.push(metricCardHtml({title:"Free Cash Flow", value:fmtMoney(r.free_cash_flow, r.currency), subtitle:`FCF yield ${fmtRawPct(r.fcf_yield)}`, explanation:"Caixa disponível depois do investimento necessário no negócio.", tone:scoreTone(r.cashflow_pct)}));
-    cards.push(metricCardHtml({title:"Forward P/E", value:fmtRatio(r.forward_pe), subtitle:r.forward_pe_vs_sector_pct == null ? "sem benchmark setorial" : `${fmtSignedPct(r.forward_pe_vs_sector_pct)} vs setor`, explanation:"Preço atual relativo ao lucro esperado. Deve ser lido com crescimento e qualidade.", tone:r.forward_pe_vs_sector_pct == null ? 'neutral' : Number(r.forward_pe_vs_sector_pct) < -10 ? 'positive' : Number(r.forward_pe_vs_sector_pct) > 20 ? 'negative' : 'neutral'}));
-    cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:r.payout_ratio == null ? "payout indisponível" : `payout ${fmtRawPct(r.payout_ratio)}`, explanation:"Rendimento anual distribuído; sustentabilidade depende de payout, cash flow e balanço.", tone:"neutral"}));
+    if (!reit) {
+      cards.push(metricCardHtml({title:"Free Cash Flow", value:fmtMoney(r.free_cash_flow, r.currency), subtitle:`FCF yield ${fmtRawPct(r.fcf_yield)}`, explanation:"Caixa disponível depois do investimento necessário no negócio.", tone:scoreTone(r.cashflow_pct)}));
+      cards.push(metricCardHtml({title:"Forward P/E", value:fmtRatio(r.forward_pe), subtitle:r.forward_pe_vs_sector_pct == null ? "sem benchmark setorial" : `${fmtSignedPct(r.forward_pe_vs_sector_pct)} vs setor`, explanation:"Preço atual relativo ao lucro esperado. Deve ser lido com crescimento e qualidade.", tone:r.forward_pe_vs_sector_pct == null ? 'neutral' : Number(r.forward_pe_vs_sector_pct) < -10 ? 'positive' : Number(r.forward_pe_vs_sector_pct) > 20 ? 'negative' : 'neutral'}));
+      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:r.payout_ratio == null ? "payout indisponível" : `payout ${fmtRawPct(r.payout_ratio)}`, explanation:"Rendimento anual distribuído; sustentabilidade depende de payout, cash flow e balanço.", tone:"neutral"}));
+    }
 
     return `<section class="w-metric-section"><div class="w-section-intro"><span>${bank ? 'BANK METRICS' : reit ? 'REIT METRICS' : insurance ? 'INSURANCE METRICS' : 'COMPANY METRICS'}</span><h3>Os números que importam</h3><p>Cada métrica combina valor atual, tendência quando disponível e contexto. Valores ausentes são mostrados como ausentes — nunca estimados sem fonte.</p></div><div class="w-metric-stack">${cards.join('')}</div></section>`;
   }
@@ -861,7 +881,7 @@
         <div class="detail-score ${verdict.cls}"><strong>${r.score ?? "—"}</strong><span>${verdict.label}</span></div>
       </div>
       <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
-      <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário provisório: evita métricas industriais inadequadas; capital regulatório e qualidade de ativos ainda não estão integrados." : scoreModelFor(r) === "reit" ? "Modelo REIT provisório: evita equiparar FCF a AFFO; FFO/AFFO, NAV e ocupação ainda não estão integrados." : scoreModelFor(r) === "insurance" ? "Modelo de seguradora provisório: combined ratio e solvência ainda não estão integrados." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
+      <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário nativo: acrescenta eficiência, provisões de crédito, capital contabilístico e crescimento do net interest income; CET1/NPL continuam dependentes de fonte regulatória." : scoreModelFor(r) === "reit" ? "Modelo REIT nativo por proxy: FFO, P/FFO, payout FFO e net-debt/EBITDA entram no score; AFFO, NAV e ocupação continuam dependentes de fontes especializadas." : scoreModelFor(r) === "insurance" ? "Modelo de seguradora provisório: combined ratio e solvência ainda não estão integrados." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
       <h3 class="dossier-title">Tese quantitativa</h3>
       ${thesisPanelHtml(r)}
       <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
@@ -971,6 +991,11 @@
     ".PT": ".LS",   // Portugal -> Euronext Lisbon (not currently tracked)
     ".PL": ".WA",   // Poland -> Warsaw (not currently tracked — see universe.py)
     ".IT": ".MI",   // Italy -> Borsa Italiana
+    ".CA": ".TO",   // Canada -> TSX (common portfolio-export convention)
+    ".NO": ".OL",   // Norway -> Oslo
+    ".FI": ".HE",   // Finland -> Helsinki
+    ".AT": ".VI",   // Austria -> Vienna
+    ".BE": ".BR",   // Belgium -> Brussels
   };
   function normalizeTicker(raw) {
     const t = raw.trim().toUpperCase();
@@ -1062,7 +1087,7 @@
         const missed = tickers.length - matched;
         renderPortfolio();
         if (missed > 0) {
-          alert(`Importado: ${tickers.length} posições.\n${matched} encontradas no universo rastreado, ${missed} não encontradas (fora do universo — ver lista completa na secção de exposição).`);
+          alert(`Importado: ${tickers.length} posições.\n${matched} já têm análise disponível; ${missed} ainda aguardam cobertura de dados.`);
         }
       } catch (e) {
         alert("Erro a ler o ficheiro: " + e.message);
@@ -1147,26 +1172,28 @@
       return { ticker, row, val };
     });
 
-    const valued = entries.filter(e => e.val != null && e.val > 0);
+    // Exposure charts must only use rows for which we have analysed metadata;
+    // otherwise an explicit CSV market_value from an unresolved symbol would
+    // become a misleading synthetic sector called "outside universe".
+    const valued = entries.filter(e => e.row && e.val != null && e.val > 0);
     const totalValue = valued.reduce((s, e) => s + e.val, 0);
     const unmatched = entries.filter(e => !e.row);
     const unmatchedCount = unmatched.length;
     const noValueCount = entries.filter(e => e.row && e.val == null).length;
 
-    const unmatchedListHtml = unmatchedCount ? `
-      <div class="exposure-block">
-        <h3 class="exposure-title">Fora do universo rastreado (${unmatchedCount})</h3>
-        <p class="unmatched-note">Estes tickers não constam do universo atual do Finscanner (~1550 ações/ETFs EUA/AU/UK/Europa) — podem ser mercados ainda não cobertos, ADRs, ou sufixo diferente do Yahoo Finance.</p>
-        <p class="unmatched-note" style="font-family:var(--font-mono, monospace);word-break:break-word;">${unmatched.map(e => escapeHtml(e.ticker)).join(", ")}</p>
-      </div>` : "";
+    // Do not dump a wall of unresolved symbols into the main portfolio UI.
+    // A valid Yahoo symbol can be absent from today's analysed universe simply
+    // because it was not selected by the base index/screener discovery step.
+    // The pipeline now has an explicit extra-ticker coverage layer for these.
+    const unmatchedListHtml = "";
 
     if (!valued.length) {
       els.exposurePanel.innerHTML = `
         <div class="exposure-block">
           <p class="unmatched-note">
-            Sem dados suficientes para calcular exposição ponderada por valor
-            (${unmatchedCount} ticker(s) fora do universo rastreado, ${noValueCount} sem preço/quantidade/valor).
-            A lista de posições abaixo continua a mostrar o que temos por ticker.
+            Sem dados suficientes para calcular exposição ponderada por valor.
+            ${unmatchedCount ? `${unmatchedCount} posição(ões) ainda aguardam análise de dados.` : ""}
+            ${noValueCount ? `${noValueCount} posição(ões) não têm preço/quantidade/valor suficiente para calcular o peso.` : ""}
           </p>
         </div>` + unmatchedListHtml;
       return;
@@ -1225,7 +1252,7 @@
         <p class="unmatched-note">
           Valor total considerado: ${totalValue.toLocaleString("pt-PT", {maximumFractionDigits:0})}
           (${valued.length} de ${entries.length} posições com valor calculável).
-          ${unmatchedCount ? `${unmatchedCount} ticker(s) fora do universo rastreado — ver lista abaixo.` : ""}
+          ${unmatchedCount ? `${unmatchedCount} posição(ões) ainda aguardam análise.` : ""}
           ${noValueCount ? `${noValueCount} posição(ões) sem quantidade nem valor explícito — não entram no peso.` : ""}
         </p>
       </div>
@@ -1247,7 +1274,7 @@
     if (!rows.length) {
       els.portfolioSummary.innerHTML = "";
       els.portfolioList.innerHTML = ownedTickers.length
-        ? `<p class="empty-state">${ownedTickers.length} ticker(s) importado(s), mas nenhum está no universo rastreado atualmente (fora do S&amp;P 500 / small-cap EUA / ASX200 / WIG20 / FTSE100).</p>`
+        ? `<p class="empty-state">${ownedTickers.length} posição(ões) importada(s), mas ainda não há análise disponível para estes símbolos. A cobertura foi alargada para incluir tickers Yahoo adicionais e será preenchida após o próximo workflow.</p>`
         : `<p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Ações e toca em "Tenho esta posição".</p>`;
       return;
     }

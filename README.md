@@ -1,3 +1,15 @@
+## v0.13.0 — REIT Native Pack
+
+Adds a sector-native REIT layer using public statement-derived **FFO proxy**, **P/FFO proxy**, **FFO payout proxy** and **net debt / EBITDA**. The REIT score now ranks those metrics against REIT peers rather than applying general-company P/E/FCF logic. AFFO, NAV and occupancy remain explicitly unavailable until specialist data sources are integrated.
+
+> Methodology boundary: `reit_ffo_proxy` is not reported FFO. It is an explainable GAAP-statement proxy (net income + D&A + available signed sale gain/loss adjustment). It must not be presented as AFFO.
+
+## v0.12.0 — Bank Native Pack
+
+The bank model now consumes statement-derived banking metrics rather than relying only on generic equity ratios. New fields include net interest income and YoY growth, an operating-efficiency proxy, credit-loss provision intensity, and an equity/assets capitalisation proxy. These inputs feed the bank-specific score dimensions.
+
+Data-integrity rule: CET1/Tier 1, NPL ratio and regulatory net charge-offs are **not inferred** from generic financial statements. They remain explicitly unavailable until a regulatory data source is integrated. The UI labels all derived figures as proxies where appropriate.
+
 ## v0.11.0 — Sector-Aware Scoring
 
 Banks, REITs and insurers now use explicit specialist proxy score packs instead of being forced through the general-company factor mix. The UI states which model is active and its limitations. Specialist confidence is capped at medium until native metrics (CET1/NPL, FFO/AFFO/NAV, combined ratio/solvency) are integrated.
@@ -110,3 +122,12 @@ antes de qualquer decisão.
 ### SEC User-Agent
 
 Para maior conformidade com a política de fair access da SEC, cria no repositório um GitHub Actions secret chamado `SEC_USER_AGENT` com um identificador e email de contacto, por exemplo `Finscanner research nome@dominio.pt`. Se o secret não existir, existe um fallback técnico, mas um contacto real é preferível.
+
+
+## v0.14.0 — Portfolio Coverage Repair
+
+- Removed the verbose CSV/JSON syntax helper from the portfolio screen.
+- Removed the giant visible list of unresolved portfolio symbols.
+- Added `data/extra_tickers.json` as an explicit Yahoo-symbol coverage extension.
+- Added common country-export to Yahoo suffix normalisation (PT/FR/GB/ES/NL/IT/CH/SE/DK/CA/NO/FI/AT/BE).
+- Portfolio holdings that are valid Yahoo symbols but absent from index-based discovery can now be included in the next data workflow without expanding the full expensive universe indiscriminately.
