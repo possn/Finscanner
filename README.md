@@ -1,3 +1,17 @@
+# v0.50.0 — Sector Intelligence · Discover / Compare / Deep Dive
+
+Nova camada no Stock Scanner inspirada na navegação Winston: selecionar um setor, descobrir líderes, comparar até 6 empresas head-to-head e abrir um deep dive contextual sem sair da comparação.
+
+- Discover: top empresas do setor com Score, Quality, Growth e Value.
+- Compare: Score + Profit + Cash + Stable + Value + Quality; o melhor valor de cada coluna é marcado.
+- Deep Dive: cinco pilares, key metrics, insider 30d, próxima earnings e acesso ao dossier completo.
+- Watchlist: vista setorial apenas das empresas guardadas.
+- O seletor setorial sincroniza com o filtro principal do Stock Radar.
+
+Ficheiros a substituir: `index.html`, `app.js`, `style.css`, `sw.js`, `README.md`.
+
+---
+
 # v0.49.1 — SEC Validation Hotfix
 
 - SEC insider coverage is now treated as auxiliary/degradable data and no longer blocks publication of an otherwise valid daily dataset.
@@ -337,3 +351,36 @@ Company dossiers now add a Winston-style context strip to key general-company me
 - Australian tickers explicitly present in the user's portfolio remain supported through `data/extra_tickers.json`; they are analysed for portfolio accounting but are not surfaced as scanner-universe opportunities.
 - Adds Capital Allocation Intelligence to stock dossiers: dividend growth, annualised buyback-yield proxy, shareholder-yield proxy, dilution/share-count context and dividend safety.
 - Scanner/Home additionally exclude stale `.AX` rows client-side until the next workflow rebuild, so the change is visible immediately after deploying the frontend.
+
+## v0.49.2 — Stock Perspective Interaction Repair
+
+- Corrige o seletor de colunas do Stock Radar: agora é possível trocar métricas mesmo quando já existem quatro selecionadas; uma quinta substitui a seleção mais antiga.
+- Adiciona botão **Limpar** e mantém **Usar perspetiva** para regressar ao conjunto padrão.
+- Cada perspetiva passa a ordenar os resultados pela métrica relevante, em vez de mostrar sempre as mesmas empresas no topo.
+- Corrige a unidade de `dividend_yield` proveniente do Yahoo/yfinance, que estava a ser multiplicada por 100 no frontend (ex.: 2.86% aparecia como 286%).
+- Corrige o cálculo do Shareholder Yield para converter dividend yield de pontos percentuais para fração antes de combinar com buybacks/diluição.
+
+## v0.51.0 — Insider Timeline + Persistent Compare Groups
+
+- Sector Intelligence comparison groups are now persistent in localStorage and can mix companies from different sectors/markets. In Compare mode, add a ticker/company directly and keep up to eight names as a reusable peer group.
+- Smart Money deep dives now include a Winston-style 12-month insider timeline: weekly stock price plus SEC Form 4 open-market buy/sell markers, filters for All/Buys/Sells, transaction detail and 12-month buy/sell totals.
+- The SEC pipeline keeps the existing 30-day metrics for ranking while adding a 365-day transaction window for visual history.
+- Weekly 1-year price history is fetched only for US equities that actually have parsed insider P/S activity, limiting Yahoo load.
+- Optional PWA insider alerts can be enabled for portfolio + watchlist. The current static GitHub Pages architecture can show a notification when the PWA next loads/refreshes and detects a new SEC transaction; true background push while the app is fully closed still requires an external push service/backend.
+- Data schema: 510.
+
+## v0.52.0 — Background Insider Push (ntfy)
+
+O Finscanner inclui agora um workflow leve separado, `.github/workflows/insider-alerts.yml`, que verifica novos Form 4 SEC de hora a hora (minuto 17) e envia push para o ntfy mesmo com a PWA fechada.
+
+### GitHub Secrets
+
+- `NTFY_TOPIC` — obrigatório; nome do tópico ntfy.
+- `NTFY_TOKEN` — opcional; apenas se o tópico exigir autenticação.
+- `SEC_USER_AGENT` — recomendado, como no pipeline principal.
+
+A primeira execução faz baseline dos filings atuais, evitando uma avalanche de alertas históricos. Quando o workflow é executado manualmente (`Run workflow`), envia também uma notificação de teste para confirmar a ligação.
+
+O universo background usa `data/extra_tickers.json` (portfolio) e, opcionalmente, `data/alert_watchlist.json`. A watchlist guardada apenas no localStorage do iPhone não é visível para GitHub Actions; para alertas remotos de watchlist, os tickers podem ser espelhados nesse ficheiro.
+
+O estado anti-duplicação é persistido em `data/insider_alert_state.json`. Só são publicados alertas para operações open-market `P`/`S`; grants, options, gifts e vesting não geram push.

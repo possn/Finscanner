@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.49.0">
+<link rel="stylesheet" href="style.css?v=0.52.0">
 </head>
 <body>
 
@@ -167,6 +167,7 @@
         </select>
         <select id="sort-by">
           <option value="score-desc">score ↓</option>
+          <option value="perspective">perspetiva selecionada</option>
           <option value="score-asc">score ↑</option>
           <option value="quality-desc">qualidade ↓</option>
           <option value="growth-desc">crescimento ↓</option>
@@ -188,6 +189,23 @@
           <span>★ watchlist</span>
         </label>
       </div>
+
+
+      <section id="sector-intelligence-lab" class="sector-intelligence-shell" aria-label="Sector Intelligence">
+        <div class="sector-intelligence-head">
+          <div><span class="eyebrow">SECTOR INTELLIGENCE</span><h3>Discover · Compare · Deep Dive</h3><p>Escolhe um setor, encontra os líderes e compara empresas lado a lado.</p></div>
+          <span id="sector-lab-selection" class="section-count">Seleciona um setor</span>
+        </div>
+        <div class="sector-intelligence-toolbar">
+          <select id="sector-lab-sector" aria-label="Setor para análise"><option value="">Escolhe um setor</option></select>
+          <div id="sector-lab-modes" class="sector-lab-modes">
+            <button class="is-active" data-sector-mode="discover">Discover</button>
+            <button data-sector-mode="compare">Compare</button>
+            <button data-sector-mode="watchlist">Watchlist</button>
+          </div>
+        </div>
+        <div id="sector-lab-body" class="sector-lab-body"><div class="sector-empty">A carregar setores…</div></div>
+      </section>
 
       <section class="stock-perspective-shell" aria-label="Perspetiva do screener">
         <div class="stock-perspective-head">
@@ -327,6 +345,7 @@
         </div>
       </div>
       <div id="smartmoney-health" class="data-health-card"></div>
+      <div class="insider-alert-card"><div><span class="eyebrow">INSIDER ALERTS</span><h3>Alertas para portfolio + watchlist</h3><p id="insider-alert-status">Alertas locais desativados. O push em background via ntfy funciona separadamente através do GitHub Actions.</p></div><button id="insider-alert-toggle" class="import-btn">Ativar alertas</button></div>
       <div id="smartmoney-list" class="dossier"></div>
     </section>
     <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">INVESTMENT THESES</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section>
@@ -391,6 +410,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.49.0"></script>
+<script src="app.js?v=0.52.0"></script>
 </body>
 </html>

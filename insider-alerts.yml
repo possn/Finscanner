@@ -1,0 +1,75 @@
+name: Insider alerts
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Minute 17 avoids GitHub's busiest top-of-hour scheduling window.
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finscanner-repo-writes-main
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install lightweight dependency
+        run: python -m pip install "requests>=2.31"
+
+      - name: Check SEC Form 4 and notify ntfy
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          FINSCANNER_SEC_WORKERS: "1"
+          FINSCANNER_SEC_MIN_INTERVAL: "0.14"
+          FINSCANNER_INSIDER_ALERT_LOOKBACK_DAYS: "10"
+          FINSCANNER_ALERT_TEST: ${{ github.event_name == 'workflow_dispatch' }}
+        run: python scripts/insider_alerts.py
+
+      - name: Persist alert state
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/insider_alert_state.json; then
+            echo "No alert-state changes to publish."
+            exit 0
+          fi
+
+          cp data/insider_alert_state.json /tmp/insider_alert_state.json
+          git config user.name "finscanner-bot"
+          git config user.email "actions@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/insider_alert_state.json data/insider_alert_state.json
+            git add data/insider_alert_state.json
+            if git diff --cached --quiet; then
+              echo "Alert state already current."
+              exit 0
+            fi
+            git commit -m "chore: insider alert state $(date -u +%Y-%m-%dT%H:%MZ)"
+            if git push origin HEAD:main; then
+              echo "Insider alert state published."
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "Could not persist insider alert state after 3 attempts."
+          exit 1

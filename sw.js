@@ -1,9 +1,9 @@
-const CACHE_VERSION = "v0.49.0";
+const CACHE_VERSION = "v0.52.0";
 const SHELL_FILES = [
   "./",
   "./index.html",
-  "./style.css?v=0.49.0",
-  "./app.js?v=0.49.0",
+  "./style.css?v=0.52.0",
+  "./app.js?v=0.52.0",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -63,5 +63,14 @@ self.addEventListener("fetch", event => {
     if (cached) return cached;
     try { return await fetch(event.request); }
     catch (_) { return Response.error(); }
+  })());
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const all = await clients.matchAll({type:"window", includeUncontrolled:true});
+    if (all.length) { await all[0].focus(); return; }
+    await clients.openWindow("./");
   })());
 });

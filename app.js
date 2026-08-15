@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", smartMoneyScope: "all", smartMoneyType: "all", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockPerspective: "overview", stockCustomColumns: null };
+  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", smartMoneyScope: "all", smartMoneyType: "all", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockPerspective: "overview", stockCustomColumns: null, sectorLabMode: "discover", sectorCompareSelection: [], sectorDeepDive: null, insiderChartFilter: "all" };
 
   const els = {
     list: document.getElementById("list"),
@@ -20,6 +20,11 @@
     stockColumnsBtn: document.getElementById("stock-columns-btn"),
     stockColumnsPanel: document.getElementById("stock-columns-panel"),
     stockTableHead: document.getElementById("stock-table-head"),
+    sectorLab: document.getElementById("sector-intelligence-lab"),
+    sectorLabSector: document.getElementById("sector-lab-sector"),
+    sectorLabModes: document.getElementById("sector-lab-modes"),
+    sectorLabBody: document.getElementById("sector-lab-body"),
+    sectorLabSelection: document.getElementById("sector-lab-selection"),
     marketFilter: document.getElementById("market-filter"),
     stocksSectorFilter: document.getElementById("stocks-sector-filter"),
     sortBy: document.getElementById("sort-by"),
@@ -82,6 +87,8 @@
     smartmoneyHealth: document.getElementById("smartmoney-health"),
     smartmoneyScopeFilters: document.getElementById("smartmoney-scope-filters"),
     smartmoneyTypeFilters: document.getElementById("smartmoney-type-filters"),
+    insiderAlertToggle: document.getElementById("insider-alert-toggle"),
+    insiderAlertStatus: document.getElementById("insider-alert-status"),
     thesesList: document.getElementById("theses-list"),
     compareInput: document.getElementById("compare-input"),
     compareList: document.getElementById("compare-list"),
@@ -114,6 +121,9 @@
   // "free, static site" constraint.
   const LS_PORTFOLIO = "finscanner:portfolio";
   const LS_WATCHLIST = "finscanner:watchlist";
+  const LS_SECTOR_COMPARE = "finscanner:sectorCompare";
+  const LS_INSIDER_ALERTS = "finscanner:insiderAlerts";
+  const LS_INSIDER_SEEN = "finscanner:insiderSeen";
 
   function lsGet(key) {
     try { return JSON.parse(localStorage.getItem(key) || "{}"); }
@@ -128,6 +138,13 @@
   // feature existed.
   function isOwned(ticker) { return !!lsGet(LS_PORTFOLIO)[ticker]; }
   function isWatched(ticker) { return !!lsGet(LS_WATCHLIST)[ticker]; }
+  function loadSectorCompareSelection() {
+    try { const v=JSON.parse(localStorage.getItem(LS_SECTOR_COMPARE)||"[]"); return Array.isArray(v)?v.filter(Boolean).slice(0,8):[]; } catch { return []; }
+  }
+  function saveSectorCompareSelection() {
+    try { localStorage.setItem(LS_SECTOR_COMPARE, JSON.stringify(state.sectorCompareSelection.slice(0,8))); } catch {}
+  }
+  state.sectorCompareSelection = loadSectorCompareSelection();
   function toggleOwned(ticker) {
     const p = lsGet(LS_PORTFOLIO);
     if (p[ticker]) delete p[ticker]; else p[ticker] = true;
@@ -137,6 +154,58 @@
     const w = lsGet(LS_WATCHLIST);
     if (w[ticker]) delete w[ticker]; else w[ticker] = true;
     lsSet(LS_WATCHLIST, w);
+  }
+
+  function insiderAlertConfig() {
+    try { return JSON.parse(localStorage.getItem(LS_INSIDER_ALERTS)||'{"enabled":false}'); } catch { return {enabled:false}; }
+  }
+  function insiderSeenKeys() {
+    try { const x=JSON.parse(localStorage.getItem(LS_INSIDER_SEEN)||'[]'); return new Set(Array.isArray(x)?x:[]); } catch { return new Set(); }
+  }
+  function saveInsiderSeen(keys) {
+    try { localStorage.setItem(LS_INSIDER_SEEN,JSON.stringify([...keys].slice(-700))); } catch {}
+  }
+  function alertUniverseRows() {
+    const p=lsGet(LS_PORTFOLIO), w=lsGet(LS_WATCHLIST);
+    return (state.data?.stocks||[]).filter(r=>p[r.ticker]||w[r.ticker]);
+  }
+  function allAlertTransactions() {
+    const out=[];
+    for(const r of alertUniverseRows()){
+      const txs=Array.isArray(r.insider_transactions_365d)?r.insider_transactions_365d:(Array.isArray(r.insider_transactions)?r.insider_transactions:[]);
+      for(const tx of txs) out.push({ticker:r.ticker,name:r.name||r.ticker,currency:r.currency||'USD',tx,key:insiderTxKey(r.ticker,tx)});
+    }
+    return out.sort((a,b)=>String(b.tx.date||'').localeCompare(String(a.tx.date||'')));
+  }
+  function refreshInsiderAlertUi() {
+    if(!els.insiderAlertToggle||!els.insiderAlertStatus)return;
+    const cfg=insiderAlertConfig(); const perm=('Notification'in window)?Notification.permission:'unsupported';
+    els.insiderAlertToggle.textContent=cfg.enabled?'Desativar alertas':'Ativar alertas';
+    els.insiderAlertToggle.classList.toggle('import-btn--secondary',cfg.enabled);
+    els.insiderAlertStatus.textContent=cfg.enabled ? (perm==='granted'?'Ativos para portfolio + watchlist. Aviso local quando a PWA detetar uma nova transação SEC.':'Ativos, mas o browser ainda não autorizou notificações.') : 'Alertas locais desativados. O push em background via ntfy funciona separadamente através do GitHub Actions.';
+  }
+  async function toggleInsiderAlerts() {
+    const cfg=insiderAlertConfig();
+    if(cfg.enabled){localStorage.setItem(LS_INSIDER_ALERTS,JSON.stringify({enabled:false}));refreshInsiderAlertUi();return;}
+    if(!('Notification'in window)){alert('Este browser não suporta notificações Web.');return;}
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){refreshInsiderAlertUi();return;}
+    // Baseline current data to avoid a flood of historical alerts on first enable.
+    const seen=new Set(allAlertTransactions().map(x=>x.key)); saveInsiderSeen(seen);
+    localStorage.setItem(LS_INSIDER_ALERTS,JSON.stringify({enabled:true,enabledAt:new Date().toISOString()}));
+    refreshInsiderAlertUi();
+  }
+  async function checkInsiderAlerts() {
+    const cfg=insiderAlertConfig(); if(!cfg.enabled||!state.data||!('Notification'in window)||Notification.permission!=='granted')return;
+    const seen=insiderSeenKeys(), all=allAlertTransactions(); const fresh=all.filter(x=>!seen.has(x.key));
+    all.forEach(x=>seen.add(x.key)); saveInsiderSeen(seen); if(!fresh.length)return;
+    const reg=await navigator.serviceWorker?.ready?.catch(()=>null);
+    for(const x of fresh.slice(0,4)){
+      const tx=x.tx; const title=`${x.ticker}: insider ${tx.type==='buy'?'comprou':'vendeu'}`;
+      const body=`${tx.owner||'Insider'}${tx.role?' · '+tx.role:''} · ${tx.shares==null?'':Number(tx.shares).toLocaleString('pt-PT')+' ações · '}${fmtMoney(tx.value,x.currency)} · ${tx.date||''}`;
+      if(reg?.showNotification) await reg.showNotification(title,{body,tag:'insider-'+x.key,data:{ticker:x.ticker,url:location.href},icon:'icons/icon-192.png',badge:'icons/icon-192.png'});
+      else new Notification(title,{body,tag:'insider-'+x.key});
+    }
   }
 
   function switchView(view) {
@@ -323,6 +392,19 @@
     return (Number(n) * 100).toFixed(1) + "%";
   }
 
+  // Yahoo/yfinance dividendYield is delivered in percentage points in the
+  // current pipeline (e.g. 2.89 means 2.89%, unlike payout/FCF ratios which
+  // are fractions). Keep a dedicated formatter to avoid 100× inflation.
+  function fmtDividendYield(n) {
+    if (n == null || !Number.isFinite(Number(n))) return "—";
+    return Number(n).toFixed(1) + "%";
+  }
+
+  function dividendYieldFraction(n) {
+    if (n == null || !Number.isFinite(Number(n))) return null;
+    return Number(n) / 100;
+  }
+
   function fmtRatio(n, digits = 1) {
     if (n == null || !Number.isFinite(Number(n))) return "—";
     return Number(n).toFixed(digits) + "×";
@@ -434,6 +516,8 @@
       updateGeneratedAt();
       setStartupStatus("");
       renderActiveView();
+      refreshInsiderAlertUi();
+      setTimeout(()=>checkInsiderAlerts().catch(()=>{}),500);
     } catch (e) {
       state.data = null;
       if (els.list) els.list.innerHTML = `<div class="load-error"><strong>Falha ao carregar os dados.</strong><p>O ficheiro <code>data/stocks.json</code> não está acessível ou é inválido nesta publicação.</p><button id="retry-data" class="import-btn import-btn--secondary">Tentar novamente</button><small>${escapeHtml(e?.message || e)}</small></div>`;
@@ -890,7 +974,7 @@
     if (preset === "value") return v >= 65 && s >= 55 && r.zombie !== "yes";
     if (preset === "growth") return g >= 70 && s >= 55 && r.zombie !== "yes";
     if (preset === "garp") return q >= 60 && g >= 60 && v >= 50 && s >= 60 && r.zombie !== "yes";
-    if (preset === "dividend") return Number(r.dividend_yield ?? 0) >= 0.02 && Number(r.payout_ratio ?? 0) < 0.9 && s >= 50;
+    if (preset === "dividend") return Number(r.dividend_yield ?? 0) >= 2.0 && Number(r.payout_ratio ?? 0) < 0.9 && s >= 50;
     if (preset === "insider") return Number(r.insider_net_value_30d ?? 0) > 0 || Number(r.insider_buy_count_30d ?? 0) > 0;
     if (preset === "revisions") {
       const qrev=Number(r.analyst_eps_next_q_revision_30d_pct);
@@ -906,6 +990,152 @@
   function metricGrade(v) {
     const n=Number(v); if(!Number.isFinite(n)) return "—";
     if(n>=85) return "A+"; if(n>=75) return "A"; if(n>=65) return "B+"; if(n>=55) return "B"; if(n>=45) return "C"; return "D";
+  }
+
+  function perspectiveSortValue(r, perspective) {
+    const n=v=>Number.isFinite(Number(v))?Number(v):null;
+    if (perspective === "profitability") return n(r.quality_pct ?? r.profitability_pct) ?? -999;
+    if (perspective === "growth") return n(r.growth_pct) ?? -999;
+    if (perspective === "valuation") return n(r.value_pct) ?? -999;
+    if (perspective === "income") {
+      const y=n(r.dividend_yield), payout=n(r.payout_ratio), fcf=n(r.fcf_yield);
+      if (y == null) return -999;
+      const sustainability=(payout!=null && payout>0 && payout<=0.9 ? 15 : 0) + (fcf!=null && fcf>0 ? 10 : 0);
+      return y + sustainability;
+    }
+    if (perspective === "smartmoney") {
+      const net=n(r.insider_net_value_30d) ?? 0, buys=n(r.insider_buy_count_30d) ?? 0;
+      return Math.sign(net)*Math.log10(Math.abs(net)+1) * 10 + buys*3;
+    }
+    if (perspective === "estimates") return n(r.analyst_eps_next_q_revision_30d_pct ?? r.analyst_eps_next_y_revision_30d_pct) ?? -999;
+    if (perspective === "catalysts") {
+      const d=n(r.analyst_days_to_earnings); return d==null ? -999 : -Math.max(0,d);
+    }
+    return n(r.score) ?? -999;
+  }
+
+
+  function sectorMetric(r, key) {
+    const map = {
+      score: r.score,
+      profit: r.quality_pct ?? r.profitability_pct,
+      cash: r.cashflow_pct,
+      stable: r.stability_pct,
+      value: r.value_pct,
+      quality: r.quality_pct ?? r.profitability_pct,
+    };
+    const n = Number(map[key]);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function sectorMetricBar(label, value, best=false) {
+    const v = Number.isFinite(Number(value)) ? Math.max(0, Math.min(100, Number(value))) : null;
+    return `<div class="sector-pillar ${best?'is-best':''}"><span>${escapeHtml(label)}</span><b>${v==null?'—':Math.round(v)}</b><i><em style="width:${v==null?0:v}%"></em></i>${best?'<small>BEST</small>':''}</div>`;
+  }
+
+  function sectorDeepDiveHtml(r) {
+    if (!r) return `<div class="sector-empty">Seleciona uma empresa para abrir o deep dive.</div>`;
+    const rev = r.revenue_yoy_latest ?? r.revenue_growth;
+    const eps = r.earnings_growth ?? r.analyst_eps_next_y_growth;
+    const insider = Number(r.insider_net_value_30d);
+    const insiderLabel = Number.isFinite(insider) ? `${insider>=0?'+':'−'}${fmtMoney(Math.abs(insider), r.currency || 'USD')}` : '—';
+    const dte = Number(r.analyst_days_to_earnings);
+    const verdict = investmentVerdict(r);
+    return `<aside class="sector-deep-dive" data-deep-ticker="${escapeHtml(r.ticker)}">
+      <div class="sector-deep-head"><div><span class="eyebrow">DEEP DIVE · ${escapeHtml(r.sector||'SETOR')}</span><h3>${escapeHtml(r.ticker)}</h3><p>${escapeHtml(r.name||'')}</p></div><span class="sector-deep-score ${verdict.cls}">${r.score==null?'—':Math.round(r.score)}</span></div>
+      <div class="sector-deep-verdict ${verdict.cls}"><strong>${escapeHtml(verdict.label)}</strong><span>${escapeHtml(verdict.text)}</span></div>
+      <div class="sector-pillar-stack">
+        ${sectorMetricBar('Profitable', sectorMetric(r,'profit'))}
+        ${sectorMetricBar('Cash', sectorMetric(r,'cash'))}
+        ${sectorMetricBar('Stable', sectorMetric(r,'stable'))}
+        ${sectorMetricBar('Valuation', sectorMetric(r,'value'))}
+        ${sectorMetricBar('Quality', sectorMetric(r,'quality'))}
+      </div>
+      <div class="sector-key-metrics">
+        <div><span>Forward P/E</span><b>${fmtRatio(r.forward_pe)}</b></div>
+        <div><span>Revenue growth</span><b>${fmtRawPct(rev)}</b></div>
+        <div><span>Gross margin</span><b>${fmtRawPct(r.gross_margin)}</b></div>
+        <div><span>EPS growth</span><b>${fmtRawPct(eps)}</b></div>
+        <div><span>Insider 30d</span><b class="${Number.isFinite(insider)?(insider>=0?'positive-text':'negative-text'):''}">${insiderLabel}</b></div>
+        <div><span>Next earnings</span><b>${Number.isFinite(dte)?`${Math.max(0,Math.round(dte))}d`:'—'}</b></div>
+      </div>
+      <button class="sector-open-dossier" data-sector-open-dossier="${escapeHtml(r.ticker)}">Abrir dossier completo →</button>
+    </aside>`;
+  }
+
+  function renderSectorDiscover(rows, sector) {
+    const pool = rows.filter(r=>r.sector===sector).sort((a,b)=>(b.score??-1)-(a.score??-1)).slice(0,12);
+    if (!pool.length) return `<div class="sector-empty">Sem empresas disponíveis para ${escapeHtml(sector||'este setor')}.</div>`;
+    return `<div class="sector-discover-strip">${pool.map((r,i)=>`<article class="sector-discover-card" data-sector-deep="${escapeHtml(r.ticker)}">
+      <div class="sector-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4>
+      <div class="sector-discover-score">${r.score==null?'—':Math.round(r.score)}<small>/100</small></div>
+      <div class="sector-mini-grid"><span>Q <b>${r.quality_pct==null?'—':Math.round(r.quality_pct)}</b></span><span>G <b>${r.growth_pct==null?'—':Math.round(r.growth_pct)}</b></span><span>V <b>${r.value_pct==null?'—':Math.round(r.value_pct)}</b></span></div>
+      <div class="sector-discover-actions"><button data-sector-compare-add="${escapeHtml(r.ticker)}">+ comparar</button><button data-sector-deep="${escapeHtml(r.ticker)}">deep dive</button></div>
+    </article>`).join('')}</div>`;
+  }
+
+  function renderSectorCompare(rows, sector) {
+    const sectorRows = rows.filter(r=>r.sector===sector).sort((a,b)=>(b.score??-1)-(a.score??-1));
+    let selected = state.sectorCompareSelection.map(t=>rows.find(r=>r.ticker===t)).filter(Boolean);
+    if (!selected.length) selected = sectorRows.slice(0,6);
+    if (!selected.length) return `<div class="sector-empty">Sem empresas para comparar neste setor.</div>`;
+    const keys=[['score','Finscanner'],['profit','Profit'],['cash','Cash'],['stable','Stable'],['value','Value'],['quality','Quality']];
+    const best={}; keys.forEach(([k])=>{ best[k]=Math.max(...selected.map(r=>sectorMetric(r,k)??-Infinity)); });
+    const deep = selected.find(r=>r.ticker===state.sectorDeepDive) || selected[0];
+    return `<div class="sector-compare-layout"><div class="sector-compare-main">
+      <div class="sector-compare-toolbar"><span>${selected.length} empresas · grupo persistente, mesmo entre setores</span><button data-sector-clear-compare>Limpar seleção</button></div>
+      <div class="sector-compare-adder"><input data-sector-compare-search placeholder="Adicionar ticker ou empresa (ex.: NVDA, ASML, TSM)…"><button data-sector-compare-add-search>Adicionar</button></div>
+      <div class="sector-compare-table-wrap"><div class="sector-compare-table">
+        <div class="sector-compare-header"><span>COMPANY</span>${keys.map(([,l])=>`<span>${escapeHtml(l)}</span>`).join('')}</div>
+        ${selected.map(r=>`<button class="sector-compare-row ${deep?.ticker===r.ticker?'is-selected':''}" data-sector-deep="${escapeHtml(r.ticker)}"><span class="sector-compare-company"><b>${escapeHtml(r.ticker)}</b><small>${escapeHtml(r.name||'')}</small></span>${keys.map(([k])=>{const v=sectorMetric(r,k), isBest=v!=null&&v===best[k]; return `<span class="sector-compare-cell ${isBest?'is-best':''}"><b>${v==null?'—':Math.round(v)}</b><i><em style="width:${v==null?0:Math.max(0,Math.min(100,v))}%"></em></i>${isBest?'<small>BEST</small>':''}</span>`}).join('')}</button>`).join('')}
+      </div></div>
+    </div>${sectorDeepDiveHtml(deep)}</div>`;
+  }
+
+  function renderSectorWatchlist(rows, sector) {
+    const pool=rows.filter(r=>r.sector===sector && isWatched(r.ticker)).sort((a,b)=>(b.score??-1)-(a.score??-1));
+    if(!pool.length) return `<div class="sector-empty">A tua watchlist ainda não tem empresas em ${escapeHtml(sector)}.</div>`;
+    return `<div class="sector-watch-grid">${pool.map(r=>`<button data-sector-deep="${escapeHtml(r.ticker)}"><b>${escapeHtml(r.ticker)}</b><span>${escapeHtml(r.name||'')}</span><strong>${r.score==null?'—':Math.round(r.score)}</strong></button>`).join('')}</div>`;
+  }
+
+  function bindSectorLabActions(rows, sector) {
+    if (!els.sectorLabBody) return;
+    els.sectorLabBody.querySelectorAll('[data-sector-deep]').forEach(el=>el.addEventListener('click',e=>{
+      if(e.target.closest('[data-sector-compare-add]')) return;
+      const t=el.dataset.sectorDeep; state.sectorDeepDive=t; renderSectorIntelligence(rows);
+    }));
+    els.sectorLabBody.querySelectorAll('[data-sector-compare-add]').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation(); const t=btn.dataset.sectorCompareAdd;
+      if(!state.sectorCompareSelection.includes(t)) state.sectorCompareSelection.push(t);
+      if(state.sectorCompareSelection.length>8) state.sectorCompareSelection.shift();
+      saveSectorCompareSelection();
+      state.sectorLabMode='compare'; state.sectorDeepDive=t; renderSectorIntelligence(rows);
+    }));
+    const addInput=els.sectorLabBody.querySelector('[data-sector-compare-search]');
+    const addSearch=()=>{const q=(addInput?.value||'').trim();if(!q)return;const hit=resolveCompareTicker(q);if(!hit){addInput.value='';addInput.placeholder='Não encontrado no universo';return;}if(!state.sectorCompareSelection.includes(hit.ticker))state.sectorCompareSelection.push(hit.ticker);if(state.sectorCompareSelection.length>8)state.sectorCompareSelection.shift();saveSectorCompareSelection();state.sectorDeepDive=hit.ticker;renderSectorIntelligence(rows);};
+    els.sectorLabBody.querySelector('[data-sector-compare-add-search]')?.addEventListener('click',addSearch);
+    addInput?.addEventListener('keydown',e=>{if(e.key==='Enter')addSearch();});
+    els.sectorLabBody.querySelector('[data-sector-clear-compare]')?.addEventListener('click',()=>{state.sectorCompareSelection=[]; saveSectorCompareSelection(); renderSectorIntelligence(rows);});
+    els.sectorLabBody.querySelectorAll('[data-sector-open-dossier]').forEach(btn=>btn.addEventListener('click',()=>openDetail(btn.dataset.sectorOpenDossier)));
+  }
+
+  function renderSectorIntelligence(rows) {
+    if (!els.sectorLab || !els.sectorLabBody || !Array.isArray(rows)) return;
+    const sectors=[...new Set(rows.map(r=>r.sector).filter(Boolean))].sort();
+    if (els.sectorLabSector && !els.sectorLabSector.dataset.ready) {
+      els.sectorLabSector.innerHTML=`<option value="">Escolhe um setor</option>`+sectors.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+      els.sectorLabSector.dataset.ready='1';
+      const preferred=sectors.find(s=>/technology/i.test(s)) || sectors[0] || '';
+      if(preferred) els.sectorLabSector.value=preferred;
+    }
+    const sector=els.sectorLabSector?.value || '';
+    els.sectorLabModes?.querySelectorAll('[data-sector-mode]').forEach(b=>b.classList.toggle('is-active',b.dataset.sectorMode===state.sectorLabMode));
+    if (els.sectorLabSelection) els.sectorLabSelection.textContent=sector ? `${sector} · ${rows.filter(r=>r.sector===sector).length} empresas` : 'Seleciona um setor';
+    if(!sector){els.sectorLabBody.innerHTML='<div class="sector-empty">Escolhe um setor para descobrir, comparar e abrir deep dives.</div>'; return;}
+    if(state.sectorLabMode==='compare') els.sectorLabBody.innerHTML=renderSectorCompare(rows,sector);
+    else if(state.sectorLabMode==='watchlist') els.sectorLabBody.innerHTML=renderSectorWatchlist(rows,sector);
+    else els.sectorLabBody.innerHTML=renderSectorDiscover(rows,sector);
+    bindSectorLabActions(rows,sector);
   }
 
   function applyFilters() {
@@ -965,10 +1195,12 @@
       if (sort === "qv-desc") return (b.quality_value_score ?? -1) - (a.quality_value_score ?? -1);
       if (sort === "revision-desc") return (b.analyst_eps_next_q_revision_30d_pct ?? b.analyst_eps_next_y_revision_30d_pct ?? -999) - (a.analyst_eps_next_q_revision_30d_pct ?? a.analyst_eps_next_y_revision_30d_pct ?? -999);
       if (sort === "earnings-asc") return (a.analyst_days_to_earnings ?? 99999) - (b.analyst_days_to_earnings ?? 99999);
+      if (sort === "perspective") return perspectiveSortValue(b, state.stockPerspective) - perspectiveSortValue(a, state.stockPerspective);
       return 0;
     });
 
     state.filtered = rows;
+    renderSectorIntelligence(equities);
     if (els.resultCount) els.resultCount.textContent = `${rows.length} resultados`;
     renderStockTableHead();
     render(els.list, state.filtered);
@@ -1011,7 +1243,7 @@
     fpe: { label:"Forward P/E", short:"Fwd P/E", value:r=>r.forward_pe, format:v=>fmtRatio(v) },
     ev: { label:"EV/EBITDA", short:"EV/EBITDA", value:r=>r.enterprise_to_ebitda, format:v=>fmtRatio(v) },
     fcfyield: { label:"FCF yield", short:"FCF Y", value:r=>r.fcf_yield, format:v=>fmtRawPct(v) },
-    dividend: { label:"Dividend yield", short:"Yield", value:r=>r.dividend_yield, format:v=>fmtRawPct(v) },
+    dividend: { label:"Dividend yield", short:"Yield", value:r=>r.dividend_yield, format:v=>fmtDividendYield(v) },
     payout: { label:"Payout", short:"Payout", value:r=>r.payout_ratio, format:v=>fmtRawPct(v) },
     insider: { label:"Insider net 30d", short:"Insider", value:r=>r.insider_net_value_30d, format:(v,r)=>v==null?"—":fmtMoney(v,r.currency||"USD") },
     buys: { label:"Insider buys", short:"Buys", value:r=>r.insider_buy_count_30d, format:v=>v==null?"—":String(v) },
@@ -1058,15 +1290,27 @@
   function renderStockColumnsPanel(){
     if(!els.stockColumnsPanel) return;
     const selected=new Set(activeStockColumns());
-    els.stockColumnsPanel.innerHTML=`<p>Seleciona até 4 métricas. A primeira coluna Empresa é fixa.</p><div class="stock-column-options">${Object.entries(STOCK_COLUMN_DEFS).map(([k,d])=>`<label><input type="checkbox" value="${k}" ${selected.has(k)?'checked':''}><span>${escapeHtml(d.label)}</span></label>`).join('')}</div><div class="stock-column-actions"><button type="button" data-columns-reset>Usar perspetiva</button><button type="button" data-columns-apply>Aplicar</button></div>`;
+    els.stockColumnsPanel.innerHTML=`<p>Seleciona até 4 métricas. A primeira coluna Empresa é fixa. Ao escolher uma 5.ª métrica, a mais antiga é substituída.</p><div class="stock-column-options">${Object.entries(STOCK_COLUMN_DEFS).map(([k,d])=>`<label><input type="checkbox" value="${k}" ${selected.has(k)?'checked':''}><span>${escapeHtml(d.label)}</span></label>`).join('')}</div><div class="stock-column-actions"><button type="button" data-columns-clear>Limpar</button><button type="button" data-columns-reset>Usar perspetiva</button><button type="button" data-columns-apply>Aplicar</button></div>`;
+    const selectionOrder=[...selected];
     els.stockColumnsPanel.querySelector('[data-columns-apply]')?.addEventListener('click',()=>{
-      const vals=[...els.stockColumnsPanel.querySelectorAll('input:checked')].map(x=>x.value).slice(0,4);
+      const vals=selectionOrder.filter(k=>els.stockColumnsPanel.querySelector(`input[value="${k}"]`)?.checked).slice(-4);
       state.stockCustomColumns=vals.length?vals:null; renderStockTableHead(); applyFilters(); els.stockColumnsPanel.hidden=true;
     });
     els.stockColumnsPanel.querySelector('[data-columns-reset]')?.addEventListener('click',()=>{state.stockCustomColumns=null; renderStockColumnsPanel(); renderStockTableHead(); applyFilters();});
+    els.stockColumnsPanel.querySelector('[data-columns-clear]')?.addEventListener('click',()=>{
+      selectionOrder.length=0; els.stockColumnsPanel.querySelectorAll('input').forEach(x=>x.checked=false);
+    });
     els.stockColumnsPanel.querySelectorAll('input').forEach(cb=>cb.addEventListener('change',()=>{
-      const checked=[...els.stockColumnsPanel.querySelectorAll('input:checked')];
-      if(checked.length>4){cb.checked=false;}
+      const key=cb.value;
+      const ix=selectionOrder.indexOf(key); if(ix>=0) selectionOrder.splice(ix,1);
+      if(cb.checked){
+        selectionOrder.push(key);
+        if(selectionOrder.length>4){
+          const removed=selectionOrder.shift();
+          const oldCb=els.stockColumnsPanel.querySelector(`input[value="${removed}"]`);
+          if(oldCb) oldCb.checked=false;
+        }
+      }
     }));
   }
 
@@ -1248,7 +1492,7 @@
     if(Number.isFinite(Number(cur))&&Number.isFinite(Number(old))&&Number(old)>0){
       const yrs=Math.max(1,Math.min(3,hist.length-1)); const cagr=(Math.pow(Number(cur)/Number(old),1/yrs)-1)*100; trend=`${cagr>=0?'+':''}${cagr.toFixed(1)}% CAGR`;
     }
-    return {current:cur==null?'—':Number(cur).toFixed(2), oneYear:one==null?'—':Number(one).toFixed(2), trend, sector:fmtRawPct(r.sector_dividend_yield_median)};
+    return {current:cur==null?'—':Number(cur).toFixed(2), oneYear:one==null?'—':Number(one).toFixed(2), trend, sector:fmtDividendYield(r.sector_dividend_yield_median)};
   }
 
   function metricContextHtml(c){
@@ -1273,9 +1517,9 @@
     }
     const mcap=Number(r.market_cap), rep=Number(r.repurchases_last_quarter);
     const annualisedBuybackYield=(Number.isFinite(rep)&&rep>0&&Number.isFinite(mcap)&&mcap>0) ? (rep*4/mcap) : null;
-    const dy=Number(r.dividend_yield), dilution=Number(r.dilution_yoy), fcfCov=Number(r.dividend_fcf_coverage), payout=Number(r.payout_ratio);
+    const dyPct=Number(r.dividend_yield), dy=dividendYieldFraction(r.dividend_yield), dilution=Number(r.dilution_yoy), fcfCov=Number(r.dividend_fcf_coverage), payout=Number(r.payout_ratio);
     const shareholderYield=(Number.isFinite(dy)?dy:0) + (Number.isFinite(annualisedBuybackYield)?annualisedBuybackYield:0) - (Number.isFinite(dilution)&&dilution>0?dilution:0);
-    const hasAny=[dy,annualisedBuybackYield,dilution,fcfCov,payout,divCagr].some(Number.isFinite);
+    const hasAny=[dyPct,annualisedBuybackYield,dilution,fcfCov,payout,divCagr].some(Number.isFinite);
     if(!hasAny) return '';
     const allocationTone = Number.isFinite(shareholderYield) ? (shareholderYield>0.04?'positive':shareholderYield<0?'negative':'neutral') : 'neutral';
     return `<section class="capital-allocation-block">
@@ -1327,7 +1571,7 @@
       cards.push(metricCardHtml({title:"Price / FFO · proxy", value:fmtRatio(pFfo), subtitle:"valuation REIT-native", explanation:"Preço dividido pelo FFO por ação proxy. É geralmente mais informativo para REITs do que P/E, mas deve ser confirmado contra FFO/AFFO reportado.", tone:pFfo == null ? "neutral" : Number(pFfo) < 15 ? "positive" : Number(pFfo) > 25 ? "negative" : "neutral"}));
       cards.push(metricCardHtml({title:"FFO payout · proxy", value:fmtRawPct(ffoPayout), subtitle:"dividendos pagos / FFO proxy", explanation:"Mede quanto do FFO proxy é consumido pelos dividendos. Valores muito elevados reduzem a margem de segurança da distribuição.", tone:ffoPayout == null ? "neutral" : Number(ffoPayout) <= .80 ? "positive" : Number(ffoPayout) > 1 ? "negative" : "neutral"}));
       cards.push(metricCardHtml({title:"Net Debt / EBITDA", value:fmtRatio(ndEbitda), subtitle:"alavancagem", explanation:"Proxy de alavancagem financeira. Em REITs deve ser complementado por maturidades, custo da dívida e dívida garantida/não garantida.", tone:ndEbitda == null ? "neutral" : Number(ndEbitda) < 5 ? "positive" : Number(ndEbitda) > 7 ? "negative" : "neutral"}));
-      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:ffoPayout == null ? "payout FFO indisponível" : `FFO payout ${fmtRawPct(ffoPayout)}`, explanation:"Rendimento distribuído contextualizado pelo payout sobre FFO proxy, quando disponível.", tone:pctTone(r.dividend_yield)}));
+      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtDividendYield(r.dividend_yield), subtitle:ffoPayout == null ? "payout FFO indisponível" : `FFO payout ${fmtRawPct(ffoPayout)}`, explanation:"Rendimento distribuído contextualizado pelo payout sobre FFO proxy, quando disponível.", tone:pctTone(r.dividend_yield)}));
       cards.push(metricCardHtml({title:"AFFO · NAV · Occupancy", value:"—", subtitle:reitCoverage == null ? "fontes especializadas não integradas" : `${Number(reitCoverage).toFixed(0)}% cobertura do REIT Native Pack`, explanation:"AFFO, NAV e ocupação exigem dados específicos do REIT e continuam deliberadamente ausentes. A app não os inventa nem transforma capex total em AFFO.", tone:"neutral", badge:"DATA INTEGRITY"}));
     } else if (insurance) {
       const claims = r.insurance_claims_to_revenue;
@@ -1356,7 +1600,7 @@
     if (!reit) {
       cards.push(metricCardHtml({title:"Free Cash Flow", value:fmtMoney(r.free_cash_flow, r.currency), subtitle:`FCF yield ${fmtRawPct(r.fcf_yield)}`, explanation:"Caixa disponível depois do investimento necessário no negócio.", tone:scoreTone(r.cashflow_pct)}));
       cards.push(metricCardHtml({title:"Forward P/E", value:fmtRatio(r.forward_pe), subtitle:r.forward_pe_vs_sector_pct == null ? "sem benchmark setorial" : `${fmtSignedPct(r.forward_pe_vs_sector_pct)} vs setor`, explanation:"Preço atual relativo ao lucro esperado. Deve ser lido com crescimento e qualidade.", tone:r.forward_pe_vs_sector_pct == null ? 'neutral' : Number(r.forward_pe_vs_sector_pct) < -10 ? 'positive' : Number(r.forward_pe_vs_sector_pct) > 20 ? 'negative' : 'neutral'}));
-      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtRawPct(r.dividend_yield), subtitle:r.payout_ratio == null ? "payout indisponível" : `payout ${fmtRawPct(r.payout_ratio)}`, explanation:"Rendimento anual distribuído; sustentabilidade depende de payout, cash flow e balanço.", tone:"neutral"}));
+      cards.push(metricCardHtml({title:"Dividend Yield", value:fmtDividendYield(r.dividend_yield), subtitle:r.payout_ratio == null ? "payout indisponível" : `payout ${fmtRawPct(r.payout_ratio)}`, explanation:"Rendimento anual distribuído; sustentabilidade depende de payout, cash flow e balanço.", tone:"neutral"}));
     }
 
     return `<section class="w-metric-section"><div class="w-section-intro"><span>${bank ? 'BANK METRICS' : reit ? 'REIT METRICS' : insurance ? 'INSURANCE METRICS' : 'COMPANY METRICS'}</span><h3>Os números que importam</h3><p>Cada métrica combina valor atual, tendência quando disponível e contexto. Valores ausentes são mostrados como ausentes — nunca estimados sem fonte.</p></div><div class="w-metric-stack">${cards.join('')}</div></section>`;
@@ -1397,7 +1641,7 @@
     const cashCards = [
       metricCardHtml({title:'Free Cash Flow', value:fmtMoney(r.free_cash_flow,r.currency), subtitle:`FCF yield ${fmtRawPct(r.fcf_yield)}`, explanation:'Caixa gerado depois do investimento operacional necessário.', tone:r.free_cash_flow == null?'neutral':Number(r.free_cash_flow)>0?'positive':'negative'}),
       metricCardHtml({title:'Net Cash / Debt', value:fmtMoney(r.net_cash,r.currency), subtitle:r.net_cash == null?'sem dados':Number(r.net_cash)>=0?'net cash':'net debt', explanation:'Caixa menos dívida total. Deve ser lido em conjunto com geração de FCF e maturidades.', tone:r.net_cash == null?'neutral':Number(r.net_cash)>=0?'positive':'negative'}),
-      metricCardHtml({title:'Dividend Safety', value:r.dividend_yield == null?'—':fmtRawPct(r.dividend_yield), context:dividendMetricContext(r), subtitle:Number.isFinite(divCov)?`${divCov.toFixed(1)}× cobertura FCF`:Number.isFinite(payout)?`payout ${(payout*100).toFixed(0)}%`:'sem payout/cobertura', explanation:Number.isFinite(divCov)?(divCov>=1.5?'FCF oferece margem confortável sobre o dividendo implícito.':divCov>=1?'FCF cobre o dividendo, mas com margem limitada.':'FCF atual não cobre integralmente o dividendo implícito.'):'A segurança do dividendo exige payout e cash flow suficientes.', tone:Number.isFinite(divCov)?(divCov>=1.5?'positive':divCov<1?'negative':'neutral'):'neutral'}),
+      metricCardHtml({title:'Dividend Safety', value:r.dividend_yield == null?'—':fmtDividendYield(r.dividend_yield), context:dividendMetricContext(r), subtitle:Number.isFinite(divCov)?`${divCov.toFixed(1)}× cobertura FCF`:Number.isFinite(payout)?`payout ${(payout*100).toFixed(0)}%`:'sem payout/cobertura', explanation:Number.isFinite(divCov)?(divCov>=1.5?'FCF oferece margem confortável sobre o dividendo implícito.':divCov>=1?'FCF cobre o dividendo, mas com margem limitada.':'FCF atual não cobre integralmente o dividendo implícito.'):'A segurança do dividendo exige payout e cash flow suficientes.', tone:Number.isFinite(divCov)?(divCov>=1.5?'positive':divCov<1?'negative':'neutral'):'neutral'}),
       metricCardHtml({title:'Balance Sheet', value:r.interest_coverage==null?'—':`${Number(r.interest_coverage).toFixed(1)}×`, subtitle:`D/E ${r.debt_to_equity==null?'—':Number(r.debt_to_equity).toFixed(0)}`, explanation:'Cobertura de juros e dívida/equity dão contexto à resistência financeira.', tone:r.interest_coverage==null?'neutral':Number(r.interest_coverage)>=5?'positive':Number(r.interest_coverage)<1.5?'negative':'neutral'})
     ];
 
@@ -1488,6 +1732,62 @@
       </div>
       <p class="detail-note">Estimativas e price targets são opiniões de analistas agregadas pela fonte e podem mudar sem aviso. Não são previsões do Finscanner e não entram no score principal.</p>
     </section>`;
+  }
+
+  function insiderTxKey(ticker, tx) {
+    return [ticker, tx?.accession||'', tx?.date||'', tx?.owner||'', tx?.type||'', tx?.shares??'', tx?.price??''].join('|');
+  }
+
+  function insiderActivitySectionHtml(r) {
+    const txs = Array.isArray(r.insider_transactions_365d) ? r.insider_transactions_365d : (Array.isArray(r.insider_transactions) ? r.insider_transactions : []);
+    const buys = r.insider_buy_count_365d ?? r.insider_buy_count_30d;
+    const sells = r.insider_sell_count_365d ?? r.insider_sell_count_30d;
+    const buyV = r.insider_buy_value_365d ?? r.insider_buy_value_30d;
+    const sellV = r.insider_sell_value_365d ?? r.insider_sell_value_30d;
+    const txList = txs.length ? txs.slice(0,16).map(tx=>`<button class="insider-ledger-row ${tx.type==='buy'?'buy':'sell'}" data-insider-ledger="${escapeHtml(insiderTxKey(r.ticker,tx))}"><span>${tx.type==='buy'?'▲ COMPRA':'▼ VENDA'} · ${escapeHtml(tx.date||'—')}</span><strong>${escapeHtml(tx.owner||'Insider')}</strong><small>${escapeHtml(tx.role||'')}${tx.shares!=null?` · ${Number(tx.shares).toLocaleString('pt-PT')} ações`:''}${tx.price!=null?` @ ${Number(tx.price).toFixed(2)}`:''}${tx.value!=null?` · ${fmtMoney(tx.value,r.currency||'USD')}`:''}</small></button>`).join('') : '<p class="detail-note">Sem transações P/S estruturadas disponíveis nos últimos 12 meses.</p>';
+    return `<section class="insider-activity-panel">
+      <div class="section-heading"><div><span class="eyebrow">SMART MONEY · SEC FORM 4</span><h3>Compras e vendas de insiders</h3><p>Preço da ação + transações open-market P/S observadas nos últimos 12 meses.</p></div><span class="insider-year-net ${(Number(buyV||0)-Number(sellV||0))>=0?'positive-text':'negative-text'}">${fmtMoney(Number(buyV||0)-Number(sellV||0),r.currency||'USD')}</span></div>
+      <div class="insider-year-summary"><span><b>${buys??'—'}</b> compras</span><span><b>${sells??'—'}</b> vendas</span><span>comprado <b>${fmtMoney(buyV,r.currency||'USD')}</b></span><span>vendido <b>${fmtMoney(sellV,r.currency||'USD')}</b></span></div>
+      <div class="insider-chart-controls" data-insider-chart-controls><button class="is-active" data-insider-chart-filter="all">Todos</button><button data-insider-chart-filter="buy">Compras</button><button data-insider-chart-filter="sell">Vendas</button></div>
+      <div class="insider-chart-wrap"><canvas id="insider-price-chart" class="insider-price-chart" height="220"></canvas><div id="insider-chart-tooltip" class="insider-chart-tooltip" hidden></div></div>
+      <div class="insider-chart-legend"><span class="buy">▲ compra insider</span><span class="sell">▼ venda insider</span></div>
+      <div class="insider-ledger">${txList}</div>
+      <p class="detail-note">Só códigos SEC P e S. O tamanho visual dos marcadores usa o valor da transação quando conhecido. Ausência de marcador pode significar cobertura SEC parcial.</p>
+    </section>`;
+  }
+
+  function drawInsiderChart(r, filter='all') {
+    const canvas=document.getElementById('insider-price-chart');
+    if(!canvas) return;
+    const history=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[];
+    const txs=(Array.isArray(r.insider_transactions_365d)?r.insider_transactions_365d:[]).filter(tx=>filter==='all'||tx.type===filter);
+    const wrap=canvas.parentElement, tooltip=document.getElementById('insider-chart-tooltip');
+    const ratio=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||680), cssH=220;
+    canvas.width=Math.round(cssW*ratio); canvas.height=Math.round(cssH*ratio); canvas.style.height=cssH+'px';
+    const ctx=canvas.getContext('2d'); ctx.scale(ratio,ratio); ctx.clearRect(0,0,cssW,cssH);
+    if(history.length<2){ctx.fillStyle='#8a93a1';ctx.font='13px system-ui';ctx.fillText('Histórico de preço será preenchido no próximo workflow para ações com atividade insider.',18,40);return;}
+    const pts=history.map(x=>({date:String(x.date),close:Number(x.close)})).filter(x=>Number.isFinite(x.close));
+    if(pts.length<2)return;
+    const parse=d=>new Date(d+'T00:00:00Z').getTime(); const minT=parse(pts[0].date),maxT=parse(pts[pts.length-1].date);
+    let minP=Math.min(...pts.map(x=>x.close)),maxP=Math.max(...pts.map(x=>x.close)); if(maxP===minP){minP-=1;maxP+=1}
+    const pad={l:46,r:18,t:18,b:30},w=cssW-pad.l-pad.r,h=cssH-pad.t-pad.b;
+    const xOf=d=>pad.l+((parse(d)-minT)/(maxT-minT))*w, yOf=v=>pad.t+h-((v-minP)/(maxP-minP))*h;
+    ctx.strokeStyle='#e7e9ee';ctx.lineWidth=1; for(let i=0;i<4;i++){const y=pad.t+i*h/3;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+w,y);ctx.stroke()}
+    ctx.strokeStyle='#5aa99a';ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.beginPath();pts.forEach((p,i)=>{const x=xOf(p.date),y=yOf(p.close);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+    ctx.fillStyle='#8a93a1';ctx.font='10px system-ui';ctx.fillText(maxP.toFixed(2),4,pad.t+4);ctx.fillText(minP.toFixed(2),4,pad.t+h);ctx.fillText(pts[0].date.slice(5),pad.l,cssH-7);const end=pts.at(-1).date.slice(5);ctx.fillText(end,cssW-pad.r-ctx.measureText(end).width,cssH-7);
+    const nearestPrice=date=>pts.reduce((best,p)=>Math.abs(parse(p.date)-parse(date))<Math.abs(parse(best.date)-parse(date))?p:best,pts[0]);
+    const knownVals=txs.map(t=>Number(t.value)).filter(v=>v>0);const maxV=knownVals.length?Math.max(...knownVals):1;
+    const markers=[];
+    txs.forEach(tx=>{if(!tx.date||parse(tx.date)<minT||parse(tx.date)>maxT)return;const base=Number(tx.price);const yprice=Number.isFinite(base)?base:nearestPrice(tx.date).close;const x=xOf(tx.date),y=yOf(yprice);const size=6+Math.min(8,Math.sqrt(Math.max(0,Number(tx.value)||0)/maxV)*8);ctx.fillStyle=tx.type==='buy'?'#17a673':'#e34e59';ctx.beginPath();if(tx.type==='buy'){ctx.moveTo(x,y-size);ctx.lineTo(x-size,y+size*.7);ctx.lineTo(x+size,y+size*.7)}else{ctx.moveTo(x,y+size);ctx.lineTo(x-size,y-size*.7);ctx.lineTo(x+size,y-size*.7)}ctx.closePath();ctx.fill();markers.push({x,y,size,tx});});
+    canvas._insiderMarkers=markers;
+    canvas.onclick=e=>{const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;let m=null,dist=Infinity;for(const z of markers){const d=Math.hypot(x-z.x,y-z.y);if(d<dist){dist=d;m=z}}if(!m||dist>28){if(tooltip)tooltip.hidden=true;return;}const tx=m.tx;if(tooltip){tooltip.hidden=false;tooltip.innerHTML=`<strong>${tx.type==='buy'?'COMPRA':'VENDA'} · ${escapeHtml(tx.owner||'Insider')}</strong><span>${escapeHtml(tx.role||'')}</span><span>${escapeHtml(tx.date||'—')} · ${tx.shares==null?'—':Number(tx.shares).toLocaleString('pt-PT')} ações · ${tx.price==null?'—':Number(tx.price).toFixed(2)} · ${fmtMoney(tx.value,r.currency||'USD')}</span>`;tooltip.style.left=Math.max(6,Math.min(cssW-260,m.x-100))+'px';tooltip.style.top=Math.max(8,m.y-86)+'px';}};
+  }
+
+  function bindInsiderChart(r) {
+    const controls=document.querySelector('[data-insider-chart-controls]');
+    if(!controls)return;
+    drawInsiderChart(r,'all');
+    controls.querySelectorAll('[data-insider-chart-filter]').forEach(btn=>btn.addEventListener('click',()=>{controls.querySelectorAll('button').forEach(b=>b.classList.toggle('is-active',b===btn));drawInsiderChart(r,btn.dataset.insiderChartFilter||'all')}));
   }
 
   function openDetail(ticker) {
@@ -1594,18 +1894,11 @@
       <div class="dossier-grid">
         <div><span>P/E trailing</span><strong>${fmtRatio(r.trailing_pe)}</strong></div><div><span>P/E forward</span><strong>${fmtRatio(r.forward_pe)}</strong></div>
         <div><span>Price / book</span><strong>${fmtRatio(r.price_to_book)}</strong></div><div><span>EV / EBITDA</span><strong>${fmtRatio(r.enterprise_to_ebitda)}</strong></div>
-        <div><span>PEG</span><strong>${r.peg_ratio == null ? "—" : Number(r.peg_ratio).toFixed(2)}</strong></div><div><span>Dividend yield</span><strong>${fmtRawPct(r.dividend_yield)}</strong></div>
+        <div><span>PEG</span><strong>${r.peg_ratio == null ? "—" : Number(r.peg_ratio).toFixed(2)}</strong></div><div><span>Dividend yield</span><strong>${fmtDividendYield(r.dividend_yield)}</strong></div>
         <div><span>Payout ratio</span><strong>${fmtRawPct(r.payout_ratio)}</strong></div><div><span>Beta</span><strong>${r.beta == null ? "—" : Number(r.beta).toFixed(2)}</strong></div>
       </div>
 
-      <h3 class="dossier-title">Smart Money · SEC Form 4</h3>
-      <div class="smartmoney-summary">
-        <div><span>Compras open-market</span><strong>${r.insider_buy_count_30d ?? '—'}</strong><small>${fmtMoney(r.insider_buy_value_30d, r.currency || 'USD')}</small></div>
-        <div><span>Vendas open-market</span><strong>${r.insider_sell_count_30d ?? '—'}</strong><small>${fmtMoney(r.insider_sell_value_30d, r.currency || 'USD')}</small></div>
-        <div><span>Fluxo líquido P/S</span><strong class="${insiderNet == null ? '' : insiderNet >= 0 ? 'positive-text' : 'negative-text'}">${insiderNetLabel}</strong><small>${insider}</small></div>
-      </div>
-      <div class="insider-transactions">${insiderTxHtml}</div>
-      <p class="detail-note">Só códigos SEC P (open-market purchase) e S (open-market sale). Awards, vesting, opções, gifts e outras transações não são tratados como compra/venda.</p>
+      ${insiderActivitySectionHtml(r)}
 
       <h3 class="dossier-title">Risco & contexto</h3>
       <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
@@ -1616,6 +1909,7 @@
       <p class="detail-note">O verdict é uma classificação quantitativa explicável e relativa ao universo analisado. Não constitui previsão de retorno nem aconselhamento financeiro.</p>
     `;
     els.detail.hidden = false;
+    bindInsiderChart(r);
 
     document.getElementById("owned-checkbox").addEventListener("change", () => {
       toggleOwned(r.ticker);
@@ -3804,11 +4098,23 @@
     els.stockPerspectives.querySelectorAll('[data-stock-perspective]').forEach(btn=>btn.addEventListener('click',()=>{
       state.stockPerspective=btn.dataset.stockPerspective || 'overview';
       state.stockCustomColumns=null;
+      if(els.sortBy) els.sortBy.value='perspective';
       els.stockPerspectives.querySelectorAll('[data-stock-perspective]').forEach(b=>b.classList.toggle('is-active',b===btn));
       renderStockTableHead(); renderStockColumnsPanel(); applyFilters();
     }));
   }
   on(els.stockColumnsBtn,'click',()=>{ if(!els.stockColumnsPanel) return; els.stockColumnsPanel.hidden=!els.stockColumnsPanel.hidden; if(!els.stockColumnsPanel.hidden) renderStockColumnsPanel(); });
+
+
+  on(els.sectorLabSector,'change',()=>{
+    state.sectorDeepDive=null;
+    if(els.stocksSectorFilter) els.stocksSectorFilter.value=els.sectorLabSector.value;
+    applyFilters();
+  });
+  if(els.sectorLabModes) els.sectorLabModes.querySelectorAll('[data-sector-mode]').forEach(btn=>btn.addEventListener('click',()=>{
+    state.sectorLabMode=btn.dataset.sectorMode || 'discover';
+    renderSectorIntelligence((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
+  }));
 
   document.querySelectorAll("#preset-filters [data-preset]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -3856,6 +4162,9 @@
     renderSmartMoney();
   }));
 
+  on(els.insiderAlertToggle, "click", () => toggleInsiderAlerts().catch(err=>console.warn("notification permission failed",err)));
+  refreshInsiderAlertUi();
+
   on(els.portfolioFile, "change", (e) => {
     const file = e.target.files[0];
     if (file) handlePortfolioFile(file);
@@ -3892,6 +4201,8 @@
   on(els.fundCompareA, 'change', renderFundCompare);
   on(els.fundCompareB, 'change', renderFundCompare);
 
+  on(els.stocksSectorFilter, "change", () => { if(els.sectorLabSector && els.stocksSectorFilter.value) els.sectorLabSector.value=els.stocksSectorFilter.value; });
+
   [els.search, els.marketFilter, els.stocksSectorFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].filter(Boolean).forEach(el => {
     el.addEventListener("input", applyFilters);
     el.addEventListener("change", applyFilters);
@@ -3899,7 +4210,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.49.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.52.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
