@@ -1,9 +1,9 @@
-const CACHE_VERSION = "finscanner-v23-physical-metals-019";
+const CACHE_VERSION = "v0.27.0";
 const SHELL_FILES = [
   "./",
   "./index.html",
-  "./style.css?v=0.18.0",
-  "./app.js?v=0.18.0",
+  "./style.css?v=0.25.0",
+  "./app.js?v=0.25.0",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"

@@ -1,0 +1,10 @@
+Finscanner v0.27.0 — Portfolio Structure Intelligence
+
+- Combina ações diretas + look-through observado dos ETFs.
+- Mostra ações vs ETFs, cobertura económica, Top 5/Top 10 e concentração observada.
+- Deteta hidden overlap: empresas detidas diretamente e simultaneamente através de ETFs.
+- Mostra empresas repetidas entre vários ETFs.
+- Calcula número efetivo de exposições e HHI apenas sobre a camada económica observada.
+- Liga os hotspots ao dossier/Stock Radar e ao ETF Consolidation Lab.
+- Novo filtro "Ações" no Portfolio Radar.
+- Não estima holdings de ETF ausentes; cobertura é sempre apresentada.

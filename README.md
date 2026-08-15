@@ -1,3 +1,11 @@
+# Finscanner v0.23.0 — Fund Holdings Intelligence
+
+This release deepens the Funds experience with Yahoo/yfinance FundsData metadata, a fund-specific dossier, observed top-holdings overlap, asset/sector mix, AUM/family/category metadata, and a more defensible Fee Saver. Overlap is explicitly a lower bound over the holdings returned by the source, never presented as full-portfolio overlap unless full holdings are available.
+
+# Finscanner v0.22.1 — Home Dashboard + Funds Intelligence
+
+Home simplificada e novo ETF Intelligence Engine (temas, geografia, estilo, Fee Saver e head-to-head).
+
 ## v0.13.0 — REIT Native Pack
 
 Adds a sector-native REIT layer using public statement-derived **FFO proxy**, **P/FFO proxy**, **FFO payout proxy** and **net debt / EBITDA**. The REIT score now ranks those metrics against REIT peers rather than applying general-company P/E/FCF logic. AFFO, NAV and occupancy remain explicitly unavailable until specialist data sources are integrated.
@@ -156,3 +164,46 @@ Data-integrity boundary: the operating ratio is **not** presented as a statutory
 
 ## v0.19.0 — Physical Metals Intelligence
 The Metals dashboard now consumes official/public physical-market sources where automation is feasible: CME COMEX warehouse stock reports, CFTC weekly Disaggregated COT positioning, and the Shanghai Gold Exchange benchmark. A World Gold Council central-bank-flow adapter is included but deliberately fails closed if the public workbook requires a logged-in session. Physical data blocks carry source/status metadata; the app does not fabricate delivery coverage, paper/physical leverage, or institutional-positioning scores from price data.
+
+## v0.20 — Delivery & Inventory Intelligence
+Metals now parses CME's official daily Issues & Stops PDF for standard gold and silver delivery notices and builds its own daily COMEX inventory history. Delivery notices are shown as clearing events; ounce equivalents are contract-size context and are never labelled as actual vault withdrawals. Registered-inventory 7d/30d/1y trends appear only after enough daily observations have accumulated.
+
+## v0.21 — Explainable Gold Pressure Index
+
+- Adds a transparent 0–100 Gold Pressure Index.
+- Components: registered-inventory contraction, delivery-notice intensity, Shanghai benchmark proxy, CFTC managed-money positioning, and central-bank flows when available.
+- Missing components are never imputed; weights are renormalized over available official-source inputs and coverage is shown.
+- Adds historical charts for COMEX registered inventory, delivery notices, CFTC positioning and the index itself.
+- The index is contextual market-pressure information, not a price forecast or trading signal.
+
+
+## v0.24.0 — ETF Portfolio Intelligence
+
+Funds now analyses the ETFs held in the local portfolio as a combined economic exposure. It uses the observed top holdings returned by Yahoo/yfinance FundsData and therefore treats all look-through figures as lower bounds, never as a full-fund decomposition unless source coverage actually reaches it.
+
+The panel reports ETF value considered in EUR, observed look-through coverage, value-weighted expense ratio, approximate annual fee drag, concentration in the largest observed underlying names, duplicated underlying holdings, and pairwise observed overlap hotspots. Selecting an overlap pair opens that pair directly in Head-to-Head.
+
+## v0.25.0 — ETF Consolidation Intelligence
+
+- Adds an **ETF Consolidation Lab** inside Fund Portfolio Intelligence.
+- Detects overlap clusters among ETFs actually held in the imported portfolio using observed top holdings.
+- For each redundancy cluster, ranks a **preferred core candidate** using a transparent, data-availability-aware heuristic:
+  - 40% cost efficiency (expense ratio)
+  - 25% representativeness of the overlap cluster
+  - 20% AUM
+  - 15% observed-holdings coverage
+  - missing inputs are omitted and the remaining weights are renormalized.
+- Shows which ETFs deserve redundancy review, pairwise observed overlap, and a theoretical annual cost delta where possible.
+- Adds a Portfolio shortcut directly to the ETF Consolidation Lab when 2+ ETFs are held.
+- This is a consolidation-review heuristic, not a sell instruction. It does not model taxes, bid/ask spreads, tracking difference, distribution policy, currency hedging, or investor-specific constraints.
+
+## v0.26.0 — Portfolio Simplification Intelligence
+A análise de ETFs da carteira inclui agora um Portfolio Simplification Score. O score mede oportunidade de simplificação (100 = maior redundância observada), constrói uma estrutura candidata com um ETF núcleo por cluster de overlap e preserva ETFs sem redundância forte. A simulação reporta ainda similaridade look-through observada e potencial diferença de expense ratio. Como FundsData normalmente fornece apenas top holdings, a análise é deliberadamente apresentada como lower-bound/heurística e não como recomendação automática de venda.
+
+## v0.27.0 — Portfolio Structure Intelligence
+
+A carteira passa a ser analisada economicamente, combinando posições diretas com o look-through observado dos ETFs. O painel mostra a divisão ações/ETFs, cobertura económica disponível, concentração Top 5/Top 10, número efetivo de exposições observadas, e identifica empresas que aparecem simultaneamente como posição direta e dentro de ETFs.
+
+A análise é deliberadamente conservadora: holdings de ETF que a fonte não devolve não são inventadas. Por isso, as métricas de concentração e hidden overlap devem ser lidas como a parte observável da estrutura, com cobertura explicitamente indicada.
+
+Foi também acrescentado o filtro **Ações** ao Portfolio Radar, mantendo Growth, Quality, Value, Zombies, ETFs e direção das teses.

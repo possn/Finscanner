@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, fx: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", thesisScope: "all", thesisDirectionFilter: "all" };
+  const state = { data: null, filtered: [], metals: null, fx: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all" };
 
   const els = {
     list: document.getElementById("list"),
@@ -23,6 +23,7 @@
     metalsNote: document.getElementById("metals-note"),
     portfolioList: document.getElementById("portfolio-list"),
     portfolioSummary: document.getElementById("portfolio-summary"),
+    portfolioStructureIntel: document.getElementById("portfolio-structure-intel"),
     exposurePanel: document.getElementById("exposure-panel"),
     portfolioFile: document.getElementById("portfolio-file"),
     portfolioClear: document.getElementById("portfolio-clear"),
@@ -49,6 +50,14 @@
     fundsSearch: document.getElementById("funds-search"),
     fundsSectorFilter: document.getElementById("funds-sector-filter"),
     fundsRegionFilter: document.getElementById("funds-region-filter"),
+    fundThemeFilters: document.getElementById("fund-theme-filters"),
+    fundGeoFilters: document.getElementById("fund-geo-filters"),
+    fundStyleFilters: document.getElementById("fund-style-filters"),
+    fundFeeSaver: document.getElementById("fund-fee-saver"),
+    fundCompareA: document.getElementById("fund-compare-a"),
+    fundCompareB: document.getElementById("fund-compare-b"),
+    fundCompareResult: document.getElementById("fund-compare-result"),
+    fundPortfolioIntel: document.getElementById("fund-portfolio-intel"),
     newsList: document.getElementById("news-list"),
     newsSearch: document.getElementById("news-search"),
     smartmoneyList: document.getElementById("smartmoney-list"),
@@ -59,6 +68,7 @@
     globalSearchBtn: document.getElementById("global-search-btn"),
     briefingCard: document.getElementById("briefing-card"),
     briefingGreeting: document.getElementById("briefing-greeting"),
+    homeOpportunityStrip: document.getElementById("home-opportunity-strip"),
   };
 
   function on(el, event, handler) {
@@ -223,6 +233,38 @@
     const body = strengthen ? (top.thesis_evolution_summary || top.thesis_summary) : insider ? `Compras líquidas de insiders: ${fmtMoney(top.insider_net_value_30d, top.currency || "USD")}.` : `Score ${Math.round(top.score)} · qualidade ${Math.round(top.quality_pct ?? 0)} · crescimento ${Math.round(top.growth_pct ?? 0)}.`;
     els.briefingCard.innerHTML = `<span class="briefing-signal">${escapeHtml(signal)}</span><small>${escapeHtml(top.ticker)}</small><h3>${escapeHtml(top.name || top.ticker)}</h3><p>${escapeHtml(body || "")}</p><button class="briefing-open" data-ticker="${escapeHtml(top.ticker)}">Abrir dossier →</button>`;
     els.briefingCard.querySelector(".briefing-open")?.addEventListener("click", () => openDetail(top.ticker));
+
+    renderHomeOpportunities(rows, top.ticker);
+  }
+
+  function renderHomeOpportunities(rows, featuredTicker) {
+    if (!els.homeOpportunityStrip) return;
+    const eligible = rows.filter(r => r.ticker !== featuredTicker && !r.zombie);
+    const strict = eligible.filter(r => Number(r.score) >= 60 && Number(r.quality_pct ?? r.profitability_pct ?? 0) >= 60 && Number(r.value_pct ?? 0) >= 45);
+    const pool = strict.length >= 4 ? strict : eligible;
+    const ranked = pool.slice().sort((a,b) => {
+      const ax = Number(a.quality_value_score ?? 0) + (a.thesis_direction === "strengthening" ? 8 : 0) + Number(a.score ?? 0) * 0.12;
+      const bx = Number(b.quality_value_score ?? 0) + (b.thesis_direction === "strengthening" ? 8 : 0) + Number(b.score ?? 0) * 0.12;
+      return bx - ax;
+    }).slice(0, 8);
+    if (!ranked.length) {
+      els.homeOpportunityStrip.innerHTML = `<div class="home-opportunity-loading">Ainda não há oportunidades com dados suficientes.</div>`;
+      return;
+    }
+    els.homeOpportunityStrip.innerHTML = ranked.map(r => {
+      const q = Math.round(Number(r.quality_pct ?? r.profitability_pct ?? 0));
+      const v = Math.round(Number(r.value_pct ?? 0));
+      const g = Math.round(Number(r.growth_pct ?? 0));
+      const direction = r.thesis_direction === "strengthening" ? "↗ tese a reforçar" : r.thesis_direction === "weakening" ? "↘ tese a enfraquecer" : "→ tese estável";
+      return `<button class="home-opportunity-card" data-ticker="${escapeHtml(r.ticker)}">
+        <span class="home-opportunity-card__meta"><b>${escapeHtml(r.ticker)}</b><em>${Math.round(Number(r.score ?? 0))}</em></span>
+        <strong>${escapeHtml(r.name || r.ticker)}</strong>
+        <small>${escapeHtml(direction)}</small>
+        <span class="home-opportunity-card__axes"><i>Q ${q}</i><i>V ${v}</i><i>G ${g}</i></span>
+        <span class="home-opportunity-card__open">Abrir dossier →</span>
+      </button>`;
+    }).join("");
+    els.homeOpportunityStrip.querySelectorAll(".home-opportunity-card").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
   }
 
   function marketOf(ticker) {
@@ -441,6 +483,29 @@
     return { label: fairLabel, cls: "neutral" };
   }
 
+  function drawMetalSeries(canvas, days, field, opts = {}) {
+    if (!canvas || !Array.isArray(days)) return false;
+    const pts = days.map(d => ({date:d.date, value:Number(d[field])})).filter(x => Number.isFinite(x.value));
+    if (pts.length < 2) return false;
+    const values = pts.map(x => x.value);
+    let min = Math.min(...values), max = Math.max(...values);
+    if (max === min) { min -= 1; max += 1; }
+    const ratio = window.devicePixelRatio || 1;
+    const cssW = Math.max(260, canvas.clientWidth || 320), cssH = opts.height || 120;
+    canvas.width = Math.round(cssW * ratio); canvas.height = Math.round(cssH * ratio);
+    canvas.style.height = cssH + "px";
+    const ctx = canvas.getContext("2d"); ctx.scale(ratio, ratio);
+    const pad = {l:8,r:8,t:10,b:18}; const w=cssW-pad.l-pad.r, h=cssH-pad.t-pad.b;
+    ctx.clearRect(0,0,cssW,cssH);
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || '#e5e7eb'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,pad.t+h); ctx.lineTo(pad.l+w,pad.t+h); ctx.stroke();
+    ctx.strokeStyle = opts.stroke || '#C9A063'; ctx.lineWidth=2.4; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.beginPath();
+    pts.forEach((pt,i)=>{ const x=pad.l+(i/(pts.length-1))*w; const y=pad.t+h-((pt.value-min)/(max-min))*h; i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim() || '#6b7280'; ctx.font='11px system-ui';
+    ctx.fillText(pts[0].date?.slice(5)||'', pad.l, cssH-3); const end=pts[pts.length-1].date?.slice(5)||''; ctx.fillText(end, cssW-pad.r-ctx.measureText(end).width, cssH-3);
+    return true;
+  }
+
   function renderMetals() {
     if (!state.metals || !state.metals.instruments || !state.metals.instruments.length) {
       if (els.metalsDashboard) els.metalsDashboard.innerHTML = `<p class="empty-state">Sem dados de metais ainda. Corre o pipeline.</p>`;
@@ -465,6 +530,13 @@
     const cotGold = physical.positioning?.gold || {};
     const sgeGold = physical.shanghai?.gold_benchmark || {};
     const centralBanks = physical.central_banks || {};
+    const deliveries = physical.deliveries || {};
+    const goldDelivery = deliveries.gold || {};
+    const silverDelivery = deliveries.silver || {};
+    const histTrend = state.metals.physical_history?.trends?.gold || {};
+    const historyObs = state.metals.physical_history?.observations || 0;
+    const historyRecent = state.metals.physical_history?.recent || [];
+    const pressure = state.metals.physical_pressure_index || {};
     const ways = state.metals.ways_to_play || {};
     const pills = (ways.own_metal || []).map(x => `<button class="metal-pill" data-open-stock="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join("");
     const minerPills = (ways.miners || []).map(x => `<button class="metal-pill" data-open-stock="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join("");
@@ -488,8 +560,24 @@
         <div class="force-grid">
           <article class="force-card"><span>TENDÊNCIA</span><strong>${gold?.data?.vs_200d_pct != null ? (gold.data.vs_200d_pct >= 0 ? "Acima" : "Abaixo") + " da média 200d" : "—"}</strong><small>${fmtSigned(gold?.data?.vs_200d_pct)} vs tendência longa</small></article>
           <article class="force-card"><span>VOLATILIDADE</span><strong>${gold?.data?.volatility_annualized_pct != null ? gold.data.volatility_annualized_pct.toFixed(1) + "%" : "—"}</strong><small>volatilidade anualizada</small></article>
-          <article class="force-card force-card--locked"><span>MERCADO FÍSICO</span><strong>Fonte não ligada</strong><small>inventários, deliveries e positioning não são inferidos</small></article>
+          <article class="force-card"><span>PRESSÃO DE MERCADO</span><strong>${pressure.status === "ok" ? Math.round(Number(pressure.score)) + "/100" : "—"}</strong><small>${pressure.status === "ok" ? escapeHtml(pressure.label || "") + " · cobertura " + Math.round(Number(pressure.coverage_pct||0)) + "%" : "dados oficiais ainda insuficientes"}</small></article>
         </div>
+      </section>
+
+      <section class="metals-section-block pressure-index-block">
+        <div class="section-heading compact"><div><span class="eyebrow">GOLD PRESSURE INDEX</span><h3>Pressão física e de procura, explicada</h3></div></div>
+        ${pressure.status === "ok" ? `<div class="pressure-hero">
+          <div class="pressure-score-ring" style="--pressure:${Math.max(0,Math.min(100,Number(pressure.score)||0))}"><strong>${Math.round(Number(pressure.score))}</strong><span>/100</span></div>
+          <div><strong class="pressure-label">${escapeHtml(pressure.label || "")}</strong><p>Cobertura atual: ${Math.round(Number(pressure.coverage_pct||0))}% das componentes previstas. Componentes em falta são removidas e os pesos disponíveis são renormalizados.</p></div>
+        </div>
+        <div class="pressure-components">${(pressure.components||[]).map(c=>`<div class="pressure-component"><div><span>${escapeHtml(c.label||c.key)}</span><small>${escapeHtml(c.explain||"")}</small></div><div class="pressure-component-bar"><i style="width:${Math.max(0,Math.min(100,Number(c.score)||0))}%"></i></div><strong>${Math.round(Number(c.score)||0)}</strong></div>`).join("")}</div>
+        <div class="metals-history-grid">
+          <article><div class="physical-card-head"><span>REGISTERED INVENTORY</span><span class="source-state ${historyObs>1?'ok':'off'}">${historyObs} obs.</span></div><canvas id="gold-inventory-chart" class="metals-history-chart"></canvas><small>COMEX gold registered · onças</small></article>
+          <article><div class="physical-card-head"><span>DELIVERY INTENSITY</span><span class="source-state ${historyObs>1?'ok':'off'}">histórico</span></div><canvas id="gold-delivery-chart" class="metals-history-chart"></canvas><small>notices diários · não equivale a retirada do vault</small></article>
+          <article><div class="physical-card-head"><span>CFTC POSITIONING</span><span class="source-state ${historyObs>1?'ok':'off'}">semanal</span></div><canvas id="gold-positioning-chart" class="metals-history-chart"></canvas><small>managed-money net como % do open interest</small></article>
+          <article><div class="physical-card-head"><span>PRESSURE INDEX</span><span class="source-state ${historyObs>1?'ok':'off'}">memória</span></div><canvas id="gold-pressure-chart" class="metals-history-chart"></canvas><small>índice 0–100 · histórico próprio</small></article>
+        </div>
+        <p class="method-note">${escapeHtml(pressure.method || "O índice só é mostrado quando existe cobertura material de fontes oficiais.")}</p>` : `<div class="empty-state">Ainda não existe cobertura suficiente para calcular o índice. O Finscanner não preenche componentes em falta com estimativas.</div>`}
       </section>
 
       <section class="metals-section-block physical-intelligence">
@@ -504,6 +592,16 @@
             ${comexGold.status === "ok" ? `<strong class="physical-big">${(Number(comexGold.registered_oz || 0)/1e6).toFixed(2)} <small>Moz registered</small></strong><div class="physical-split"><span>Eligible <b>${(Number(comexGold.eligible_oz || 0)/1e6).toFixed(2)} Moz</b></span><span>Total <b>${(Number(comexGold.total_oz || 0)/1e6).toFixed(2)} Moz</b></span></div>` : `<strong class="physical-big">—</strong><p>Inventário registered/eligible só aparece quando o XLS oficial da CME é lido com sucesso.</p>`}
           </article>
           <article class="physical-card">
+            <div class="physical-card-head"><span>COMEX · DELIVERY NOTICES</span><span class="source-state ${deliveries.status === "ok" ? "ok" : "off"}">${deliveries.status === "ok" ? "CME" : "indisponível"}</span></div>
+            ${goldDelivery.status === "ok" ? `<strong class="physical-big">${Number(goldDelivery.daily_notices || 0).toLocaleString("pt-PT")} <small>gold notices/dia</small></strong><p>${goldDelivery.daily_oz_equivalent != null ? (Number(goldDelivery.daily_oz_equivalent)/1e6).toFixed(3)+" Moz equivalente" : ""}</p><div class="physical-split"><span>MTD <b>${Number(goldDelivery.month_to_date_notices || 0).toLocaleString("pt-PT")}</b></span><span>Registered equiv. <b>${comexGold.registered_oz && goldDelivery.daily_oz_equivalent != null ? (Number(goldDelivery.daily_oz_equivalent)/Number(comexGold.registered_oz)*100).toFixed(2)+"%" : "—"}</b></span></div><small>${escapeHtml(deliveries.business_date || "")} · notices ≠ retirada de metal do vault</small>` : `<strong class="physical-big">—</strong><p>O pipeline tenta o PDF diário oficial Issues & Stops da CME.</p>`}
+          </article>
+          <article class="physical-card">
+            <div class="physical-card-head"><span>REGISTERED INVENTORY TREND</span><span class="source-state ${historyObs > 1 ? "ok" : "off"}">${historyObs} obs.</span></div>
+            <strong class="physical-big">${comexGold.registered_oz ? (Number(comexGold.registered_oz)/1e6).toFixed(2)+" <small>Moz</small>" : "—"}</strong>
+            <div class="physical-split"><span>7d <b class="${Number(histTrend.registered_change_7d_pct)>=0 ? "good":"weak"}">${fmtSigned(histTrend.registered_change_7d_pct)}</b></span><span>30d <b class="${Number(histTrend.registered_change_30d_pct)>=0 ? "good":"weak"}">${fmtSigned(histTrend.registered_change_30d_pct)}</b></span><span>1a <b>${fmtSigned(histTrend.registered_change_365d_pct)}</b></span></div>
+            <p>${historyObs < 8 ? "A memória própria está a ser construída diariamente." : (Number(histTrend.registered_change_30d_pct) < -5 ? "Registered inventory em contração material no último mês." : "Inventário acompanhado diariamente pelo Finscanner.")}</p>
+          </article>
+          <article class="physical-card">
             <div class="physical-card-head"><span>SHANGHAI BENCHMARK</span><span class="source-state ${sgeGold.status === "ok" ? "ok" : "off"}">${sgeGold.status === "ok" ? "SGE" : "indisponível"}</span></div>
             ${sgeGold.status === "ok" ? `<strong class="physical-big">¥${Number(sgeGold.benchmark_cny_per_g).toFixed(2)} <small>/g</small></strong>${sgeGold.premium_vs_comex_front_pct != null ? `<p class="${Number(sgeGold.premium_vs_comex_front_pct)>=0 ? "good" : "weak"}">${fmtSigned(sgeGold.premium_vs_comex_front_pct)} vs COMEX front-month</p>` : ""}<small>${escapeHtml(sgeGold.trade_date || "")} · proxy cross-market, não Shanghai-London spot premium</small>` : `<strong class="physical-big">—</strong><p>Benchmark oficial SGE. Sem valor se a página não puder ser processada no workflow.</p>`}
           </article>
@@ -512,8 +610,8 @@
             ${centralBanks.status === "ok" && (centralBanks.buyers || []).length ? `<strong class="physical-big">${escapeHtml(centralBanks.buyers[0].country)} <small>${fmtSigned(centralBanks.buyers[0].tonnes,1)}t</small></strong><p>Maior comprador no período disponível</p><div class="flow-mini">${(centralBanks.buyers || []).slice(0,3).map(x=>`<span>↑ ${escapeHtml(x.country)} <b>${fmtSigned(x.tonnes,1)}t</b></span>`).join("")}${(centralBanks.sellers || []).slice(0,2).map(x=>`<span class="weak">↓ ${escapeHtml(x.country)} <b>${fmtSigned(x.tonnes,1)}t</b></span>`).join("")}</div>` : `<strong class="physical-big">—</strong><p>O workbook público do WGC pode exigir sessão/login. Se bloquear, o Finscanner não inventa fluxos.</p>`}
           </article>
         </div>
-        ${comexSilver.status === "ok" ? `<div class="silver-strip"><span>COMEX SILVER</span><strong>${(Number(comexSilver.registered_oz || 0)/1e6).toFixed(1)} Moz registered</strong><small>${(Number(comexSilver.eligible_oz || 0)/1e6).toFixed(1)} Moz eligible</small></div>` : ""}
-        <p class="method-note">CFTC: posições semanais reportadas; CME: stocks dos depositários; SGE: benchmark oficial. O gauge é uma visualização do net managed-money como % do open interest — não é um score preditivo.</p>
+        ${comexSilver.status === "ok" ? `<div class="silver-strip"><span>COMEX SILVER</span><strong>${(Number(comexSilver.registered_oz || 0)/1e6).toFixed(1)} Moz registered</strong><small>${(Number(comexSilver.eligible_oz || 0)/1e6).toFixed(1)} Moz eligible${silverDelivery.status === "ok" ? ` · ${Number(silverDelivery.daily_notices||0).toLocaleString("pt-PT")} delivery notices hoje` : ""}</small></div>` : ""}
+        <p class="method-note">CFTC: posições semanais reportadas; CME: stocks dos depositários; SGE: benchmark oficial. O gauge é uma visualização do net managed-money como % do open interest — não é um score preditivo. Delivery notices são eventos de clearing; o equivalente em onças não significa retirada efetiva do depósito.</p>
       </section>
 
       <section class="metals-section-block">
@@ -533,6 +631,13 @@
         <div class="ways-row"><strong>Royalty & streaming</strong><div>${royaltyPills || "—"}</div></div>
       </section>
     `;
+    if (pressure.status === "ok" && historyRecent.length > 1) {
+      drawMetalSeries(document.getElementById("gold-inventory-chart"), historyRecent, "gold_registered_oz", {stroke:"#b07a33"});
+      drawMetalSeries(document.getElementById("gold-delivery-chart"), historyRecent, "gold_daily_delivery_notices", {stroke:"#b07a33"});
+      drawMetalSeries(document.getElementById("gold-positioning-chart"), historyRecent, "gold_mm_net_pct_oi", {stroke:"#3b8f70"});
+      drawMetalSeries(document.getElementById("gold-pressure-chart"), historyRecent, "gold_pressure_index", {stroke:"#b07a33"});
+    }
+
     els.metalsDashboard?.querySelectorAll("[data-open-stock]").forEach(btn => btn.addEventListener("click", () => {
       const ticker = btn.dataset.openStock;
       const row = state.data?.stocks?.find(x => x.ticker === ticker);
@@ -957,6 +1062,7 @@
   function openDetail(ticker) {
     const r = state.data.stocks.find(s => s.ticker === ticker);
     if (!r) return;
+    if (r.quote_type === "ETF") { openFundDetail(r); return; }
 
     const zombieLabel = { yes: "SIM — cobertura de juros < 1×", no: "não", unknown: "desconhecido" }[r.zombie];
     const insider = typeof r.insider_form4_count_30d === "number"
@@ -1435,6 +1541,7 @@
     if (filter === "quality") return r.quote_type !== "ETF" && Number(r.quality_pct ?? r.profitability_pct ?? -1) >= 70;
     if (filter === "value") return r.quote_type !== "ETF" && Number(r.value_pct ?? -1) >= 65;
     if (filter === "zombie") return r.quote_type !== "ETF" && r.zombie === "yes";
+    if (filter === "stocks") return r.quote_type !== "ETF";
     if (filter === "etf") return r.quote_type === "ETF";
     if (filter === "thesis-up") return r.quote_type !== "ETF" && r.thesis_direction === "strengthening";
     if (filter === "thesis-down") return r.quote_type !== "ETF" && r.thesis_direction === "weakening";
@@ -1443,7 +1550,7 @@
   }
 
   function portfolioFilterCounts(rows) {
-    const filters = ["all","growth","quality","value","zombie","etf","thesis-up","thesis-down","thesis-changed"];
+    const filters = ["all","stocks","growth","quality","value","zombie","etf","thesis-up","thesis-down","thesis-changed"];
     return Object.fromEntries(filters.map(f => [f, rows.filter(r => portfolioFilterMatches(r, f)).length]));
   }
 
@@ -1493,7 +1600,7 @@
     if (!els.portfolioFilters) return;
     const c = portfolioFilterCounts(rows);
     const defs = [
-      ["all","Todos"], ["growth","Growth"], ["quality","Quality"], ["value","Value"], ["zombie","Zombies"],
+      ["all","Todos"], ["stocks","Ações"], ["growth","Growth"], ["quality","Quality"], ["value","Value"], ["zombie","Zombies"],
       ["etf","ETFs"], ["thesis-up","Tese ↑"], ["thesis-down","Tese ↓"], ["thesis-changed","Mudou"]
     ];
     els.portfolioFilters.innerHTML = defs.map(([id,label]) => `<button class="portfolio-filter-chip ${state.portfolioFilter===id?"is-active":""}" data-filter="${id}">${label}<span>${c[id]}</span></button>`).join("");
@@ -1501,6 +1608,135 @@
       state.portfolioFilter = btn.dataset.filter;
       renderPortfolio();
     }));
+  }
+
+  function renderPortfolioStructureIntel(portfolio, rows) {
+    if (!els.portfolioStructureIntel) return;
+    const byTicker = Object.fromEntries(rows.map(r => [r.ticker, r]));
+    const valued = Object.entries(portfolio).map(([ticker, entry]) => {
+      const row = byTicker[ticker];
+      if (!row) return null;
+      const eur = positionValue(entry, row, true);
+      return Number.isFinite(eur) && eur > 0 ? { ticker, entry, row, eur } : null;
+    }).filter(Boolean);
+
+    if (!valued.length) {
+      els.portfolioStructureIntel.innerHTML = '';
+      return;
+    }
+
+    const total = valued.reduce((s,x)=>s+x.eur,0);
+    const direct = valued.filter(x=>x.row.quote_type !== 'ETF');
+    const etfs = valued.filter(x=>x.row.quote_type === 'ETF');
+    const directValue = direct.reduce((s,x)=>s+x.eur,0);
+    const etfValue = etfs.reduce((s,x)=>s+x.eur,0);
+
+    const economic = new Map();
+    const upsert = (symbol, name) => {
+      const key = String(symbol || '').toUpperCase();
+      if (!key) return null;
+      if (!economic.has(key)) economic.set(key,{symbol:key,name:name||key,direct:0,indirect:0,funds:new Set()});
+      return economic.get(key);
+    };
+
+    // Direct equities are fully observed economic exposures.
+    for (const x of direct) {
+      const e=upsert(x.ticker,x.row.name||x.ticker);
+      if (e) e.direct += x.eur;
+    }
+
+    // ETFs are decomposed only through holdings actually returned by the source.
+    let observedEtfValue=0;
+    let etfsWithHoldings=0;
+    for (const x of etfs) {
+      const hmap=fundHoldingsMap(x.row);
+      if (!hmap.size) continue;
+      etfsWithHoldings++;
+      let coverage=0;
+      for (const h of hmap.values()) {
+        const weight=Number(h.weight)||0;
+        if (!(weight>0)) continue;
+        coverage += weight;
+        const e=upsert(h.symbol,h.name||h.symbol);
+        if (!e) continue;
+        e.indirect += x.eur*weight;
+        e.funds.add(x.ticker);
+      }
+      observedEtfValue += x.eur*Math.min(1,coverage);
+    }
+
+    const knownEconomicValue=directValue+observedEtfValue;
+    const coverage=total ? knownEconomicValue/total : null;
+    const exposures=[...economic.values()].map(x=>({...x,total:x.direct+x.indirect})).sort((a,b)=>b.total-a.total);
+    const top10=exposures.slice(0,10);
+    const top10Pct=total ? top10.reduce((s,x)=>s+x.total,0)/total*100 : null;
+    const top5Pct=total ? exposures.slice(0,5).reduce((s,x)=>s+x.total,0)/total*100 : null;
+    const directPlusEtf=exposures.filter(x=>x.direct>0 && x.indirect>0).sort((a,b)=>b.indirect-a.indirect);
+    const multiFund=exposures.filter(x=>x.funds.size>=2).sort((a,b)=>b.indirect-a.indirect);
+    const hiddenTopUp=directPlusEtf.reduce((s,x)=>s+x.indirect,0);
+    const hiddenTopUpPct=total ? hiddenTopUp/total*100 : null;
+
+    // Effective number is calculated only on the observed economic layer.
+    const hhiBase=knownEconomicValue>0 ? exposures.reduce((s,x)=>s+Math.pow(x.total/knownEconomicValue,2),0) : null;
+    const effectiveNames=hhiBase ? 1/hhiBase : null;
+    const hhi=hhiBase ? hhiBase*10000 : null;
+    const concentrationLabel = hhi==null ? '—' : hhi>=1800 ? 'Elevada' : hhi>=1000 ? 'Moderada' : 'Dispersa';
+
+    const money = v => new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v||0);
+    const pct = v => v==null ? '—' : `${v.toFixed(1)}%`;
+    const directPct=total ? directValue/total*100 : null;
+    const etfPct=total ? etfValue/total*100 : null;
+
+    const exposureRows=top10.map((x,i)=>{
+      const totalPct=total ? x.total/total*100 : 0;
+      const directPart=x.total ? x.direct/x.total*100 : 0;
+      const indirectPart=x.total ? x.indirect/x.total*100 : 0;
+      const source=x.direct>0 && x.indirect>0 ? `direta + ${x.funds.size} ETF${x.funds.size===1?'':'s'}` : x.direct>0 ? 'posição direta' : `${x.funds.size} ETF${x.funds.size===1?'':'s'}`;
+      return `<button class="structure-exposure-row" data-structure-ticker="${escapeHtml(x.symbol)}">
+        <span class="structure-rank">${i+1}</span>
+        <span class="structure-name"><b>${escapeHtml(x.symbol)}</b><small>${escapeHtml(x.name||x.symbol)} · ${source}</small></span>
+        <span class="structure-stack" title="Direta ${directPart.toFixed(0)}% · ETFs ${indirectPart.toFixed(0)}%"><i style="width:${Math.min(100,directPart)}%"></i><em style="width:${Math.min(100,indirectPart)}%"></em></span>
+        <strong>${totalPct.toFixed(1)}%</strong>
+      </button>`;
+    }).join('');
+
+    const overlapRows=directPlusEtf.slice(0,6).map(x=>`<button class="hidden-overlap-row" data-structure-ticker="${escapeHtml(x.symbol)}"><span><b>${escapeHtml(x.symbol)}</b><small>${escapeHtml(x.name||x.symbol)} · direta ${money(x.direct)} + ETFs ${money(x.indirect)}</small></span><strong>+${total ? (x.indirect/total*100).toFixed(1) : '0.0'}%</strong></button>`).join('');
+
+    const multiRows=multiFund.slice(0,6).map(x=>`<div class="hidden-overlap-row is-static"><span><b>${escapeHtml(x.symbol)}</b><small>${[...x.funds].slice(0,5).map(escapeHtml).join(' · ')}${x.funds.size>5?' · …':''}</small></span><strong>${x.funds.size} ETFs</strong></div>`).join('');
+
+    const interpretation = (()=>{
+      if (coverage!=null && coverage<0.55) return 'A cobertura look-through ainda é limitada; trata a concentração abaixo como um mínimo observável.';
+      if (hiddenTopUpPct!=null && hiddenTopUpPct>=10) return 'Há exposição indireta material a empresas que já possuis diretamente. O número de linhas da carteira subestima a concentração económica real.';
+      if (top10Pct!=null && top10Pct>=50) return 'As maiores exposições económicas têm peso elevado. Convém analisar risco por empresa, não apenas por ticker ou ETF.';
+      return 'A estrutura observada está relativamente distribuída. Mantém atenção aos overlaps entre ETFs e posições diretas.';
+    })();
+
+    els.portfolioStructureIntel.innerHTML=`
+      <section class="portfolio-structure-panel">
+        <div class="section-heading"><div><span class="eyebrow">PORTFOLIO STRUCTURE INTELLIGENCE</span><h3>O que possuis realmente</h3></div><span class="section-count">${valued.length} posições valorizadas</span></div>
+        <p class="fund-method-note">Combina ações diretas com o look-through observado dos ETFs. Holdings de ETF incompletas ficam fora do cálculo, por isso a concentração apresentada é conservadora sobre o total da carteira.</p>
+        <div class="portfolio-structure-kpis">
+          <div><span>Ações diretas</span><strong>${pct(directPct)}</strong><small>${money(directValue)}</small></div>
+          <div><span>ETFs</span><strong>${pct(etfPct)}</strong><small>${money(etfValue)}</small></div>
+          <div><span>Cobertura económica</span><strong>${coverage==null?'—':(coverage*100).toFixed(1)+'%'}</strong><small>${etfsWithHoldings}/${etfs.length} ETFs com holdings</small></div>
+          <div><span>Top 5 económico</span><strong>${pct(top5Pct)}</strong><small>mínimo observado</small></div>
+          <div><span>Top 10 económico</span><strong>${pct(top10Pct)}</strong><small>mínimo observado</small></div>
+          <div><span>Concentração observada</span><strong>${concentrationLabel}</strong><small>${effectiveNames==null?'—':effectiveNames.toFixed(1)+' posições efetivas'}${hhi==null?'':` · HHI ${hhi.toFixed(0)}`}</small></div>
+        </div>
+        <div class="portfolio-structure-insight"><strong>${hiddenTopUpPct==null?'—':hiddenTopUpPct.toFixed(1)+'%'}</strong><span>da carteira é exposição ETF observada a empresas que também possuis diretamente.</span><p>${escapeHtml(interpretation)}</p></div>
+        <div class="portfolio-structure-columns">
+          <article><span class="eyebrow">ECONOMIC EXPOSURE</span><h4>Maiores exposições reais observadas</h4><div class="structure-exposure-list">${exposureRows || '<p class="muted">Sem dados suficientes.</p>'}</div><div class="structure-legend"><span><i></i>Direta</span><span><em></em>Via ETFs</span></div></article>
+          <article><span class="eyebrow">HIDDEN OVERLAP</span><h4>Ação direta + ETFs</h4>${overlapRows || '<p class="muted">Não detetei sobreposição direta/ETF nas holdings observadas.</p>'}<span class="eyebrow structure-subhead">REPETIDA ENTRE ETFs</span>${multiRows || '<p class="muted">Sem holdings repetidas em dois ou mais ETFs observados.</p>'}</article>
+        </div>
+        ${etfs.length>=2 ? '<button class="portfolio-etf-consolidation-cta structure-lab-cta" data-structure-etf-lab><span><b>ETF Consolidation Lab</b><small>Ver quais fundos criam estas duplicações e qual o melhor candidato a núcleo.</small></span><strong>Abrir →</strong></button>' : ''}
+      </section>`;
+
+    els.portfolioStructureIntel.querySelectorAll('[data-structure-ticker]').forEach(btn=>btn.addEventListener('click',()=>{
+      const ticker=btn.dataset.structureTicker;
+      if (byTicker[ticker]) openDetail(ticker);
+      else { state.activeView='stocks'; switchView('stocks'); if (els.search) { els.search.value=ticker; els.search.dispatchEvent(new Event('input')); } }
+    }));
+    els.portfolioStructureIntel.querySelector('[data-structure-etf-lab]')?.addEventListener('click',()=>{ switchView('funds'); setTimeout(()=>els.fundPortfolioIntel?.scrollIntoView({behavior:'smooth',block:'start'}),80); });
   }
 
   function renderPortfolio() {
@@ -1515,6 +1751,7 @@
       if (els.portfolioFilters) els.portfolioFilters.innerHTML = "";
       if (els.portfolioThesisMonitor) els.portfolioThesisMonitor.innerHTML = "";
       els.portfolioSummary.innerHTML = "";
+      if (els.portfolioStructureIntel) els.portfolioStructureIntel.innerHTML = "";
       els.portfolioList.innerHTML = ownedTickers.length
         ? `<p class="empty-state">${ownedTickers.length} posição(ões) importada(s), mas ainda não há análise disponível. O ficheiro importado foi aceite; corre o workflow para incorporar esses símbolos no universo analisado.</p>`
         : `<p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Stocks e toca em "Tenho esta posição".</p>`;
@@ -1551,8 +1788,11 @@
         <div class="summary-item"><span class="summary-label">expense ratio médio (ETFs)</span><span class="summary-value">${avgFee != null ? fmtExpenseRatio(avgFee) : "sem dados"}</span></div>
       </div>
       <p class="detail-note">Ponderação económica convertida para EUR com data/fx.json. O score médio simples continua disponível para comparação; o score ponderado e as exposições por estilo/tese usam o valor atual de cada posição.</p>
+      ${etfs.length >= 2 ? `<button class="portfolio-etf-consolidation-cta" data-portfolio-etf-consolidation><span><b>ETF Consolidation Lab</b><small>${etfs.length} ETFs na carteira · analisar overlap, redundância e candidato a núcleo</small></span><strong>Analyzar →</strong></button>` : ''}
     `;
+    els.portfolioSummary.querySelector('[data-portfolio-etf-consolidation]')?.addEventListener('click',()=>{ switchView('funds'); setTimeout(()=>els.fundPortfolioIntel?.scrollIntoView({behavior:'smooth',block:'start'}),80); });
 
+    renderPortfolioStructureIntel(portfolio, rows);
     renderPortfolioThesisMonitor(rows);
     renderPortfolioFilterBar(rows);
     const filteredRows = rows.filter(r => portfolioFilterMatches(r, state.portfolioFilter));
@@ -1567,31 +1807,521 @@
   function escapeHtml(v) { return String(v ?? "").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
   let fundsSectorsPopulated = false;
+  let fundCompareOptionsPopulated = false;
+
+  function fundMeta(r) {
+    const text = `${r.ticker || ""} ${r.name || ""} ${r.sector || ""}`.toLowerCase();
+    const themes = [];
+    const add = (label, re) => { if (re.test(text)) themes.push(label); };
+    add("AI", /artificial|\bai\b|cloud|innovation/);
+    add("Semiconductors", /semiconductor|chip|soxx|smh/);
+    add("Defense", /defen[cs]e|aerospace|ita\b/);
+    add("Energy", /energy|oil|gas|xle\b/);
+    add("Nuclear", /uranium|nuclear|ura\b/);
+    add("Gold", /gold|gld\b|miners|precious/);
+    add("Cybersecurity", /cyber|hack\b/);
+    add("Robotics", /robot|automation|robo\b/);
+    add("Clean Energy", /clean energy|solar|tan\b/);
+
+    let style = "Broad";
+    if (/bond|treasury|fixed income|aggregate/.test(text)) style = "Bonds";
+    else if (/dividend|income|yield/.test(text)) style = "Dividend";
+    else if (/small cap|iwm\b/.test(text)) style = "Small Cap";
+    else if (/growth|innovation|nasdaq|qqq\b/.test(text)) style = "Growth";
+
+    let geo = r.region || "Global";
+    if (["Germany","France","Netherlands","Spain","Italy","Portugal","Switzerland","Sweden","Denmark","Poland","Norway","Finland","Austria","Belgium","Europe"].includes(geo)) geo = "Europe";
+    return { themes, style, geo };
+  }
+
+  function pctFundWeight(v) {
+    if (v == null || !Number.isFinite(Number(v))) return "—";
+    const n = Number(v);
+    return `${(n <= 1 ? n * 100 : n).toFixed(1)}%`;
+  }
+
+  function fundHoldingsMap(r) {
+    const out = new Map();
+    (Array.isArray(r.top_holdings) ? r.top_holdings : []).forEach(h => {
+      if (Array.isArray(h)) {
+        const [symbol, weight] = h;
+        if (symbol && Number.isFinite(Number(weight))) out.set(String(symbol).toUpperCase(), {symbol:String(symbol), name:String(symbol), weight:Number(weight)});
+      } else if (h && h.symbol && Number.isFinite(Number(h.weight))) {
+        out.set(String(h.symbol).toUpperCase(), {symbol:String(h.symbol), name:h.name || h.symbol, weight:Number(h.weight)});
+      }
+    });
+    return out;
+  }
+
+  function fundOverlap(a, b) {
+    const ah = fundHoldingsMap(a), bh = fundHoldingsMap(b);
+    if (!ah.size || !bh.size) return null;
+    let overlap = 0;
+    const shared = [];
+    ah.forEach((ha, symbol) => {
+      const hb = bh.get(symbol);
+      if (!hb) return;
+      const w = Math.min(Number(ha.weight), Number(hb.weight));
+      overlap += w;
+      shared.push({symbol, name:ha.name || hb.name || symbol, weight:w});
+    });
+    shared.sort((x,y)=>y.weight-x.weight);
+    return { value: overlap, shared, coverageA:[...ah.values()].reduce((x,h)=>x+Number(h.weight),0), coverageB:[...bh.values()].reduce((x,h)=>x+Number(h.weight),0) };
+  }
+
+  function fundBars(obj, limit=8) {
+    const entries = Object.entries(obj || {}).filter(([,v])=>Number.isFinite(Number(v))).sort((a,b)=>Number(b[1])-Number(a[1])).slice(0,limit);
+    if (!entries.length) return '<p class="muted">Sem dados estruturados disponíveis.</p>';
+    const max = Math.max(...entries.map(([,v])=>Number(v)), .0001);
+    return `<div class="fund-bars">${entries.map(([k,v])=>`<div class="fund-bar-row"><span>${escapeHtml(String(k).replace(/_/g,' '))}</span><i><b style="width:${Math.max(4, Number(v)/max*100)}%"></b></i><strong>${pctFundWeight(v)}</strong></div>`).join('')}</div>`;
+  }
+
+  function openFundDetail(r) {
+    const meta = fundMeta(r);
+    const holdings = [...fundHoldingsMap(r).values()].sort((a,b)=>b.weight-a.weight);
+    const topCoverage = holdings.reduce((x,h)=>x+Number(h.weight),0);
+    const starred = isWatched(r.ticker);
+    const owned = isOwned(r.ticker);
+    els.detailContent.innerHTML = `
+      <div class="fund-detail-hero">
+        <div><span class="eyebrow">FUND DOSSIER</span><h2>${escapeHtml(r.ticker)}</h2><p>${escapeHtml(r.name || 'ETF')}</p><small>${escapeHtml(r.fund_category || r.sector || 'ETF')} · ${escapeHtml(meta.geo)} · ${escapeHtml(meta.style)}</small></div>
+        <div class="fund-detail-fee"><span>Expense ratio</span><strong>${fmtExpenseRatio(r.expense_ratio)}</strong></div>
+      </div>
+      <div class="fund-detail-actions"><button class="fund-action" id="fund-watch">${starred?'★ Na watchlist':'☆ Watchlist'}</button><label class="fund-action fund-owned"><input id="fund-owned" type="checkbox" ${owned?'checked':''}> Na carteira</label></div>
+      <section class="fund-kpi-grid">
+        <div><span>AUM</span><strong>${r.fund_total_assets == null ? '—' : fmtCap(r.fund_total_assets)}</strong></div>
+        <div><span>Família</span><strong>${escapeHtml(r.fund_family || '—')}</strong></div>
+        <div><span>Categoria</span><strong>${escapeHtml(r.fund_category || r.sector || '—')}</strong></div>
+        <div><span>Início</span><strong>${escapeHtml(r.fund_inception_date || '—')}</strong></div>
+        <div><span>Região</span><strong>${escapeHtml(meta.geo)}</strong></div>
+        <div><span>Estilo</span><strong>${escapeHtml(meta.style)}</strong></div>
+      </section>
+      ${r.fund_description ? `<section class="fund-editorial-card"><span class="eyebrow">WHAT IT OWNS</span><p>${escapeHtml(r.fund_description)}</p></section>` : ''}
+      <section class="fund-detail-section"><div class="section-heading"><div><span class="eyebrow">TOP HOLDINGS</span><h3>Principais posições</h3></div><span class="section-count">${holdings.length ? pctFundWeight(topCoverage) : '—'}</span></div>
+        ${holdings.length ? `<div class="fund-holdings-list">${holdings.map(h=>`<div><span><b>${escapeHtml(h.symbol)}</b><small>${escapeHtml(h.name)}</small></span><i><b style="width:${Math.min(100, Math.max(3, Number(h.weight)*500))}%"></b></i><strong>${pctFundWeight(h.weight)}</strong></div>`).join('')}</div><p class="fund-method-note">A percentagem no cabeçalho é apenas a cobertura das posições devolvidas pela fonte, não 100% do fundo.</p>` : '<p class="muted">A fonte não devolveu top holdings para esta cotação.</p>'}
+      </section>
+      <section class="fund-detail-two"><article><span class="eyebrow">ASSET MIX</span><h3>Classes de ativos</h3>${fundBars(r.fund_asset_classes)}</article><article><span class="eyebrow">SECTOR MIX</span><h3>Exposição setorial</h3>${fundBars(r.fund_sector_weightings)}</article></section>
+      <section class="fund-editorial-card integrity"><span class="eyebrow">DATA INTEGRITY</span><h3>O que este dossier sabe</h3><p>Holdings, classes de ativos e pesos setoriais vêm do módulo FundsData quando Yahoo os disponibiliza. O overlap do comparador usa apenas as holdings observadas e é apresentado como limite inferior — não como composição completa do fundo.</p></section>
+    `;
+    els.detail.hidden = false;
+    document.getElementById('fund-watch')?.addEventListener('click', e => { toggleWatched(r.ticker); e.currentTarget.textContent = isWatched(r.ticker) ? '★ Na watchlist' : '☆ Watchlist'; });
+    document.getElementById('fund-owned')?.addEventListener('change', () => toggleOwned(r.ticker));
+  }
+
+  function renderFundCards(rows) {
+    if (!els.fundsList) return;
+    els.fundsList.innerHTML = rows.length ? rows.map(r => {
+      const m = fundMeta(r);
+      const fee = r.expense_ratio == null ? "—" : fmtExpenseRatio(Number(r.expense_ratio));
+      const ai = r.ai_exposure_pct == null ? "—" : `${Number(r.ai_exposure_pct).toFixed(1)}%`;
+      const theme = m.themes[0] || r.sector || "Diversified";
+      return `<article class="fund-result-card" data-ticker="${escapeHtml(r.ticker)}">
+        <div class="fund-result-top"><div><span class="eyebrow">${escapeHtml(theme)}</span><h3>${escapeHtml(r.ticker)}</h3><p>${escapeHtml(r.name || "ETF")}</p></div><button class="fund-open" data-fund-open="${escapeHtml(r.ticker)}">Abrir →</button></div>
+        <div class="fund-result-metrics">
+          <div><span>Expense ratio</span><strong>${fee}</strong></div>
+          <div><span>Região</span><strong>${escapeHtml(m.geo)}</strong></div>
+          <div><span>Estilo</span><strong>${escapeHtml(m.style)}</strong></div>
+          <div><span>AI exposure</span><strong>${ai}</strong></div>
+          <div><span>AUM</span><strong>${r.fund_total_assets == null ? "—" : fmtCap(r.fund_total_assets)}</strong></div>
+          <div><span>Top holdings</span><strong>${Array.isArray(r.top_holdings) ? r.top_holdings.length : 0}</strong></div>
+        </div>
+      </article>`;
+    }).join("") : '<p class="empty-state">Nenhum ETF corresponde a estes filtros.</p>';
+    els.fundsList.querySelectorAll('[data-fund-open]').forEach(x => x.addEventListener('click', () => openDetail(x.dataset.fundOpen)));
+  }
+
+  function renderFundFeeSaver(allFunds) {
+    if (!els.fundFeeSaver) return;
+    const owned = lsGet(LS_PORTFOLIO);
+    const ownedFunds = allFunds.filter(r => owned[r.ticker] && Number.isFinite(Number(r.expense_ratio)));
+    const candidates = [];
+    for (const held of ownedFunds) {
+      const hm = fundMeta(held);
+      const peers = allFunds.filter(r => r.ticker !== held.ticker && Number.isFinite(Number(r.expense_ratio)) && fundMeta(r).style === hm.style && (r.region === held.region || fundMeta(r).geo === hm.geo));
+      peers.sort((a,b) => {
+        const ao = fundOverlap(held,a)?.value ?? -1, bo = fundOverlap(held,b)?.value ?? -1;
+        if (ao >= 0 || bo >= 0) return bo-ao || Number(a.expense_ratio)-Number(b.expense_ratio);
+        return Number(a.expense_ratio)-Number(b.expense_ratio);
+      });
+      const alt = peers.find(x => { const ov=fundOverlap(held,x); return !ov || ov.value >= .15; }) || peers[0];
+      if (!alt) continue;
+      const diff = Number(held.expense_ratio) - Number(alt.expense_ratio);
+      if (diff <= 0.02) continue;
+      candidates.push({held, alt, diff});
+    }
+    candidates.sort((a,b)=>b.diff-a.diff);
+    if (!candidates.length) {
+      els.fundFeeSaver.innerHTML = `<p class="muted">Não encontrei ainda uma alternativa claramente mais barata entre os ETFs rastreados da tua carteira.</p>`;
+      return;
+    }
+    els.fundFeeSaver.innerHTML = candidates.slice(0,4).map(({held,alt,diff}) => {
+      const annual10k = diff / 100 * 10000;
+      return `<button class="fee-saver-row" data-fund-open="${escapeHtml(alt.ticker)}"><span><strong>${escapeHtml(held.ticker)} → ${escapeHtml(alt.ticker)}</strong><small>${fmtExpenseRatio(Number(held.expense_ratio))} → ${fmtExpenseRatio(Number(alt.expense_ratio))}</small></span><b>≈ €${annual10k.toFixed(0)}/10k ano</b></button>`;
+    }).join("") + `<p class="fund-method-note">Quando existem holdings observadas, o Fee Saver favorece alternativas com maior overlap antes do custo. Ainda assim confirma índice, réplica, moeda, tracking difference e fiscalidade.</p>`;
+    els.fundFeeSaver.querySelectorAll('[data-fund-open]').forEach(x => x.addEventListener('click',()=>openDetail(x.dataset.fundOpen)));
+  }
+
+  function populateFundCompare(allFunds) {
+    if (fundCompareOptionsPopulated || !els.fundCompareA || !els.fundCompareB) return;
+    const opts = allFunds.slice().sort((a,b)=>(a.ticker||'').localeCompare(b.ticker||'')).map(r => `<option value="${escapeHtml(r.ticker)}">${escapeHtml(r.ticker)} · ${escapeHtml(r.name || '')}</option>`).join('');
+    els.fundCompareA.innerHTML = `<option value="">ETF A</option>${opts}`;
+    els.fundCompareB.innerHTML = `<option value="">ETF B</option>${opts}`;
+    fundCompareOptionsPopulated = true;
+  }
+
+  function renderFundCompare() {
+    if (!els.fundCompareResult || !state.data) return;
+    const a = state.data.stocks.find(r => r.ticker === els.fundCompareA?.value && r.quote_type === 'ETF');
+    const b = state.data.stocks.find(r => r.ticker === els.fundCompareB?.value && r.quote_type === 'ETF');
+    if (!a || !b) { els.fundCompareResult.innerHTML = '<p class="muted">Escolhe dois fundos para comparar custos, exposição e classificação.</p>'; return; }
+    const am = fundMeta(a), bm = fundMeta(b);
+    const feeA = Number.isFinite(Number(a.expense_ratio)) ? Number(a.expense_ratio) : null;
+    const feeB = Number.isFinite(Number(b.expense_ratio)) ? Number(b.expense_ratio) : null;
+    const cheaper = feeA != null && feeB != null ? (feeA < feeB ? a.ticker : feeB < feeA ? b.ticker : 'igual') : '—';
+    const overlap = fundOverlap(a,b);
+    const overlapHtml = overlap ? `<div class="fund-overlap"><span class="eyebrow">OBSERVED HOLDINGS OVERLAP</span><strong>${pctFundWeight(overlap.value)}</strong><p>Limite inferior calculado apenas nas holdings devolvidas pela fonte (${pctFundWeight(overlap.coverageA)} de ${escapeHtml(a.ticker)}; ${pctFundWeight(overlap.coverageB)} de ${escapeHtml(b.ticker)}).</p>${overlap.shared.length ? `<div class="shared-holdings">${overlap.shared.slice(0,6).map(h=>`<span>${escapeHtml(h.symbol)} ${pctFundWeight(h.weight)}</span>`).join('')}</div>`:''}</div>` : `<p class="fund-method-note">A fonte não devolveu holdings suficientes para calcular overlap observado.</p>`;
+    els.fundCompareResult.innerHTML = `<div class="fund-h2h-grid">
+      <div><strong>${escapeHtml(a.ticker)}</strong><span>${escapeHtml(am.geo)} · ${escapeHtml(am.style)}</span><b>${feeA==null?'—':fmtExpenseRatio(feeA)}</b><small>${a.fund_total_assets==null?'AUM —':`AUM ${fmtCap(a.fund_total_assets)}`}</small></div>
+      <div><strong>${escapeHtml(b.ticker)}</strong><span>${escapeHtml(bm.geo)} · ${escapeHtml(bm.style)}</span><b>${feeB==null?'—':fmtExpenseRatio(feeB)}</b><small>${b.fund_total_assets==null?'AUM —':`AUM ${fmtCap(b.fund_total_assets)}`}</small></div>
+    </div><p class="fund-h2h-verdict">Mais barato: <strong>${escapeHtml(cheaper)}</strong></p>${overlapHtml}`;
+  }
+
+
+  function fundExpenseCostPct(r) {
+    const n = Number(r?.expense_ratio);
+    return Number.isFinite(n) && n >= 0 ? n : null; // percentage points, e.g. 0.20 = 0.20%
+  }
+
+  function buildFundOverlapClusters(held, minOverlap = 0.30) {
+    const n = held.length;
+    const adj = Array.from({length:n},()=>new Set());
+    const pairMap = new Map();
+    for (let i=0;i<n;i++) for (let j=i+1;j<n;j++) {
+      const ov = fundOverlap(held[i].row, held[j].row);
+      if (!ov) continue;
+      pairMap.set(`${i}:${j}`, ov);
+      if (ov.value >= minOverlap) { adj[i].add(j); adj[j].add(i); }
+    }
+    const seen = new Set(), clusters=[];
+    for (let i=0;i<n;i++) {
+      if (seen.has(i) || !adj[i].size) continue;
+      const stack=[i], idx=[]; seen.add(i);
+      while (stack.length) {
+        const k=stack.pop(); idx.push(k);
+        for (const j of adj[k]) if (!seen.has(j)) { seen.add(j); stack.push(j); }
+      }
+      if (idx.length>=2) clusters.push(idx.map(k=>held[k]));
+    }
+    return {clusters, pairMap};
+  }
+
+  function consolidationCandidate(cluster) {
+    if (!cluster?.length) return null;
+    // Transparent, data-availability-aware score. It is a consolidation heuristic,
+    // not a forecast of future returns or a sell instruction.
+    const fees = cluster.map(x=>fundExpenseCostPct(x.row)).filter(Number.isFinite);
+    const aums = cluster.map(x=>Number(x.row.fund_total_assets)).filter(x=>Number.isFinite(x)&&x>0);
+    const minFee = fees.length ? Math.min(...fees) : null;
+    const maxFee = fees.length ? Math.max(...fees) : null;
+    const logAums = aums.map(x=>Math.log10(x));
+    const minA = logAums.length ? Math.min(...logAums) : null;
+    const maxA = logAums.length ? Math.max(...logAums) : null;
+
+    const scored = cluster.map(x=>{
+      const pieces=[];
+      const fee=fundExpenseCostPct(x.row);
+      if (fee!=null) {
+        const v = maxFee===minFee ? 1 : 1-(fee-minFee)/(maxFee-minFee);
+        pieces.push({w:.40,v,reason:`custo ${fmtExpenseRatio(fee)}`});
+      }
+      const aum=Number(x.row.fund_total_assets);
+      if (Number.isFinite(aum)&&aum>0) {
+        const la=Math.log10(aum), v=maxA===minA?1:(la-minA)/(maxA-minA);
+        pieces.push({w:.20,v,reason:`AUM ${fmtCap(aum)}`});
+      }
+      if (Number.isFinite(x.coverage)) pieces.push({w:.15,v:Math.max(0,Math.min(1,x.coverage)),reason:`holdings observadas ${pctFundWeight(x.coverage)}`});
+      const ovs=cluster.filter(y=>y!==x).map(y=>fundOverlap(x.row,y.row)?.value).filter(Number.isFinite);
+      if (ovs.length) {
+        const avg=ovs.reduce((a,b)=>a+b,0)/ovs.length;
+        pieces.push({w:.25,v:Math.max(0,Math.min(1,avg)),reason:`representatividade ${pctFundWeight(avg)}`});
+      }
+      const wsum=pieces.reduce((a,b)=>a+b.w,0);
+      const score=wsum?pieces.reduce((a,b)=>a+b.w*b.v,0)/wsum:null;
+      return {...x,score,pieces};
+    }).sort((a,b)=>(b.score??-1)-(a.score??-1));
+    return {preferred:scored[0], ranked:scored};
+  }
+
+  function renderFundConsolidation(held, totalValue) {
+    const {clusters}=buildFundOverlapClusters(held, .30);
+    if (!clusters.length) return `<article class="fund-consolidation-panel"><span class="eyebrow">CONSOLIDATION LAB</span><h4>Sem redundâncias fortes detetadas</h4><p class="fund-method-note">Com as holdings observadas, nenhum grupo de ETFs da carteira ultrapassa 30% de overlap entre si. Isto não exclui redundância nas holdings que a fonte não devolve.</p></article>`;
+
+    const cards=clusters.map((cluster,idx)=>{
+      const c=consolidationCandidate(cluster); if (!c?.preferred) return '';
+      const preferred=c.preferred;
+      const others=c.ranked.filter(x=>x.ticker!==preferred.ticker);
+      const clusterValue=cluster.reduce((s,x)=>s+(x.eur||0),0);
+      const feeP=fundExpenseCostPct(preferred.row);
+      let currentCost=0, modeledCost=0, costCoverage=0;
+      for (const x of cluster) {
+        const fee=fundExpenseCostPct(x.row);
+        if (x.eur!=null && fee!=null) { currentCost += x.eur*fee/100; costCoverage += x.eur; if (feeP!=null) modeledCost += x.eur*feeP/100; }
+      }
+      const saving=(feeP!=null && costCoverage>0)?Math.max(0,currentCost-modeledCost):null;
+      const avgOv=others.map(x=>fundOverlap(preferred.row,x.row)?.value).filter(Number.isFinite);
+      const represent=avgOv.length?avgOv.reduce((a,b)=>a+b,0)/avgOv.length:null;
+      const reasons=[];
+      if (feeP!=null) reasons.push(`expense ratio ${fmtExpenseRatio(feeP)}`);
+      if (preferred.row.fund_total_assets) reasons.push(`AUM ${fmtCap(preferred.row.fund_total_assets)}`);
+      if (represent!=null) reasons.push(`overlap médio ${pctFundWeight(represent)}`);
+      const tags=cluster.map(x=>`<button class="consolidation-ticker ${x.ticker===preferred.ticker?'is-preferred':''}" data-fund-open="${escapeHtml(x.ticker)}">${escapeHtml(x.ticker)}</button>`).join('');
+      const review=others.map(x=>{
+        const ov=fundOverlap(preferred.row,x.row);
+        const fee=fundExpenseCostPct(x.row);
+        return `<div class="consolidation-review-row"><span><b>${escapeHtml(x.ticker)}</b><small>${ov?`${pctFundWeight(ov.value)} overlap observado com ${escapeHtml(preferred.ticker)}`:'overlap indisponível'}${fee!=null?` · custo ${fmtExpenseRatio(fee)}`:''}</small></span><button data-fund-pair-a="${escapeHtml(preferred.ticker)}" data-fund-pair-b="${escapeHtml(x.ticker)}">Comparar</button></div>`;
+      }).join('');
+      return `<article class="consolidation-cluster">
+        <div class="consolidation-cluster-head"><div><span class="eyebrow">GRUPO ${idx+1} · ${cluster.length} ETFs</span><h5>${tags}</h5></div><span class="cluster-weight">${totalValue&&clusterValue?`${(clusterValue/totalValue*100).toFixed(1)}% da carteira`:'—'}</span></div>
+        <div class="retain-candidate"><span>Melhor candidato a <strong>reter como núcleo</strong></span><b>${escapeHtml(preferred.ticker)}</b><p>${escapeHtml(reasons.join(' · ') || 'melhor combinação disponível de custo, dimensão, cobertura e representatividade')}</p>${saving!=null&&saving>1?`<small>Poupança anual teórica se todo o valor deste grupo tivesse o custo de ${escapeHtml(preferred.ticker)}: ≈ €${saving.toFixed(0)}. Não inclui impostos, spreads, tracking difference ou custos de transação.</small>`:''}</div>
+        <div class="consolidation-review"><span class="eyebrow">REVER REDUNDÂNCIA</span>${review}</div>
+      </article>`;
+    }).join('');
+
+    return `<article class="fund-consolidation-panel"><div class="section-heading"><div><span class="eyebrow">CONSOLIDATION LAB</span><h4>Que ETFs se sobrepõem — e qual parece o núcleo mais eficiente</h4></div><span class="section-count">${clusters.length} grupo${clusters.length===1?'':'s'}</span></div><p class="fund-method-note">O candidato a reter é uma <strong>heurística transparente</strong>: 40% custo, 25% representatividade do grupo, 20% AUM e 15% cobertura de holdings, com pesos renormalizados quando faltam dados. Serve para priorizar revisão — não é uma ordem de venda. Confirma índice, tracking difference, moeda, distribuição/acumulação, fiscalidade e custos antes de alterar a carteira.</p>${cards}</article>`;
+  }
+
+  function buildObservedLookthrough(items) {
+    const map = new Map();
+    for (const item of items || []) {
+      const eur = Number(item.eur);
+      if (!Number.isFinite(eur) || eur <= 0) continue;
+      const hmap = item.hmap instanceof Map ? item.hmap : fundHoldingsMap(item.row);
+      for (const h of hmap.values()) {
+        const symbol = String(h.symbol || '').toUpperCase();
+        const weight = Number(h.weight) || 0;
+        if (!symbol || weight <= 0) continue;
+        map.set(symbol, (map.get(symbol) || 0) + eur * weight);
+      }
+    }
+    return map;
+  }
+
+  function observedDistributionSimilarity(a, b) {
+    const sa=[...a.values()].reduce((x,y)=>x+y,0), sb=[...b.values()].reduce((x,y)=>x+y,0);
+    if (!sa || !sb) return null;
+    const keys=new Set([...a.keys(),...b.keys()]);
+    let overlap=0;
+    for (const k of keys) overlap += Math.min((a.get(k)||0)/sa, (b.get(k)||0)/sb);
+    return Math.max(0,Math.min(1,overlap));
+  }
+
+  function portfolioSimplificationModel(held, totalValue) {
+    const {clusters}=buildFundOverlapClusters(held, .30);
+    const memberToCluster=new Map();
+    const clusterModels=[];
+    const review=[];
+    for (let i=0;i<clusters.length;i++) {
+      const cluster=clusters[i];
+      const ranked=consolidationCandidate(cluster);
+      if (!ranked?.preferred) continue;
+      const preferred=ranked.preferred;
+      cluster.forEach(x=>memberToCluster.set(x.ticker,i));
+      const clusterValue=cluster.reduce((sum,x)=>sum+(Number(x.eur)||0),0);
+      const others=cluster.filter(x=>x.ticker!==preferred.ticker);
+      const rels=others.map(x=>({x,ov:fundOverlap(preferred.row,x.row)}));
+      clusterModels.push({index:i,cluster,preferred,others,clusterValue,rels});
+      for (const {x,ov} of rels) review.push({ticker:x.ticker,core:preferred.ticker,overlap:ov?.value??null,eur:x.eur,row:x.row});
+    }
+
+    const cores=[];
+    const seen=new Set();
+    for (const cm of clusterModels) {
+      const x=cm.preferred;
+      if (!seen.has(x.ticker)) { cores.push({...x,role:`núcleo de ${cm.cluster.length} ETFs semelhantes`,clusterSize:cm.cluster.length}); seen.add(x.ticker); }
+    }
+    for (const x of held) if (!memberToCluster.has(x.ticker) && !seen.has(x.ticker)) {
+      cores.push({...x,role:'exposição distinta nas holdings observadas',clusterSize:1}); seen.add(x.ticker);
+    }
+
+    // Model: capital inside each redundancy cluster is represented by its preferred core ETF.
+    const modeled=[];
+    for (const cm of clusterModels) {
+      if (cm.clusterValue>0) modeled.push({...cm.preferred,eur:cm.clusterValue,hmap:fundHoldingsMap(cm.preferred.row)});
+    }
+    for (const x of held) if (!memberToCluster.has(x.ticker) && x.eur!=null) modeled.push(x);
+    const originalMap=buildObservedLookthrough(held);
+    const modeledMap=buildObservedLookthrough(modeled);
+    const similarity=observedDistributionSimilarity(originalMap,modeledMap);
+
+    let weightedRedundancy=0;
+    if (totalValue>0) for (const r of review) if (Number.isFinite(r.eur) && Number.isFinite(r.overlap)) weightedRedundancy += (r.eur/totalValue)*r.overlap;
+    const countReduction=held.length ? review.length/held.length : 0;
+    const countSignal=Math.min(1,countReduction/0.50); // 50% removable candidates saturates count signal
+    const capitalSignal=Math.min(1,weightedRedundancy/0.30); // 30% overlap-weighted capital saturates capital signal
+    const opportunity=Math.round(100*(0.45*countSignal+0.55*capitalSignal));
+
+    let currentCost=0, modeledCost=0, costCoverage=0;
+    for (const x of held) {
+      const fee=fundExpenseCostPct(x.row);
+      if (x.eur!=null && fee!=null) { currentCost += x.eur*fee/100; costCoverage += x.eur; }
+    }
+    for (const x of modeled) {
+      const fee=fundExpenseCostPct(x.row);
+      if (x.eur!=null && fee!=null) modeledCost += x.eur*fee/100;
+    }
+    const saving=(costCoverage>0 && modeledCost>0)?Math.max(0,currentCost-modeledCost):null;
+    const label=opportunity>=75?'muito elevada':opportunity>=50?'elevada':opportunity>=25?'moderada':'baixa';
+    return {clusters:clusterModels,cores,review,similarity,opportunity,label,weightedRedundancy,countReduction,currentCost,modeledCost,saving};
+  }
+
+  function renderPortfolioSimplification(held,totalValue) {
+    if (!held?.length) return '';
+    const m=portfolioSimplificationModel(held,totalValue);
+    const eur=n=>new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+    const coreHtml=m.cores.slice(0,14).map(x=>`<button class="simplification-core" data-fund-open="${escapeHtml(x.ticker)}"><b>${escapeHtml(x.ticker)}</b><small>${escapeHtml(x.role)}</small></button>`).join('');
+    const reviewHtml=m.review.length?m.review.slice(0,14).map(x=>`<div class="simplification-review-row"><span><b>${escapeHtml(x.ticker)} → ${escapeHtml(x.core)}</b><small>${Number.isFinite(x.overlap)?pctFundWeight(x.overlap)+' overlap observado':'overlap indisponível'}${Number.isFinite(x.eur)?` · ${eur(x.eur)}`:''}</small></span><button data-fund-pair-a="${escapeHtml(x.core)}" data-fund-pair-b="${escapeHtml(x.ticker)}">Comparar</button></div>`).join(''):`<p class="muted">Não há candidatos claros a consolidação com overlap ≥30% nas holdings observadas.</p>`;
+    const delta=Math.max(0,held.length-m.cores.length);
+    const similarity=m.similarity==null?'—':(m.similarity*100).toFixed(0)+'%';
+    const saving=m.saving!=null&&m.saving>0?`≈ ${eur(m.saving)}/ano`:'—';
+    return `<article class="portfolio-simplification-panel">
+      <div class="section-heading"><div><span class="eyebrow">PORTFOLIO SIMPLIFICATION</span><h4>Quantos ETFs acrescentam diversificação real?</h4></div><span class="simplification-score">${m.opportunity}<small>/100</small></span></div>
+      <div class="simplification-meter"><i style="width:${m.opportunity}%"></i></div>
+      <p class="simplification-summary">Oportunidade de simplificação <strong>${m.label}</strong>. Com as holdings observadas, ${delta?`há ${delta} ETF${delta===1?'':'s'} que parecem redundantes dentro de grupos semelhantes.`:'não há redução clara sugerida neste momento.'}</p>
+      <div class="simplification-kpis">
+        <div><span>ETFs atuais</span><strong>${held.length}</strong></div>
+        <div><span>Estrutura candidata</span><strong>${m.cores.length}</strong><small>${delta?`−${delta} fundos`:'sem redução'}</small></div>
+        <div><span>Similaridade look-through</span><strong>${similarity}</strong><small>apenas holdings observadas</small></div>
+        <div><span>Poupança modelada</span><strong>${saving}</strong><small>expense ratio apenas</small></div>
+      </div>
+      <div class="simplification-grid">
+        <section><span class="eyebrow">ESTRUTURA MAIS SIMPLES · CANDIDATOS A NÚCLEO</span><div class="simplification-cores">${coreHtml}</div></section>
+        <section><span class="eyebrow">REVER / POSSÍVEL REDUNDÂNCIA</span><div class="simplification-review">${reviewHtml}</div></section>
+      </div>
+      <p class="fund-method-note">O score mede <strong>potencial de simplificação</strong>, não qualidade da carteira: quanto maior, maior a redundância observada. O modelo combina número de fundos potencialmente redundantes e capital overlap-weighted. A estrutura candidata realoca, apenas para simulação, cada grupo para o ETF com melhor heurística de custo, representatividade, AUM e cobertura. Antes de qualquer alteração confirma índice, tracking difference, UCITS/domicílio, moeda, distribuição/acumulação, fiscalidade, spreads e objetivos de cada posição.</p>
+    </article>`;
+  }
+
+  function renderFundPortfolioIntel(allFunds) {
+    if (!els.fundPortfolioIntel) return;
+    const portfolio = lsGet(LS_PORTFOLIO);
+    const byTicker = Object.fromEntries(allFunds.map(r => [r.ticker, r]));
+    const held = Object.entries(portfolio).map(([ticker, entry]) => {
+      const row = byTicker[ticker];
+      if (!row) return null;
+      const eur = positionValue(entry, row, true);
+      const hmap = fundHoldingsMap(row);
+      const coverage = [...hmap.values()].reduce((sum,h)=>sum+Number(h.weight||0),0);
+      return { ticker, entry, row, eur: Number.isFinite(eur) && eur > 0 ? eur : null, hmap, coverage };
+    }).filter(Boolean);
+
+    if (!held.length) {
+      els.fundPortfolioIntel.innerHTML = `<div class="fund-portfolio-empty"><p>Não tens ETFs rastreados na carteira atual. Importa a carteira em <strong>Portfolio</strong> para analisar overlap e concentração económica.</p><button data-open-portfolio>Ir para Portfolio →</button></div>`;
+      els.fundPortfolioIntel.querySelector('[data-open-portfolio]')?.addEventListener('click', ()=>switchView('portfolio'));
+      return;
+    }
+
+    const valued = held.filter(x=>x.eur != null);
+    const totalValue = valued.reduce((s,x)=>s+x.eur,0);
+    const withHoldings = held.filter(x=>x.hmap.size);
+    const observedValue = totalValue ? valued.reduce((s,x)=>s + x.eur * Math.min(1, x.coverage),0) : 0;
+    const observedCoverage = totalValue ? observedValue / totalValue : null;
+
+    const feeRows = valued.filter(x=>fundExpenseCostPct(x.row)!=null);
+    const feeValue = feeRows.reduce((s,x)=>s+x.eur,0);
+    const weightedFee = feeValue ? feeRows.reduce((s,x)=>s+x.eur*fundExpenseCostPct(x.row),0)/feeValue : null;
+    const annualFeeEur = feeRows.reduce((s,x)=>s + x.eur*(fundExpenseCostPct(x.row)/100),0);
+
+    // Look-through exposure: a lower bound because FundsData generally returns top holdings only.
+    const underlying = new Map();
+    for (const f of valued) {
+      for (const h of f.hmap.values()) {
+        const symbol = String(h.symbol).toUpperCase();
+        const weight = Number(h.weight)||0;
+        if (!weight) continue;
+        const prev = underlying.get(symbol) || { symbol, name:h.name||symbol, eur:0, funds:new Set() };
+        prev.eur += f.eur * weight;
+        prev.funds.add(f.ticker);
+        underlying.set(symbol, prev);
+      }
+    }
+    const lookThrough = [...underlying.values()].sort((a,b)=>b.eur-a.eur);
+    const duplicates = lookThrough.filter(x=>x.funds.size>=2);
+    const topUnderlying = lookThrough.slice(0,10);
+    const top10Pct = totalValue ? topUnderlying.reduce((s,x)=>s+x.eur,0)/totalValue : null;
+    const duplicatedPct = totalValue ? duplicates.reduce((s,x)=>s+x.eur,0)/totalValue : null;
+
+    // Pairwise overlap among held ETFs.
+    const pairs=[];
+    for (let i=0;i<held.length;i++) for (let j=i+1;j<held.length;j++) {
+      const ov=fundOverlap(held[i].row, held[j].row);
+      if (ov) pairs.push({a:held[i].ticker,b:held[j].ticker,...ov});
+    }
+    pairs.sort((a,b)=>b.value-a.value);
+
+    const topUnderlyingHtml = topUnderlying.length ? topUnderlying.map((x,i)=>{
+      const pct=totalValue ? x.eur/totalValue*100 : null;
+      const funds=[...x.funds];
+      return `<div class="portfolio-lookthrough-row"><span><b>${i+1}. ${escapeHtml(x.symbol)}</b><small>${escapeHtml(x.name||x.symbol)} · ${funds.length} ETF${funds.length===1?'':'s'}</small></span><i><b style="width:${pct==null?4:Math.max(4,Math.min(100,pct*4))}%"></b></i><strong>${pct==null?'—':pct.toFixed(1)+'%'}</strong></div>`;
+    }).join('') : '<p class="muted">As holdings dos ETFs da carteira ainda não estão disponíveis na fonte.</p>';
+
+    const pairHtml = pairs.length ? pairs.slice(0,6).map(p=>`<button class="fund-overlap-pair" data-fund-pair-a="${escapeHtml(p.a)}" data-fund-pair-b="${escapeHtml(p.b)}"><span><b>${escapeHtml(p.a)} ↔ ${escapeHtml(p.b)}</b><small>cobertura observada ${pctFundWeight(p.coverageA)} / ${pctFundWeight(p.coverageB)}</small></span><strong>${pctFundWeight(p.value)}</strong></button>`).join('') : '<p class="muted">Sem pares com holdings observadas suficientes.</p>';
+
+    const duplicateHtml = duplicates.length ? duplicates.slice(0,8).map(x=>`<div class="duplicate-holding"><span><b>${escapeHtml(x.symbol)}</b><small>${[...x.funds].slice(0,5).map(escapeHtml).join(' · ')}${x.funds.size>5?' · …':''}</small></span><strong>${totalValue ? (x.eur/totalValue*100).toFixed(1)+'%' : '—'}</strong></div>`).join('') : '<p class="muted">Não detetei duplicações nas holdings observadas.</p>';
+
+    els.fundPortfolioIntel.innerHTML = `
+      <div class="section-heading"><div><span class="eyebrow">ETF PORTFOLIO INTELLIGENCE</span><h3>O que possuis realmente por baixo dos fundos</h3></div><span class="section-count">${held.length} ETF${held.length===1?'':'s'}</span></div>
+      <p class="fund-method-note">Look-through calculado apenas nas holdings que a fonte devolve. As percentagens abaixo são portanto <strong>limites inferiores observados</strong>, não uma decomposição integral do portfolio.</p>
+      <div class="fund-portfolio-kpis">
+        <div><span>Valor ETF considerado</span><strong>${totalValue ? new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(totalValue) : '—'}</strong></div>
+        <div><span>Cobertura look-through</span><strong>${observedCoverage==null?'—':(observedCoverage*100).toFixed(1)+'%'}</strong></div>
+        <div><span>Expense ratio ponderado</span><strong>${weightedFee==null?'—':weightedFee.toFixed(2)+'%'}</strong><small>${feeValue ? `≈ ${new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(annualFeeEur)}/ano` : ''}</small></div>
+        <div><span>Exposição duplicada observada</span><strong>${duplicatedPct==null?'—':(duplicatedPct*100).toFixed(1)+'%'}</strong></div>
+        <div><span>Top 10 subjacentes</span><strong>${top10Pct==null?'—':(top10Pct*100).toFixed(1)+'%'}</strong></div>
+        <div><span>Holdings repetidas</span><strong>${duplicates.length}</strong></div>
+      </div>
+      ${renderPortfolioSimplification(held,totalValue)}
+      <div class="fund-portfolio-columns">
+        <article><span class="eyebrow">ECONOMIC LOOK-THROUGH</span><h4>Maiores exposições observadas</h4><div class="portfolio-lookthrough-list">${topUnderlyingHtml}</div></article>
+        <article><span class="eyebrow">OVERLAP HOTSPOTS</span><h4>ETFs mais semelhantes</h4><div class="fund-overlap-pairs">${pairHtml}</div></article>
+      </div>
+      <article class="duplicate-holdings-panel"><span class="eyebrow">DUPLICATE HOLDINGS</span><h4>Empresas repetidas entre vários ETFs</h4>${duplicateHtml}</article>
+      ${renderFundConsolidation(held, totalValue)}
+    `;
+
+    els.fundPortfolioIntel.querySelectorAll('[data-fund-pair-a]').forEach(btn=>btn.addEventListener('click',()=>{
+      const a=btn.dataset.fundPairA,b=btn.dataset.fundPairB;
+      if (els.fundCompareA) els.fundCompareA.value=a;
+      if (els.fundCompareB) els.fundCompareB.value=b;
+      renderFundCompare();
+      els.fundCompareResult?.scrollIntoView({behavior:'smooth',block:'center'});
+    }));
+    els.fundPortfolioIntel.querySelectorAll('[data-fund-open]').forEach(btn=>btn.addEventListener('click',()=>openDetail(btn.dataset.fundOpen)));
+  }
 
   function renderFunds() {
     if (!state.data) return;
     const allFunds = state.data.stocks.filter(r => r.quote_type === "ETF");
-
-    if (!fundsSectorsPopulated && els.fundsSectorFilter) {
-      const sectors = [...new Set(allFunds.map(r => r.sector).filter(Boolean))].sort();
-      els.fundsSectorFilter.innerHTML = `<option value="">todos os setores</option>` +
-        sectors.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
-      populateRegionFilter(els.fundsRegionFilter, allFunds, () => {});
-      fundsSectorsPopulated = true;
-    }
+    populateFundCompare(allFunds);
 
     const q = (els.fundsSearch?.value || "").trim().toUpperCase();
-    const sector = els.fundsSectorFilter?.value || "";
-    const region = els.fundsRegionFilter?.value || "";
     const rows = allFunds.filter(r => {
-      if (sector && r.sector !== sector) return false;
-      if (region && r.region !== region) return false;
+      const m = fundMeta(r);
+      if (state.fundTheme !== 'all' && !m.themes.includes(state.fundTheme)) return false;
+      if (state.fundGeo !== 'all' && m.geo !== state.fundGeo) return false;
+      if (state.fundStyle !== 'all' && m.style !== state.fundStyle) return false;
       if (q && !(r.ticker.toUpperCase().includes(q) || (r.name || "").toUpperCase().includes(q))) return false;
       return true;
+    }).sort((a,b) => {
+      const af = Number.isFinite(Number(a.expense_ratio)) ? Number(a.expense_ratio) : Infinity;
+      const bf = Number.isFinite(Number(b.expense_ratio)) ? Number(b.expense_ratio) : Infinity;
+      return af - bf || (a.ticker||'').localeCompare(b.ticker||'');
     });
 
-    els.fundsCount.textContent = `${rows.length} de ${allFunds.length} fundos`;
-    render(els.fundsList, rows);
+    if (els.fundsCount) els.fundsCount.textContent = `${rows.length} de ${allFunds.length}`;
+    renderFundCards(rows);
+    renderFundFeeSaver(allFunds);
+    renderFundPortfolioIntel(allFunds);
+    renderFundCompare();
   }
 
   function renderSmartMoney() {
@@ -1784,10 +2514,24 @@
 
   els.compareInput?.addEventListener("input", renderCompare);
 
-  [els.fundsSearch, els.fundsSectorFilter, els.fundsRegionFilter].filter(Boolean).forEach(el => {
-    el.addEventListener("input", renderFunds);
-    el.addEventListener("change", renderFunds);
-  });
+  [els.fundsSearch].filter(Boolean).forEach(el => el.addEventListener("input", renderFunds));
+  els.fundThemeFilters?.querySelectorAll('[data-fund-theme]').forEach(btn => btn.addEventListener('click', () => {
+    state.fundTheme = btn.dataset.fundTheme;
+    els.fundThemeFilters.querySelectorAll('[data-fund-theme]').forEach(x => x.classList.toggle('is-active', x === btn));
+    renderFunds();
+  }));
+  els.fundGeoFilters?.querySelectorAll('[data-fund-geo]').forEach(btn => btn.addEventListener('click', () => {
+    state.fundGeo = btn.dataset.fundGeo;
+    els.fundGeoFilters.querySelectorAll('[data-fund-geo]').forEach(x => x.classList.toggle('is-active', x === btn));
+    renderFunds();
+  }));
+  els.fundStyleFilters?.querySelectorAll('[data-fund-style]').forEach(btn => btn.addEventListener('click', () => {
+    state.fundStyle = btn.dataset.fundStyle;
+    els.fundStyleFilters.querySelectorAll('[data-fund-style]').forEach(x => x.classList.toggle('is-active', x === btn));
+    renderFunds();
+  }));
+  on(els.fundCompareA, 'change', renderFundCompare);
+  on(els.fundCompareB, 'change', renderFundCompare);
 
   [els.search, els.marketFilter, els.stocksSectorFilter, els.sortBy, els.zombieOnly, els.watchlistOnly].filter(Boolean).forEach(el => {
     el.addEventListener("input", applyFilters);
@@ -1796,7 +2540,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.17.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.27.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

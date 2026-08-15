@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.18.0">
+<link rel="stylesheet" href="style.css?v=0.27.0">
 </head>
 <body>
 
@@ -84,13 +84,19 @@
         <div class="briefing-hello"><img src="icons/icon-192.png" alt="" class="briefing-avatar"><div><span class="eyebrow">Finscanner Intelligence</span><p id="briefing-greeting">Bom dia</p><h2>Briefing</h2></div></div>
         <article class="briefing-card" id="briefing-card"><span class="briefing-signal">A calcular sinais…</span><h3>O mercado em contexto.</h3><p>Assim que os dados carregarem, o Finscanner resume as alterações mais relevantes do universo, da tua carteira e da watchlist.</p></article>
       </section>
-      <section class="home-tools">
-        <div class="section-heading"><div><span class="eyebrow">YOUR TOOLS</span><h3>Explorar</h3></div></div>
+
+      <section class="home-opportunities" aria-label="Oportunidades em destaque">
+        <div class="home-section-head"><div><span class="eyebrow">OPORTUNIDADES</span><h3>Ideias que merecem investigação</h3></div><span>desliza →</span></div>
+        <div id="home-opportunity-strip" class="home-opportunity-strip"><div class="home-opportunity-loading">A selecionar oportunidades…</div></div>
+      </section>
+
+      <section class="home-tools" aria-label="Acessos rápidos">
+        <div class="home-section-head"><div><span class="eyebrow">YOUR TOOLS</span><h3>Explorar</h3></div></div>
         <div class="home-tool-grid">
-          <button class="home-tool-card" data-goto="stocks"><span>▥</span><strong>Stocks</strong><small>Radar, filtros e dossiers</small></button>
-          <button class="home-tool-card" data-goto="metals"><span>◆</span><strong>Metals</strong><small>Preço, tendência e stress</small></button>
-          <button class="home-tool-card" data-goto="funds"><span>▱</span><strong>Funds</strong><small>ETFs, temas e custos</small></button>
-          <button class="home-tool-card" data-goto="portfolio"><span>★</span><strong>Portfolio</strong><small>Posições e exposição</small></button>
+          <button class="home-tool-card orientation-card" data-goto="stocks"><span>▥</span><strong>Stocks</strong><small>Radar, filtros e dossiers</small></button>
+          <button class="home-tool-card orientation-card" data-goto="metals"><span>◆</span><strong>Metals</strong><small>Preço, tendência e pressão física</small></button>
+          <button class="home-tool-card orientation-card" data-goto="funds"><span>▱</span><strong>Funds</strong><small>ETFs, temas e custos</small></button>
+          <button class="home-tool-card orientation-card" data-goto="portfolio"><span>★</span><strong>Portfolio</strong><small>Posições, teses e exposição</small></button>
         </div>
       </section>
     </section>
@@ -195,13 +201,88 @@
     </section>
 
 
-    <section id="view-funds" class="view"><div class="section-heading"><div><span class="eyebrow">FUNDS</span><h3>ETFs</h3></div><span class="section-count" id="funds-count">—</span></div>
-      <div class="commandbar">
-        <input id="funds-search" type="text" placeholder="ticker ou nome…" autocomplete="off" spellcheck="false">
-        <select id="funds-sector-filter"><option value="">todos os setores</option></select>
-        <select id="funds-region-filter"><option value="">todas as regiões</option></select>
-      </div>
-      <div id="funds-list" class="dossier"></div>
+    <section id="view-funds" class="view">
+      <section class="funds-hero">
+        <span class="eyebrow">ETF INTELLIGENCE</span>
+        <h2>Encontra o fundo certo — e não pagues mais pelo mesmo.</h2>
+        <p>Pesquisa por tema, geografia, estilo e rendimento. Compara custos e encontra alternativas mais baratas dentro do universo rastreado.</p>
+      </section>
+
+      <section class="fund-discovery">
+        <div class="fund-search-row">
+          <input id="funds-search" type="text" placeholder="Pesquisar ticker ou nome…" autocomplete="off" spellcheck="false">
+          <span class="section-count" id="funds-count">—</span>
+        </div>
+
+        <div class="fund-facet-group">
+          <span class="fund-facet-label">HOT THEMES</span>
+          <div id="fund-theme-filters" class="fund-chip-row">
+            <button class="fund-chip is-active" data-fund-theme="all">Todos</button>
+            <button class="fund-chip" data-fund-theme="AI">AI</button>
+            <button class="fund-chip" data-fund-theme="Semiconductors">Semiconductors</button>
+            <button class="fund-chip" data-fund-theme="Defense">Defense</button>
+            <button class="fund-chip" data-fund-theme="Energy">Energy</button>
+            <button class="fund-chip" data-fund-theme="Nuclear">Nuclear / Uranium</button>
+            <button class="fund-chip" data-fund-theme="Gold">Gold</button>
+            <button class="fund-chip" data-fund-theme="Cybersecurity">Cybersecurity</button>
+            <button class="fund-chip" data-fund-theme="Robotics">Robotics</button>
+            <button class="fund-chip" data-fund-theme="Clean Energy">Clean Energy</button>
+          </div>
+        </div>
+
+        <div class="fund-facet-grid">
+          <div class="fund-facet-group">
+            <span class="fund-facet-label">GEOGRAPHY</span>
+            <div id="fund-geo-filters" class="fund-chip-row compact">
+              <button class="fund-chip is-active" data-fund-geo="all">Todos</button>
+              <button class="fund-chip" data-fund-geo="United States">US</button>
+              <button class="fund-chip" data-fund-geo="Europe">Europe</button>
+              <button class="fund-chip" data-fund-geo="United Kingdom">UK</button>
+              <button class="fund-chip" data-fund-geo="Japan">Japan</button>
+              <button class="fund-chip" data-fund-geo="Emerging Markets">Emerging</button>
+              <button class="fund-chip" data-fund-geo="Global">Global</button>
+            </div>
+          </div>
+          <div class="fund-facet-group">
+            <span class="fund-facet-label">STYLE / INCOME</span>
+            <div id="fund-style-filters" class="fund-chip-row compact">
+              <button class="fund-chip is-active" data-fund-style="all">Todos</button>
+              <button class="fund-chip" data-fund-style="Broad">Broad</button>
+              <button class="fund-chip" data-fund-style="Growth">Growth</button>
+              <button class="fund-chip" data-fund-style="Small Cap">Small Cap</button>
+              <button class="fund-chip" data-fund-style="Dividend">Dividend</button>
+              <button class="fund-chip" data-fund-style="Bonds">Bonds</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="fund-tools-grid">
+        <article class="fund-tool-panel fee-saver-panel">
+          <span class="eyebrow">FEE SAVER</span>
+          <h3>Estás a pagar demasiado?</h3>
+          <p>Analisa os ETFs da tua carteira e procura alternativas semelhantes com menor expense ratio.</p>
+          <div id="fund-fee-saver"></div>
+        </article>
+        <article class="fund-tool-panel">
+          <span class="eyebrow">HEAD-TO-HEAD</span>
+          <h3>Compara dois ETFs</h3>
+          <div class="fund-compare-controls">
+            <select id="fund-compare-a"><option value="">ETF A</option></select>
+            <select id="fund-compare-b"><option value="">ETF B</option></select>
+          </div>
+          <div id="fund-compare-result" class="fund-compare-result"><p class="muted">Escolhe dois fundos para comparar custos, exposição e classificação.</p></div>
+        </article>
+      </section>
+
+      <section id="fund-portfolio-intel" class="fund-portfolio-intel">
+        <p class="muted">A analisar os ETFs da tua carteira…</p>
+      </section>
+
+      <section class="fund-results">
+        <div class="section-heading"><div><span class="eyebrow">DISCOVER FUNDS</span><h3>Resultados</h3></div></div>
+        <div id="funds-list" class="funds-card-list"></div>
+      </section>
     </section>
     <section id="view-news" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">NOTÍCIAS</span><h2>Notícias das tuas posições e watchlist.</h2><p>Notícias recentes agregadas por ticker. Podes também pesquisar qualquer ticker manualmente. Se a fonte direta bloquear o browser, ficam sempre disponíveis pesquisas externas por empresa.</p></div></section>
       <div class="commandbar"><input id="news-search" type="text" placeholder="pesquisar notícias de um ticker…" autocomplete="off" spellcheck="false"></div>
@@ -235,6 +316,7 @@
       </div>
       <div id="exposure-panel" class="exposure-panel"></div>
       <div id="portfolio-summary" class="portfolio-summary"></div>
+      <div id="portfolio-structure-intel" class="portfolio-structure-intel"></div>
       <div id="portfolio-thesis-monitor" class="portfolio-thesis-monitor"></div>
       <section class="portfolio-filter-section">
         <div class="section-heading"><div><span class="eyebrow">PORTFOLIO RADAR</span><h3>Filtrar as minhas posições</h3></div></div>
@@ -266,6 +348,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.18.0"></script>
+<script src="app.js?v=0.27.0"></script>
 </body>
 </html>
