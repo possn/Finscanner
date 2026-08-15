@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-15T21:37:51.248793Z",
+  "generated_at": "2026-08-15T23:18:43.516909Z",
   "note": "Pre\u00e7os de futuros (n\u00e3o spot) para ouro/prata/cobre/platina/pal\u00e1dio. Ur\u00e2nio \u00e9 um proxy via ETF de mineradoras. A camada f\u00edsica e de deliveries usa fontes oficiais/gratuitas (CME, CFTC, SGE e, quando acess\u00edvel, WGC). Cada bloco exp\u00f5e a fonte e o estado; dados indispon\u00edveis n\u00e3o s\u00e3o estimados.",
   "ways_to_play": {
     "own_metal": [
@@ -21,19 +21,19 @@
     ]
   },
   "physical": {
-    "generated_at": "2026-08-15T21:36:28.875061Z",
+    "generated_at": "2026-08-15T23:17:20.827256Z",
     "comex": {
       "gold": {
         "source": "CME Group",
         "source_url": "https://www.cmegroup.com/delivery_reports/Gold_Stocks.xls",
-        "fetched_at": "2026-08-15T21:36:28.875077Z",
+        "fetched_at": "2026-08-15T23:17:20.827265Z",
         "status": "unavailable",
         "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=25)"
       },
       "silver": {
         "source": "CME Group",
         "source_url": "https://www.cmegroup.com/delivery_reports/Silver_stocks.xls",
-        "fetched_at": "2026-08-15T21:36:53.970354Z",
+        "fetched_at": "2026-08-15T23:17:45.927422Z",
         "status": "unavailable",
         "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=25)"
       }
@@ -41,7 +41,7 @@
     "deliveries": {
       "source": "CME Group",
       "source_url": "https://www.cmegroup.com/delivery_reports/MetalsIssuesAndStopsReport.pdf",
-      "fetched_at": "2026-08-15T21:37:19.038654Z",
+      "fetched_at": "2026-08-15T23:18:10.979643Z",
       "status": "unavailable",
       "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=30)"
     },
@@ -49,7 +49,7 @@
       "gold": {
         "source": "CFTC Disaggregated COT",
         "source_url": "https://www.cftc.gov/dea/newcot/f_disagg.txt",
-        "fetched_at": "2026-08-15T21:37:49.221774Z",
+        "fetched_at": "2026-08-15T23:18:41.186213Z",
         "status": "ok",
         "report_date": "2026-08-11",
         "open_interest": 400309,
@@ -68,7 +68,7 @@
       "gold_benchmark": {
         "source": "Shanghai Gold Exchange",
         "source_url": "https://en.sge.com.cn/data_BenchmarkPrice",
-        "fetched_at": "2026-08-15T21:37:49.344614Z",
+        "fetched_at": "2026-08-15T23:18:41.359236Z",
         "status": "unavailable",
         "error": "benchmark table not found"
       }
@@ -76,7 +76,7 @@
     "central_banks": {
       "source": "World Gold Council / IMF IFS",
       "source_url": "https://www.gold.org/goldhub/data/gold-reserves-by-country",
-      "fetched_at": "2026-08-15T21:37:50.831921Z",
+      "fetched_at": "2026-08-15T23:18:42.866445Z",
       "status": "unavailable",
       "error": "403 Client Error: Forbidden for url: https://www.gold.org/download/file/7741/Changes_latest_as_of_Aug2026_IFS.xlsx"
     }
@@ -113,35 +113,100 @@
       "label": "Prata",
       "kind": "futures",
       "unit": "USD/oz",
-      "data": null
+      "data": {
+        "price": 64.988,
+        "day_change_pct": 0.18,
+        "range_90d_low": 55.898,
+        "range_90d_high": 88.888,
+        "range_1y_low": 34.519,
+        "range_1y_high": 115.08,
+        "sma_200": 70.578,
+        "vs_200d_pct": -7.9,
+        "position_52w_pct": 37.8,
+        "change_ytd_pct": -7.9,
+        "change_1y_pct": 88.3,
+        "volatility_annualized_pct": 60.6
+      }
     },
     {
       "ticker": "HG=F",
       "label": "Cobre",
       "kind": "futures",
       "unit": "USD/lb",
-      "data": null
+      "data": {
+        "price": 6.6,
+        "day_change_pct": 0.11,
+        "range_90d_low": 5.748,
+        "range_90d_high": 6.703,
+        "range_1y_low": 4.331,
+        "range_1y_high": 6.703,
+        "sma_200": 5.871,
+        "vs_200d_pct": 12.4,
+        "position_52w_pct": 95.6,
+        "change_ytd_pct": 17.0,
+        "change_1y_pct": 35.7,
+        "volatility_annualized_pct": 35.7
+      }
     },
     {
       "ticker": "PL=F",
       "label": "Platina",
       "kind": "futures",
       "unit": "USD/oz",
-      "data": null
+      "data": {
+        "price": 1750.0,
+        "day_change_pct": 1.44,
+        "range_90d_low": 1550.2,
+        "range_90d_high": 2187.1,
+        "range_1y_low": 1088.7,
+        "range_1y_high": 2852.4,
+        "sma_200": 1916.737,
+        "vs_200d_pct": -8.7,
+        "position_52w_pct": 37.5,
+        "change_ytd_pct": -17.7,
+        "change_1y_pct": 60.7,
+        "volatility_annualized_pct": 52.9
+      }
     },
     {
       "ticker": "PA=F",
       "label": "Pal\u00e1dio",
       "kind": "futures",
       "unit": "USD/oz",
-      "data": null
+      "data": {
+        "price": 1322.5,
+        "day_change_pct": -0.01,
+        "range_90d_low": 1161.3,
+        "range_90d_high": 1590.4,
+        "range_1y_low": 1000.3,
+        "range_1y_high": 2169.9,
+        "sma_200": 1507.456,
+        "vs_200d_pct": -12.3,
+        "position_52w_pct": 27.5,
+        "change_ytd_pct": -20.7,
+        "change_1y_pct": 32.2,
+        "volatility_annualized_pct": 54.3
+      }
     },
     {
       "ticker": "URA",
       "label": "Ur\u00e2nio (proxy: Global X Uranium ETF)",
       "kind": "etf_proxy",
       "unit": "USD",
-      "data": null
+      "data": {
+        "price": 44.93,
+        "day_change_pct": -0.71,
+        "range_90d_low": 37.52,
+        "range_90d_high": 58.26,
+        "range_1y_low": 19.337,
+        "range_1y_high": 61.81,
+        "sma_200": 48.33,
+        "vs_200d_pct": -7.0,
+        "position_52w_pct": 60.3,
+        "change_ytd_pct": -2.5,
+        "change_1y_pct": 95.7,
+        "volatility_annualized_pct": 49.0
+      }
     }
   ],
   "physical_history": {
