@@ -43,7 +43,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          required = [Path("data/stocks.json"), Path("data/metals.json")]
+          required = [Path("data/stocks.json"), Path("data/metals.json"), Path("data/fx.json"), Path("data/metals_history.json")]
           for path in required:
               if not path.exists() or path.stat().st_size == 0:
                   raise SystemExit(f"Missing/empty generated file: {path}")
@@ -67,9 +67,12 @@ jobs:
           for f in \
             data/stocks.json \
             data/metals.json \
+            data/metals_history.json \
+            data/fx.json \
             data/history.json \
             data/valuation_history.json \
             data/thesis_history.json \
+            data/news.json \
             data/last_error.log \
             data/pipeline_log.txt; do
             [ -f "$f" ] && cp "$f" "/tmp/finscanner-generated/data/$(basename "$f")"
@@ -84,9 +87,12 @@ jobs:
             for f in \
               data/stocks.json \
               data/metals.json \
+              data/metals_history.json \
+              data/fx.json \
               data/history.json \
               data/valuation_history.json \
               data/thesis_history.json \
+              data/news.json \
               data/last_error.log \
               data/pipeline_log.txt; do
               [ -f "$f" ] && git add "$f"
