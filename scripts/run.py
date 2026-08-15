@@ -109,13 +109,24 @@ def _json_safe(obj):
 def main():
     universe = build_universe()
     all_tickers = sorted({t for tickers in universe.values() for t in tickers})
-    log.info("Total universe: %d tickers", len(all_tickers))
+    portfolio_tickers = list(dict.fromkeys(universe.get("EXTRA", [])))
+    portfolio_set = set(portfolio_tickers)
+    remainder_tickers = [t for t in all_tickers if t not in portfolio_set]
+    log.info("Total universe: %d tickers (%d portfolio-priority)", len(all_tickers), len(portfolio_tickers))
 
     if not all_tickers:
         log.error("Empty universe — aborting without overwriting existing data/stocks.json")
         return
 
-    raw = fetch_many(all_tickers)
+    # Fetch the user's holdings first. Previously all ~2k instruments were sent
+    # through Yahoo together, so transient throttling could leave most portfolio
+    # names missing even while the generic screener succeeded. Portfolio rows
+    # now get a smaller pool plus two retry passes before the broad universe.
+    raw_portfolio = fetch_many(portfolio_tickers, workers_override=3, retries=2, pause=0.05)
+    raw_remainder = fetch_many(remainder_tickers, retries=1)
+    raw_by_symbol = {r.ticker: r for r in raw_remainder}
+    raw_by_symbol.update({r.ticker: r for r in raw_portfolio})
+    raw = [raw_by_symbol[t] for t in all_tickers if t in raw_by_symbol]
     scored = score_universe(raw)
 
     analyst_map = fetch_analyst_many(
@@ -137,6 +148,8 @@ def main():
             if not row.get("sector"):
                 row["sector"] = etf_meta.get("sector")
             row["region"] = etf_meta.get("region", "Global")
+        elif row.get("quote_type") == "CRYPTO":
+            row["region"] = "Global"
         else:
             row["region"] = region_for_equity(s.ticker)
         analyst = analyst_map.get(s.ticker)
@@ -223,7 +236,7 @@ def main():
     analyst_earnings_within_14d = sum(1 for a in analyst_map.values() if isinstance(a.get("days_to_earnings"), int) and 0 <= a.get("days_to_earnings") <= 14)
 
     payload = {
-        "schema_version": 48,
+        "schema_version": 481,
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
         "data_quality": {
             "portfolio_extra_requested": len(portfolio_extra),

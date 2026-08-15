@@ -165,6 +165,61 @@ def _as_float(x):
     return f
 
 
+def _yahoo_symbol(ticker: str) -> str:
+    """Translate broker/DivTracker symbols to Yahoo symbols without changing
+    the canonical ticker stored by Finscanner. Crypto positions are exported
+    by DivTracker as e.g. BTC.CC while Yahoo uses BTC-USD."""
+    t = str(ticker or "").strip().upper()
+    if t.endswith(".CC") and len(t) > 3:
+        return t[:-3] + "-USD"
+    return t
+
+
+def _apply_fast_fallback(t, m: RawMetrics) -> bool:
+    """Recover identity/price when Yahoo's heavy `info` endpoint is throttled.
+    A portfolio position should remain recognisable/valuable even when full
+    fundamentals are temporarily unavailable. Returns True if minimally usable.
+    """
+    got = False
+    try:
+        fi = t.fast_info
+        if fi is not None:
+            for key in ("last_price", "previous_close"):
+                try:
+                    v = _as_float(fi.get(key) if hasattr(fi, "get") else getattr(fi, key, None))
+                except Exception:
+                    v = None
+                if v is not None and v > 0:
+                    m.current_price = m.current_price or v
+                    got = True
+                    break
+            try:
+                cur = fi.get("currency") if hasattr(fi, "get") else getattr(fi, "currency", None)
+                if cur:
+                    m.currency = m.currency or str(cur)
+            except Exception:
+                pass
+            try:
+                cap = _as_float(fi.get("market_cap") if hasattr(fi, "get") else getattr(fi, "market_cap", None))
+                if cap is not None:
+                    m.market_cap = m.market_cap or cap
+            except Exception:
+                pass
+    except Exception:
+        pass
+    if m.current_price is None:
+        try:
+            hist = t.history(period="5d", auto_adjust=False)
+            if hist is not None and not hist.empty and "Close" in hist:
+                close = hist["Close"].dropna()
+                if not close.empty:
+                    m.current_price = _as_float(close.iloc[-1])
+                    got = m.current_price is not None
+        except Exception:
+            pass
+    return got
+
+
 
 def _row_value(frame, labels, col_index=0):
     if frame is None or getattr(frame, "empty", True):
@@ -196,9 +251,16 @@ def _row_series(frame, labels, limit=6):
 
 def fetch_one(ticker: str) -> RawMetrics:
     m = RawMetrics(ticker=ticker)
+    yahoo_symbol = _yahoo_symbol(ticker)
     try:
-        t = yf.Ticker(ticker)
-        info = t.info or {}
+        t = yf.Ticker(yahoo_symbol)
+        info_error = None
+        try:
+            info = t.info or {}
+        except Exception as exc:
+            info = {}
+            info_error = exc
+            log.debug("%s: info endpoint unavailable (%s); trying fast fallback", ticker, exc)
 
         m.name = info.get("shortName") or info.get("longName")
         m.sector = info.get("sector")
@@ -207,6 +269,18 @@ def fetch_one(ticker: str) -> RawMetrics:
         m.quote_type = info.get("quoteType")
         m.market_cap = _as_float(info.get("marketCap"))
         m.current_price = _as_float(_safe_get(info, "currentPrice", "regularMarketPrice", "previousClose"))
+        if str(ticker).upper().endswith(".CC"):
+            m.quote_type = "CRYPTO"
+            m.currency = m.currency or "USD"
+            m.name = m.name or str(ticker).upper().removesuffix(".CC")
+        if not info or m.current_price is None:
+            _apply_fast_fallback(t, m)
+        # A failure of the heavy info endpoint is not fatal if fast_info/history
+        # still gives a tradable identity/price. This is critical for portfolio
+        # coverage under transient Yahoo throttling.
+        if info_error is not None and m.current_price is None:
+            raise info_error
+        m.name = m.name or ticker
 
         # quality / profitability
         m.roe = _as_float(info.get("returnOnEquity"))
@@ -627,7 +701,7 @@ def fetch_one(ticker: str) -> RawMetrics:
     return m
 
 
-def fetch_many(tickers: list[str], pause: float = 0.0) -> list[RawMetrics]:
+def fetch_many(tickers: list[str], pause: float = 0.0, workers_override: int | None = None, retries: int = 1) -> list[RawMetrics]:
     """Fetch fundamentals concurrently but conservatively.
 
     Portfolio coverage expanded the universe materially; the old sequential loop
@@ -639,7 +713,7 @@ def fetch_many(tickers: list[str], pause: float = 0.0) -> list[RawMetrics]:
     tickers = list(dict.fromkeys(tickers))
     if not tickers:
         return []
-    workers = max(1, min(8, int(os.getenv("FINSCANNER_FETCH_WORKERS", "5"))))
+    workers = max(1, min(8, int(workers_override if workers_override is not None else os.getenv("FINSCANNER_FETCH_WORKERS", "5"))))
     results_by_ticker: dict[str, RawMetrics] = {}
     completed = 0
     log.info("Fetching %d tickers with %d workers", len(tickers), workers)
@@ -656,10 +730,14 @@ def fetch_many(tickers: list[str], pause: float = 0.0) -> list[RawMetrics]:
             if completed % 50 == 0 or completed == len(tickers):
                 log.info("fetched %d/%d", completed, len(tickers))
 
-    failed = [tk for tk in tickers if getattr(results_by_ticker.get(tk), "error", None)]
-    if failed:
-        log.info("Retrying %d failed ticker(s) once", len(failed))
-        time.sleep(1.5)
+    for attempt in range(max(0, int(retries))):
+        failed = [tk for tk in tickers if getattr(results_by_ticker.get(tk), "error", None)]
+        if not failed:
+            break
+        log.info("Retrying %d failed ticker(s), pass %d/%d", len(failed), attempt + 1, retries)
+        time.sleep(1.5 * (attempt + 1))
+        # Retry sequentially: after a Yahoo throttle event, another burst of
+        # parallel requests tends to reproduce the same failure.
         for i, tk in enumerate(failed):
             retry = fetch_one(tk)
             if not getattr(retry, "error", None):
@@ -667,6 +745,6 @@ def fetch_many(tickers: list[str], pause: float = 0.0) -> list[RawMetrics]:
             if pause:
                 time.sleep(pause)
             if (i + 1) % 50 == 0:
-                log.info("retry %d/%d", i + 1, len(failed))
+                log.info("retry pass %d: %d/%d", attempt + 1, i + 1, len(failed))
 
     return [results_by_ticker[tk] for tk in tickers if tk in results_by_ticker]

@@ -202,8 +202,9 @@ AI_EXPOSED_TICKERS = {
 
 
 def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
-    equities = [r for r in raw if r.quote_type != "ETF" and r.error is None]
+    equities = [r for r in raw if r.quote_type not in ("ETF", "CRYPTO") and r.error is None]
     etfs = [r for r in raw if r.quote_type == "ETF" and r.error is None]
+    cryptos = [r for r in raw if r.quote_type == "CRYPTO" and r.error is None]
 
     def arr(attr):
         return [getattr(r, attr) for r in equities]
@@ -471,6 +472,17 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             insurance_book_value_per_share_proxy=r.insurance_book_value_per_share_proxy,
             insurance_equity_to_assets=r.insurance_equity_to_assets,
             insurance_metric_coverage_pct=r.insurance_metric_coverage_pct,
+        ))
+
+    for r in cryptos:
+        out.append(ScoredTicker(
+            ticker=r.ticker, name=r.name, sector="Crypto", industry="Digital Assets",
+            market_cap=r.market_cap, currency=r.currency, quote_type="CRYPTO",
+            score=None, data_confidence="low", data_coverage_pct=0,
+            zombie="unknown", interest_coverage=None,
+            profitability_pct=None, leverage_pct=None, value_pct=None, stability_pct=None,
+            quality_pct=None, growth_pct=None, balance_pct=None, cashflow_pct=None,
+            current_price=r.current_price,
         ))
 
     for r in etfs:
