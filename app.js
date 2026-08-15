@@ -4007,6 +4007,100 @@
     return `<article class="fund-consolidation-panel"><div class="section-heading"><div><span class="eyebrow">CONSOLIDATION LAB</span><h4>Que ETFs se sobrepõem — e qual parece o núcleo mais eficiente</h4></div><span class="section-count">${clusters.length} grupo${clusters.length===1?'':'s'}</span></div><p class="fund-method-note">Cada grupo é expansível. O candidato a reter usa uma heurística transparente: 40% custo, 25% representatividade, 20% AUM e 15% cobertura de holdings, com pesos renormalizados quando faltam dados. Serve para priorizar revisão — não é uma ordem de venda.</p>${cards}</article>`;
   }
 
+
+  function fundUcitsStatus(r) {
+    const text = `${r?.name||''} ${r?.fund_category||''} ${r?.fund_family||''} ${r?.fund_description||''}`.toLowerCase();
+    if (/\bucits\b/.test(text)) return {status:'confirmed',label:'UCITS confirmado'};
+    const t = String(r?.ticker||'').toUpperCase();
+    const europeanListing = /\.(L|DE|PA|AS|MI|MC|SW|LS|BR|ST|CO|HE|OL|VI)$/.test(t);
+    if (europeanListing) return {status:'possible',label:'cotação europeia · UCITS não confirmado'};
+    return {status:'unknown',label:'UCITS não confirmado'};
+  }
+
+  function fundReplacementCompatibility(held, alt) {
+    const hm=fundMeta(held), am=fundMeta(alt);
+    const ov=fundOverlap(held,alt);
+    const sameGeo = hm.geo && am.geo && hm.geo===am.geo;
+    const sameStyle = hm.style && am.style && hm.style===am.style;
+    const sharedThemes = hm.themes.filter(x=>am.themes.includes(x));
+    let score=0, evidence=[];
+    if (ov) { score += Math.min(.55, ov.value*.70); evidence.push(`${pctFundWeight(ov.value)} overlap observado`); }
+    if (sameStyle) { score += .16; evidence.push(`mesmo estilo (${hm.style})`); }
+    if (sameGeo) { score += .14; evidence.push(`mesma geografia (${hm.geo})`); }
+    if (sharedThemes.length) { score += .10; evidence.push(`tema ${sharedThemes[0]}`); }
+    if (!ov && sameStyle && sameGeo) score += .08;
+    return {score:Math.min(1,score),overlap:ov,evidence,sameGeo,sameStyle,sharedThemes};
+  }
+
+  function fundReplacementCandidates(held, allFunds) {
+    const feeHeld=fundExpenseCostPct(held);
+    const aumHeld=Number(held?.fund_total_assets);
+    const ucHeld=fundUcitsStatus(held);
+    const out=[];
+    for (const alt of allFunds) {
+      if (!alt || alt.ticker===held.ticker) continue;
+      const comp=fundReplacementCompatibility(held,alt);
+      if (comp.score < .22) continue;
+      const feeAlt=fundExpenseCostPct(alt);
+      const aumAlt=Number(alt.fund_total_assets);
+      const ucAlt=fundUcitsStatus(alt);
+      const cheaper=feeHeld!=null && feeAlt!=null && feeAlt < feeHeld-.005;
+      const bigger=Number.isFinite(aumHeld)&&aumHeld>0&&Number.isFinite(aumAlt)&&aumAlt>aumHeld*1.20;
+      const betterCoverage=fundHoldingsMap(alt).size > fundHoldingsMap(held).size;
+      const ucitsUpgrade=ucHeld.status!=='confirmed' && ucAlt.status==='confirmed';
+      if (!cheaper && !bigger && !betterCoverage && !ucitsUpgrade) continue;
+      let merit=comp.score*.50;
+      const reasons=[];
+      if (cheaper) {
+        const save=feeHeld-feeAlt;
+        merit += Math.min(.22, save/0.60*.22);
+        reasons.push(`TER −${save.toFixed(2)} pp`);
+      }
+      if (bigger) { merit += .10; reasons.push('AUM superior'); }
+      if (betterCoverage) { merit += .05; reasons.push('melhor cobertura de holdings'); }
+      if (ucAlt.status==='confirmed') { merit += .13; reasons.push('UCITS confirmado'); }
+      else if (ucAlt.status==='possible') { merit += .03; }
+      out.push({held,alt,comp,feeHeld,feeAlt,aumHeld,aumAlt,ucHeld,ucAlt,merit:Math.min(1,merit),reasons});
+    }
+    return out.sort((a,b)=>b.merit-a.merit);
+  }
+
+  function renderFundReplacementIntel(held, allFunds, totalValue) {
+    const candidates=[];
+    for (const h of held) {
+      const list=fundReplacementCandidates(h.row, allFunds);
+      if (list.length) candidates.push({...list[0],eur:h.eur});
+    }
+    candidates.sort((a,b)=>b.merit-a.merit);
+    if (!candidates.length) {
+      return `<details class="fund-replacement-panel"><summary><div><span class="eyebrow">ETF REPLACEMENT INTELLIGENCE</span><h4>Alternativas potencialmente mais eficientes</h4></div><span class="section-count">0 <i>⌄</i></span></summary><div class="replacement-empty"><p>Não encontrei ainda substitutos com evidência suficiente de equivalência e melhoria de custo/estrutura no universo rastreado.</p><small>O motor só propõe revisão quando existe semelhança observável e pelo menos uma melhoria: TER, AUM, cobertura de holdings ou UCITS confirmado.</small></div></details>`;
+    }
+    const cards=candidates.slice(0,8).map((x,i)=>{
+      const feeSave=x.feeHeld!=null&&x.feeAlt!=null?Math.max(0,x.feeHeld-x.feeAlt):null;
+      const annual=(feeSave!=null&&Number.isFinite(x.eur))?x.eur*feeSave/100:null;
+      const ov=x.comp.overlap?.value;
+      const confidence = ov>=.60 ? 'Alta' : ov>=.35 ? 'Moderada' : (x.comp.sameGeo&&x.comp.sameStyle?'Moderada':'Baixa');
+      const ops=encodeURIComponent(JSON.stringify([{source:x.held.ticker,target:x.alt.ticker,pct:100,reason:`ETF Replacement · ${Number.isFinite(ov)?pctFundWeight(ov)+' overlap observado':'semelhança estrutural'}${feeSave!=null&&feeSave>0?` · TER -${feeSave.toFixed(2)} pp`:''}`}]));
+      return `<details class="replacement-card" ${i===0?'open':''}>
+        <summary><div><span class="replacement-route"><b>${escapeHtml(x.held.ticker)}</b><i>→</i><b>${escapeHtml(x.alt.ticker)}</b></span><small>${escapeHtml(x.reasons.slice(0,3).join(' · ') || 'candidato estrutural')}</small></div><span class="replacement-score">${Math.round(x.merit*100)}<small>/100</small></span></summary>
+        <div class="replacement-body">
+          <div class="replacement-kpis">
+            <div><span>Overlap observado</span><strong>${Number.isFinite(ov)?pctFundWeight(ov):'—'}</strong></div>
+            <div><span>TER atual → candidato</span><strong>${x.feeHeld==null?'—':fmtExpenseRatio(x.feeHeld)} → ${x.feeAlt==null?'—':fmtExpenseRatio(x.feeAlt)}</strong></div>
+            <div><span>AUM candidato</span><strong>${Number.isFinite(x.aumAlt)&&x.aumAlt>0?fmtCap(x.aumAlt):'—'}</strong></div>
+            <div><span>UCITS</span><strong>${escapeHtml(x.ucAlt.label)}</strong></div>
+            <div><span>Confiança equivalência</span><strong>${confidence}</strong></div>
+            <div><span>Poupança estimada</span><strong>${annual!=null&&annual>0?`≈ €${annual.toFixed(0)}/ano`:'—'}</strong></div>
+          </div>
+          <p class="replacement-evidence">${escapeHtml(x.comp.evidence.join(' · ') || 'Semelhança baseada em classificação do fundo.')}</p>
+          <div class="replacement-actions"><button data-fund-pair-a="${escapeHtml(x.held.ticker)}" data-fund-pair-b="${escapeHtml(x.alt.ticker)}">Comparar lado a lado</button><button class="primary" data-replacement-simulate="${ops}">Simular substituição</button></div>
+          <p class="fund-method-note">Não é uma recomendação automática. Confirma índice, TER oficial, tracking difference, réplica, securities lending, moeda, distribuição/acumulação, fiscalidade, liquidez e UCITS no KID/prospeto antes de trocar.</p>
+        </div>
+      </details>`;
+    }).join('');
+    return `<details class="fund-replacement-panel" open><summary><div><span class="eyebrow">ETF REPLACEMENT INTELLIGENCE</span><h4>Onde pode existir um fundo equivalente mais eficiente</h4></div><span class="section-count">${candidates.length} <i>⌄</i></span></summary><p class="fund-method-note">Compara os ETFs que tens com todo o universo rastreado. Prioriza overlap/semelhança, menor TER, maior AUM e UCITS quando explicitamente confirmado pela fonte. “Cotação europeia” nunca é tratada automaticamente como UCITS.</p>${cards}</details>`;
+  }
+
   function buildObservedLookthrough(items) {
     const map = new Map();
     for (const item of items || []) {
@@ -4196,6 +4290,7 @@
         <div><span>Top 10 subjacentes</span><strong>${top10Pct==null?'—':(top10Pct*100).toFixed(1)+'%'}</strong></div>
         <div><span>Holdings repetidas</span><strong>${duplicates.length}</strong></div>
       </div>
+      ${renderFundReplacementIntel(held, allFunds, totalValue)}
       ${renderPortfolioSimplification(held,totalValue)}
       <div class="fund-portfolio-columns">
         <article><span class="eyebrow">ECONOMIC LOOK-THROUGH</span><h4>Maiores exposições observadas</h4><div class="portfolio-lookthrough-list">${topUnderlyingHtml}</div></article>
@@ -4213,6 +4308,19 @@
       els.fundCompareResult?.scrollIntoView({behavior:'smooth',block:'center'});
     }));
     els.fundPortfolioIntel.querySelectorAll('[data-fund-open]').forEach(btn=>btn.addEventListener('click',()=>openDetail(btn.dataset.fundOpen)));
+    els.fundPortfolioIntel.querySelectorAll('[data-replacement-simulate]').forEach(btn=>btn.addEventListener('click',()=>{
+      try {
+        const ops=JSON.parse(decodeURIComponent(btn.dataset.replacementSimulate||''));
+        localStorage.setItem(LS_REBALANCE_DRAFT,JSON.stringify({source:'etf-replacement',createdAt:new Date().toISOString(),ops}));
+        switchView('portfolio');
+        setTimeout(()=>{
+          const box=document.getElementById('portfolio-rebalance-box');
+          if (box) box.open=true;
+          els.portfolioRebalancingLab?.scrollIntoView({behavior:'smooth',block:'start'});
+          renderPortfolio();
+        },100);
+      } catch {}
+    }));
     els.fundPortfolioIntel.querySelectorAll('[data-consolidation-simulate]').forEach(btn=>btn.addEventListener('click',()=>{
       try {
         const ops=JSON.parse(decodeURIComponent(btn.dataset.consolidationSimulate||''));
@@ -4586,7 +4694,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.63.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.64.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

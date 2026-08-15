@@ -462,3 +462,12 @@ Smart Money passa a distinguir tamanho de operação de qualidade de oportunidad
 - Novo botão “Simular consolidar este grupo” cria automaticamente um cenário what-if no Portfolio Rebalancing Lab.
 - O cenário importado é editável e nunca altera a carteira real.
 - Corrigido versionamento de cache: index.html, app.js e Service Worker passam todos a v0.63.0.
+
+## v0.64.0 — ETF Replacement Intelligence
+
+- Novo **ETF Replacement Intelligence** dentro de Funds → ETF Portfolio Intelligence.
+- Compara cada ETF detido com todo o universo rastreado e procura candidatos com semelhança observável e pelo menos uma melhoria de estrutura: TER inferior, AUM superior, melhor cobertura de holdings ou UCITS explicitamente confirmado.
+- O estado UCITS é conservador: só é marcado como confirmado quando a fonte/nome do fundo o explicita. Uma cotação europeia aparece apenas como “UCITS não confirmado”.
+- Cada candidato mostra overlap observado, TER atual vs candidato, AUM, UCITS, confiança de equivalência e poupança anual estimada sobre o valor atual da posição.
+- A partir do candidato é possível abrir comparação lado a lado ou enviar uma substituição de 100% para o Portfolio Rebalancing Lab como cenário what-if.
+- Mantém progressive disclosure com dropboxes para evitar excesso de informação.

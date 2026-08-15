@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v0.63.0";
+const CACHE_VERSION = "v0.64.0";
 const SHELL_FILES = [
   "./",
   "./index.html",
