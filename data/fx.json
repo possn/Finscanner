@@ -1,0 +1,7 @@
+{
+  "generated_at": null,
+  "base": "EUR",
+  "rates_to_eur": {"EUR": 1.0},
+  "sources": {"EUR": "identity"},
+  "note": "Run the GitHub Action once to populate current FX rates."
+}
