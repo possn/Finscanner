@@ -471,3 +471,21 @@ Smart Money passa a distinguir tamanho de operação de qualidade de oportunidad
 - Cada candidato mostra overlap observado, TER atual vs candidato, AUM, UCITS, confiança de equivalência e poupança anual estimada sobre o valor atual da posição.
 - A partir do candidato é possível abrir comparação lado a lado ou enviar uma substituição de 100% para o Portfolio Rebalancing Lab como cenário what-if.
 - Mantém progressive disclosure com dropboxes para evitar excesso de informação.
+
+
+## v0.66.0 — Fund Dossier & Portfolio Role Intelligence
+
+- O dossier de cada ETF passa a responder primeiro ao papel do fundo: Core, Satellite, Income, Diversifier ou Redundant.
+- Novo Fund fit 0–100 com dimensões separadas de Cost, Size, Diversification, Concentration e Overlap; são heurísticas transparentes de triagem, não previsões de retorno.
+- O papel na carteira usa estilo/geografia/tema e overlap observado com os outros ETFs detidos. Um overlap elevado pode sinalizar redundância; um baixo overlap pode sugerir função de diversificador.
+- Informação densa passa para dropboxes: Snapshot, Composition, Exposures, Portfolio Role e Data Integrity.
+- Fund Dossier deixa de usar fundos brancos fixos e passa a respeitar integralmente os tokens Claro/Escuro/Alto contraste.
+- Service Worker e assets sincronizados em v0.66.0.
+
+
+## v0.66.0 — Interaction Repair
+- Company dossier navigation buttons now jump reliably with header/nav offset and active state.
+- Sticky dossier navigation is opaque so body text no longer scrolls visibly behind it.
+- Portfolio ledger search preserves focus while typing and offers ticker/company autocomplete.
+- Stock searches offer autocomplete suggestions; Enter/Tab accepts the first suggestion.
+- Fixed “Analyzar” typo to “Analisar”.

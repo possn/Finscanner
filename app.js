@@ -1901,10 +1901,21 @@
   }
 
   function bindDossierNav() {
-    els.detailContent.querySelectorAll('[data-dossier-jump]').forEach(btn=>btn.addEventListener('click',()=>{
-      const target=els.detailContent.querySelector('#'+btn.dataset.dossierJump);
-      if(target) target.scrollIntoView({behavior: appSettings().reduceMotion?'auto':'smooth', block:'start'});
-    }));
+    const nav = els.detailContent.querySelector('.dossier-nav');
+    const buttons = [...els.detailContent.querySelectorAll('[data-dossier-jump]')];
+    const jump = (btn) => {
+      const target = els.detailContent.querySelector('#' + btn.dataset.dossierJump);
+      if (!target) return;
+      const mobileHeader = document.querySelector('.app-shell__mobile-header');
+      const headerH = mobileHeader && getComputedStyle(mobileHeader).display !== 'none' ? mobileHeader.getBoundingClientRect().height : 0;
+      const navH = nav ? nav.getBoundingClientRect().height : 0;
+      const offset = headerH + navH + 14;
+      const top = window.scrollY + target.getBoundingClientRect().top - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: appSettings().reduceMotion ? 'auto' : 'smooth' });
+      buttons.forEach(x => x.classList.toggle('is-active', x === btn));
+      btn.scrollIntoView({ behavior: appSettings().reduceMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
+    };
+    buttons.forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); jump(btn); }));
   }
 
   function scoreDescriptor(v) {
@@ -2736,7 +2747,7 @@
       <section class="portfolio-positions-ledger">
         <div class="section-heading"><div><span class="eyebrow">POSITIONS LEDGER</span><h3>Posições, capital e rentabilidade</h3></div><span class="section-count">${items.length} posições</span></div>
         <div class="portfolio-ledger-controls">
-          <input id="portfolio-table-query" type="search" placeholder="Pesquisar posição…" value="${escapeHtml(state.portfolioTableQuery||'')}">
+          <div class="portfolio-search-wrap"><input id="portfolio-table-query" type="search" placeholder="Pesquisar posição…" autocomplete="off" spellcheck="false" value="${escapeHtml(state.portfolioTableQuery||'')}"><div class="portfolio-search-suggestions" role="listbox" hidden></div></div>
           <select id="portfolio-table-sort">
             ${[['value-desc','Valor atual ↓'],['weight-desc','Peso ↓'],['pnl-desc','P/L € ↓'],['return-desc','Rentabilidade ↓'],['basis-desc','Capital investido ↓'],['score-desc','Score ↓'],['ticker-asc','Ticker A–Z']].map(([v,l])=>`<option value="${v}" ${state.portfolioTableSort===v?'selected':''}>${l}</option>`).join('')}
           </select>
@@ -2750,7 +2761,44 @@
         <p class="fund-method-note">Capital investido usa o custo médio remanescente reconstruído pelo ledger. Quando existe FX histórico, cada transação é convertida para EUR à taxa da respetiva data; posições sem preço atual continuam listadas mas não entram no valor total.</p>
       </section>`;
     const input=els.portfolioPositionsTable.querySelector('#portfolio-table-query');
-    input?.addEventListener('input',e=>{state.portfolioTableQuery=e.target.value; renderPortfolioPositionsTable(portfolio,rows);});
+    const suggestions=els.portfolioPositionsTable.querySelector('.portfolio-search-suggestions');
+    const updateSuggestions=()=>{
+      if(!input || !suggestions) return;
+      const q=input.value.trim().toUpperCase();
+      if(!q){ suggestions.hidden=true; suggestions.innerHTML=''; return; }
+      const matches=items.filter(x => `${x.symbol} ${x.name||''}`.toUpperCase().includes(q)).slice(0,7);
+      suggestions.innerHTML=matches.map(x=>`<button type="button" role="option" data-portfolio-suggest="${escapeHtml(x.symbol)}"><strong>${escapeHtml(x.symbol)}</strong><span>${escapeHtml(x.name||'')}</span></button>`).join('');
+      suggestions.hidden=!matches.length;
+      suggestions.querySelectorAll('[data-portfolio-suggest]').forEach(btn=>btn.addEventListener('mousedown',e=>e.preventDefault()));
+      suggestions.querySelectorAll('[data-portfolio-suggest]').forEach(btn=>btn.addEventListener('click',()=>{
+        state.portfolioTableQuery=btn.dataset.portfolioSuggest;
+        renderPortfolioPositionsTable(portfolio,rows);
+        requestAnimationFrame(()=>els.portfolioPositionsTable.querySelector('#portfolio-table-query')?.focus());
+      }));
+    };
+    let portfolioSearchTimer;
+    input?.addEventListener('input',e=>{
+      state.portfolioTableQuery=e.target.value;
+      updateSuggestions();
+      clearTimeout(portfolioSearchTimer);
+      portfolioSearchTimer=setTimeout(()=>{
+        const caret=e.target.selectionStart ?? e.target.value.length;
+        renderPortfolioPositionsTable(portfolio,rows);
+        requestAnimationFrame(()=>{
+          const next=els.portfolioPositionsTable.querySelector('#portfolio-table-query');
+          if(next){ next.focus({preventScroll:true}); const n=Math.min(caret,next.value.length); next.setSelectionRange(n,n); }
+        });
+      },180);
+    });
+    input?.addEventListener('focus',updateSuggestions);
+    input?.addEventListener('keydown',e=>{
+      if((e.key==='Enter'||e.key==='Tab') && suggestions && !suggestions.hidden){
+        const first=suggestions.querySelector('[data-portfolio-suggest]');
+        if(first){ e.preventDefault(); state.portfolioTableQuery=first.dataset.portfolioSuggest; renderPortfolioPositionsTable(portfolio,rows); requestAnimationFrame(()=>els.portfolioPositionsTable.querySelector('#portfolio-table-query')?.focus()); }
+      }
+      if(e.key==='Escape' && suggestions) suggestions.hidden=true;
+    });
+    input?.addEventListener('blur',()=>setTimeout(()=>{if(suggestions) suggestions.hidden=true},120));
     els.portfolioPositionsTable.querySelector('#portfolio-table-sort')?.addEventListener('change',e=>{state.portfolioTableSort=e.target.value; renderPortfolioPositionsTable(portfolio,rows);});
     els.portfolioPositionsTable.querySelectorAll('[data-position-ticker]').forEach(btn=>btn.addEventListener('click',()=>{ const t=btn.dataset.positionTicker; if(byTicker[t]) openDetail(t); }));
   }
@@ -3687,7 +3735,7 @@
         <div class="summary-item"><span class="summary-label">expense ratio médio (ETFs)</span><span class="summary-value">${avgFee != null ? fmtExpenseRatio(avgFee) : "sem dados"}</span></div>
       </div>
       <p class="detail-note">Valor atual = quantidade líquida importada × preço de mercado × taxa FX para EUR. O score ponderado e as exposições usam esse valor económico atual.</p>
-      ${etfs.length >= 2 ? `<button class="portfolio-etf-consolidation-cta" data-portfolio-etf-consolidation><span><b>ETF Consolidation Lab</b><small>${etfs.length} ETFs na carteira · analisar overlap, redundância e candidato a núcleo</small></span><strong>Analyzar →</strong></button>` : ''}
+      ${etfs.length >= 2 ? `<button class="portfolio-etf-consolidation-cta" data-portfolio-etf-consolidation><span><b>ETF Consolidation Lab</b><small>${etfs.length} ETFs na carteira · analisar overlap, redundância e candidato a núcleo</small></span><strong>Analisar →</strong></button>` : ''}
     `;
     els.portfolioSummary.querySelector('[data-portfolio-etf-consolidation]')?.addEventListener('click',()=>{ switchView('funds'); setTimeout(()=>els.fundPortfolioIntel?.scrollIntoView({behavior:'smooth',block:'start'}),80); });
     renderPortfolioDecisionCenter(portfolio, rows);
@@ -3779,36 +3827,130 @@
     return `<div class="fund-bars">${entries.map(([k,v])=>`<div class="fund-bar-row"><span>${escapeHtml(String(k).replace(/_/g,' '))}</span><i><b style="width:${Math.max(4, Number(v)/max*100)}%"></b></i><strong>${pctFundWeight(v)}</strong></div>`).join('')}</div>`;
   }
 
+  function fundPortfolioFit(r) {
+    const allFunds = (state.data?.stocks || []).filter(x => x.quote_type === "ETF");
+    const ownedMap = lsGet(LS_PORTFOLIO);
+    const peers = allFunds.filter(x => x.ticker !== r.ticker && ownedMap[x.ticker]);
+    const overlaps = peers.map(x => ({ticker:x.ticker, overlap:fundOverlap(r,x)?.value})).filter(x => Number.isFinite(Number(x.overlap))).sort((a,b)=>b.overlap-a.overlap);
+    const maxOverlap = overlaps.length ? Number(overlaps[0].overlap) : null;
+    const m = fundMeta(r);
+    const holdings = [...fundHoldingsMap(r).values()].sort((a,b)=>b.weight-a.weight);
+    const observedCoverage = holdings.reduce((x,h)=>x+Number(h.weight),0);
+    const top5 = holdings.slice(0,5).reduce((x,h)=>x+Number(h.weight),0);
+    const fee = Number(r.expense_ratio);
+    const aum = Number(r.fund_total_assets);
+
+    let costScore = 50;
+    if (Number.isFinite(fee)) {
+      const pct = fee; // Yahoo expense ratio is already in percentage points: 0.03 = 0.03%
+      costScore = pct <= .10 ? 100 : pct <= .20 ? 88 : pct <= .30 ? 76 : pct <= .50 ? 58 : pct <= .75 ? 40 : 24;
+    }
+    let sizeScore = 50;
+    if (Number.isFinite(aum) && aum > 0) sizeScore = aum >= 20e9 ? 100 : aum >= 5e9 ? 90 : aum >= 1e9 ? 78 : aum >= 250e6 ? 62 : aum >= 50e6 ? 45 : 28;
+    let diversificationScore = 50;
+    if (holdings.length) {
+      diversificationScore = 45 + Math.min(30, holdings.length * 2.5);
+      if (top5 <= .20) diversificationScore += 20;
+      else if (top5 <= .35) diversificationScore += 10;
+      else if (top5 >= .60) diversificationScore -= 20;
+      diversificationScore = Math.max(10, Math.min(100, Math.round(diversificationScore)));
+    }
+    let concentrationScore = holdings.length ? Math.max(0, Math.min(100, Math.round((1 - Math.min(1, top5)) * 100))) : 50;
+
+    const thematic = m.themes.length > 0;
+    const broad = m.style === 'Broad' && !thematic;
+    let role = 'Satellite';
+    let roleReason = thematic ? `Exposição temática: ${m.themes.join(', ')}` : `${m.geo} · ${m.style}`;
+    if (m.style === 'Bonds') { role = 'Diversifier'; roleReason = 'Renda fixa pode reduzir dependência do risco acionista.'; }
+    else if (m.style === 'Dividend') { role = 'Income'; roleReason = 'Perfil orientado para rendimento/distribuição.'; }
+    else if (maxOverlap != null && maxOverlap >= .60) { role = 'Redundant'; roleReason = `${Math.round(maxOverlap*100)}% de overlap observado com ${overlaps[0].ticker}.`; }
+    else if (broad && (m.geo === 'Global' || m.geo === 'Europe' || /world|global|all.?world|msci|s&p 500/i.test(`${r.name||''} ${r.ticker||''}`))) { role = 'Core'; roleReason = 'Exposição broad suficientemente diversificada para potencial função de núcleo.'; }
+    else if (maxOverlap != null && maxOverlap <= .20 && peers.length) { role = 'Diversifier'; roleReason = `Baixo overlap observado com os outros ETFs da carteira (máx. ${Math.round(maxOverlap*100)}%).`; }
+
+    const overall = Math.round(costScore*.22 + sizeScore*.18 + diversificationScore*.28 + concentrationScore*.17 + (role === 'Core' ? 92 : role === 'Diversifier' ? 82 : role === 'Income' ? 72 : role === 'Redundant' ? 35 : 65)*.15);
+    return { costScore, sizeScore, diversificationScore, concentrationScore, overall, role, roleReason, maxOverlap, overlaps, observedCoverage, top5 };
+  }
+
+  function fundScoreLabel(v) {
+    if (!Number.isFinite(Number(v))) return '—';
+    if (v >= 85) return 'Excelente';
+    if (v >= 70) return 'Forte';
+    if (v >= 55) return 'Razoável';
+    return 'Fraco';
+  }
+
   function openFundDetail(r) {
     const meta = fundMeta(r);
     const holdings = [...fundHoldingsMap(r).values()].sort((a,b)=>b.weight-a.weight);
     const topCoverage = holdings.reduce((x,h)=>x+Number(h.weight),0);
     const starred = isWatched(r.ticker);
     const owned = isOwned(r.ticker);
+    const fit = fundPortfolioFit(r);
+    const overlapText = fit.maxOverlap == null ? '—' : `${Math.round(fit.maxOverlap*100)}%`;
+    const roleClass = String(fit.role).toLowerCase();
     els.detailContent.innerHTML = `
       <div class="fund-detail-hero">
         <div><span class="eyebrow">FUND DOSSIER</span><h2>${escapeHtml(r.ticker)}</h2><p>${escapeHtml(r.name || 'ETF')}</p><small>${escapeHtml(r.fund_category || r.sector || 'ETF')} · ${escapeHtml(meta.geo)} · ${escapeHtml(meta.style)}</small></div>
         <div class="fund-detail-fee"><span>Expense ratio</span><strong>${fmtExpenseRatio(r.expense_ratio)}</strong></div>
       </div>
       <div class="fund-detail-actions"><button class="fund-action" id="fund-watch">${starred?'★ Na watchlist':'☆ Watchlist'}</button><label class="fund-action fund-owned"><input id="fund-owned" type="checkbox" ${owned?'checked':''}> Na carteira</label></div>
-      <section class="fund-kpi-grid">
-        <div><span>AUM</span><strong>${r.fund_total_assets == null ? '—' : fmtCap(r.fund_total_assets)}</strong></div>
-        <div><span>Família</span><strong>${escapeHtml(r.fund_family || '—')}</strong></div>
-        <div><span>Categoria</span><strong>${escapeHtml(r.fund_category || r.sector || '—')}</strong></div>
-        <div><span>Início</span><strong>${escapeHtml(r.fund_inception_date || '—')}</strong></div>
-        <div><span>Região</span><strong>${escapeHtml(meta.geo)}</strong></div>
-        <div><span>Estilo</span><strong>${escapeHtml(meta.style)}</strong></div>
+
+      <section class="fund-role-hero">
+        <div class="fund-role-score"><span>Fund fit</span><strong>${fit.overall}</strong><small>${fundScoreLabel(fit.overall)}</small></div>
+        <div class="fund-role-copy"><span class="fund-role-chip role-${roleClass}">${escapeHtml(fit.role)}</span><h3>${escapeHtml(fit.roleReason)}</h3><p>Leitura estrutural baseada apenas nos dados observáveis disponíveis. Não é uma recomendação automática de compra ou venda.</p></div>
       </section>
-      ${r.fund_description ? `<section class="fund-editorial-card"><span class="eyebrow">WHAT IT OWNS</span><p>${escapeHtml(r.fund_description)}</p></section>` : ''}
-      <section class="fund-detail-section"><div class="section-heading"><div><span class="eyebrow">TOP HOLDINGS</span><h3>Principais posições</h3></div><span class="section-count">${holdings.length ? pctFundWeight(topCoverage) : '—'}</span></div>
+
+      <section class="fund-dimension-grid">
+        ${[
+          ['Cost', fit.costScore, Number.isFinite(Number(r.expense_ratio)) ? fmtExpenseRatio(r.expense_ratio) : 'sem TER'],
+          ['Size', fit.sizeScore, r.fund_total_assets == null ? 'AUM indisponível' : fmtCap(r.fund_total_assets)],
+          ['Diversification', fit.diversificationScore, holdings.length ? `${holdings.length} holdings observadas` : 'sem holdings'],
+          ['Concentration', fit.concentrationScore, holdings.length ? `Top 5 ${pctFundWeight(fit.top5)}` : 'sem holdings'],
+          ['Overlap', fit.maxOverlap == null ? 50 : Math.max(0, Math.round((1-fit.maxOverlap)*100)), fit.maxOverlap == null ? 'sem pares observáveis' : `${overlapText} máx.`]
+        ].map(([label,score,note])=>`<div><span>${label}</span><strong>${score}</strong><small>${escapeHtml(note)}</small></div>`).join('')}
+      </section>
+
+      <details class="fund-dossier-box" open>
+        <summary><div><span class="eyebrow">SNAPSHOT</span><h3>Estrutura do fundo</h3></div><span class="section-count">${escapeHtml(fit.role)}</span></summary>
+        <div class="fund-kpi-grid">
+          <div><span>AUM</span><strong>${r.fund_total_assets == null ? '—' : fmtCap(r.fund_total_assets)}</strong></div>
+          <div><span>Família</span><strong>${escapeHtml(r.fund_family || '—')}</strong></div>
+          <div><span>Categoria</span><strong>${escapeHtml(r.fund_category || r.sector || '—')}</strong></div>
+          <div><span>Início</span><strong>${escapeHtml(r.fund_inception_date || '—')}</strong></div>
+          <div><span>Região</span><strong>${escapeHtml(meta.geo)}</strong></div>
+          <div><span>Estilo</span><strong>${escapeHtml(meta.style)}</strong></div>
+        </div>
+        ${r.fund_description ? `<div class="fund-editorial-card"><span class="eyebrow">WHAT IT OWNS</span><p>${escapeHtml(r.fund_description)}</p></div>` : ''}
+      </details>
+
+      <details class="fund-dossier-box">
+        <summary><div><span class="eyebrow">COMPOSITION</span><h3>Principais posições</h3></div><span class="section-count">${holdings.length ? pctFundWeight(topCoverage) : '—'}</span></summary>
         ${holdings.length ? `<div class="fund-holdings-list">${holdings.map(h=>`<div><span><b>${escapeHtml(h.symbol)}</b><small>${escapeHtml(h.name)}</small></span><i><b style="width:${Math.min(100, Math.max(3, Number(h.weight)*500))}%"></b></i><strong>${pctFundWeight(h.weight)}</strong></div>`).join('')}</div><p class="fund-method-note">A percentagem no cabeçalho é apenas a cobertura das posições devolvidas pela fonte, não 100% do fundo.</p>` : '<p class="muted">A fonte não devolveu top holdings para esta cotação.</p>'}
-      </section>
-      <section class="fund-detail-two"><article><span class="eyebrow">ASSET MIX</span><h3>Classes de ativos</h3>${fundBars(r.fund_asset_classes)}</article><article><span class="eyebrow">SECTOR MIX</span><h3>Exposição setorial</h3>${fundBars(r.fund_sector_weightings)}</article></section>
-      <section class="fund-editorial-card integrity"><span class="eyebrow">DATA INTEGRITY</span><h3>O que este dossier sabe</h3><p>Holdings, classes de ativos e pesos setoriais vêm do módulo FundsData quando Yahoo os disponibiliza. O overlap do comparador usa apenas as holdings observadas e é apresentado como limite inferior — não como composição completa do fundo.</p></section>
+      </details>
+
+      <details class="fund-dossier-box">
+        <summary><div><span class="eyebrow">EXPOSURES</span><h3>Classes de ativos & setores</h3></div><span class="section-count">abrir</span></summary>
+        <section class="fund-detail-two"><article><span class="eyebrow">ASSET MIX</span><h3>Classes de ativos</h3>${fundBars(r.fund_asset_classes)}</article><article><span class="eyebrow">SECTOR MIX</span><h3>Exposição setorial</h3>${fundBars(r.fund_sector_weightings)}</article></section>
+      </details>
+
+      <details class="fund-dossier-box">
+        <summary><div><span class="eyebrow">PORTFOLIO ROLE</span><h3>O papel deste ETF na carteira</h3></div><span class="section-count">${overlapText}</span></summary>
+        <div class="fund-role-detail">
+          <div><span>Papel provável</span><strong>${escapeHtml(fit.role)}</strong><small>${escapeHtml(fit.roleReason)}</small></div>
+          <div><span>Maior overlap observado</span><strong>${overlapText}</strong><small>${fit.overlaps.length ? `com ${escapeHtml(fit.overlaps[0].ticker)}` : 'sem outro ETF comparável na carteira'}</small></div>
+          <div><span>Cobertura observada</span><strong>${holdings.length ? pctFundWeight(fit.observedCoverage) : '—'}</strong><small>limite inferior; depende das holdings devolvidas pela fonte</small></div>
+        </div>
+        ${fit.overlaps.length ? `<div class="fund-overlap-list">${fit.overlaps.slice(0,5).map(x=>`<div><span>${escapeHtml(x.ticker)}</span><strong>${Math.round(x.overlap*100)}%</strong></div>`).join('')}</div>` : ''}
+      </details>
+
+      <details class="fund-dossier-box">
+        <summary><div><span class="eyebrow">DATA INTEGRITY</span><h3>O que este dossier sabe</h3></div><span class="section-count">metodologia</span></summary>
+        <div class="fund-editorial-card integrity"><p>Holdings, classes de ativos e pesos setoriais vêm do módulo FundsData quando Yahoo os disponibiliza. O overlap usa apenas as holdings observadas e deve ser lido como limite inferior. Cost, Size, Diversification, Concentration e Fund fit são heurísticas transparentes de triagem — não estimativas de retorno.</p></div>
+      </details>
     `;
     els.detail.hidden = false;
     document.getElementById('fund-watch')?.addEventListener('click', e => { toggleWatched(r.ticker); e.currentTarget.textContent = isWatched(r.ticker) ? '★ Na watchlist' : '☆ Watchlist'; });
-    document.getElementById('fund-owned')?.addEventListener('change', () => toggleOwned(r.ticker));
+    document.getElementById('fund-owned')?.addEventListener('change', () => { toggleOwned(r.ticker); openFundDetail(r); });
   }
 
   function renderFundCards(rows) {
@@ -4606,7 +4748,50 @@
     });
   });
 
+  function bindStockAutocomplete(input, syncInput) {
+    if (!input) return;
+    let box = input.parentElement?.querySelector('.stock-autocomplete-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'stock-autocomplete-box';
+      box.hidden = true;
+      input.parentElement?.appendChild(box);
+    }
+    const update = () => {
+      if (!state.data?.stocks) return;
+      const q = input.value.trim().toUpperCase();
+      if (!q) { box.hidden = true; box.innerHTML = ''; return; }
+      const matches = state.data.stocks
+        .filter(r => r.quote_type !== 'ETF' && !isAustralianScannerRow(r))
+        .filter(r => `${r.ticker} ${r.name||''}`.toUpperCase().includes(q))
+        .sort((a,b) => (a.ticker.toUpperCase().startsWith(q)?-1:0) - (b.ticker.toUpperCase().startsWith(q)?-1:0) || (b.score??0)-(a.score??0))
+        .slice(0,7);
+      box.innerHTML = matches.map(r => `<button type="button" data-stock-suggest="${escapeHtml(r.ticker)}"><strong>${escapeHtml(r.ticker)}</strong><span>${escapeHtml(r.name||'')}</span><em>${r.score==null?'—':Number(r.score).toFixed(0)}</em></button>`).join('');
+      box.hidden = !matches.length;
+      box.querySelectorAll('[data-stock-suggest]').forEach(btn=>btn.addEventListener('mousedown',e=>e.preventDefault()));
+      box.querySelectorAll('[data-stock-suggest]').forEach(btn=>btn.addEventListener('click',()=>{
+        input.value = btn.dataset.stockSuggest;
+        if(syncInput) syncInput.value = input.value;
+        box.hidden = true;
+        applyFilters();
+        input.focus({preventScroll:true});
+      }));
+    };
+    input.addEventListener('input', update);
+    input.addEventListener('focus', update);
+    input.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === 'Tab') && !box.hidden) {
+        const first = box.querySelector('[data-stock-suggest]');
+        if (first) { e.preventDefault(); first.click(); }
+      }
+      if (e.key === 'Escape') box.hidden = true;
+    });
+    input.addEventListener('blur',()=>setTimeout(()=>{box.hidden=true},120));
+  }
+
   on(els.stockHeroSearch, "input", () => { if(els.search){ els.search.value=els.stockHeroSearch.value; applyFilters(); } });
+  bindStockAutocomplete(els.stockHeroSearch, els.search);
+  bindStockAutocomplete(els.search, els.stockHeroSearch);
   on(els.stockFiltersBtn, "click", () => { if(els.stockAdvancedFilters) els.stockAdvancedFilters.hidden = !els.stockAdvancedFilters.hidden; });
   [els.stockMinScore,els.stockMinQuality,els.stockMinGrowth,els.stockMinValue,els.stockMinCap,els.stockMaxFpe].forEach(el=>on(el,"input",applyFilters));
   on(els.stockClearFilters, "click", () => {
@@ -4694,7 +4879,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.64.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.66.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
