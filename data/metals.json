@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14T23:57:49.696341Z",
+  "generated_at": "2026-08-15T00:45:31.411265Z",
   "note": "Pre\u00e7os de futuros (n\u00e3o spot) para ouro/prata/cobre/platina/pal\u00e1dio. Ur\u00e2nio \u00e9 um proxy via ETF de mineradoras (URA), n\u00e3o o pre\u00e7o do metal \u2014 n\u00e3o existe fonte gratuita de pre\u00e7o spot de ur\u00e2nio. Sem indicador de stress/tens\u00e3o de mercado: exigiria dados de invent\u00e1rio/lease rates que n\u00e3o est\u00e3o dispon\u00edveis gratuitamente; nenhum n\u00famero \u00e9 inventado.",
   "instruments": [
     {
