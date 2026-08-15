@@ -120,20 +120,31 @@ def _number(v) -> str:
 
 
 def _post_ntfy(title: str, message: str, *, priority: int = 3, tags: str = "chart_with_upwards_trend", click: str | None = None) -> None:
+    """Publish through ntfy's JSON API.
+
+    Do not put user-visible Unicode text in HTTP headers: Python's http.client
+    encodes header values as latin-1, so characters such as ✓/→ raise
+    UnicodeEncodeError before the request even leaves GitHub Actions.
+    JSON is UTF-8 and safely carries Portuguese text and symbols.
+    """
     if not NTFY_TOPIC:
         raise RuntimeError("NTFY_TOPIC is not configured")
-    headers = {
-        "Title": title,
-        "Priority": str(priority),
-        "Tags": tags,
-        "Content-Type": "text/plain; charset=utf-8",
-    }
-    if click:
-        headers["Click"] = click
+
+    headers = {"Content-Type": "application/json; charset=utf-8"}
     if NTFY_TOKEN:
         headers["Authorization"] = f"Bearer {NTFY_TOKEN}"
-    url = f"{NTFY_SERVER}/{quote(NTFY_TOPIC, safe='')}"
-    r = requests.post(url, data=message.encode("utf-8"), headers=headers, timeout=20)
+
+    payload = {
+        "topic": NTFY_TOPIC,
+        "title": title,
+        "message": message,
+        "priority": int(priority),
+        "tags": [t.strip() for t in str(tags).split(",") if t.strip()],
+    }
+    if click:
+        payload["click"] = click
+
+    r = requests.post(NTFY_SERVER, json=payload, headers=headers, timeout=20)
     r.raise_for_status()
 
 
