@@ -445,3 +445,20 @@ Smart Money passa a distinguir tamanho de operação de qualidade de oportunidad
 - Progressive disclosure por defeito para informação densa.
 - Mantém cards de oportunidade e acessos rápidos.
 - Dark mode/alto contraste compatíveis com os novos blocos.
+
+## v0.62.0 — Portfolio Decision Center + Progressive Disclosure
+
+- Portfolio passa a abrir com um Decision Center que prioriza cobertura, teses em deterioração, exposição Zombie, concentração, ETFs redundantes e P/L coberto.
+- Position Ledger, Estrutura & Risco, Opportunity Engine, Rebalancing Lab, Thesis Monitor e Portfolio Radar passam a usar dropboxes/accordions.
+- Estrutura & Risco fica aberta por defeito; detalhe adicional abre apenas quando necessário.
+- Os cartões do Decision Center abrem diretamente o módulo relevante.
+- Mantida compatibilidade com tema Sistema/Claro/Escuro, contraste alto e texto grande.
+
+
+## v0.63.0 — ETF Consolidation Decision Lab
+
+- Consolidation Lab reorganizado em grupos expansíveis para reduzir densidade visual.
+- Cada cluster mostra candidato a núcleo, ETFs a rever, overlap médio e poupança anual modelada.
+- Novo botão “Simular consolidar este grupo” cria automaticamente um cenário what-if no Portfolio Rebalancing Lab.
+- O cenário importado é editável e nunca altera a carteira real.
+- Corrigido versionamento de cache: index.html, app.js e Service Worker passam todos a v0.63.0.

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fef5e8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.59.0">
+<link rel="stylesheet" href="style.css?v=0.63.0">
 </head>
 <body>
 
@@ -440,18 +440,37 @@
       </div>
       <div id="exposure-panel" class="exposure-panel"></div>
       <div id="portfolio-summary" class="portfolio-summary"></div>
-      <div id="portfolio-positions-table" class="portfolio-positions-table"></div>
-      <div id="portfolio-structure-intel" class="portfolio-structure-intel"></div>
-      <div id="portfolio-opportunity-engine" class="portfolio-opportunity-engine"></div>
-      <div id="portfolio-rebalancing-lab" class="portfolio-rebalancing-lab"></div>
-      <div id="portfolio-thesis-monitor" class="portfolio-thesis-monitor"></div>
-      <section class="portfolio-filter-section">
-        <div class="section-heading"><div><span class="eyebrow">PORTFOLIO RADAR</span><h3>Filtrar as minhas posições</h3></div></div>
-        <div id="portfolio-filters" class="portfolio-filter-bar" aria-label="Filtros do portfolio"></div>
-      </section>
-      <div id="portfolio-list" class="dossier">
-        <p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Ações e toca em "Tenho esta posição".</p>
-      </div>
+      <div id="portfolio-decision-center" class="portfolio-decision-center"></div>
+
+      <details class="portfolio-dropbox" id="portfolio-ledger-box">
+        <summary><span><b>Position Ledger</b><small>Posições, capital e rentabilidade</small></span><i>⌄</i></summary>
+        <div id="portfolio-positions-table" class="portfolio-positions-table"></div>
+      </details>
+      <details class="portfolio-dropbox" id="portfolio-structure-box" open>
+        <summary><span><b>Estrutura & risco</b><small>Concentração, overlap e exposição económica real</small></span><i>⌄</i></summary>
+        <div id="portfolio-structure-intel" class="portfolio-structure-intel"></div>
+      </details>
+      <details class="portfolio-dropbox" id="portfolio-opportunity-box">
+        <summary><span><b>Portfolio Opportunity Engine</b><small>Empresas que encaixam melhor na estrutura atual</small></span><i>⌄</i></summary>
+        <div id="portfolio-opportunity-engine" class="portfolio-opportunity-engine"></div>
+      </details>
+      <details class="portfolio-dropbox" id="portfolio-rebalance-box">
+        <summary><span><b>Rebalancing Lab</b><small>Simular alterações antes de mexer na carteira</small></span><i>⌄</i></summary>
+        <div id="portfolio-rebalancing-lab" class="portfolio-rebalancing-lab"></div>
+      </details>
+      <details class="portfolio-dropbox" id="portfolio-thesis-box">
+        <summary><span><b>Thesis Monitor</b><small>O que está a melhorar, piorar ou mudar</small></span><i>⌄</i></summary>
+        <div id="portfolio-thesis-monitor" class="portfolio-thesis-monitor"></div>
+      </details>
+      <details class="portfolio-dropbox" id="portfolio-radar-box">
+        <summary><span><b>Portfolio Radar</b><small>Filtrar e rever posições individuais</small></span><i>⌄</i></summary>
+        <section class="portfolio-filter-section">
+          <div id="portfolio-filters" class="portfolio-filter-bar" aria-label="Filtros do portfolio"></div>
+        </section>
+        <div id="portfolio-list" class="dossier">
+          <p class="empty-state">Ainda não marcaste nenhuma posição. Importa um ficheiro acima, ou abre um ticker em Ações e toca em "Tenho esta posição".</p>
+        </div>
+      </details>
     </section>
 
 
@@ -501,6 +520,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.59.0"></script>
+<script src="app.js?v=0.63.0"></script>
 </body>
 </html>
