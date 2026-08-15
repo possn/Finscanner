@@ -116,9 +116,17 @@ class RawMetrics:
     insurance_equity_to_assets: float | None = None
     insurance_metric_coverage_pct: float | None = None
 
-    # ETF-specific
+    # ETF-specific. FundsData is optional and Yahoo coverage varies by listing.
     expense_ratio: float | None = None
-    top_holdings: list[tuple[str, float]] = field(default_factory=list)
+    top_holdings: list[dict] = field(default_factory=list)
+    fund_family: str | None = None
+    fund_category: str | None = None
+    fund_legal_type: str | None = None
+    fund_inception_date: str | None = None
+    fund_description: str | None = None
+    fund_total_assets: float | None = None
+    fund_asset_classes: dict = field(default_factory=dict)
+    fund_sector_weightings: dict = field(default_factory=dict)
 
     error: str | None = None
 
@@ -223,15 +231,59 @@ def fetch_one(ticker: str) -> RawMetrics:
         m.beta = _as_float(info.get("beta"))
 
         if m.quote_type == "ETF":
+            # Yahoo reports fund expense ratios in percentage points (e.g. 0.03 = 0.03%).
             m.expense_ratio = _as_float(_safe_get(info, "annualReportExpenseRatio", "netExpenseRatio"))
+            m.fund_family = _safe_get(info, "fundFamily", "fundFamilyName")
+            m.fund_category = _safe_get(info, "category", "fundCategory")
+            m.fund_legal_type = info.get("legalType")
+            m.fund_total_assets = _as_float(_safe_get(info, "totalAssets", "netAssets"))
+            inception = info.get("fundInceptionDate")
+            if inception is not None:
+                try:
+                    import datetime as _dt
+                    m.fund_inception_date = _dt.datetime.utcfromtimestamp(float(inception)).date().isoformat()
+                except Exception:
+                    m.fund_inception_date = str(inception)
             try:
                 funds_data = t.funds_data
-                if funds_data is not None and funds_data.top_holdings is not None:
-                    th = funds_data.top_holdings
-                    if "Holding Percent" in th.columns:
-                        m.top_holdings = list(zip(th.index.tolist(), th["Holding Percent"].tolist()))
+                if funds_data is not None:
+                    try:
+                        m.fund_description = funds_data.description or None
+                    except Exception:
+                        pass
+                    try:
+                        overview = funds_data.fund_overview or {}
+                        if isinstance(overview, dict):
+                            m.fund_family = m.fund_family or overview.get("family") or overview.get("fundFamily")
+                            m.fund_category = m.fund_category or overview.get("categoryName") or overview.get("category")
+                            m.fund_legal_type = m.fund_legal_type or overview.get("legalType")
+                    except Exception:
+                        pass
+                    try:
+                        ac = funds_data.asset_classes or {}
+                        if isinstance(ac, dict):
+                            m.fund_asset_classes = {str(k): _as_float(v) for k,v in ac.items() if _as_float(v) is not None}
+                    except Exception:
+                        pass
+                    try:
+                        sw = funds_data.sector_weightings or {}
+                        if isinstance(sw, dict):
+                            m.fund_sector_weightings = {str(k): _as_float(v) for k,v in sw.items() if _as_float(v) is not None}
+                    except Exception:
+                        pass
+                    try:
+                        th = funds_data.top_holdings
+                        if th is not None and not th.empty and "Holding Percent" in th.columns:
+                            holdings=[]
+                            for symbol, row in th.iterrows():
+                                weight=_as_float(row.get("Holding Percent"))
+                                if weight is None: continue
+                                holdings.append({"symbol": str(symbol), "name": str(row.get("Name") or symbol), "weight": weight})
+                            m.top_holdings = holdings
+                    except Exception as e:
+                        log.debug("%s: no top holdings data (%s)", ticker, e)
             except Exception as e:
-                log.debug("%s: no holdings data (%s)", ticker, e)
+                log.debug("%s: no funds data (%s)", ticker, e)
         else:
             # Quarterly trajectory: latest five quarters allow a like-for-like YoY
             # comparison (Q0 vs Q4) without pretending sequential seasonality is growth.

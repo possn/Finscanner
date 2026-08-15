@@ -137,13 +137,14 @@ def build_metals_payload() -> dict:
     if physical.get("positioning", {}).get("gold", {}).get("status") != "ok": gaps.append("CFTC managed-money positioning")
     if sge.get("status") != "ok": gaps.append("Shanghai Gold Exchange benchmark")
     if physical.get("central_banks", {}).get("status") != "ok": gaps.append("central-bank monthly flows (WGC workbook)")
-    gaps.append("COMEX delivery coverage / paper-to-physical leverage: not derived without a defensible denominator")
+    if physical.get("deliveries", {}).get("status") != "ok": gaps.append("COMEX daily delivery notices (CME Issues & Stops PDF)")
+    gaps.append("paper-to-physical leverage / delivery-stress score: deliberately not derived without a defensible methodology")
 
     return {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "note": (
             "Preços de futuros (não spot) para ouro/prata/cobre/platina/paládio. "
-            "Urânio é um proxy via ETF de mineradoras. A camada física usa fontes "
+            "Urânio é um proxy via ETF de mineradoras. A camada física e de deliveries usa fontes "
             "oficiais/gratuitas (CME, CFTC, SGE e, quando acessível, WGC). Cada bloco "
             "expõe a fonte e o estado; dados indisponíveis não são estimados."
         ),

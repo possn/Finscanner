@@ -24,6 +24,7 @@ import history as history_mod
 import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from metals import build_metals_payload
+import metals_history as metals_history_mod
 from fx import build_fx_payload
 from news import fetch_news_for_universe
 from score import score_universe
@@ -33,6 +34,7 @@ from universe import build_universe, ETF_UNIVERSE, region_for_equity
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
+METALS_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals_history.json")
 FX_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "fx.json")
 HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "history.json")
 VALUATION_HISTORY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "valuation_history.json")
@@ -139,6 +141,16 @@ def main():
 
         rm = raw_by_ticker.get(s.ticker)
         if rm is not None:
+            if row.get("quote_type") == "ETF":
+                row["top_holdings"] = rm.top_holdings
+                row["fund_family"] = rm.fund_family
+                row["fund_category"] = rm.fund_category
+                row["fund_legal_type"] = rm.fund_legal_type
+                row["fund_inception_date"] = rm.fund_inception_date
+                row["fund_description"] = rm.fund_description
+                row["fund_total_assets"] = rm.fund_total_assets
+                row["fund_asset_classes"] = rm.fund_asset_classes
+                row["fund_sector_weightings"] = rm.fund_sector_weightings
             row["quarterly_revenue"] = rm.quarterly_revenue
             row["quarterly_net_income"] = rm.quarterly_net_income
             row["quarterly_diluted_shares"] = rm.quarterly_diluted_shares
@@ -188,6 +200,10 @@ def main():
     log.info("Wrote %d rows to %s", len(rows), OUT_PATH)
 
     metals_payload = build_metals_payload()
+    metals_history = metals_history_mod.load(METALS_HISTORY_PATH)
+    metals_history = metals_history_mod.update(metals_history, metals_payload, today)
+    metals_payload = metals_history_mod.enrich(metals_payload, metals_history)
+    metals_history_mod.save(metals_history, METALS_HISTORY_PATH)
     with open(METALS_OUT_PATH, "w") as f:
         json.dump(_json_safe(metals_payload), f, indent=2)
     log.info("Wrote metals data to %s", METALS_OUT_PATH)

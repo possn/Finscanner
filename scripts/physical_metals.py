@@ -24,7 +24,7 @@ import requests
 
 log = logging.getLogger("physical_metals")
 
-UA = "Mozilla/5.0 (compatible; Finscanner/0.19; +https://github.com/possn/Finscanner)"
+UA = "Mozilla/5.0 (compatible; Finscanner/0.20; +https://github.com/possn/Finscanner)"
 HEADERS = {"User-Agent": UA, "Accept": "*/*"}
 
 CME_STOCK_URLS = {
@@ -34,6 +34,7 @@ CME_STOCK_URLS = {
 CFTC_DISAGG = "https://www.cftc.gov/dea/newcot/f_disagg.txt"
 SGE_BENCHMARK = "https://en.sge.com.cn/data_BenchmarkPrice"
 WGC_RESERVES_PAGE = "https://www.gold.org/goldhub/data/gold-reserves-by-country"
+CME_DELIVERY_DAILY = "https://www.cmegroup.com/delivery_reports/MetalsIssuesAndStopsReport.pdf"
 
 
 def _now() -> str:
@@ -199,6 +200,63 @@ def fetch_sge_benchmark() -> dict:
     return out
 
 
+
+def fetch_cme_delivery_notices() -> dict:
+    """Parse CME's official daily Metals Issues & Stops PDF.
+
+    We expose delivery-notice counts for the standard COMEX gold and silver
+    contracts only. A notice is a clearing/delivery event, not proof that metal
+    left a vault; ounce-equivalent figures are therefore labelled as such.
+    """
+    out = {"source": "CME Group", "source_url": CME_DELIVERY_DAILY, "fetched_at": _now(), "status": "unavailable"}
+    try:
+        from pypdf import PdfReader
+        r = requests.get(CME_DELIVERY_DAILY, headers=HEADERS, timeout=30)
+        r.raise_for_status()
+        reader = PdfReader(io.BytesIO(r.content))
+        text = "\n".join((page.extract_text() or "") for page in reader.pages)
+        text = re.sub(r"[ \t]+", " ", text)
+
+        business = re.search(r"BUSINESS DATE:\s*(\d{1,2}/\d{1,2}/\d{4})", text, re.I)
+        business_date = business.group(1) if business else None
+
+        def parse_contract(pattern: str, contract_oz: int):
+            m = re.search(pattern, text, re.I)
+            if not m:
+                return {"status": "unavailable"}
+            start = m.start()
+            # The next EXCHANGE/CONTRACT block is a safe boundary.
+            nxt = re.search(r"\n\s*EXCHANGE:\s*", text[m.end():], re.I)
+            end = m.end() + nxt.start() if nxt else min(len(text), start + 12000)
+            block = text[start:end]
+            totals = re.findall(r"(?:^|\n)\s*TOTAL:\s*([0-9,]+)\s+([0-9,]+)", block, re.I)
+            mtd = re.search(r"MONTH TO DATE:\s*([0-9,]+)", block, re.I)
+            if not totals:
+                return {"status": "unavailable", "error": "contract found but TOTAL not parsed"}
+            issued, stopped = [int(x.replace(",", "")) for x in totals[-1]]
+            # Issued and stopped should balance. Keep both so the UI can audit the parse.
+            notices = min(issued, stopped) if issued and stopped else max(issued, stopped)
+            return {
+                "status": "ok", "issued": issued, "stopped": stopped,
+                "daily_notices": notices,
+                "daily_oz_equivalent": notices * contract_oz,
+                "month_to_date_notices": int(mtd.group(1).replace(",", "")) if mtd else None,
+                "month_to_date_oz_equivalent": int(mtd.group(1).replace(",", "")) * contract_oz if mtd else None,
+                "contract_oz": contract_oz,
+            }
+
+        gold = parse_contract(r"CONTRACT:\s*[^\n]*COMEX 100 GOLD FUTURES", 100)
+        silver = parse_contract(r"CONTRACT:\s*[^\n]*COMEX 5000 SILVER FUTURES", 5000)
+        if gold.get("status") != "ok" and silver.get("status") != "ok":
+            raise ValueError("daily PDF downloaded but gold/silver delivery blocks were not parsed")
+        out.update({"status": "ok", "business_date": business_date, "gold": gold, "silver": silver,
+                    "method": "CME Issues & Stops. Ounce-equivalent = notices × standard contract size; not vault withdrawals."})
+    except Exception as e:
+        out["error"] = str(e)[:240]
+        log.warning("CME delivery notices unavailable: %s", e)
+    return out
+
+
 def fetch_wgc_central_bank_changes() -> dict:
     out = {"source": "World Gold Council / IMF IFS", "source_url": WGC_RESERVES_PAGE, "fetched_at": _now(), "status": "unavailable"}
     try:
@@ -251,6 +309,7 @@ def build_physical_payload() -> dict:
     return {
         "generated_at": _now(),
         "comex": {"gold": fetch_cme_stocks("gold"), "silver": fetch_cme_stocks("silver")},
+        "deliveries": fetch_cme_delivery_notices(),
         "positioning": {"gold": fetch_cftc_gold_positioning()},
         "shanghai": {"gold_benchmark": fetch_sge_benchmark()},
         "central_banks": fetch_wgc_central_bank_changes(),
