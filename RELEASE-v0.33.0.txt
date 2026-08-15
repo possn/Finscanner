@@ -1,3 +1,0 @@
-Finscanner v0.33.0 — Portfolio Rebalancing Lab
-
-Adds a what-if rebalancing simulator to Portfolio. Move 5–100% of one current holding to cash or another current holding and compare structural metrics before/after. No scenario is persisted.
