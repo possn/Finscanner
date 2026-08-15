@@ -70,7 +70,6 @@ jobs:
             data/history.json \
             data/valuation_history.json \
             data/thesis_history.json \
-            data/news.json \
             data/last_error.log \
             data/pipeline_log.txt; do
             [ -f "$f" ] && cp "$f" "/tmp/finscanner-generated/data/$(basename "$f")"
@@ -88,7 +87,6 @@ jobs:
               data/history.json \
               data/valuation_history.json \
               data/thesis_history.json \
-              data/news.json \
               data/last_error.log \
               data/pipeline_log.txt; do
               [ -f "$f" ] && git add "$f"
