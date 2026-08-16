@@ -224,7 +224,12 @@ def main():
             row["repurchases_last_quarter"] = rm.repurchases_last_quarter
         row.update(classify_thesis(row))
         prev_date, prev_snapshot = thesis_history_mod.previous(thesis_history, s.ticker, today)
-        row.update(evolve_thesis(row, prev_snapshot, prev_date))
+        d7_date, d7_snapshot = thesis_history_mod.nearest_days_ago(thesis_history, s.ticker, today, 7)
+        d30_date, d30_snapshot = thesis_history_mod.nearest_days_ago(thesis_history, s.ticker, today, 30)
+        row.update(evolve_thesis(
+            row, prev_snapshot, prev_date,
+            d7_snapshot, d7_date, d30_snapshot, d30_date,
+        ))
         rows.append(row)
 
     portfolio_extra = set(universe.get("EXTRA", []))

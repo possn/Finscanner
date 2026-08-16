@@ -41,6 +41,7 @@ NTFY_SERVER = (os.getenv("NTFY_SERVER") or "https://ntfy.sh").rstrip("/")
 NTFY_TOPIC = (os.getenv("NTFY_TOPIC") or "").strip().strip("/")
 NTFY_TOKEN = (os.getenv("NTFY_TOKEN") or "").strip()
 SEND_TEST = (os.getenv("FINSCANNER_ALERT_TEST") or "").lower() in {"1", "true", "yes", "on"}
+SEND_HEARTBEAT = (os.getenv("FINSCANNER_ALERT_HEARTBEAT") or "").lower() in {"1", "true", "yes", "on"}
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("insider-alerts")
@@ -475,6 +476,14 @@ def run() -> int:
         "done: baseline %d · new filings %d · alerts %d · detail retries %d",
         baselined, new_filings, alerts_sent, detail_failures,
     )
+    if SEND_HEARTBEAT:
+        _post_ntfy(
+            "Finscanner · monitor insider ativo",
+            f"Verificação automática concluída. {len(us_tickers)} emissores SEC verificados · {new_filings} novos Form 4 · {alerts_sent} alertas enviados.",
+            priority=2,
+            tags="white_check_mark,clock1",
+        )
+        log.info("daily automatic heartbeat sent")
     return 0
 
 

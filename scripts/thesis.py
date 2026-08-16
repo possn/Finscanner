@@ -143,7 +143,7 @@ def _delta(current, previous):
     return None if a is None or b is None else a - b
 
 
-def evolve(row: dict, previous: dict | None = None, previous_date: str | None = None) -> dict:
+def evolve(row: dict, previous: dict | None = None, previous_date: str | None = None, snapshot_7d: dict | None = None, snapshot_7d_date: str | None = None, snapshot_30d: dict | None = None, snapshot_30d_date: str | None = None) -> dict:
     """Describe direction of the current thesis using quarterly acceleration plus
     the previous persisted daily snapshot when available.
 
@@ -151,10 +151,33 @@ def evolve(row: dict, previous: dict | None = None, previous_date: str | None = 
     evidence supporting the current thesis improved; it is not a return forecast.
     """
     previous = previous or {}
+    snapshot_7d = snapshot_7d or {}
+    snapshot_30d = snapshot_30d or {}
     score_delta = _delta(row.get("score"), previous.get("score"))
     quality_delta = _delta(row.get("quality_pct"), previous.get("quality_pct"))
     growth_delta = _delta(row.get("growth_pct"), previous.get("growth_pct"))
     value_delta = _delta(row.get("value_pct"), previous.get("value_pct"))
+    insider_net_delta = _delta(row.get("insider_net_value_30d"), previous.get("insider_net_value_30d"))
+    analyst_eps_next_y_revision_delta = _delta(row.get("analyst_eps_next_y_revision_30d_pct"), previous.get("analyst_eps_next_y_revision_30d_pct"))
+    analyst_eps_next_q_revision_delta = _delta(row.get("analyst_eps_next_q_revision_30d_pct"), previous.get("analyst_eps_next_q_revision_30d_pct"))
+    analyst_price_target_upside_delta = _delta(row.get("analyst_price_target_upside_pct"), previous.get("analyst_price_target_upside_pct"))
+    latest_earnings_date_changed = bool(previous.get("analyst_latest_earnings_date") and row.get("analyst_latest_earnings_date") and previous.get("analyst_latest_earnings_date") != row.get("analyst_latest_earnings_date"))
+
+    # Multi-horizon persistence context. These are deltas in the underlying
+    # daily snapshots, not forecasts. They let the UI distinguish a one-day
+    # event from evidence that has persisted for roughly a week/month.
+    score_delta_7d = _delta(row.get("score"), snapshot_7d.get("score"))
+    score_delta_30d = _delta(row.get("score"), snapshot_30d.get("score"))
+    quality_delta_7d = _delta(row.get("quality_pct"), snapshot_7d.get("quality_pct"))
+    quality_delta_30d = _delta(row.get("quality_pct"), snapshot_30d.get("quality_pct"))
+    growth_delta_7d = _delta(row.get("growth_pct"), snapshot_7d.get("growth_pct"))
+    growth_delta_30d = _delta(row.get("growth_pct"), snapshot_30d.get("growth_pct"))
+    value_delta_7d = _delta(row.get("value_pct"), snapshot_7d.get("value_pct"))
+    value_delta_30d = _delta(row.get("value_pct"), snapshot_30d.get("value_pct"))
+    insider_delta_7d = _delta(row.get("insider_net_value_30d"), snapshot_7d.get("insider_net_value_30d"))
+    insider_delta_30d = _delta(row.get("insider_net_value_30d"), snapshot_30d.get("insider_net_value_30d"))
+    eps_rev_delta_7d = _delta(row.get("analyst_eps_next_y_revision_30d_pct"), snapshot_7d.get("analyst_eps_next_y_revision_30d_pct"))
+    eps_rev_delta_30d = _delta(row.get("analyst_eps_next_y_revision_30d_pct"), snapshot_30d.get("analyst_eps_next_y_revision_30d_pct"))
     rev_acc = _n(row.get("revenue_yoy_acceleration_pp"))
     ni_acc = _n(row.get("net_income_yoy_acceleration_pp"))
     margin_delta = _n(row.get("net_margin_yoy_change_pp"))
@@ -233,5 +256,26 @@ def evolve(row: dict, previous: dict | None = None, previous_date: str | None = 
         "thesis_quality_delta": None if quality_delta is None else round(quality_delta, 2),
         "thesis_growth_delta": None if growth_delta is None else round(growth_delta, 2),
         "thesis_value_delta": None if value_delta is None else round(value_delta, 2),
+        "insider_net_value_delta": None if insider_net_delta is None else round(insider_net_delta, 2),
+        "analyst_eps_next_y_revision_delta_pp": None if analyst_eps_next_y_revision_delta is None else round(analyst_eps_next_y_revision_delta, 2),
+        "analyst_eps_next_q_revision_delta_pp": None if analyst_eps_next_q_revision_delta is None else round(analyst_eps_next_q_revision_delta, 2),
+        "analyst_price_target_upside_delta_pp": None if analyst_price_target_upside_delta is None else round(analyst_price_target_upside_delta, 2),
+        "analyst_latest_earnings_date_changed": latest_earnings_date_changed,
+        "thesis_history_7d_date": snapshot_7d_date,
+        "thesis_history_30d_date": snapshot_30d_date,
+        "thesis_score_delta_7d": None if score_delta_7d is None else round(score_delta_7d, 2),
+        "thesis_score_delta_30d": None if score_delta_30d is None else round(score_delta_30d, 2),
+        "thesis_quality_delta_7d": None if quality_delta_7d is None else round(quality_delta_7d, 2),
+        "thesis_quality_delta_30d": None if quality_delta_30d is None else round(quality_delta_30d, 2),
+        "thesis_growth_delta_7d": None if growth_delta_7d is None else round(growth_delta_7d, 2),
+        "thesis_growth_delta_30d": None if growth_delta_30d is None else round(growth_delta_30d, 2),
+        "thesis_value_delta_7d": None if value_delta_7d is None else round(value_delta_7d, 2),
+        "thesis_value_delta_30d": None if value_delta_30d is None else round(value_delta_30d, 2),
+        "insider_net_value_delta_7d": None if insider_delta_7d is None else round(insider_delta_7d, 2),
+        "insider_net_value_delta_30d": None if insider_delta_30d is None else round(insider_delta_30d, 2),
+        "analyst_eps_next_y_revision_delta_7d_pp": None if eps_rev_delta_7d is None else round(eps_rev_delta_7d, 2),
+        "analyst_eps_next_y_revision_delta_30d_pp": None if eps_rev_delta_30d is None else round(eps_rev_delta_30d, 2),
+        "thesis_type_7d_ago": snapshot_7d.get("thesis_type"),
+        "thesis_type_30d_ago": snapshot_30d.get("thesis_type"),
         "thesis_evolution_drivers": drivers[:5],
     }

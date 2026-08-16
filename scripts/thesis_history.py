@@ -21,6 +21,9 @@ SNAPSHOT_FIELDS = (
     "net_income_yoy_prior", "net_income_yoy_acceleration_pp",
     "net_margin_yoy_change_pp", "net_margin_yoy_change_prior_pp",
     "diluted_shares_yoy", "insider_net_value_30d", "zombie",
+    "analyst_eps_next_y_revision_30d_pct", "analyst_eps_next_q_revision_30d_pct",
+    "analyst_price_target_upside_pct", "analyst_latest_earnings_date",
+    "analyst_latest_eps_surprise_pct", "analyst_days_to_earnings",
 )
 
 
