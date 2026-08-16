@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.96.0">
+<link rel="stylesheet" href="style.css?v=0.96.1">
 </head>
 <body>
 
@@ -147,13 +147,6 @@
           <button type="button" data-stock-jump="mine"><span>2</span><b>As minhas ações</b><small>Qualidade, tese e riscos das posições</small></button>
           <button type="button" data-stock-jump="better"><span>3</span><b>Melhores adições</b><small>Boas empresas que melhoram a carteira</small></button>
         </div>
-        <div class="market-hero__stats stock-global-stats" id="market-stats">
-          <div class="hero-stat"><span>Universo</span><strong>—</strong></div>
-          <div class="hero-stat"><span>Alta qualidade</span><strong>—</strong></div>
-          <div class="hero-stat"><span>Score mediano</span><strong>—</strong></div>
-        </div>
-      </section>
-
       <section class="stock-search-shell" aria-label="Pesquisa de ações">
         <div class="stock-search-row">
           <span class="stock-search-icon">⌕</span>
@@ -173,9 +166,17 @@
         </div>
       </section>
 
-      <section class="insight-strip" id="insight-strip" aria-label="Ideias em destaque"></section>
+        <div class="market-hero__stats stock-global-stats" id="market-stats">
+          <div class="hero-stat"><span>Universo</span><strong>—</strong></div>
+          <div class="hero-stat"><span>Alta qualidade</span><strong>—</strong></div>
+          <div class="hero-stat"><span>Score mediano</span><strong>—</strong></div>
+        </div>
+      </section>
 
-      <section class="opportunity-zone" aria-label="Zona de oportunidade">
+
+      <section class="insight-strip" id="insight-strip" hidden aria-label="Ideias em destaque"></section>
+
+      <section class="opportunity-zone" aria-label="Zona de oportunidade" hidden>
         <div class="section-heading">
           <div><span class="eyebrow">QUALITY × VALUE</span><h3>Zona de oportunidade</h3></div>
           <span class="section-count">qualidade + valuation</span>
@@ -183,7 +184,7 @@
         <div id="opportunity-grid" class="opportunity-grid"></div>
       </section>
 
-      <section class="stock-radar-head">
+      <section class="stock-radar-head" hidden>
         <span class="eyebrow">STOCK RADAR</span>
         <h2>Encontra empresas que merecem investigação.</h2>
         <p>Score explicável, métricas fundamentais, valuation relativo e trajetória da tese.</p>
@@ -192,8 +193,6 @@
       <section id="stock-global-discovery" class="stock-discover-hub stock-simple-block" aria-label="Discover stocks">
         <div class="section-heading"><div><span class="eyebrow">1 · DESCOBRIR NO UNIVERSO GLOBAL</span><h3>Que tipo de empresa procuras?</h3><p>Escolhe uma tese. Os resultados vêm do universo rastreado, quer tenhas ou não essas empresas na carteira.</p></div></div>
         <div class="stock-simple-filter-group">
-          <span class="stock-simple-filter-label">O que procuras?</span>
-          <div class="stock-simple-filter-group">
           <span class="stock-simple-filter-label">O que procuras?</span>
           <div id="stock-discover-categories" class="stock-discover-categories">
             <button class="is-active" data-discover-preset="compounders">Empresas sólidas</button>
@@ -613,6 +612,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.96.0"></script>
+<script src="app.js?v=0.96.1"></script>
 </body>
 </html>

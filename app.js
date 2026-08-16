@@ -2523,7 +2523,7 @@
       if(!resp.ok) throw new Error(body.error||`HTTP ${resp.status}`);
       const stored={generated_at:new Date().toISOString(),analysis:body.analysis||body,model:body.model||null};
       saveAiTake(r.ticker,stored);
-      openDetail(r.ticker); showDossierTab('take');
+      openDetail(r.ticker); showDossierTab('overview');
     }catch(err){
       card?.classList.remove('is-loading');
       if(status) status.textContent=`Não foi possível gerar a análise: ${err.message||err}`;
@@ -5926,54 +5926,91 @@
 
   function bindStockAutocomplete(input, syncInput) {
     if (!input) return;
-    let box = input.parentElement?.querySelector('.stock-autocomplete-box');
-    if (!box) {
-      box = document.createElement('div');
-      box.className = 'stock-autocomplete-box';
+    let box = document.createElement('div');
+    box.className = 'stock-autocomplete-box stock-autocomplete-portal';
+    box.hidden = true;
+    document.body.appendChild(box);
+
+    const positionBox = () => {
+      if (box.hidden || !input.isConnected) return;
+      const r = input.getBoundingClientRect();
+      const gap = 7;
+      const viewportH = window.visualViewport?.height || window.innerHeight;
+      const below = viewportH - r.bottom - gap;
+      const desired = Math.min(360, Math.max(180, viewportH * 0.42));
+      const openUp = below < 180 && r.top > below;
+      box.style.left = `${Math.max(10, r.left)}px`;
+      box.style.width = `${Math.max(240, Math.min(r.width, window.innerWidth - 20))}px`;
+      box.style.right = 'auto';
+      box.style.maxHeight = `${Math.max(150, Math.min(desired, openUp ? r.top - 18 : below - 8))}px`;
+      box.style.top = openUp ? 'auto' : `${r.bottom + gap}px`;
+      box.style.bottom = openUp ? `${Math.max(10, window.innerHeight - r.top + gap)}px` : 'auto';
+    };
+
+    const rankMatch = (r, q) => {
+      const t = String(r.ticker || '').toUpperCase();
+      const n = String(r.name || '').toUpperCase();
+      if (t === q) return 0;
+      if (t.startsWith(q)) return 1;
+      if (n.startsWith(q)) return 2;
+      if (t.includes(q)) return 3;
+      if (n.includes(q)) return 4;
+      return 9;
+    };
+
+    const choose = (ticker) => {
+      const row = state.data?.stocks?.find(r => String(r.ticker || '').toUpperCase() === String(ticker || '').toUpperCase());
+      if (!row) return;
+      input.value = row.ticker;
+      if (syncInput) syncInput.value = row.ticker;
       box.hidden = true;
-      input.parentElement?.appendChild(box);
-    }
+      try { input.blur(); } catch(_) {}
+      if (row.quote_type === 'ETF') openFundDetail(row); else openDetail(row.ticker);
+    };
+
     const update = () => {
       if (!state.data?.stocks) return;
       const q = input.value.trim().toUpperCase();
+      if (syncInput) syncInput.value = input.value;
       if (!q) { box.hidden = true; box.innerHTML = ''; return; }
       const matches = state.data.stocks
         .filter(r => !isAustralianScannerRow(r))
-        .filter(r => `${r.ticker} ${r.name||''}`.toUpperCase().includes(q))
+        .filter(r => rankMatch(r, q) < 9)
         .sort((a,b) => {
-          const aq=String(a.ticker||'').toUpperCase(), bq=String(b.ticker||'').toUpperCase();
-          const exactA=aq===q?0:aq.startsWith(q)?1:2, exactB=bq===q?0:bq.startsWith(q)?1:2;
-          if(exactA!==exactB) return exactA-exactB;
-          const typeA=a.quote_type==='ETF'?1:0, typeB=b.quote_type==='ETF'?1:0;
-          if(typeA!==typeB) return typeA-typeB;
+          const ra = rankMatch(a,q), rb = rankMatch(b,q);
+          if (ra !== rb) return ra-rb;
+          const typeA = a.quote_type === 'ETF' ? 1 : 0, typeB = b.quote_type === 'ETF' ? 1 : 0;
+          if (typeA !== typeB) return typeA-typeB;
           return (Number(b.market_cap)||0)-(Number(a.market_cap)||0) || (Number(b.score)||0)-(Number(a.score)||0);
         })
         .slice(0,10);
       box.innerHTML = matches.map(r => `<button type="button" data-stock-suggest="${escapeHtml(r.ticker)}"><strong>${escapeHtml(r.ticker)}</strong><span>${escapeHtml(r.name||'')}</span><em>${r.quote_type==='ETF'?'ETF':(r.score==null?'AÇÃO':Math.round(Number(r.score))+'/100')}</em></button>`).join('');
       box.hidden = !matches.length;
-      box.querySelectorAll('[data-stock-suggest]').forEach(btn=>btn.addEventListener('mousedown',e=>e.preventDefault()));
-      box.querySelectorAll('[data-stock-suggest]').forEach(btn=>btn.addEventListener('click',()=>{
-        const ticker=btn.dataset.stockSuggest;
-        input.value = ticker;
-        if(syncInput) syncInput.value = ticker;
-        box.hidden = true;
-        const row=state.data?.stocks?.find(r=>String(r.ticker).toUpperCase()===String(ticker).toUpperCase());
-        if(row?.quote_type==='ETF') openFundDetail(row); else openDetail(ticker);
-      }));
+      if (!box.hidden) positionBox();
+      box.querySelectorAll('[data-stock-suggest]').forEach(btn => {
+        btn.addEventListener('pointerdown', e => { e.preventDefault(); choose(btn.dataset.stockSuggest); });
+      });
     };
+
     input.addEventListener('input', update);
     input.addEventListener('focus', update);
     input.addEventListener('keydown', e => {
-      if ((e.key === 'Enter' || e.key === 'Tab') && !box.hidden) {
+      if (e.key === 'Enter') {
+        const exact = state.data?.stocks?.find(r => String(r.ticker || '').toUpperCase() === input.value.trim().toUpperCase());
         const first = box.querySelector('[data-stock-suggest]');
-        if (first) { e.preventDefault(); first.click(); }
+        if (exact || first) { e.preventDefault(); choose(exact?.ticker || first.dataset.stockSuggest); }
       }
       if (e.key === 'Escape') box.hidden = true;
     });
-    input.addEventListener('blur',()=>setTimeout(()=>{box.hidden=true},120));
+    input.addEventListener('blur',()=>setTimeout(()=>{box.hidden=true},180));
+    window.addEventListener('resize', positionBox, {passive:true});
+    window.addEventListener('scroll', positionBox, {passive:true, capture:true});
+    window.visualViewport?.addEventListener('resize', positionBox, {passive:true});
+    window.visualViewport?.addEventListener('scroll', positionBox, {passive:true});
   }
 
-  on(els.stockHeroSearch, "input", () => { if(els.search){ els.search.value=els.stockHeroSearch.value; applyFilters(); } });
+  // The hero search is navigation, not a live table filter. Typing must never make exact matches disappear.
+  on(els.stockHeroSearch, "input", () => { if(els.search) els.search.value = els.stockHeroSearch.value; });
   bindStockAutocomplete(els.stockHeroSearch, els.search);
   bindStockAutocomplete(els.search, els.stockHeroSearch);
   on(els.stockFiltersBtn, "click", () => { if(els.stockAdvancedFilters) els.stockAdvancedFilters.hidden = !els.stockAdvancedFilters.hidden; });
@@ -6080,7 +6117,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.96.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.96.1").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

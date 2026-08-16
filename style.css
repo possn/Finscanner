@@ -2224,8 +2224,33 @@ html[data-theme="dark"] .stock-card-action.bad,html[data-theme="dark"] .stock-ac
   .dossier-tab-nav{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}
 }
 
-/* v0.96.0 — Smart Money Dossier */
+/* v0.96.1 — Smart Money Dossier */
 .smartmoney-overview{margin:18px 0}.smartmoney-overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.smartmoney-overview-grid article{border:1px solid var(--line,#e2d7c3);border-radius:18px;padding:16px;background:var(--surface,#fffaf2);display:grid;gap:5px}.smartmoney-overview-grid article>span{font-size:10px;letter-spacing:.12em;font-weight:850;color:var(--muted,#788071)}.smartmoney-overview-grid article strong{font-size:18px;line-height:1.2}.smartmoney-overview-grid article small{font-size:12px;color:var(--muted,#788071)}
 .congress-activity-panel{margin:20px 0;padding:18px;border:1px solid var(--line,#e3e7ec);border-radius:20px;background:var(--surface,#fff)}.congress-balance{font-size:14px;font-weight:850;max-width:180px;text-align:right}.congress-balance.positive{color:#168b62}.congress-balance.negative{color:#cf3e4a}.congress-summary{display:flex;flex-wrap:wrap;gap:8px 16px;padding:10px 0 12px;color:var(--muted,#6d7683);font-size:12px}.congress-summary b{color:var(--text,#172033)}.congress-ledger{display:grid;gap:7px;margin-top:12px}.congress-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line,#e6e0d4);border-radius:13px;padding:11px 12px;background:var(--surface,#fff)}.congress-row>div{display:grid;gap:3px}.congress-row>div:last-child{text-align:right}.congress-row span{font-size:9px;font-weight:850}.congress-row.buy span:first-child{color:#168b62}.congress-row.sell span:first-child{color:#cf3e4a}.congress-row strong{font-size:12px}.congress-row small{font-size:10px;color:var(--muted,#7b8490)}.congress-row b{font-size:12px}.congress-activity-panel .detail-note a{color:inherit;text-decoration:underline;font-weight:700}
 @media(max-width:620px){.smartmoney-overview-grid{grid-template-columns:1fr}.congress-activity-panel{padding:13px;margin-left:-2px;margin-right:-2px}.congress-row{grid-template-columns:1fr}.congress-row>div:last-child{text-align:left}.congress-balance{text-align:left;max-width:none}.congress-activity-panel .section-heading{display:block}.congress-activity-panel .section-heading>.congress-balance{display:block;margin-top:8px}}
 [data-theme="dark"] .smartmoney-overview-grid article,[data-theme="dark"] .congress-activity-panel,[data-theme="dark"] .congress-row{background:var(--surface,#20251e);border-color:var(--line,#41483c)}
+
+/* v0.96.1 — stock search / dossier UX repair */
+.stock-autocomplete-portal{
+  position:fixed!important;
+  z-index:10000!important;
+  margin:0!important;
+  background:var(--surface,#fffaf0)!important;
+  border:1px solid var(--border,#ddd3c2)!important;
+  border-radius:16px!important;
+  box-shadow:0 18px 44px rgba(31,37,31,.20)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.stock-autocomplete-portal button{min-height:56px!important;cursor:pointer}
+.stock-search-shell,.stock-search-row,.stocks-hero-simple{overflow:visible!important}
+@media(max-width:700px){
+  /* Position is calculated from the actual input; never pin suggestions to the top of the screen. */
+  .stock-autocomplete-portal{position:fixed!important;left:auto!important;right:auto!important;top:auto;bottom:auto;width:auto;max-height:42vh}
+  .stocks-hero-simple{padding-bottom:16px}
+  .stock-search-shell{margin:16px 0 14px!important}
+  .stock-search-row{background:var(--surface,#fffaf0)!important}
+  .dossier-tab-nav{left:12px!important;right:12px!important;bottom:calc(82px + env(safe-area-inset-bottom,0px))!important;z-index:950!important}
+  #detail-content{padding-bottom:200px!important}
+}

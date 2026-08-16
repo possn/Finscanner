@@ -1,6 +1,6 @@
-# Finscanner v0.96.0 — Smart Money Dossier
+# Finscanner v0.96.1 — Smart Money Dossier
 
-## v0.96.0 — Smart Money dentro das 5 tabs
+## v0.96.1 — Smart Money dentro das 5 tabs
 - Mantém a barra de tabs sempre visível no iPhone, acima da navegação global.
 - Overview · Growth · Earnings · Pillars · Deep Dive · Final Take deixam de desaparecer ao fazer scroll.
 - Acrescenta espaço inferior ao dossier para nenhum conteúdo ficar escondido atrás da barra.
