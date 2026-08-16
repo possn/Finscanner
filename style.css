@@ -2296,7 +2296,7 @@ html[data-theme="dark"] .stock-card-action.bad,html[data-theme="dark"] .stock-ac
 .stock-flow-steps:has([data-stock-jump="discover"]){grid-template-columns:repeat(2,minmax(0,1fr))}
 
 
-/* v0.98.1 — mobile navigation priority + Smart Money chart clarity */
+/* v0.98.2 — mobile navigation priority + Smart Money chart clarity */
 @media (max-width:700px){
   .bottom-nav{z-index:200!important;pointer-events:auto!important;}
   .bottom-nav button{pointer-events:auto!important;touch-action:manipulation!important;}

@@ -143,7 +143,7 @@
     smartmoney: { title: "Smart Money", sub: "atividade de insiders · SEC Form 4" },
     theses: { title: "Teses", sub: "arquétipos quantitativos · hipóteses explicáveis" },
     compare: { title: "Comparar", sub: "comparação multifator lado a lado" },
-    settings: { title: "Definições", sub: "aparência · contraste · AI Analyst" },
+    settings: { title: "Definições", sub: "aparência · contraste · preferências" },
   };
 
   // ---------- localStorage: portfolio (owned) + watchlist (starred) ----------

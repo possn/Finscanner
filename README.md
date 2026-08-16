@@ -1,55 +1,38 @@
-# Finscanner v0.98.1 — Smart Money Dossier
+# Finscanner v0.98.2 — Baseline Consolidation
 
-## v0.98.1 — Smart Money dentro das 5 tabs
-- Mantém a barra de tabs sempre visível no iPhone, acima da navegação global.
-- Overview · Growth · Earnings · Pillars · Deep Dive · Final Take deixam de desaparecer ao fazer scroll.
-- Acrescenta espaço inferior ao dossier para nenhum conteúdo ficar escondido atrás da barra.
+Esta release consolida como baseline funcional a versão validada em workflow após a revisão externa. Não altera a lógica financeira, os scores, o pipeline de insiders/Congresso nem o comportamento do portfolio.
 
+## Arquitetura atual
 
-A área **Stocks** passa a seguir a mesma arquitetura simples que a área Funds:
+### Stocks
+1. **Descobrir empresas** — pesquisa o universo global rastreado, independentemente da carteira; permite depois considerar o encaixe no portfolio.
+2. **As minhas ações** — mostra qualidade, tese, riscos e sugestões sobre posições já detidas.
 
-1. **Descobrir empresas** — universo global rastreado, independente da carteira.
-2. **As minhas ações** — apenas posições diretas do portfolio, com score, tese e sinais de revisão.
-3. **Melhores adições** — empresas que ainda não estão na carteira e combinam qualidade absoluta com Portfolio Fit.
+Os dossiers usam cinco tabs principais: **Overview · Growth · Earnings · Pillars · Deep Dive**. A informação técnica extensa fica em exploração aprofundada, em vez de ocupar o fluxo principal.
 
-A exploração avançada (filtros, Sector Intelligence, perspetivas e tabela completa) continua disponível dentro de uma dropbox única.
+### Smart Money
+- Insiders empresariais: SEC Form 4.
+- Congresso dos EUA: dados recolhidos server-side no pipeline e gravados no `stocks.json`.
+- O mesmo histórico `price_history_1y` alimenta a leitura visual de preço e transações.
+- `insider_price_history_1y` é mantido apenas como alias de compatibilidade quando necessário.
 
+### Funds / ETFs
+O universo de ETFs é independente da carteira. A carteira serve como contexto para overlap, redundância, comparação e possíveis alternativas. O pipeline enriquece progressivamente preço, AUM, TER, holdings e exposições quando as fontes os disponibilizam. Dados ausentes devem permanecer ausentes; não devem ser convertidos em pontuações neutras artificiais.
 
-## v0.94.0 — Finscanner AI Analyst
+### Portfolio
+O portfolio continua local ao dispositivo, com importação CSV/JSON e contexto económico para pesos, tese, risco e adequação estrutural.
 
-- Company Dossier mantém as tabs Overview / Growth / Earnings / Pillars / Deep Dive / Final Take.
-- Final Take passa a poder pedir uma análise narrativa server-side a um LLM.
-- O payload inclui fundamentais, valuation, earnings/estimates, insiders, tese/momentum, séries disponíveis e contexto do portfolio.
-- A análise retorna JSON estruturado: resumo, apreciação, confiança, argumentos a favor/contra, pontos a vigiar, contexto da carteira e lacunas de dados.
-- A chave Gemini fica exclusivamente num Cloudflare Worker. A PWA guarda apenas o URL do Worker em localStorage.
-- Incluído `worker/ai-analyst-worker.js`, `worker/wrangler.toml` e instruções de deploy.
+## Limpeza desta release
+- removidos `*.bak`;
+- removidos `__pycache__` / `.pyc`;
+- removidas referências residuais ao AI Analyst / Cloudflare Worker da interface e documentação;
+- README reescrito para refletir a arquitetura realmente ativa;
+- cache/versionamento sincronizado para `v0.98.2`.
 
 ## Ficheiros a substituir
-
-- `index.html`
 - `app.js`
 - `style.css`
 - `sw.js`
 - `README.md`
 
-Não é necessário alterar workflows nem ficheiros `data/` nesta release.
-
-
-
-## v0.89.0 — Stocks Clarity & Sector Discovery
-- Novos setores/temas: Tecnologia, Healthcare, Biotech, Água, Agricultura, Energia, Financeiro, Industriais, Consumo, Imobiliário, Utilities, Materiais, Defesa e Semicondutores.
-- Presets de descoberta renomeados em linguagem simples, com explicação visível.
-- A tabela principal deixa de mostrar grades A/B/C/D e abreviações Q/G/V: mostra scores 0–100 com nomes Qualidade, Crescimento e Valor.
-- Portfolio Radar também usa nomes explícitos.
-
-## v0.93.0 — Dossier Tabs + Final Take
-
-- Discovery no longer treats the raw Finscanner Score as a complete ranking. Ordering now also considers data confidence and company size, with strong penalties for low-confidence microcaps and financial-risk flags.
-- "Empresas sólidas" becomes quality-first, so an anomalous Stability/Value sub-score cannot by itself push a tiny speculative company above an established high-quality company.
-- Discovery cards show a simple size/confidence label so users can understand why one candidate ranks above another.
-- Portfolio holdings gain an explicit triage suggestion: **Reforçar**, **Manter**, **Reduzir / rever**, or **Vender / sair?**, with 2–3 reasons and confidence. This is decision support, never an automatic order.
-- Crypto positions are explicitly excluded from the equity action model.
-- The Company Dossier shows the same suggestion when the stock is held in the imported portfolio.
-
-### v0.98.1 — Price Context + ETF Dossier Repair
-O pipeline guarda uma série semanal `price_history_1y` para o universo rastreado e catálogo ETF. Esta série alimenta os gráficos de Smart Money e o novo gráfico de preço dos Fund Dossiers. Fund Fit deixa de exibir uma pontuação global quando não existem dimensões observadas suficientes.
+Não é necessário voltar a correr o workflow apenas por causa desta release de limpeza.
