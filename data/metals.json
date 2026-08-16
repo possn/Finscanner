@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T12:47:20.790067Z",
+  "generated_at": "2026-08-16T13:55:45.585664Z",
   "note": "Pre\u00e7os de futuros (n\u00e3o spot) para ouro/prata/cobre/platina/pal\u00e1dio. Ur\u00e2nio \u00e9 um proxy via ETF de mineradoras. A camada f\u00edsica e de deliveries usa fontes oficiais/gratuitas (CME, CFTC, SGE e, quando acess\u00edvel, WGC). Cada bloco exp\u00f5e a fonte e o estado; dados indispon\u00edveis n\u00e3o s\u00e3o estimados.",
   "ways_to_play": {
     "own_metal": [
@@ -21,19 +21,19 @@
     ]
   },
   "physical": {
-    "generated_at": "2026-08-16T12:45:58.620346Z",
+    "generated_at": "2026-08-16T13:54:23.157815Z",
     "comex": {
       "gold": {
         "source": "CME Group",
         "source_url": "https://www.cmegroup.com/delivery_reports/Gold_Stocks.xls",
-        "fetched_at": "2026-08-16T12:45:58.620364Z",
+        "fetched_at": "2026-08-16T13:54:23.157836Z",
         "status": "unavailable",
         "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=25)"
       },
       "silver": {
         "source": "CME Group",
         "source_url": "https://www.cmegroup.com/delivery_reports/Silver_stocks.xls",
-        "fetched_at": "2026-08-16T12:46:23.707140Z",
+        "fetched_at": "2026-08-16T13:54:48.252661Z",
         "status": "unavailable",
         "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=25)"
       }
@@ -41,7 +41,7 @@
     "deliveries": {
       "source": "CME Group",
       "source_url": "https://www.cmegroup.com/delivery_reports/MetalsIssuesAndStopsReport.pdf",
-      "fetched_at": "2026-08-16T12:46:48.760848Z",
+      "fetched_at": "2026-08-16T13:55:13.307352Z",
       "status": "unavailable",
       "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=30)"
     },
@@ -49,7 +49,7 @@
       "gold": {
         "source": "CFTC Disaggregated COT",
         "source_url": "https://www.cftc.gov/dea/newcot/f_disagg.txt",
-        "fetched_at": "2026-08-16T12:47:19.031967Z",
+        "fetched_at": "2026-08-16T13:55:43.513858Z",
         "status": "ok",
         "report_date": "2026-08-11",
         "open_interest": 400309,
@@ -68,7 +68,7 @@
       "gold_benchmark": {
         "source": "Shanghai Gold Exchange",
         "source_url": "https://en.sge.com.cn/data_BenchmarkPrice",
-        "fetched_at": "2026-08-16T12:47:19.134143Z",
+        "fetched_at": "2026-08-16T13:55:43.617464Z",
         "status": "unavailable",
         "error": "benchmark table not found"
       }
@@ -76,7 +76,7 @@
     "central_banks": {
       "source": "World Gold Council / IMF IFS",
       "source_url": "https://www.gold.org/goldhub/data/gold-reserves-by-country",
-      "fetched_at": "2026-08-16T12:47:20.419059Z",
+      "fetched_at": "2026-08-16T13:55:44.913340Z",
       "status": "unavailable",
       "error": "403 Client Error: Forbidden for url: https://www.gold.org/download/file/7741/Changes_latest_as_of_Aug2026_IFS.xlsx"
     }
