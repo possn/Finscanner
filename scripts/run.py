@@ -34,7 +34,7 @@ from news import fetch_news_for_universe
 from score import score_universe
 from thesis import classify as classify_thesis, evolve as evolve_thesis
 import thesis_history as thesis_history_mod
-from universe import build_universe, ETF_UNIVERSE, region_for_equity
+from universe import build_universe, ETF_UNIVERSE, STOCK_DISCOVERY_CATALOG, region_for_equity
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "stocks.json")
 METALS_OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "metals.json")
@@ -277,6 +277,44 @@ def main():
     analyst_with_surprise = sum(1 for a in analyst_map.values() if a.get("latest_eps_surprise_pct") is not None)
     analyst_with_next_earnings = sum(1 for a in analyst_map.values() if a.get("next_earnings_date"))
     analyst_earnings_within_14d = sum(1 for a in analyst_map.values() if isinstance(a.get("days_to_earnings"), int) and 0 <= a.get("days_to_earnings") <= 14)
+
+    # Keep the equity discovery universe stable across transient Yahoo failures.
+    # A ticker that was successfully enriched on a previous run should not
+    # disappear merely because today's quote/fundamental request was throttled.
+    present_equities = {str(r.get("ticker") or "") for r in rows if r.get("quote_type") != "ETF"}
+    current_equity_universe = set().union(*(set(universe.get(k, [])) for k in ("US", "UK", "EU", "PL", "DISCOVERY", "EXTRA")))
+    for ticker in sorted(current_equity_universe):
+        if ticker in present_equities or ticker in ETF_UNIVERSE:
+            continue
+        meta = STOCK_DISCOVERY_CATALOG.get(ticker, {})
+        previous = previous_equities.get(ticker)
+        if previous:
+            carried = dict(previous)
+            carried["name"] = meta.get("name") or carried.get("name") or ticker
+            carried["sector"] = meta.get("sector") or carried.get("sector")
+            carried["industry"] = meta.get("industry") or carried.get("industry")
+            carried["stock_theme"] = meta.get("theme") or carried.get("stock_theme")
+            carried["region"] = meta.get("region") or carried.get("region") or region_for_equity(ticker)
+            carried["pipeline_status"] = "equity_carried_forward"
+            rows.append(carried)
+            continue
+        if meta:
+            rows.append({
+                "ticker": ticker,
+                "name": meta.get("name") or ticker,
+                "sector": meta.get("sector"),
+                "industry": meta.get("industry"),
+                "stock_theme": meta.get("theme"),
+                "region": meta.get("region") or region_for_equity(ticker),
+                "quote_type": "EQUITY",
+                "score": None,
+                "quality_pct": None,
+                "growth_pct": None,
+                "value_pct": None,
+                "data_confidence": "metadata_only",
+                "data_coverage_pct": 0,
+                "pipeline_status": "equity_catalog_only",
+            })
 
     # Keep the curated ETF discovery universe visible even when Yahoo fails to
     # return full fundamentals for a ticker on a given run. These placeholder

@@ -398,6 +398,85 @@ class Market:
     suffix: str  # Yahoo Finance ticker suffix, "" for US
 
 
+
+
+# Curated equity discovery anchors.  These are not the whole market; they are
+# a resilient seed layer for sectors/themes that users explicitly browse in the
+# PWA.  The daily universe still comes from Yahoo/Wikipedia, while these names
+# guarantee that important themes remain represented even when a screener or
+# quote endpoint is temporarily incomplete.  Missing live fields are never
+# fabricated; run.py can carry forward prior observed data or expose a
+# metadata-only catalogue row until enrichment succeeds.
+STOCK_DISCOVERY_CATALOG: dict[str, dict[str, str]] = {
+    # Water
+    "AWK": {"name":"American Water Works", "sector":"Utilities", "industry":"Utilities - Regulated Water", "theme":"Water", "region":"United States"},
+    "XYL": {"name":"Xylem Inc.", "sector":"Industrials", "industry":"Specialty Industrial Machinery", "theme":"Water", "region":"United States"},
+    "WMS": {"name":"Advanced Drainage Systems", "sector":"Industrials", "industry":"Building Products & Equipment", "theme":"Water", "region":"United States"},
+    "BMI": {"name":"Badger Meter", "sector":"Technology", "industry":"Scientific & Technical Instruments", "theme":"Water", "region":"United States"},
+    "MWA": {"name":"Mueller Water Products", "sector":"Industrials", "industry":"Specialty Industrial Machinery", "theme":"Water", "region":"United States"},
+    "PNR": {"name":"Pentair", "sector":"Industrials", "industry":"Specialty Industrial Machinery", "theme":"Water", "region":"United States"},
+    "ECL": {"name":"Ecolab", "sector":"Materials", "industry":"Specialty Chemicals", "theme":"Water", "region":"United States"},
+    "CWCO": {"name":"Consolidated Water", "sector":"Utilities", "industry":"Utilities - Regulated Water", "theme":"Water", "region":"United States"},
+    "AWR": {"name":"American States Water", "sector":"Utilities", "industry":"Utilities - Regulated Water", "theme":"Water", "region":"United States"},
+    "SJW": {"name":"SJW Group", "sector":"Utilities", "industry":"Utilities - Regulated Water", "theme":"Water", "region":"United States"},
+    # Agriculture / food chain
+    "DE": {"name":"Deere & Company", "sector":"Industrials", "industry":"Farm & Heavy Construction Machinery", "theme":"Agriculture", "region":"United States"},
+    "ADM": {"name":"Archer-Daniels-Midland", "sector":"Consumer Defensive", "industry":"Farm Products", "theme":"Agriculture", "region":"United States"},
+    "BG": {"name":"Bunge Global", "sector":"Consumer Defensive", "industry":"Farm Products", "theme":"Agriculture", "region":"United States"},
+    "CTVA": {"name":"Corteva", "sector":"Materials", "industry":"Agricultural Inputs", "theme":"Agriculture", "region":"United States"},
+    "MOS": {"name":"The Mosaic Company", "sector":"Materials", "industry":"Agricultural Inputs", "theme":"Agriculture", "region":"United States"},
+    "NTR": {"name":"Nutrien", "sector":"Materials", "industry":"Agricultural Inputs", "theme":"Agriculture", "region":"Canada"},
+    "CF": {"name":"CF Industries", "sector":"Materials", "industry":"Agricultural Inputs", "theme":"Agriculture", "region":"United States"},
+    "FMC": {"name":"FMC Corporation", "sector":"Materials", "industry":"Agricultural Inputs", "theme":"Agriculture", "region":"United States"},
+    "CALM": {"name":"Cal-Maine Foods", "sector":"Consumer Defensive", "industry":"Farm Products", "theme":"Agriculture", "region":"United States"},
+    "TSN": {"name":"Tyson Foods", "sector":"Consumer Defensive", "industry":"Farm Products", "theme":"Agriculture", "region":"United States"},
+    # Healthcare
+    "UNH": {"name":"UnitedHealth Group", "sector":"Healthcare", "industry":"Healthcare Plans", "theme":"Healthcare", "region":"United States"},
+    "JNJ": {"name":"Johnson & Johnson", "sector":"Healthcare", "industry":"Drug Manufacturers - General", "theme":"Healthcare", "region":"United States"},
+    "LLY": {"name":"Eli Lilly", "sector":"Healthcare", "industry":"Drug Manufacturers - General", "theme":"Healthcare", "region":"United States"},
+    "MRK": {"name":"Merck & Co.", "sector":"Healthcare", "industry":"Drug Manufacturers - General", "theme":"Healthcare", "region":"United States"},
+    "ABBV": {"name":"AbbVie", "sector":"Healthcare", "industry":"Drug Manufacturers - General", "theme":"Healthcare", "region":"United States"},
+    "TMO": {"name":"Thermo Fisher Scientific", "sector":"Healthcare", "industry":"Diagnostics & Research", "theme":"Healthcare", "region":"United States"},
+    "DHR": {"name":"Danaher", "sector":"Healthcare", "industry":"Diagnostics & Research", "theme":"Healthcare", "region":"United States"},
+    "ISRG": {"name":"Intuitive Surgical", "sector":"Healthcare", "industry":"Medical Instruments & Supplies", "theme":"Healthcare", "region":"United States"},
+    "SYK": {"name":"Stryker", "sector":"Healthcare", "industry":"Medical Devices", "theme":"Healthcare", "region":"United States"},
+    "BSX": {"name":"Boston Scientific", "sector":"Healthcare", "industry":"Medical Devices", "theme":"Healthcare", "region":"United States"},
+    "MDT": {"name":"Medtronic", "sector":"Healthcare", "industry":"Medical Devices", "theme":"Healthcare", "region":"United States"},
+    "ABT": {"name":"Abbott Laboratories", "sector":"Healthcare", "industry":"Medical Devices", "theme":"Healthcare", "region":"United States"},
+    # Biotech
+    "AMGN": {"name":"Amgen", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    "GILD": {"name":"Gilead Sciences", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    "REGN": {"name":"Regeneron Pharmaceuticals", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    "VRTX": {"name":"Vertex Pharmaceuticals", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    "BIIB": {"name":"Biogen", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    "MRNA": {"name":"Moderna", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    "BNTX": {"name":"BioNTech", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"Germany"},
+    "CRSP": {"name":"CRISPR Therapeutics", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"Switzerland"},
+    "NTLA": {"name":"Intellia Therapeutics", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    "BEAM": {"name":"Beam Therapeutics", "sector":"Healthcare", "industry":"Biotechnology", "theme":"Biotech", "region":"United States"},
+    # Defense
+    "LMT": {"name":"Lockheed Martin", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"United States"},
+    "NOC": {"name":"Northrop Grumman", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"United States"},
+    "RTX": {"name":"RTX Corporation", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"United States"},
+    "GD": {"name":"General Dynamics", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"United States"},
+    "LHX": {"name":"L3Harris Technologies", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"United States"},
+    "HII": {"name":"Huntington Ingalls", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"United States"},
+    "BA.L": {"name":"BAE Systems", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"United Kingdom"},
+    "RHM.DE": {"name":"Rheinmetall", "sector":"Industrials", "industry":"Aerospace & Defense", "theme":"Defense", "region":"Europe"},
+    # Semiconductors
+    "NVDA": {"name":"NVIDIA", "sector":"Technology", "industry":"Semiconductors", "theme":"Semiconductors", "region":"United States"},
+    "AMD": {"name":"Advanced Micro Devices", "sector":"Technology", "industry":"Semiconductors", "theme":"Semiconductors", "region":"United States"},
+    "AVGO": {"name":"Broadcom", "sector":"Technology", "industry":"Semiconductors", "theme":"Semiconductors", "region":"United States"},
+    "QCOM": {"name":"Qualcomm", "sector":"Technology", "industry":"Semiconductors", "theme":"Semiconductors", "region":"United States"},
+    "TXN": {"name":"Texas Instruments", "sector":"Technology", "industry":"Semiconductors", "theme":"Semiconductors", "region":"United States"},
+    "MU": {"name":"Micron Technology", "sector":"Technology", "industry":"Semiconductors", "theme":"Semiconductors", "region":"United States"},
+    "AMAT": {"name":"Applied Materials", "sector":"Technology", "industry":"Semiconductor Equipment & Materials", "theme":"Semiconductors", "region":"United States"},
+    "LRCX": {"name":"Lam Research", "sector":"Technology", "industry":"Semiconductor Equipment & Materials", "theme":"Semiconductors", "region":"United States"},
+    "KLAC": {"name":"KLA Corporation", "sector":"Technology", "industry":"Semiconductor Equipment & Materials", "theme":"Semiconductors", "region":"United States"},
+    "ASML": {"name":"ASML Holding", "sector":"Technology", "industry":"Semiconductor Equipment & Materials", "theme":"Semiconductors", "region":"Europe"},
+    "TSM": {"name":"Taiwan Semiconductor", "sector":"Technology", "industry":"Semiconductors", "theme":"Semiconductors", "region":"Taiwan"},
+}
+
 MARKETS = {
     "US": Market("United States", ""),
     "PL": Market("Poland", ".WA"),
@@ -590,6 +669,7 @@ def build_universe() -> dict[str, list[str]]:
     time.sleep(1)
     universe["EU"] = europe_constituents()
     universe["ETF"] = etf_daily_fetch_tickers()
+    universe["DISCOVERY"] = sorted(STOCK_DISCOVERY_CATALOG)
     universe["EXTRA"] = extra_portfolio_tickers()
 
     for market, tickers in universe.items():
