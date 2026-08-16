@@ -2134,17 +2134,33 @@
     const buttons = [...els.detailContent.querySelectorAll('[data-dossier-jump]')];
     const jump = (btn) => {
       const target = els.detailContent.querySelector('#' + btn.dataset.dossierJump);
-      if (!target) return;
-      const mobileHeader = document.querySelector('.app-shell__mobile-header');
-      const headerH = mobileHeader && getComputedStyle(mobileHeader).display !== 'none' ? mobileHeader.getBoundingClientRect().height : 0;
-      const navH = nav ? nav.getBoundingClientRect().height : 0;
-      const offset = headerH + navH + 14;
-      const top = window.scrollY + target.getBoundingClientRect().top - offset;
-      window.scrollTo({ top: Math.max(0, top), behavior: appSettings().reduceMotion ? 'auto' : 'smooth' });
+      if (!target || !els.detail) return;
+      // The company dossier lives inside .detail-overlay, which is the actual
+      // scrolling container on iOS. Scrolling window/document therefore does
+      // nothing. Calculate the target relative to the overlay itself.
+      const overlayRect = els.detail.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const top = els.detail.scrollTop + (targetRect.top - overlayRect.top) - 14;
+      els.detail.scrollTo({ top: Math.max(0, top), behavior: appSettings().reduceMotion ? 'auto' : 'smooth' });
       buttons.forEach(x => x.classList.toggle('is-active', x === btn));
-      btn.scrollIntoView({ behavior: appSettings().reduceMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
+      // Keep the selected chip visible horizontally without affecting the
+      // vertical scroll position of the dossier.
+      if (nav) {
+        const left = btn.offsetLeft - Math.max(0, (nav.clientWidth - btn.offsetWidth) / 2);
+        nav.scrollTo({ left: Math.max(0, left), behavior: appSettings().reduceMotion ? 'auto' : 'smooth' });
+      }
     };
-    buttons.forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); jump(btn); }));
+    buttons.forEach(btn => {
+      btn.style.touchAction = 'manipulation';
+      btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); jump(btn); });
+    });
+    // Defensive delegation for iOS/PWA re-render edge cases.
+    nav?.addEventListener('pointerup', (e) => {
+      const btn = e.target.closest('[data-dossier-jump]');
+      if (!btn) return;
+      e.preventDefault();
+      jump(btn);
+    });
   }
 
   function scoreDescriptor(v) {
@@ -5370,7 +5386,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.79.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.80.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

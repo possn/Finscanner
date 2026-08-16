@@ -1857,7 +1857,7 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 .interaction-error-toast{position:fixed;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:99999;padding:14px 16px;border-radius:14px;background:var(--surface-strong,#172036);color:var(--text-on-strong,#fff);box-shadow:0 10px 30px rgba(0,0,0,.18);font-weight:700;text-align:center}
 .home-opportunity-card,.briefing-open,.home-brief-row{pointer-events:auto;touch-action:manipulation}
 
-/* v0.79.0 — dossier visual hierarchy + non-sticky navigation repair */
+/* v0.80.0 — dossier visual hierarchy + non-sticky navigation repair */
 /* The section navigation is intentionally NOT sticky on iOS. This prevents dossier content
    from scrolling underneath the control strip and keeps the reading surface visually clean. */
 .dossier-nav{
@@ -1951,3 +1951,8 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 [data-theme="dark"] .stock-detail-brand,
 [data-theme="dark"] .stock-facts>div,
 [data-theme="dark"] .stock-score-hero{background:var(--surface)!important;border-color:var(--border)!important}
+
+
+/* v0.80.0 — dossier section chip navigation repair */
+.dossier-nav{pointer-events:auto!important;touch-action:pan-x!important;overscroll-behavior-x:contain}
+.dossier-nav [data-dossier-jump]{pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent;cursor:pointer}
