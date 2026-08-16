@@ -668,7 +668,7 @@ def build_universe() -> dict[str, list[str]]:
     universe["UK"] = ftse_constituents()
     time.sleep(1)
     universe["EU"] = europe_constituents()
-    universe["ETF"] = etf_daily_fetch_tickers()
+    universe["ETF"] = sorted(ETF_UNIVERSE.keys())  # v0.98: enrich the complete tracked ETF catalogue every run
     universe["DISCOVERY"] = sorted(STOCK_DISCOVERY_CATALOG)
     universe["EXTRA"] = extra_portfolio_tickers()
 

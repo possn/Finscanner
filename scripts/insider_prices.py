@@ -11,6 +11,8 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import math
 import yfinance as yf
+import requests
+from urllib.parse import quote
 
 log = logging.getLogger("insider_prices")
 
@@ -81,6 +83,39 @@ def _download_batch(batch: list[str]) -> dict[str, list[dict]]:
     return out
 
 
+
+def _download_direct(ticker: str) -> list[dict]:
+    """Best-effort Yahoo chart fallback when yfinance batch download is empty.
+
+    The chart endpoint is intentionally used only as a fallback. It returns the
+    same public market series and does not require a user credential.
+    """
+    try:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(ticker, safe='')}"
+        r = requests.get(url, params={"range":"1y","interval":"1wk","events":"history","includeAdjustedClose":"true"}, headers={"User-Agent":"Mozilla/5.0 Finscanner/0.98"}, timeout=8)
+        if r.status_code != 200:
+            return []
+        data = r.json()
+        result = (((data or {}).get("chart") or {}).get("result") or [None])[0] or {}
+        ts = result.get("timestamp") or []
+        q = (((result.get("indicators") or {}).get("quote") or [{}])[0] or {})
+        closes = q.get("close") or []
+        import datetime as _dt
+        out=[]
+        for t,c in zip(ts, closes):
+            if c is None: continue
+            try:
+                v=float(c)
+                if not math.isfinite(v): continue
+                d=_dt.datetime.utcfromtimestamp(int(t)).date().isoformat()
+                out.append({"date":d,"close":round(v,6)})
+            except Exception:
+                continue
+        return out[-54:]
+    except Exception as exc:
+        log.debug("direct chart fallback failed for %s: %s", ticker, exc)
+        return []
+
 def fetch_many(tickers: list[str], workers: int = 4, batch_size: int = 60) -> dict[str, list[dict]]:
     unique = sorted(set(str(t).strip() for t in tickers if t and str(t).strip()))
     out: dict[str, list[dict]] = {t: [] for t in unique}
@@ -97,5 +132,25 @@ def fetch_many(tickers: list[str], workers: int = 4, batch_size: int = 60) -> di
             except Exception as exc:
                 log.warning("price history batch crashed: %s", exc)
             done += len(batch)
-            log.info("price histories %d/%d", min(done, len(unique)), len(unique))
+            log.info("price histories batch phase %d/%d", min(done, len(unique)), len(unique))
+
+    # yfinance occasionally returns an empty frame for otherwise valid tickers.
+    # Recover those names individually so a transient batch failure does not
+    # leave the dossier charts blank for an entire day.
+    missing=[t for t in unique if len(out.get(t) or []) < 2]
+    if missing:
+        log.info("price histories direct fallback for %d missing tickers", len(missing))
+        with ThreadPoolExecutor(max_workers=16) as pool:
+            futures={pool.submit(_download_direct,t):t for t in missing}
+            done=0
+            for fut in as_completed(futures):
+                t=futures[fut]
+                try:
+                    vals=fut.result()
+                    if vals: out[t]=vals
+                except Exception as exc:
+                    log.debug("price fallback crashed for %s: %s",t,exc)
+                done+=1
+                if done % 50 == 0 or done == len(missing):
+                    log.info("price histories fallback %d/%d",done,len(missing))
     return out
