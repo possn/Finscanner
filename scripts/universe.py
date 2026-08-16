@@ -93,7 +93,269 @@ ETF_UNIVERSE: dict[str, dict[str, str]] = {
     "GLD": {"sector": "Commodities", "region": "Global"},
     "SLV": {"sector": "Commodities", "region": "Global"},
     "USO": {"sector": "Commodities", "region": "Global"},
+    # Expanded thematic / style coverage for Funds discovery
+    "AIQ": {"sector": "Artificial Intelligence", "region": "Global", "theme": "AI", "style": "Growth"},
+    "BOTZ": {"sector": "Robotics & AI", "region": "Global", "theme": "AI", "style": "Growth"},
+    "IRBO": {"sector": "Robotics & AI", "region": "Global", "theme": "AI", "style": "Growth"},
+    "CIBR": {"sector": "Cybersecurity", "region": "Global", "theme": "Cybersecurity", "style": "Growth"},
+    "PPA": {"sector": "Aerospace & Defense", "region": "United States", "theme": "Defense", "style": "Broad"},
+    "XAR": {"sector": "Aerospace & Defense", "region": "United States", "theme": "Defense", "style": "Broad"},
+    "URNM": {"sector": "Uranium", "region": "Global", "theme": "Nuclear", "style": "Broad"},
+    "NLR": {"sector": "Uranium/Nuclear", "region": "Global", "theme": "Nuclear", "style": "Broad"},
+    "ICLN": {"sector": "Clean Energy", "region": "Global", "theme": "Clean Energy", "style": "Growth"},
+    "QCLN": {"sector": "Clean Energy", "region": "United States", "theme": "Clean Energy", "style": "Growth"},
+    "PBW": {"sector": "Clean Energy", "region": "United States", "theme": "Clean Energy", "style": "Growth"},
+    "IAU": {"sector": "Commodities", "region": "Global", "theme": "Gold", "style": "Broad"},
+    "GDX": {"sector": "Gold Miners", "region": "Global", "theme": "Gold", "style": "Broad"},
+    "GDXJ": {"sector": "Gold Miners", "region": "Global", "theme": "Gold", "style": "Small Cap"},
+    "SCHD": {"sector": "Broad Market", "region": "United States", "theme": "", "style": "Dividend"},
+    "VIG": {"sector": "Broad Market", "region": "United States", "theme": "", "style": "Dividend"},
+    "VYM": {"sector": "Broad Market", "region": "United States", "theme": "", "style": "Dividend"},
+    "DGRO": {"sector": "Broad Market", "region": "United States", "theme": "", "style": "Dividend"},
+    "VUG": {"sector": "Broad Market", "region": "United States", "theme": "", "style": "Growth"},
+    "SCHG": {"sector": "Broad Market", "region": "United States", "theme": "", "style": "Growth"},
+    "QQQM": {"sector": "Broad Market", "region": "United States", "theme": "", "style": "Growth"},
+    "VB": {"sector": "Small Cap", "region": "United States", "theme": "", "style": "Small Cap"},
+    "IJR": {"sector": "Small Cap", "region": "United States", "theme": "", "style": "Small Cap"},
+    "SCHA": {"sector": "Small Cap", "region": "United States", "theme": "", "style": "Small Cap"},
+    "VGK": {"sector": "Broad Market", "region": "Europe", "theme": "", "style": "Broad"},
+    "IEUR": {"sector": "Broad Market", "region": "Europe", "theme": "", "style": "Broad"},
+    "EZU": {"sector": "Broad Market", "region": "Europe", "theme": "", "style": "Broad"},
+    "FEZ": {"sector": "Broad Market", "region": "Europe", "theme": "", "style": "Broad"},
+    "ACWX": {"sector": "Broad Market", "region": "Global", "theme": "", "style": "Broad"},
+    "VEU": {"sector": "Broad Market", "region": "Global", "theme": "", "style": "Broad"},
+    "VXUS": {"sector": "Broad Market", "region": "Global", "theme": "", "style": "Broad"},
+    "ACWI": {"sector": "Broad Market", "region": "Global", "theme": "", "style": "Broad"},
+    "VT": {"sector": "Broad Market", "region": "Global", "theme": "", "style": "Broad"},
+    "BNDX": {"sector": "Bonds", "region": "Global", "theme": "", "style": "Bonds"},
 }
+
+
+# v0.87 — Global ETF catalogue layer.
+#
+# The catalogue is deliberately broader than the daily Yahoo fetch set. It gives
+# the PWA a useful discovery universe even when a quote endpoint fails, while the
+# pipeline enriches a rotating subset with live TER/AUM/holdings every day. This
+# avoids making the daily Action excessively slow and lets coverage improve over
+# time. Metadata-only rows are clearly marked in the UI and are never used as if
+# TER/AUM/holdings were observed facts.
+_GLOBAL_ETF_EXPANSION: dict[str, dict[str, str]] = {
+    # US broad / factors / styles
+    "SCHB": {"sector":"Broad Market","region":"United States","style":"Broad"},
+    "ITOT": {"sector":"Broad Market","region":"United States","style":"Broad"},
+    "SPLG": {"sector":"Broad Market","region":"United States","style":"Broad"},
+    "RSP": {"sector":"Broad Market","region":"United States","style":"Broad"},
+    "USMV": {"sector":"Broad Market","region":"United States","style":"Broad"},
+    "QUAL": {"sector":"Broad Market","region":"United States","style":"Broad"},
+    "MTUM": {"sector":"Broad Market","region":"United States","style":"Growth"},
+    "VLUE": {"sector":"Broad Market","region":"United States","style":"Value"},
+    "VTV": {"sector":"Broad Market","region":"United States","style":"Value"},
+    "SCHV": {"sector":"Broad Market","region":"United States","style":"Value"},
+    "IVE": {"sector":"Broad Market","region":"United States","style":"Value"},
+    "IWF": {"sector":"Broad Market","region":"United States","style":"Growth"},
+    "IWD": {"sector":"Broad Market","region":"United States","style":"Value"},
+    "SPYG": {"sector":"Broad Market","region":"United States","style":"Growth"},
+    "SPYV": {"sector":"Broad Market","region":"United States","style":"Value"},
+    "VXF": {"sector":"Broad Market","region":"United States","style":"Broad"},
+    "MDY": {"sector":"Mid Cap","region":"United States","style":"Broad"},
+    "VO": {"sector":"Mid Cap","region":"United States","style":"Broad"},
+    "IJH": {"sector":"Mid Cap","region":"United States","style":"Broad"},
+    "IJS": {"sector":"Small Cap","region":"United States","style":"Small Cap"},
+    "IWO": {"sector":"Small Cap","region":"United States","style":"Small Cap"},
+    "IWN": {"sector":"Small Cap","region":"United States","style":"Small Cap"},
+    "VBR": {"sector":"Small Cap","region":"United States","style":"Small Cap"},
+    "VBK": {"sector":"Small Cap","region":"United States","style":"Small Cap"},
+    "AVUV": {"sector":"Small Cap","region":"United States","style":"Small Cap"},
+    "CALF": {"sector":"Small Cap","region":"United States","style":"Small Cap"},
+    # Dividend / income
+    "HDV": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    "SDY": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    "NOBL": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    "DGRW": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    "SPHD": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    "JEPI": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    "JEPQ": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    "DIVO": {"sector":"Broad Market","region":"United States","style":"Dividend"},
+    # Global / ex-US / regions
+    "IXUS": {"sector":"Broad Market","region":"Global ex-US","style":"Broad"},
+    "SCHF": {"sector":"Broad Market","region":"International Developed","style":"Broad"},
+    "IDEV": {"sector":"Broad Market","region":"International Developed","style":"Broad"},
+    "IEFA": {"sector":"Broad Market","region":"International Developed","style":"Broad"},
+    "EFV": {"sector":"Broad Market","region":"International Developed","style":"Value"},
+    "EFG": {"sector":"Broad Market","region":"International Developed","style":"Growth"},
+    "VYMI": {"sector":"Broad Market","region":"Global ex-US","style":"Dividend"},
+    "VIGI": {"sector":"Broad Market","region":"Global ex-US","style":"Dividend"},
+    "DNL": {"sector":"Broad Market","region":"Global ex-US","style":"Growth"},
+    "AAXJ": {"sector":"Broad Market","region":"Asia ex-Japan","style":"Broad"},
+    "VPL": {"sector":"Broad Market","region":"Asia Pacific","style":"Broad"},
+    "AIA": {"sector":"Broad Market","region":"Asia","style":"Broad"},
+    "MCHI": {"sector":"Broad Market","region":"China","style":"Broad"},
+    "FXI": {"sector":"Broad Market","region":"China","style":"Broad"},
+    "KWEB": {"sector":"Internet","region":"China","theme":"AI","style":"Growth"},
+    "ASHR": {"sector":"Broad Market","region":"China","style":"Broad"},
+    "INDA": {"sector":"Broad Market","region":"India","style":"Broad"},
+    "EPI": {"sector":"Broad Market","region":"India","style":"Broad"},
+    "EWY": {"sector":"Broad Market","region":"South Korea","style":"Broad"},
+    "EWT": {"sector":"Broad Market","region":"Taiwan","style":"Broad"},
+    "EWH": {"sector":"Broad Market","region":"Hong Kong","style":"Broad"},
+    "EWQ": {"sector":"Broad Market","region":"France","style":"Broad"},
+    "EWI": {"sector":"Broad Market","region":"Italy","style":"Broad"},
+    "EWP": {"sector":"Broad Market","region":"Spain","style":"Broad"},
+    "EWN": {"sector":"Broad Market","region":"Netherlands","style":"Broad"},
+    "EWL": {"sector":"Broad Market","region":"Switzerland","style":"Broad"},
+    "EWD": {"sector":"Broad Market","region":"Sweden","style":"Broad"},
+    "NORW": {"sector":"Broad Market","region":"Norway","style":"Broad"},
+    "EPOL": {"sector":"Broad Market","region":"Poland","style":"Broad"},
+    "GREK": {"sector":"Broad Market","region":"Greece","style":"Broad"},
+    "TUR": {"sector":"Broad Market","region":"Turkey","style":"Broad"},
+    "EWW": {"sector":"Broad Market","region":"Mexico","style":"Broad"},
+    "EWZ": {"sector":"Broad Market","region":"Brazil","style":"Broad"},
+    "ARGT": {"sector":"Broad Market","region":"Argentina","style":"Broad"},
+    "ECH": {"sector":"Broad Market","region":"Chile","style":"Broad"},
+    "EWC": {"sector":"Broad Market","region":"Canada","style":"Broad"},
+    # Technology / semiconductors / AI / robotics / cyber
+    "VGT": {"sector":"Technology","region":"United States","style":"Growth"},
+    "IYW": {"sector":"Technology","region":"United States","style":"Growth"},
+    "FTEC": {"sector":"Technology","region":"United States","style":"Growth"},
+    "IGV": {"sector":"Software","region":"United States","style":"Growth"},
+    "FDN": {"sector":"Internet","region":"United States","style":"Growth"},
+    "CLOU": {"sector":"Cloud Computing","region":"Global","theme":"AI","style":"Growth"},
+    "WCLD": {"sector":"Cloud Computing","region":"Global","theme":"AI","style":"Growth"},
+    "BUG": {"sector":"Cybersecurity","region":"Global","theme":"Cybersecurity","style":"Growth"},
+    "IHAK": {"sector":"Cybersecurity","region":"Global","theme":"Cybersecurity","style":"Growth"},
+    "ARKQ": {"sector":"Robotics & AI","region":"Global","theme":"Robotics","style":"Growth"},
+    "ROBT": {"sector":"Robotics & AI","region":"Global","theme":"Robotics","style":"Growth"},
+    "THNQ": {"sector":"Artificial Intelligence","region":"Global","theme":"AI","style":"Growth"},
+    "CHAT": {"sector":"Artificial Intelligence","region":"Global","theme":"AI","style":"Growth"},
+    "ARTY": {"sector":"Artificial Intelligence","region":"Global","theme":"AI","style":"Growth"},
+    "SOXQ": {"sector":"Semiconductors","region":"United States","theme":"Semiconductors","style":"Growth"},
+    "XSD": {"sector":"Semiconductors","region":"United States","theme":"Semiconductors","style":"Growth"},
+    "PSI": {"sector":"Semiconductors","region":"United States","theme":"Semiconductors","style":"Growth"},
+    "FTXL": {"sector":"Semiconductors","region":"United States","theme":"Semiconductors","style":"Growth"},
+    # Defense / industrial / infrastructure
+    "DFEN": {"sector":"Aerospace & Defense","region":"United States","theme":"Defense","style":"Growth"},
+    "SHLD": {"sector":"Aerospace & Defense","region":"Global","theme":"Defense","style":"Broad"},
+    "VIS": {"sector":"Industrials","region":"United States","style":"Broad"},
+    "FIDU": {"sector":"Industrials","region":"United States","style":"Broad"},
+    "PAVE": {"sector":"Infrastructure","region":"United States","theme":"Infrastructure","style":"Broad"},
+    "IFRA": {"sector":"Infrastructure","region":"United States","theme":"Infrastructure","style":"Broad"},
+    "IGF": {"sector":"Infrastructure","region":"Global","theme":"Infrastructure","style":"Broad"},
+    # Energy / uranium / clean energy
+    "VDE": {"sector":"Energy","region":"United States","theme":"Energy","style":"Broad"},
+    "IYE": {"sector":"Energy","region":"United States","theme":"Energy","style":"Broad"},
+    "FENY": {"sector":"Energy","region":"United States","theme":"Energy","style":"Broad"},
+    "XOP": {"sector":"Oil & Gas E&P","region":"United States","theme":"Energy","style":"Broad"},
+    "OIH": {"sector":"Oil Services","region":"Global","theme":"Energy","style":"Broad"},
+    "AMLP": {"sector":"Midstream Energy","region":"United States","theme":"Energy","style":"Dividend"},
+    "MLPX": {"sector":"Midstream Energy","region":"United States","theme":"Energy","style":"Dividend"},
+    "URA": {"sector":"Uranium","region":"Global","theme":"Nuclear","style":"Broad"},
+    "URNJ": {"sector":"Uranium","region":"Global","theme":"Nuclear","style":"Small Cap"},
+    "UTES": {"sector":"Utilities","region":"United States","theme":"Energy","style":"Broad"},
+    "PBW": {"sector":"Clean Energy","region":"United States","theme":"Clean Energy","style":"Growth"},
+    "CNRG": {"sector":"Clean Energy","region":"Global","theme":"Clean Energy","style":"Growth"},
+    "ACES": {"sector":"Clean Energy","region":"North America","theme":"Clean Energy","style":"Growth"},
+    "FAN": {"sector":"Wind Energy","region":"Global","theme":"Clean Energy","style":"Growth"},
+    # Healthcare / biotech
+    "VHT": {"sector":"Healthcare","region":"United States","style":"Broad"},
+    "IYH": {"sector":"Healthcare","region":"United States","style":"Broad"},
+    "FHLC": {"sector":"Healthcare","region":"United States","style":"Broad"},
+    "IHI": {"sector":"Medical Devices","region":"United States","style":"Growth"},
+    "XPH": {"sector":"Pharmaceuticals","region":"United States","style":"Broad"},
+    "ARKG": {"sector":"Genomics","region":"Global","theme":"Biotechnology","style":"Growth"},
+    "GNOM": {"sector":"Genomics","region":"Global","theme":"Biotechnology","style":"Growth"},
+    # Financial / REIT / consumer / materials
+    "VFH": {"sector":"Financial Services","region":"United States","style":"Broad"},
+    "IYF": {"sector":"Financial Services","region":"United States","style":"Broad"},
+    "KBE": {"sector":"Banks","region":"United States","style":"Broad"},
+    "KRE": {"sector":"Regional Banks","region":"United States","style":"Broad"},
+    "VNQ": {"sector":"Real Estate","region":"United States","style":"Dividend"},
+    "SCHH": {"sector":"Real Estate","region":"United States","style":"Dividend"},
+    "IYR": {"sector":"Real Estate","region":"United States","style":"Dividend"},
+    "REET": {"sector":"Real Estate","region":"Global","style":"Dividend"},
+    "VCR": {"sector":"Consumer Cyclical","region":"United States","style":"Broad"},
+    "VDC": {"sector":"Consumer Defensive","region":"United States","style":"Broad"},
+    "XRT": {"sector":"Retail","region":"United States","style":"Broad"},
+    "IYM": {"sector":"Basic Materials","region":"United States","style":"Broad"},
+    "VAW": {"sector":"Basic Materials","region":"United States","style":"Broad"},
+    "PICK": {"sector":"Metals & Mining","region":"Global","theme":"Metals","style":"Broad"},
+    "COPX": {"sector":"Copper Miners","region":"Global","theme":"Metals","style":"Broad"},
+    "LIT": {"sector":"Lithium & Battery","region":"Global","theme":"Clean Energy","style":"Growth"},
+    # Gold / commodities
+    "SGOL": {"sector":"Commodities","region":"Global","theme":"Gold","style":"Broad"},
+    "BAR": {"sector":"Commodities","region":"Global","theme":"Gold","style":"Broad"},
+    "GLDM": {"sector":"Commodities","region":"Global","theme":"Gold","style":"Broad"},
+    "SIL": {"sector":"Silver Miners","region":"Global","theme":"Metals","style":"Broad"},
+    "SILJ": {"sector":"Silver Miners","region":"Global","theme":"Metals","style":"Small Cap"},
+    "DBC": {"sector":"Commodities","region":"Global","style":"Broad"},
+    "PDBC": {"sector":"Commodities","region":"Global","style":"Broad"},
+    # Bonds / cash
+    "BIL": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "SGOV": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "VGSH": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "IEF": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "VGIT": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "VGLT": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "TIP": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "SCHP": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "VCIT": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "VCSH": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "JNK": {"sector":"Bonds","region":"United States","style":"Bonds"},
+    "EMB": {"sector":"Bonds","region":"Emerging Markets","style":"Bonds"},
+    "VWOB": {"sector":"Bonds","region":"Emerging Markets","style":"Bonds"},
+    # Major UCITS / European listings (metadata catalogue; live quote enrichment when available)
+    "CSPX.L": {"sector":"Broad Market","region":"United States","style":"Broad","ucits":"confirmed"},
+    "VUAA.L": {"sector":"Broad Market","region":"United States","style":"Broad","ucits":"confirmed"},
+    "VUSA.L": {"sector":"Broad Market","region":"United States","style":"Dividend","ucits":"confirmed"},
+    "IUSA.L": {"sector":"Broad Market","region":"United States","style":"Dividend","ucits":"confirmed"},
+    "SWDA.L": {"sector":"Broad Market","region":"Global","style":"Broad","ucits":"confirmed"},
+    "IWDA.AS": {"sector":"Broad Market","region":"Global","style":"Broad","ucits":"confirmed"},
+    "EUNL.DE": {"sector":"Broad Market","region":"Global","style":"Broad","ucits":"confirmed"},
+    "VWCE.DE": {"sector":"Broad Market","region":"Global","style":"Broad","ucits":"confirmed"},
+    "VWRL.L": {"sector":"Broad Market","region":"Global","style":"Dividend","ucits":"confirmed"},
+    "SSAC.L": {"sector":"Broad Market","region":"Global","style":"Broad","ucits":"confirmed"},
+    "IUSN.L": {"sector":"Small Cap","region":"Global","style":"Small Cap","ucits":"confirmed"},
+    "EMIM.L": {"sector":"Broad Market","region":"Emerging Markets","style":"Broad","ucits":"confirmed"},
+    "IS3N.DE": {"sector":"Broad Market","region":"Emerging Markets","style":"Broad","ucits":"confirmed"},
+    "IEMA.L": {"sector":"Broad Market","region":"Emerging Markets","style":"Broad","ucits":"confirmed"},
+    "IMEU.L": {"sector":"Broad Market","region":"Europe","style":"Broad","ucits":"confirmed"},
+    "EXSA.DE": {"sector":"Broad Market","region":"Europe","style":"Broad","ucits":"confirmed"},
+    "MEUD.PA": {"sector":"Broad Market","region":"Europe","style":"Broad","ucits":"confirmed"},
+    "CNDX.L": {"sector":"Technology","region":"United States","style":"Growth","ucits":"confirmed"},
+    "EQQQ.L": {"sector":"Technology","region":"United States","style":"Growth","ucits":"confirmed"},
+    "IUIT.L": {"sector":"Technology","region":"United States","style":"Growth","ucits":"confirmed"},
+    "SMH.L": {"sector":"Semiconductors","region":"Global","theme":"Semiconductors","style":"Growth","ucits":"confirmed"},
+    "SEMI.L": {"sector":"Semiconductors","region":"Global","theme":"Semiconductors","style":"Growth","ucits":"confirmed"},
+    "RBOT.L": {"sector":"Robotics & AI","region":"Global","theme":"Robotics","style":"Growth","ucits":"confirmed"},
+    "AIAI.L": {"sector":"Artificial Intelligence","region":"Global","theme":"AI","style":"Growth","ucits":"confirmed"},
+    "INRG.L": {"sector":"Clean Energy","region":"Global","theme":"Clean Energy","style":"Growth","ucits":"confirmed"},
+    "IQQH.DE": {"sector":"Clean Energy","region":"Global","theme":"Clean Energy","style":"Growth","ucits":"confirmed"},
+    "SGLN.L": {"sector":"Commodities","region":"Global","theme":"Gold","style":"Broad","ucits":"confirmed"},
+    "PHAU.L": {"sector":"Commodities","region":"Global","theme":"Gold","style":"Broad","ucits":"confirmed"},
+}
+
+# Keep any richer metadata already present in the original core list.
+for _ticker, _meta in _GLOBAL_ETF_EXPANSION.items():
+    ETF_UNIVERSE.setdefault(_ticker, _meta)
+
+# Core names are refreshed every day; the wider catalogue is refreshed in a
+# deterministic rotation so Actions stay within a practical runtime.
+ETF_CORE_TICKERS = frozenset(list(ETF_UNIVERSE.keys())[:79])
+
+
+def etf_daily_fetch_tickers(limit: int = 70) -> list[str]:
+    """Core ETFs + a rotating slice of the wider catalogue.
+
+    All catalogue names remain visible in the PWA as metadata-only rows. The
+    rotating enrichment provides live Yahoo fields without requiring hundreds
+    of extra network calls every single day.
+    """
+    wider = sorted(set(ETF_UNIVERSE) - set(ETF_CORE_TICKERS))
+    if not wider:
+        return sorted(ETF_CORE_TICKERS)
+    day = int(time.time() // 86400)
+    start = (day * limit) % len(wider)
+    rotated = wider[start:] + wider[:start]
+    return sorted(set(ETF_CORE_TICKERS) | set(rotated[:limit]))
 
 # Ticker-suffix -> region, for equities (where they trade, not just an
 # abstract "market code"). Used to set row["region"] server-side so the
@@ -327,7 +589,7 @@ def build_universe() -> dict[str, list[str]]:
     universe["UK"] = ftse_constituents()
     time.sleep(1)
     universe["EU"] = europe_constituents()
-    universe["ETF"] = sorted(ETF_UNIVERSE.keys())
+    universe["ETF"] = etf_daily_fetch_tickers()
     universe["EXTRA"] = extra_portfolio_tickers()
 
     for market, tickers in universe.items():

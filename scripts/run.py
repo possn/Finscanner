@@ -108,6 +108,23 @@ def _json_safe(obj):
 
 
 def main():
+    # Preserve previously enriched ETF catalogue rows. The wider fund universe is
+    # refreshed in rotation, so a name not fetched today should keep yesterday's
+    # observed TER/AUM/holdings rather than falling back to metadata-only.
+    previous_etfs = {}
+    try:
+        if os.path.exists(OUT_PATH):
+            with open(OUT_PATH, "r", encoding="utf-8") as _f:
+                _prev = json.load(_f)
+            previous_etfs = {
+                str(r.get("ticker") or ""): r
+                for r in (_prev.get("stocks") or [])
+                if r.get("quote_type") == "ETF" and r.get("ticker")
+            }
+    except Exception as exc:
+        log.warning("Could not load previous ETF catalogue: %s", exc)
+        previous_etfs = {}
+
     universe = build_universe()
     all_tickers = sorted({t for tickers in universe.values() for t in tickers})
     portfolio_tickers = list(dict.fromkeys(universe.get("EXTRA", [])))
@@ -144,6 +161,7 @@ def main():
     thesis_history = thesis_history_mod.load(THESIS_HISTORY_PATH)
 
     rows = []
+    scored_symbols = {s.ticker for s in scored}
     for s in scored:
         row = dataclasses.asdict(s)
         if row.get("quote_type") == "ETF":
@@ -151,6 +169,11 @@ def main():
             if not row.get("sector"):
                 row["sector"] = etf_meta.get("sector")
             row["region"] = etf_meta.get("region", "Global")
+            row["fund_region"] = etf_meta.get("region", row.get("region", "Global"))
+            row["fund_theme"] = etf_meta.get("theme") or row.get("fund_theme")
+            row["fund_style"] = etf_meta.get("style") or row.get("fund_style")
+            if etf_meta.get("ucits"):
+                row["fund_ucits"] = etf_meta.get("ucits")
         elif row.get("quote_type") == "CRYPTO":
             row["region"] = "Global"
         else:
@@ -255,6 +278,56 @@ def main():
     analyst_with_next_earnings = sum(1 for a in analyst_map.values() if a.get("next_earnings_date"))
     analyst_earnings_within_14d = sum(1 for a in analyst_map.values() if isinstance(a.get("days_to_earnings"), int) and 0 <= a.get("days_to_earnings") <= 14)
 
+    # Keep the curated ETF discovery universe visible even when Yahoo fails to
+    # return full fundamentals for a ticker on a given run. These placeholder
+    # rows are deliberately metadata-only: no fake price, TER, AUM or holdings.
+    # The UI can discover/filter them, while Fee Saver/overlap only use rows
+    # with real observed data.
+    present = {str(r.get("ticker") or "") for r in rows}
+    for ticker, meta in ETF_UNIVERSE.items():
+        if ticker in present:
+            continue
+        previous = previous_etfs.get(ticker)
+        if previous:
+            carried = dict(previous)
+            # Catalogue metadata is authoritative for discovery labels; observed
+            # market/fund fields remain whatever Yahoo last returned.
+            carried["sector"] = meta.get("sector") or carried.get("sector")
+            carried["industry"] = meta.get("sector") or carried.get("industry")
+            carried["region"] = meta.get("region", carried.get("region", "Global"))
+            carried["fund_region"] = meta.get("region", carried.get("fund_region", "Global"))
+            carried["fund_theme"] = meta.get("theme") or carried.get("fund_theme")
+            carried["fund_style"] = meta.get("style") or carried.get("fund_style")
+            carried["fund_category"] = meta.get("sector") or carried.get("fund_category")
+            if meta.get("ucits"):
+                carried["fund_ucits"] = meta.get("ucits")
+            carried["pipeline_status"] = "catalog_carried_forward"
+            rows.append(carried)
+            continue
+        rows.append({
+            "ticker": ticker,
+            "name": meta.get("name") or ticker,
+            "sector": meta.get("sector"),
+            "industry": meta.get("sector"),
+            "market_cap": None,
+            "currency": None,
+            "quote_type": "ETF",
+            "score": None,
+            "data_confidence": "metadata_only",
+            "data_coverage_pct": 0,
+            "current_price": None,
+            "expense_ratio": None,
+            "fund_total_assets": None,
+            "top_holdings": [],
+            "region": meta.get("region", "Global"),
+            "fund_region": meta.get("region", "Global"),
+            "fund_theme": meta.get("theme"),
+            "fund_style": meta.get("style"),
+            "fund_category": meta.get("sector"),
+            "fund_ucits": meta.get("ucits"),
+            "pipeline_status": "catalog_only",
+        })
+
     payload = {
         "schema_version": 510,
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
@@ -263,6 +336,7 @@ def main():
             "portfolio_extra_covered": portfolio_covered,
             "portfolio_extra_coverage_pct": round((portfolio_covered / len(portfolio_extra) * 100), 1) if portfolio_extra else 100.0,
             "etf_rows": len(etf_rows),
+            "etf_catalog_total": len(ETF_UNIVERSE),
             "etf_rows_with_holdings": etf_holdings_rows,
             "insider_us_equities": len(us_equity_rows),
             "insider_sec_ok": insider_ok_rows,
