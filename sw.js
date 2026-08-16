@@ -1,9 +1,9 @@
-const CACHE_VERSION = "v0.96.3";
+const CACHE_VERSION = "v0.97.0";
 const SHELL_FILES = [
   "./",
   "./index.html",
-  "./style.css?v=0.96.3",
-  "./app.js?v=0.96.3",
+  "./style.css?v=0.97.0",
+  "./app.js?v=0.97.0",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"

@@ -289,7 +289,7 @@
   }
 
   function insiderNearLow(r) {
-    const hist = Array.isArray(r.insider_price_history_1y) ? r.insider_price_history_1y : [];
+    const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : (Array.isArray(r.insider_price_history_1y) ? r.insider_price_history_1y : []);
     const vals = hist.map(x=>Number(x.close ?? x.price ?? x.value)).filter(Number.isFinite);
     if (vals.length < 8) return null;
     const low = Math.min(...vals), current = Number(r.current_price ?? vals[vals.length-1]);
@@ -2727,7 +2727,7 @@
     drawCongressChart(r,trades);
   }
   function drawCongressChart(r,trades=[]){
-    const canvas=document.getElementById('congress-price-chart'); if(!canvas)return; const history=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]; const tooltip=document.getElementById('congress-chart-tooltip');
+    const canvas=document.getElementById('congress-price-chart'); if(!canvas)return; const history=Array.isArray(r.price_history_1y)?r.price_history_1y:(Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]); const tooltip=document.getElementById('congress-chart-tooltip');
     const ratio=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||680),cssH=220;canvas.width=Math.round(cssW*ratio);canvas.height=Math.round(cssH*ratio);canvas.style.height=cssH+'px';const ctx=canvas.getContext('2d');ctx.scale(ratio,ratio);ctx.clearRect(0,0,cssW,cssH);
     if(history.length<2){ctx.fillStyle='#8a93a1';ctx.font='13px system-ui';ctx.fillText('Histórico de preço indisponível para este ticker.',18,40);return;}
     const pts=history.map(x=>({date:String(x.date),close:Number(x.close)})).filter(x=>Number.isFinite(x.close));if(pts.length<2)return;const parse=d=>new Date(d+'T00:00:00Z').getTime(),minT=parse(pts[0].date),maxT=parse(pts.at(-1).date);let minP=Math.min(...pts.map(x=>x.close)),maxP=Math.max(...pts.map(x=>x.close));if(maxP===minP){minP-=1;maxP+=1}const pad={l:46,r:18,t:18,b:30},w=cssW-pad.l-pad.r,h=cssH-pad.t-pad.b,xOf=d=>pad.l+((parse(d)-minT)/(maxT-minT))*w,yOf=v=>pad.t+h-((v-minP)/(maxP-minP))*h;
@@ -2767,7 +2767,7 @@
   function drawInsiderChart(r, filter='all') {
     const canvas=document.getElementById('insider-price-chart');
     if(!canvas) return;
-    const history=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[];
+    const history=Array.isArray(r.price_history_1y)?r.price_history_1y:(Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]);
     const txs=(Array.isArray(r.insider_transactions_365d)?r.insider_transactions_365d:[]).filter(tx=>filter==='all'||tx.type===filter);
     const wrap=canvas.parentElement, tooltip=document.getElementById('insider-chart-tooltip');
     const ratio=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||680), cssH=220;
@@ -4755,8 +4755,9 @@
     else if (broad && (m.geo === 'Global' || m.geo === 'Europe' || /world|global|all.?world|msci|s&p 500/i.test(`${r.name||''} ${r.ticker||''}`))) { role = 'Core'; roleReason = 'Exposição broad suficientemente diversificada para potencial função de núcleo.'; }
     else if (maxOverlap != null && maxOverlap <= .20 && peers.length) { role = 'Diversifier'; roleReason = `Baixo overlap observado com os outros ETFs da carteira (máx. ${Math.round(maxOverlap*100)}%).`; }
 
-    const overall = Math.round(costScore*.22 + sizeScore*.18 + diversificationScore*.28 + concentrationScore*.17 + (role === 'Core' ? 92 : role === 'Diversifier' ? 82 : role === 'Income' ? 72 : role === 'Redundant' ? 35 : 65)*.15);
-    return { costScore, sizeScore, diversificationScore, concentrationScore, overall, role, roleReason, maxOverlap, overlaps, observedCoverage, top5 };
+    const observedDims = (Number.isFinite(fee)?1:0) + (Number.isFinite(aum)&&aum>0?1:0) + (holdings.length?2:0) + (maxOverlap!=null?1:0);
+    const overall = observedDims >= 2 ? Math.round(costScore*.22 + sizeScore*.18 + diversificationScore*.28 + concentrationScore*.17 + (role === 'Core' ? 92 : role === 'Diversifier' ? 82 : role === 'Income' ? 72 : role === 'Redundant' ? 35 : 65)*.15) : null;
+    return { costScore:Number.isFinite(fee)?costScore:null, sizeScore:(Number.isFinite(aum)&&aum>0)?sizeScore:null, diversificationScore:holdings.length?diversificationScore:null, concentrationScore:holdings.length?concentrationScore:null, overall, observedDims, role, roleReason, maxOverlap, overlaps, observedCoverage, top5 };
   }
 
   function fundScoreLabel(v) {
@@ -4765,6 +4766,30 @@
     if (v >= 70) return 'Forte';
     if (v >= 55) return 'Razoável';
     return 'Fraco';
+  }
+
+
+  function fundPriceChartHtml(r) {
+    const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : (Array.isArray(r.insider_price_history_1y) ? r.insider_price_history_1y : []);
+    if (!hist.length) return `<div class="fund-price-empty"><strong>Histórico de preço ainda não disponível</strong><p>O workflow diário está a enriquecer este ETF. Os dados estruturais abaixo continuam válidos quando disponíveis.</p></div>`;
+    const ret = Number(r.fund_return_1y_pct);
+    const last = Number(hist[hist.length-1]?.close);
+    return `<section class="fund-market-card"><div class="fund-market-head"><div><span class="eyebrow">MARKET</span><h3>Preço · 12 meses</h3></div><div class="fund-market-stats"><span>Último<strong>${Number.isFinite(last)?last.toLocaleString('pt-PT',{maximumFractionDigits:2}):'—'}</strong></span><span>12m<strong class="${ret>0?'positive-text':ret<0?'negative-text':''}">${Number.isFinite(ret)?`${ret>=0?'+':''}${ret.toFixed(1)}%`:'—'}</strong></span></div></div><div class="fund-price-chart-wrap"><canvas id="fund-price-chart" height="180"></canvas></div></section>`;
+  }
+
+  function drawFundPriceChart(r) {
+    const canvas=document.getElementById('fund-price-chart'); if(!canvas) return;
+    const hist=Array.isArray(r.price_history_1y)?r.price_history_1y:(Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]);
+    const pts=hist.map(x=>({date:x.date,close:Number(x.close??x.price??x.value)})).filter(x=>Number.isFinite(x.close)); if(pts.length<2)return;
+    const dpr=Math.max(1,window.devicePixelRatio||1), rect=canvas.getBoundingClientRect(), w=Math.max(280,rect.width||320), h=180; canvas.width=w*dpr; canvas.height=h*dpr;
+    const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
+    const pad={l:10,r:10,t:14,b:24}, vals=pts.map(x=>x.close), lo=Math.min(...vals), hi=Math.max(...vals), span=Math.max(hi-lo,Math.max(1,hi)*.04);
+    const X=i=>pad.l+(w-pad.l-pad.r)*(i/(pts.length-1)); const Y=v=>pad.t+(h-pad.t-pad.b)*(1-(v-lo)/span);
+    const css=getComputedStyle(document.documentElement), line=css.getPropertyValue('--accent').trim()||'#b57821', grid=css.getPropertyValue('--line').trim()||'rgba(80,70,50,.15)', text=css.getPropertyValue('--muted').trim()||'#6f7469';
+    ctx.strokeStyle=grid; ctx.lineWidth=1; for(let i=0;i<3;i++){const y=pad.t+(h-pad.t-pad.b)*i/2;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();}
+    ctx.beginPath(); pts.forEach((p,i)=>{const x=X(i),y=Y(p.close); i?ctx.lineTo(x,y):ctx.moveTo(x,y)}); ctx.strokeStyle=line;ctx.lineWidth=2.5;ctx.stroke();
+    ctx.lineTo(X(pts.length-1),h-pad.b);ctx.lineTo(X(0),h-pad.b);ctx.closePath();ctx.globalAlpha=.10;ctx.fillStyle=line;ctx.fill();ctx.globalAlpha=1;
+    ctx.font='11px system-ui';ctx.fillStyle=text;ctx.fillText(String(pts[0].date||'').slice(0,7),pad.l,h-6);const end=String(pts.at(-1).date||'').slice(0,7);ctx.fillText(end,w-pad.r-ctx.measureText(end).width,h-6);
   }
 
   function openFundDetail(r) {
@@ -4779,23 +4804,24 @@
     els.detailContent.innerHTML = `
       <div class="fund-detail-hero">
         <div><span class="eyebrow">FUND DOSSIER</span><h2>${escapeHtml(r.ticker)}</h2><p>${escapeHtml(r.name || 'ETF')}</p><small>${escapeHtml(r.fund_category || r.sector || 'ETF')} · ${escapeHtml(meta.geo)} · ${escapeHtml(meta.style)}</small></div>
-        <div class="fund-detail-fee"><span>Expense ratio</span><strong>${fmtExpenseRatio(r.expense_ratio)}</strong></div>
+        <div class="fund-detail-fee"><span>Expense ratio</span><strong>${fmtExpenseRatio(r.expense_ratio)}</strong><small>${r.fund_ucits==='confirmed'?'UCITS confirmado':r.fund_ucits?'UCITS: '+escapeHtml(r.fund_ucits):''}</small></div>
       </div>
       <div class="fund-detail-actions"><button class="fund-action" id="fund-watch">${starred?'★ Na watchlist':'☆ Watchlist'}</button><label class="fund-action fund-owned"><input id="fund-owned" type="checkbox" ${owned?'checked':''}> Na carteira</label></div>
+      ${fundPriceChartHtml(r)}
 
       <section class="fund-role-hero">
-        <div class="fund-role-score"><span>Fund fit</span><strong>${fit.overall}</strong><small>${fundScoreLabel(fit.overall)}</small></div>
+        <div class="fund-role-score"><span>Fund fit</span><strong>${fit.overall==null?'—':fit.overall}</strong><small>${fit.overall==null?'dados insuficientes':fundScoreLabel(fit.overall)}</small></div>
         <div class="fund-role-copy"><span class="fund-role-chip role-${roleClass}">${escapeHtml(fit.role)}</span><h3>${escapeHtml(fit.roleReason)}</h3><p>Leitura estrutural baseada apenas nos dados observáveis disponíveis. Não é uma recomendação automática de compra ou venda.</p></div>
       </section>
 
       <section class="fund-dimension-grid">
         ${[
-          ['Cost', fit.costScore, Number.isFinite(Number(r.expense_ratio)) ? fmtExpenseRatio(r.expense_ratio) : 'sem TER'],
-          ['Size', fit.sizeScore, r.fund_total_assets == null ? 'AUM indisponível' : fmtCap(r.fund_total_assets)],
-          ['Diversification', fit.diversificationScore, holdings.length ? `${holdings.length} holdings observadas` : 'sem holdings'],
-          ['Concentration', fit.concentrationScore, holdings.length ? `Top 5 ${pctFundWeight(fit.top5)}` : 'sem holdings'],
+          ['Cost', fit.costScore, Number.isFinite(Number(r.expense_ratio)) ? fmtExpenseRatio(r.expense_ratio) : 'TER a enriquecer'],
+          ['Size', fit.sizeScore, r.fund_total_assets == null ? 'AUM a enriquecer' : fmtCap(r.fund_total_assets)],
+          ['Diversification', fit.diversificationScore, holdings.length ? `${holdings.length} holdings observadas` : 'holdings a enriquecer'],
+          ['Concentration', fit.concentrationScore, holdings.length ? `Top 5 ${pctFundWeight(fit.top5)}` : 'holdings a enriquecer'],
           ['Overlap', fit.maxOverlap == null ? 50 : Math.max(0, Math.round((1-fit.maxOverlap)*100)), fit.maxOverlap == null ? 'sem pares observáveis' : `${overlapText} máx.`]
-        ].map(([label,score,note])=>`<div><span>${label}</span><strong>${score}</strong><small>${escapeHtml(note)}</small></div>`).join('')}
+        ].map(([label,score,note])=>`<div><span>${label}</span><strong>${score==null?'—':score}</strong><small>${escapeHtml(note)}</small></div>`).join('')}
       </section>
 
       <details class="fund-dossier-box" open>
@@ -4818,7 +4844,7 @@
 
       <details class="fund-dossier-box">
         <summary><div><span class="eyebrow">EXPOSURES</span><h3>Classes de ativos & setores</h3></div><span class="section-count">abrir</span></summary>
-        <section class="fund-detail-two"><article><span class="eyebrow">ASSET MIX</span><h3>Classes de ativos</h3>${fundBars(r.fund_asset_classes)}</article><article><span class="eyebrow">SECTOR MIX</span><h3>Exposição setorial</h3>${fundBars(r.fund_sector_weightings)}</article></section>
+        ${(r.fund_asset_classes&&Object.keys(r.fund_asset_classes).length)||(r.fund_sector_weightings&&Object.keys(r.fund_sector_weightings).length)?`<section class="fund-detail-two"><article><span class="eyebrow">ASSET MIX</span><h3>Classes de ativos</h3>${fundBars(r.fund_asset_classes)}</article><article><span class="eyebrow">SECTOR MIX</span><h3>Exposição setorial</h3>${fundBars(r.fund_sector_weightings)}</article></section>`:`<div class="fund-data-pending"><strong>Exposições detalhadas ainda a enriquecer</strong><p>Já sabemos a categoria, região e estilo deste ETF. Holdings e pesos setoriais são acrescentados quando a fonte os disponibiliza.</p></div>`}
       </details>
 
       <details class="fund-dossier-box">
@@ -4837,6 +4863,7 @@
       </details>
     `;
     els.detail.hidden = false;
+    requestAnimationFrame(()=>drawFundPriceChart(r));
     document.getElementById('fund-watch')?.addEventListener('click', e => { toggleWatched(r.ticker); e.currentTarget.textContent = isWatched(r.ticker) ? '★ Na watchlist' : '☆ Watchlist'; });
     document.getElementById('fund-owned')?.addEventListener('change', () => { toggleOwned(r.ticker); openFundDetail(r); });
   }
@@ -6109,7 +6136,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.96.3").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.97.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
