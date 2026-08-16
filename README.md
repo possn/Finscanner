@@ -17,3 +17,10 @@ A exploração avançada (filtros, Sector Intelligence, perspetivas e tabela com
 - `README.md`
 
 Não é necessário alterar workflows nem ficheiros `data/` nesta release.
+
+
+## v0.89.0 — Stocks Clarity & Sector Discovery
+- Novos setores/temas: Tecnologia, Healthcare, Biotech, Água, Agricultura, Energia, Financeiro, Industriais, Consumo, Imobiliário, Utilities, Materiais, Defesa e Semicondutores.
+- Presets de descoberta renomeados em linguagem simples, com explicação visível.
+- A tabela principal deixa de mostrar grades A/B/C/D e abreviações Q/G/V: mostra scores 0–100 com nomes Qualidade, Crescimento e Valor.
+- Portfolio Radar também usa nomes explícitos.

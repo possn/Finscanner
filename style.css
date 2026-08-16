@@ -2086,3 +2086,12 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 }
 /* The old Stock Radar highlight layers are intentionally hidden in the simple 1→2→3 flow. Their underlying data remains available to other views. */
 #view-stocks>.insight-strip,#view-stocks>.opportunity-zone,#view-stocks>.stock-radar-head{display:none}
+
+
+/* v0.89.0 — Stocks clarity + sector/theme discovery */
+.stock-simple-filter-group{margin-top:14px}.stock-simple-filter-label{display:block;margin:0 0 7px;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted)}
+.stock-discover-explainer{display:grid;gap:3px;margin:0 0 12px;padding:11px 13px;border:1px solid var(--border);border-radius:14px;background:var(--surface-sunken)}
+.stock-discover-explainer b{font-size:13px;color:var(--ink)}.stock-discover-explainer span{font-size:12px;line-height:1.45;color:var(--ink-muted)}.stock-discover-explainer small{font-size:10px;color:var(--ink-muted)}
+.portfolio-filter-help{margin:0 0 9px;color:var(--ink-muted);font-size:11px;line-height:1.45}
+.sector-empty{display:grid;gap:5px}.sector-empty b{color:var(--ink);font-size:14px}.sector-empty span{color:var(--ink-muted);font-size:12px}
+@media(max-width:760px){.stock-table-head,.stock-radar-row{grid-template-columns:minmax(0,1fr) repeat(var(--stock-cols,4),66px)!important;gap:5px!important}.stock-table-head span:not(:first-child){font-size:8px!important;line-height:1.05!important}.stock-table-head span:nth-child(3):after,.stock-table-head span:nth-child(4):after,.stock-table-head span:nth-child(5):after{content:none!important}.stock-row-metric b{font-size:13px!important;max-width:66px!important}.stock-row-metric small{font-size:7px!important;max-width:66px!important;white-space:normal!important;line-height:1.05!important}.stock-discover-explainer{padding:10px 11px}.stock-simple-filter-label{font-size:10px}}

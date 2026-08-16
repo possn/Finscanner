@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", fundRank: "core", smartMoneyScope: "all", smartMoneyType: "all", smartMoneyHubMode: "feed", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockDiscoverPreset: "compounders", stockPerspective: "overview", stockCustomColumns: null, sectorLabMode: "discover", sectorCompareSelection: [], sectorDeepDive: null, insiderChartFilter: "all" };
+  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", fundRank: "core", smartMoneyScope: "all", smartMoneyType: "all", smartMoneyHubMode: "feed", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockDiscoverPreset: "compounders", stockSectorTheme: "all", stockPerspective: "overview", stockCustomColumns: null, sectorLabMode: "discover", sectorCompareSelection: [], sectorDeepDive: null, insiderChartFilter: "all" };
 
   const els = {
     list: document.getElementById("list"),
@@ -21,6 +21,8 @@
     stockColumnsPanel: document.getElementById("stock-columns-panel"),
     stockTableHead: document.getElementById("stock-table-head"),
     stockDiscoverCategories: document.getElementById("stock-discover-categories"),
+    stockDiscoverSectors: document.getElementById("stock-discover-sectors"),
+    stockDiscoverExplainer: document.getElementById("stock-discover-explainer"),
     stockDiscoverBody: document.getElementById("stock-discover-body"),
     stockMyBody: document.getElementById("stock-my-body"),
     stockMyCount: document.getElementById("stock-my-count"),
@@ -1633,7 +1635,43 @@
     bindSectorLabActions(rows,sector);
   }
 
-  const DISCOVER_LABELS = {compounders:"Compounders",quality:"High Quality",garp:"GARP",growth:"Growth",value:"Value",dividend:"Dividend",insider:"Insider Buying","near-low":"Near 52W Low",improving:"Improving Thesis","improving-fast":"Improving Fast","persistent-down":"Persistent Deterioration","positive-reversal":"Positive Reversal",earnings:"Earnings Soon"};
+  const DISCOVER_LABELS = {compounders:"Empresas sólidas",quality:"Alta qualidade",garp:"Crescimento + preço razoável",growth:"Crescimento forte",value:"Preço atrativo",dividend:"Dividendos",insider:"Insiders a comprar","near-low":"Perto de mínimos",improving:"Tese a melhorar","improving-fast":"Tese a melhorar","persistent-down":"Tese a piorar","positive-reversal":"Possível recuperação",earnings:"Resultados em breve"};
+  const DISCOVER_EXPLANATIONS = {
+    compounders:"Negócios equilibrados: qualidade, crescimento e estabilidade acima da média.",
+    quality:"Empresas com melhor rentabilidade, margens e qualidade operacional.",
+    garp:"Procura crescimento interessante sem pagar uma valorização excessiva.",
+    growth:"Empresas cujo negócio e/ou lucros estão a crescer mais depressa.",
+    value:"Empresas que parecem relativamente baratas face aos fundamentais observados.",
+    dividend:"Empresas que distribuem dividendos e apresentam rendimento observável.",
+    insider:"Empresas com compras recentes de insiders observadas em Form 4.",
+    "near-low":"Empresas cujo preço está próximo dos mínimos observados de 52 semanas.",
+    improving:"Empresas cuja tese está a melhorar.",
+    "improving-fast":"Empresas cuja tese está a melhorar com persistência recente.",
+    "persistent-down":"Empresas cuja tese se está a deteriorar de forma persistente.",
+    "positive-reversal":"Empresas que começam a melhorar depois de um período de deterioração.",
+    earnings:"Empresas com resultados previstos nos próximos dias."
+  };
+  const STOCK_SECTOR_THEME_LABELS={all:"Todos",technology:"Tecnologia",healthcare:"Healthcare",biotech:"Biotech",water:"Água",agriculture:"Agricultura",energy:"Energia",financials:"Financeiro",industrials:"Industriais",consumer:"Consumo",realestate:"Imobiliário",utilities:"Utilities",materials:"Materiais",defense:"Defesa",semiconductors:"Semicondutores"};
+  function stockSectorThemeMatch(r,key){
+    if(!key||key==='all') return true;
+    const hay=`${r.sector||''} ${r.industry||''} ${r.name||''} ${r.ticker||''}`.toLowerCase();
+    const any=(words)=>words.some(w=>hay.includes(w));
+    if(key==='technology') return any(['technology','software','internet','information technology','it services','computer','electronic']);
+    if(key==='healthcare') return any(['healthcare','health care','medical','pharma','pharmaceutical','diagnostic','hospital','health services']);
+    if(key==='biotech') return any(['biotech','biotechnology','biopharma','biopharmaceutical','genomic','gene therapy']);
+    if(key==='water') return any(['water','wastewater','irrigation','aqua']);
+    if(key==='agriculture') return any(['agricultur','farm','fertiliz','seed','crop','grain','agribusiness']);
+    if(key==='energy') return any(['energy','oil','gas','petroleum','solar','wind','renewable','uranium']);
+    if(key==='financials') return any(['financial','bank','insurance','capital markets','asset management','credit services']);
+    if(key==='industrials') return any(['industrial','machinery','aerospace','transport','logistics','construction','electrical equipment']);
+    if(key==='consumer') return any(['consumer','retail','restaurant','apparel','beverage','household','leisure','auto manufacturer']);
+    if(key==='realestate') return any(['real estate','reit','property','mortgage']);
+    if(key==='utilities') return any(['utilities','utility','electric','regulated water','regulated gas']);
+    if(key==='materials') return any(['materials','mining','chemicals','steel','copper','gold','paper','packaging']);
+    if(key==='defense') return any(['defense','defence','aerospace & defense','aerospace and defense','military']);
+    if(key==='semiconductors') return any(['semiconductor','chip']);
+    return true;
+  }
   function discoverRankValue(r,preset){
     if(preset==='compounders') return (Number(r.quality_pct||0)*.35)+(Number(r.growth_pct||0)*.30)+(Number(r.stability_pct||0)*.20)+(Number(r.score||0)*.15);
     if(preset==='quality') return Number(r.quality_pct ?? r.profitability_pct ?? -1);
@@ -1650,20 +1688,22 @@
     return Number(r.score??-1);
   }
   function discoverReason(r,preset){
-    if(preset==='compounders') return `Q ${Math.round(Number(r.quality_pct||0))} · G ${Math.round(Number(r.growth_pct||0))} · estabilidade ${Math.round(Number(r.stability_pct||0))}`;
+    if(preset==='compounders') return `Qualidade ${Math.round(Number(r.quality_pct||0))} · Crescimento ${Math.round(Number(r.growth_pct||0))} · Estabilidade ${Math.round(Number(r.stability_pct||0))}`;
     if(preset==='insider') return `${Number(r.insider_buy_count_30d||0)} compra(s) · ${fmtMoney(Math.abs(Number(r.insider_net_value_30d||0)),r.currency||'USD')} net 30d`;
     if(preset==='improving') return `tese ↑ · score ${Number(r.thesis_score_delta||0)>=0?'+':''}${Number(r.thesis_score_delta||0).toFixed(1)}`;
     if(preset==='improving-fast') { const m=thesisMomentumSnapshot(r); return `Momentum ${m.score}/100${Number.isFinite(m.s7)?` · 7d ${m.s7>0?'+':''}${m.s7.toFixed(1)}`:''}`; }
     if(preset==='persistent-down') { const m=thesisMomentumSnapshot(r); return `Momentum ${m.score}/100${Number.isFinite(m.s30)?` · 30d ${m.s30.toFixed(1)}`:''}`; }
     if(preset==='positive-reversal') { const m=thesisMomentumSnapshot(r); return `Reversão positiva · hoje ${Number.isFinite(m.sd)?(m.sd>0?'+':'')+m.sd.toFixed(1):'—'} · 30d ${Number.isFinite(m.s30)?m.s30.toFixed(1):'—'}`; }
     if(preset==='earnings') return `${Number.isFinite(Number(r.analyst_days_to_earnings))?Math.max(0,Math.round(Number(r.analyst_days_to_earnings)))+' dias':'—'} até earnings`;
-    return `Q ${Math.round(Number(r.quality_pct||0))} · G ${Math.round(Number(r.growth_pct||0))} · V ${Math.round(Number(r.value_pct||0))}`;
+    return `Qualidade ${Math.round(Number(r.quality_pct||0))} · Crescimento ${Math.round(Number(r.growth_pct||0))} · Valor ${Math.round(Number(r.value_pct||0))}`;
   }
   function renderStockDiscover(rows){
     if(!els.stockDiscoverBody) return; const p=state.stockDiscoverPreset||'compounders';
-    const pool=rows.filter(r=>stockPresetMatch(r,p)).sort((a,b)=>discoverRankValue(b,p)-discoverRankValue(a,p)).slice(0,12);
+    const sectorKey=state.stockSectorTheme||'all';
+    if(els.stockDiscoverExplainer){const sectorText=sectorKey==='all'?'todos os setores':STOCK_SECTOR_THEME_LABELS[sectorKey];els.stockDiscoverExplainer.innerHTML=`<b>${escapeHtml(DISCOVER_LABELS[p]||p)}</b><span>${escapeHtml(DISCOVER_EXPLANATIONS[p]||'')}</span><small>Setor/tema: ${escapeHtml(sectorText)}.</small>`;}
+    const pool=rows.filter(r=>stockPresetMatch(r,p)&&stockSectorThemeMatch(r,sectorKey)).sort((a,b)=>discoverRankValue(b,p)-discoverRankValue(a,p)).slice(0,12);
     els.stockDiscoverCategories?.querySelectorAll('[data-discover-preset]').forEach(b=>b.classList.toggle('is-active',b.dataset.discoverPreset===p));
-    if(!pool.length){els.stockDiscoverBody.innerHTML=`<div class="sector-empty">Sem candidatos com dados suficientes para ${escapeHtml(DISCOVER_LABELS[p]||p)}.</div>`;return;}
+    if(!pool.length){els.stockDiscoverBody.innerHTML=`<div class="sector-empty"><b>Sem empresas nesta combinação.</b><span>Experimenta outro setor/tema ou outra forma de procurar.</span></div>`;return;}
     els.stockDiscoverBody.innerHTML=`<div class="stock-discover-strip">${pool.map((r,i)=>`<article class="stock-discover-card" data-discover-open="${escapeHtml(r.ticker)}"><div class="stock-discover-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4><div class="stock-discover-score">${r.score==null?'—':Math.round(r.score)}<small>/100</small></div><p>${escapeHtml(discoverReason(r,p))}</p><div class="stock-discover-actions"><button data-discover-open="${escapeHtml(r.ticker)}">Deep dive</button><button data-discover-filter="${escapeHtml(p)}">Ver lista</button></div></article>`).join('')}</div>`;
     els.stockDiscoverBody.querySelectorAll('[data-discover-open]').forEach(el=>el.addEventListener('click',e=>{if(e.target.closest('[data-discover-filter]'))return;openDetail(el.dataset.discoverOpen);}));
     els.stockDiscoverBody.querySelectorAll('[data-discover-filter]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();state.stockPreset=btn.dataset.discoverFilter;applyFilters();els.list?.scrollIntoView({behavior:'smooth',block:'start'});}));
@@ -1677,7 +1717,7 @@
     const v = Number(r.value_pct);
     const thesis = r.thesis_direction === 'strengthening' ? '↑ tese a melhorar' : r.thesis_direction === 'weakening' ? '↓ tese a piorar' : '→ tese estável';
     const thesisClass = r.thesis_direction === 'strengthening' ? 'good' : r.thesis_direction === 'weakening' ? 'bad' : 'neutral';
-    const chips = [Number.isFinite(q)?`Q ${Math.round(q)}`:null, Number.isFinite(g)?`G ${Math.round(g)}`:null, Number.isFinite(v)?`V ${Math.round(v)}`:null].filter(Boolean).join(' · ');
+    const chips = [Number.isFinite(q)?`Qualidade ${Math.round(q)}`:null, Number.isFinite(g)?`Crescimento ${Math.round(g)}`:null, Number.isFinite(v)?`Valor ${Math.round(v)}`:null].filter(Boolean).join(' · ');
     return `<article class="stock-portfolio-card" data-stock-portfolio-open="${escapeHtml(r.ticker)}">
       <div class="stock-portfolio-card__top"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4></div>${Number.isFinite(score)?`<strong>${Math.round(score)}<small>/100</small></strong>`:''}</div>
       ${meta.badge?`<span class="stock-portfolio-badge ${escapeHtml(meta.badgeTone||'neutral')}">${escapeHtml(meta.badge)}</span>`:''}
@@ -1888,7 +1928,7 @@
   function renderStockTableHead(){
     if(!els.stockTableHead) return;
     const cols=activeStockColumns();
-    els.stockTableHead.innerHTML=`<span>Empresa</span>${cols.map(k=>`<span>${escapeHtml(STOCK_COLUMN_DEFS[k]?.short||k)}</span>`).join("")}`;
+    els.stockTableHead.innerHTML=`<span>Empresa</span>${cols.map(k=>`<span>${escapeHtml(({quality:'Qualidade',growth:'Cresc.',value:'Valor'}[k])||STOCK_COLUMN_DEFS[k]?.short||k)}</span>`).join("")}`;
     els.stockTableHead.style.setProperty('--stock-cols', String(cols.length));
   }
   function renderStockColumnsPanel(){
@@ -1931,7 +1971,7 @@
     const metricCells=cols.map(k=>{
       const d=STOCK_COLUMN_DEFS[k]; const val=d?.value(r); const tone=metricCellTone(k,val);
       if(k==='score') return `<div class="stock-row-score"><span class="score-pill ${verdict.cls}">${val==null?'—':Math.round(val)}</span><small>${verdict.label}</small></div>`;
-      if(d?.grade) return `<div class="stock-row-metric ${tone}"><b>${metricGrade(val)}</b><small>${d.short} ${val==null?'—':Math.round(val)}</small></div>`;
+      if(d?.grade){const readable={quality:'Qualidade',growth:'Crescimento',value:'Valor',score:'Score'}[k]||d.label;return `<div class="stock-row-metric ${tone}"><b>${val==null?'—':Math.round(val)}</b><small>${escapeHtml(readable)}</small></div>`;}
       return `<div class="stock-row-metric ${tone}"><b>${d?d.format(val,r):'—'}</b><small>${d?.short||k}</small></div>`;
     }).join('');
     return `
@@ -3343,8 +3383,8 @@
     if (!els.portfolioFilters) return;
     const c = portfolioFilterCounts(rows);
     const defs = [
-      ["all","Todos"], ["stocks","Ações"], ["growth","Growth"], ["quality","Quality"], ["value","Value"], ["zombie","Zombies"],
-      ["etf","ETFs"], ["thesis-up","Tese ↑"], ["thesis-down","Tese ↓"], ["thesis-changed","Mudou"]
+      ["all","Todos"], ["stocks","Ações"], ["growth","Crescimento forte"], ["quality","Alta qualidade"], ["value","Preço atrativo"], ["zombie","Risco financeiro"],
+      ["etf","ETFs"], ["thesis-up","Tese a melhorar"], ["thesis-down","Tese a piorar"], ["thesis-changed","Tese mudou"]
     ];
     els.portfolioFilters.innerHTML = defs.map(([id,label]) => `<button class="portfolio-filter-chip ${state.portfolioFilter===id?"is-active":""}" data-filter="${id}">${label}<span>${c[id]}</span></button>`).join("");
     els.portfolioFilters.querySelectorAll("[data-filter]").forEach(btn => btn.addEventListener("click", () => {
@@ -5526,6 +5566,11 @@
     state.stockDiscoverPreset=btn.dataset.discoverPreset||'compounders';
     renderStockDiscover((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
   }));
+  els.stockDiscoverSectors?.querySelectorAll('[data-stock-sector-theme]').forEach(btn=>btn.addEventListener('click',()=>{
+    state.stockSectorTheme=btn.dataset.stockSectorTheme||'all';
+    els.stockDiscoverSectors.querySelectorAll('[data-stock-sector-theme]').forEach(x=>x.classList.toggle('is-active',x===btn));
+    renderStockDiscover((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
+  }));
 
   function bindStockAutocomplete(input, syncInput) {
     if (!input) return;
@@ -5675,7 +5720,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.88.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.89.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
