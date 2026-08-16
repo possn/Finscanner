@@ -22,6 +22,10 @@
     stockTableHead: document.getElementById("stock-table-head"),
     stockDiscoverCategories: document.getElementById("stock-discover-categories"),
     stockDiscoverBody: document.getElementById("stock-discover-body"),
+    stockMyBody: document.getElementById("stock-my-body"),
+    stockMyCount: document.getElementById("stock-my-count"),
+    stockBetterBody: document.getElementById("stock-better-body"),
+    stockBetterCount: document.getElementById("stock-better-count"),
     sectorLab: document.getElementById("sector-intelligence-lab"),
     sectorLabSector: document.getElementById("sector-lab-sector"),
     sectorLabModes: document.getElementById("sector-lab-modes"),
@@ -1665,6 +1669,77 @@
     els.stockDiscoverBody.querySelectorAll('[data-discover-filter]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();state.stockPreset=btn.dataset.discoverFilter;applyFilters();els.list?.scrollIntoView({behavior:'smooth',block:'start'});}));
   }
 
+
+  function stockPortfolioCardHtml(r, meta = {}) {
+    const score = Number(r.score);
+    const q = Number(r.quality_pct ?? r.profitability_pct);
+    const g = Number(r.growth_pct);
+    const v = Number(r.value_pct);
+    const thesis = r.thesis_direction === 'strengthening' ? '↑ tese a melhorar' : r.thesis_direction === 'weakening' ? '↓ tese a piorar' : '→ tese estável';
+    const thesisClass = r.thesis_direction === 'strengthening' ? 'good' : r.thesis_direction === 'weakening' ? 'bad' : 'neutral';
+    const chips = [Number.isFinite(q)?`Q ${Math.round(q)}`:null, Number.isFinite(g)?`G ${Math.round(g)}`:null, Number.isFinite(v)?`V ${Math.round(v)}`:null].filter(Boolean).join(' · ');
+    return `<article class="stock-portfolio-card" data-stock-portfolio-open="${escapeHtml(r.ticker)}">
+      <div class="stock-portfolio-card__top"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4></div>${Number.isFinite(score)?`<strong>${Math.round(score)}<small>/100</small></strong>`:''}</div>
+      ${meta.badge?`<span class="stock-portfolio-badge ${escapeHtml(meta.badgeTone||'neutral')}">${escapeHtml(meta.badge)}</span>`:''}
+      <p class="stock-portfolio-thesis ${thesisClass}">${thesis}</p>
+      ${chips?`<small>${escapeHtml(chips)}</small>`:''}
+      ${meta.note?`<p class="stock-portfolio-note">${escapeHtml(meta.note)}</p>`:''}
+      <button type="button" data-stock-portfolio-open="${escapeHtml(r.ticker)}">Abrir dossier →</button>
+    </article>`;
+  }
+
+  function renderStockPortfolioWorkflow(rows) {
+    if(!Array.isArray(rows)) return;
+    const portfolio = loadPortfolio();
+    const keys = Object.keys(portfolio || {});
+    const byTicker = Object.fromEntries(rows.map(r=>[r.ticker,r]));
+    const held = keys.map(t=>({ ticker:t, row:byTicker[t] })).filter(x=>x.row && x.row.quote_type !== 'ETF');
+
+    if(els.stockMyBody) {
+      if(!keys.length) {
+        els.stockMyBody.innerHTML = `<div class="stock-workflow-empty"><b>Importa o teu portfolio</b><span>Depois vês aqui apenas as ações que já tens, com score, tese e riscos.</span><button type="button" data-stock-open-portfolio>Ir para Portfolio</button></div>`;
+        if(els.stockMyCount) els.stockMyCount.textContent='—';
+      } else if(!held.length) {
+        els.stockMyBody.innerHTML = `<div class="stock-workflow-empty"><b>Sem ações reconhecidas</b><span>O portfolio está importado, mas ainda não há ações com análise disponível neste universo.</span></div>`;
+        if(els.stockMyCount) els.stockMyCount.textContent='0 ações';
+      } else {
+        const enriched = held.map(x=>{
+          const eur = positionValue(portfolio[x.ticker], x.row, true);
+          return {...x, eur:Number.isFinite(eur)?eur:0};
+        }).sort((a,b)=>b.eur-a.eur);
+        const total = enriched.reduce((s,x)=>s+x.eur,0);
+        els.stockMyBody.innerHTML = `<div class="stock-portfolio-strip-inner">${enriched.slice(0,16).map(x=>{
+          const w = total>0 ? x.eur/total*100 : null;
+          const risk = x.row.thesis_direction==='weakening' || x.row.zombie==='yes' || Number(x.row.score)<45;
+          const badge = risk ? 'Rever' : x.row.thesis_direction==='strengthening' ? 'A melhorar' : 'Na carteira';
+          const note = Number.isFinite(w) ? `${w.toFixed(1)}% das ações valorizadas da carteira` : '';
+          return stockPortfolioCardHtml(x.row,{badge,badgeTone:risk?'bad':x.row.thesis_direction==='strengthening'?'good':'neutral',note});
+        }).join('')}</div>`;
+        if(els.stockMyCount) els.stockMyCount.textContent=`${held.length} ações`;
+      }
+    }
+
+    if(els.stockBetterBody) {
+      if(!keys.length) {
+        els.stockBetterBody.innerHTML = `<div class="stock-workflow-empty"><b>Importa o teu portfolio</b><span>O Portfolio Fit só faz sentido depois de sabermos o que já tens.</span><button type="button" data-stock-open-portfolio>Ir para Portfolio</button></div>`;
+        if(els.stockBetterCount) els.stockBetterCount.textContent='—';
+      } else {
+        const candidates = rows.filter(r=>r.quote_type!=='ETF' && !portfolio[r.ticker] && !isAustralianScannerRow(r)).map(r=>({r,pf:portfolioFitSnapshot(r,portfolio,state.data?.stocks||rows)})).filter(x=>x.pf && Number.isFinite(x.pf.fit) && Number(x.r.score)>=50).sort((a,b)=>b.pf.fit-a.pf.fit || Number(b.r.score||0)-Number(a.r.score||0)).slice(0,16);
+        if(!candidates.length) {
+          els.stockBetterBody.innerHTML = `<div class="stock-workflow-empty"><b>Ainda sem candidatos suficientes</b><span>Precisamos de mais cobertura do universo ou do portfolio para calcular encaixe estrutural com confiança.</span></div>`;
+        } else {
+          els.stockBetterBody.innerHTML = `<div class="stock-portfolio-strip-inner">${candidates.map(x=>stockPortfolioCardHtml(x.r,{badge:`Fit ${Math.round(x.pf.fit)}/100`,badgeTone:x.pf.fit>=75?'good':'neutral',note:x.pf.reasons.slice(0,2).join(' · ')})).join('')}</div>`;
+        }
+        if(els.stockBetterCount) els.stockBetterCount.textContent=`${candidates.length} candidatos`;
+      }
+    }
+
+    document.querySelectorAll('[data-stock-portfolio-open]').forEach(el=>{
+      el.addEventListener('click',e=>{e.stopPropagation();openDetail(el.dataset.stockPortfolioOpen);});
+    });
+    document.querySelectorAll('[data-stock-open-portfolio]').forEach(btn=>btn.addEventListener('click',()=>switchView('portfolio')));
+  }
+
   function applyFilters() {
     if (!state.data) return;
     const equities = state.data.stocks.filter(r => r.quote_type !== "ETF" && !isAustralianScannerRow(r));
@@ -1728,6 +1803,7 @@
 
     state.filtered = rows;
     renderStockDiscover(equities);
+    renderStockPortfolioWorkflow(equities);
     renderSectorIntelligence(equities);
     if (els.resultCount) els.resultCount.textContent = `${rows.length} resultados`;
     renderStockTableHead();
@@ -5582,6 +5658,10 @@
     const id = btn.dataset.fundJump === 'discover' ? 'fund-global-discovery' : btn.dataset.fundJump === 'mine' ? 'fund-portfolio-intel' : 'fund-better-alternatives';
     document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
   }));
+  document.querySelectorAll('[data-stock-jump]').forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.stockJump === 'discover' ? 'stock-global-discovery' : btn.dataset.stockJump === 'mine' ? 'stock-my-positions' : 'stock-better-additions';
+    document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
 
   on(els.fundCompareA, 'change', renderFundCompare);
   on(els.fundCompareB, 'change', renderFundCompare);
@@ -5595,7 +5675,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.87.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.88.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

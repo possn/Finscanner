@@ -2044,3 +2044,45 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
   .fund-result-simple{padding:15px}
 }
 [data-theme="dark"] .fund-owned-badge{background:rgba(35,116,81,.22);color:#bfe7d3}
+
+/* v0.88.0 — Stocks follows the same simple global → portfolio → additions model as Funds */
+.stocks-hero-simple{margin:0 0 20px;padding:24px 0 6px}
+.stocks-hero-simple h2{max-width:820px;font-family:var(--serif);font-size:clamp(34px,5vw,58px);line-height:1.02;margin:8px 0 14px;color:var(--ink)}
+.stocks-hero-simple>p{max-width:820px;font-size:18px;line-height:1.55;color:var(--ink-muted)}
+.stock-simple-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 18px}
+.stock-simple-steps button{border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:16px;padding:14px;text-align:left;display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;box-shadow:var(--shadow-card);cursor:pointer}
+.stock-simple-steps button>span{grid-row:1/3;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-sunken);font-weight:800}
+.stock-simple-steps b{font-size:15px}.stock-simple-steps small{color:var(--ink-muted);font-size:12px;line-height:1.35}
+.stock-global-stats{margin-top:12px}
+.stock-simple-block{scroll-margin-top:90px;margin:22px 0}
+.stock-portfolio-section{border:1px solid var(--border);background:var(--surface);border-radius:22px;padding:20px;box-shadow:var(--shadow-card)}
+.stock-portfolio-strip{min-width:0}
+.stock-portfolio-strip-inner{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 10px;-webkit-overflow-scrolling:touch}
+.stock-portfolio-card{flex:0 0 min(330px,84vw);scroll-snap-align:start;border:1px solid var(--border);background:var(--surface-elevated,var(--surface));border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:9px;min-height:220px}
+.stock-portfolio-card__top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.stock-portfolio-card__top h4{font-size:20px;line-height:1.15;margin:3px 0 0;color:var(--ink)}
+.stock-portfolio-card__top strong{font-size:26px;color:var(--ink);white-space:nowrap}.stock-portfolio-card__top strong small{font-size:11px;color:var(--ink-muted)}
+.stock-portfolio-badge{align-self:flex-start;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:800;background:var(--surface-sunken);color:var(--ink-muted)}
+.stock-portfolio-badge.good{background:color-mix(in srgb,#2a936b 13%,var(--surface));color:#23785a}
+.stock-portfolio-badge.bad{background:color-mix(in srgb,#c64f5a 12%,var(--surface));color:#a83d48}
+.stock-portfolio-thesis{margin:0;font-size:14px}.stock-portfolio-thesis.good{color:#23785a}.stock-portfolio-thesis.bad{color:#a83d48}.stock-portfolio-thesis.neutral{color:var(--ink-muted)}
+.stock-portfolio-card>small{color:var(--ink-muted)}
+.stock-portfolio-note{margin:0;color:var(--ink-muted);font-size:13px;line-height:1.4;min-height:36px}
+.stock-portfolio-card button,.stock-workflow-empty button{margin-top:auto;border:0;border-radius:12px;background:var(--ink);color:var(--bg);padding:11px 12px;font-weight:800;cursor:pointer}
+.stock-workflow-empty{border:1px dashed var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:7px;color:var(--ink-muted)}
+.stock-workflow-empty b{color:var(--ink);font-size:17px}.stock-workflow-empty button{align-self:flex-start;margin-top:8px}
+.stock-advanced-explorer{margin:24px 0;border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden}
+.stock-advanced-explorer>summary{padding:16px 18px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;color:var(--ink)}
+.stock-advanced-explorer>summary::-webkit-details-marker{display:none}
+.stock-advanced-explorer>summary span:first-child{display:flex;flex-direction:column;gap:3px}.stock-advanced-explorer>summary b{font-size:17px}.stock-advanced-explorer>summary small{font-size:12px;color:var(--ink-muted)}
+.stock-advanced-explorer>.section-heading,.stock-advanced-explorer>.stock-dropbox,.stock-advanced-explorer>#stock-table-head,.stock-advanced-explorer>#list{margin-left:16px;margin-right:16px}
+
+@media(max-width:760px){
+  .stock-simple-steps{grid-template-columns:1fr}
+  .stocks-hero-simple h2{font-size:34px}
+  .stocks-hero-simple>p{font-size:16px}
+  .stock-portfolio-section{padding:16px}
+  .stock-portfolio-card{flex-basis:82vw}
+}
+/* The old Stock Radar highlight layers are intentionally hidden in the simple 1→2→3 flow. Their underlying data remains available to other views. */
+#view-stocks>.insight-strip,#view-stocks>.opportunity-zone,#view-stocks>.stock-radar-head{display:none}
