@@ -2119,48 +2119,56 @@
     return `<section class="winston-dossier-flow"><div class="w-section-intro dossier-flow-intro"><span>FINANCIAL STORY</span><h3>Leitura por blocos</h3><p>Valor atual, tendência, contexto e interpretação — organizados numa sequência única para investigação.</p></div>${metricStorySection('Growth Profile','GROWTH',growthCards,'dossier-growth')}${metricStorySection('Profitability & Capital','QUALITY',qualityCards,'dossier-profitability')}${metricStorySection('Cash & Balance Sheet','FINANCIAL STRENGTH',cashCards,'dossier-balance')}${metricStorySection('Valuation','MARKET CONTEXT',marketCards,'dossier-valuation')}</section>`;
   }
 
+  const DOSSIER_SECTIONS = [
+    ['dossier-overview','Snapshot'],['dossier-score','Score'],['dossier-changes','Mudanças'],
+    ['dossier-growth','Growth'],['dossier-profitability','Profit'],['dossier-balance','Balanço'],
+    ['dossier-valuation','Valuation'],['dossier-dividends','Dividendos'],['dossier-insiders','Insiders'],
+    ['dossier-estimates','Estimates'],['dossier-catalysts','Catalysts'],['dossier-thesis','Tese']
+  ];
+
   function dossierNavHtml() {
-    const items = [
-      ['dossier-overview','Snapshot'],['dossier-score','Score'],['dossier-changes','Mudanças'],
-      ['dossier-growth','Growth'],['dossier-profitability','Profit'],['dossier-balance','Balanço'],
-      ['dossier-valuation','Valuation'],['dossier-dividends','Dividendos'],['dossier-insiders','Insiders'],
-      ['dossier-estimates','Estimates'],['dossier-catalysts','Catalysts'],['dossier-thesis','Tese']
-    ];
-    return `<nav class="dossier-nav" aria-label="Navegação do dossier">${items.map(([id,label])=>`<button type="button" data-dossier-jump="${id}">${label}</button>`).join('')}</nav>`;
+    // Native select is deliberately used on mobile: iOS handles it reliably even
+    // inside a fixed, independently scrolling PWA overlay. Chips remain as a
+    // secondary desktop affordance and use the same single jump function.
+    return `<nav class="dossier-nav" aria-label="Navegação do dossier">
+      <label class="dossier-section-picker"><span>Ir para</span><select data-dossier-select aria-label="Ir para secção do dossier">${DOSSIER_SECTIONS.map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
+      <div class="dossier-nav-chips">${DOSSIER_SECTIONS.map(([id,label])=>`<button type="button" data-dossier-jump="${id}" onclick="window.__finscannerDossierJump && window.__finscannerDossierJump('${id}', this); return false;">${label}</button>`).join('')}</div>
+    </nav>`;
   }
+
+  function dossierJumpTo(id, sourceBtn=null) {
+    const target = document.getElementById(id);
+    if (!target || !els.detail || els.detail.hidden) return false;
+    // scrollIntoView is the most reliable path in iOS Safari/PWA because it
+    // automatically scrolls the nearest scrollable ancestor (.detail-overlay).
+    try { target.scrollIntoView({ behavior: appSettings().reduceMotion ? 'auto' : 'smooth', block: 'start', inline: 'nearest' }); }
+    catch (_) { target.scrollIntoView(true); }
+    // Small correction keeps the section heading clear of the overlay edge.
+    setTimeout(() => { try { els.detail.scrollTop = Math.max(0, els.detail.scrollTop - 10); } catch (_) {} }, appSettings().reduceMotion ? 0 : 260);
+    const nav = els.detailContent.querySelector('.dossier-nav');
+    const buttons = [...els.detailContent.querySelectorAll('[data-dossier-jump]')];
+    buttons.forEach(x => x.classList.toggle('is-active', x.dataset.dossierJump === id));
+    const select = nav?.querySelector('[data-dossier-select]');
+    if (select && select.value !== id) select.value = id;
+    const btn = sourceBtn || buttons.find(x => x.dataset.dossierJump === id);
+    if (btn) { try { btn.scrollIntoView({behavior:'auto',block:'nearest',inline:'center'}); } catch (_) {} }
+    return true;
+  }
+  window.__finscannerDossierJump = dossierJumpTo;
 
   function bindDossierNav() {
     const nav = els.detailContent.querySelector('.dossier-nav');
-    const buttons = [...els.detailContent.querySelectorAll('[data-dossier-jump]')];
-    const jump = (btn) => {
-      const target = els.detailContent.querySelector('#' + btn.dataset.dossierJump);
-      if (!target || !els.detail) return;
-      // The company dossier lives inside .detail-overlay, which is the actual
-      // scrolling container on iOS. Scrolling window/document therefore does
-      // nothing. Calculate the target relative to the overlay itself.
-      const overlayRect = els.detail.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
-      const top = els.detail.scrollTop + (targetRect.top - overlayRect.top) - 14;
-      els.detail.scrollTo({ top: Math.max(0, top), behavior: appSettings().reduceMotion ? 'auto' : 'smooth' });
-      buttons.forEach(x => x.classList.toggle('is-active', x === btn));
-      // Keep the selected chip visible horizontally without affecting the
-      // vertical scroll position of the dossier.
-      if (nav) {
-        const left = btn.offsetLeft - Math.max(0, (nav.clientWidth - btn.offsetWidth) / 2);
-        nav.scrollTo({ left: Math.max(0, left), behavior: appSettings().reduceMotion ? 'auto' : 'smooth' });
-      }
-    };
-    buttons.forEach(btn => {
-      btn.style.touchAction = 'manipulation';
-      btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); jump(btn); });
-    });
-    // Defensive delegation for iOS/PWA re-render edge cases.
-    nav?.addEventListener('pointerup', (e) => {
+    if (!nav) return;
+    const select = nav.querySelector('[data-dossier-select]');
+    select?.addEventListener('change', () => dossierJumpTo(select.value));
+    // Delegation is kept as a non-inline fallback for desktop and accessibility.
+    nav.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-dossier-jump]');
       if (!btn) return;
       e.preventDefault();
-      jump(btn);
-    });
+      e.stopPropagation();
+      dossierJumpTo(btn.dataset.dossierJump, btn);
+    }, true);
   }
 
   function scoreDescriptor(v) {
