@@ -1856,3 +1856,98 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 /* v0.78 interaction repair */
 .interaction-error-toast{position:fixed;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:99999;padding:14px 16px;border-radius:14px;background:var(--surface-strong,#172036);color:var(--text-on-strong,#fff);box-shadow:0 10px 30px rgba(0,0,0,.18);font-weight:700;text-align:center}
 .home-opportunity-card,.briefing-open,.home-brief-row{pointer-events:auto;touch-action:manipulation}
+
+/* v0.79.0 — dossier visual hierarchy + non-sticky navigation repair */
+/* The section navigation is intentionally NOT sticky on iOS. This prevents dossier content
+   from scrolling underneath the control strip and keeps the reading surface visually clean. */
+.dossier-nav{
+  position:relative!important;
+  top:auto!important;
+  z-index:2!important;
+  margin:14px 0 22px!important;
+  padding:8px 0 10px!important;
+  background:var(--bg)!important;
+  border-top:1px solid var(--border)!important;
+  border-bottom:1px solid var(--border)!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.dossier-block{scroll-margin-top:18px!important}
+
+/* Restore a clearer 'boxed' snapshot hierarchy in the company header. */
+.stock-detail-hero{
+  grid-template-columns:1fr!important;
+  gap:14px!important;
+  padding:8px 0 4px!important;
+  border-bottom:0!important;
+}
+.stock-detail-brand{
+  grid-column:1!important;
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  gap:12px!important;
+  align-items:center!important;
+  padding:16px!important;
+  border:1px solid var(--border)!important;
+  border-radius:20px!important;
+  background:var(--surface)!important;
+}
+.stock-detail-brand>div:last-child{min-width:0!important}
+.stock-detail-brand h2{font-size:clamp(27px,7.5vw,36px)!important;line-height:1.05!important;margin:3px 0 5px!important;overflow-wrap:anywhere!important}
+.stock-detail-brand h2 small{display:block!important;margin:5px 0 0!important;font-size:14px!important;letter-spacing:.04em!important;color:var(--ink-faint)!important}
+.stock-detail-brand p{font-size:14px!important;line-height:1.35!important;color:var(--ink-muted)!important}
+.detail-watch{
+  position:absolute!important;
+  right:16px!important;
+  top:18px!important;
+  z-index:3!important;
+  background:var(--surface-sunken)!important;
+  color:var(--ink)!important;
+  border-color:var(--border)!important;
+}
+.stock-detail-hero{position:relative!important}
+.stock-detail-brand{padding-right:104px!important}
+
+.stock-facts{
+  grid-column:1!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:9px!important;
+  margin:0!important;
+}
+.stock-facts>div{
+  min-width:0!important;
+  padding:13px 12px!important;
+  border:1px solid var(--border)!important;
+  border-radius:16px!important;
+  background:var(--surface)!important;
+}
+.stock-facts span{font-size:9px!important;color:var(--ink-faint)!important}
+.stock-facts strong{font-size:17px!important;color:var(--ink)!important;overflow-wrap:anywhere!important}
+
+.stock-score-hero{
+  grid-column:1!important;
+  margin:0!important;
+  padding:18px!important;
+  border:1px solid var(--border)!important;
+  border-radius:20px!important;
+  background:var(--surface)!important;
+}
+.stock-score-hero>strong{font-size:clamp(58px,17vw,78px)!important}
+.stock-score-hero>small{color:var(--ink-muted)!important}
+
+@media(max-width:700px){
+  .detail-card{padding-left:16px!important;padding-right:16px!important}
+  .stock-detail-brand{grid-template-columns:auto minmax(0,1fr)!important;padding:15px 14px 15px!important;padding-right:92px!important}
+  .detail-company-mark{width:50px!important;height:50px!important;font-size:17px!important}
+  .detail-watch{right:10px!important;top:14px!important;padding:8px 10px!important;font-size:12px!important}
+  .stock-facts{grid-template-columns:1fr 1fr!important}
+  .stock-facts>div:last-child{grid-column:1/-1!important}
+  .dossier-nav{margin-left:-16px!important;margin-right:-16px!important;padding-left:16px!important;padding-right:16px!important}
+}
+
+[data-theme="dark"] .dossier-nav{background:var(--bg)!important}
+[data-theme="dark"] .stock-detail-brand,
+[data-theme="dark"] .stock-facts>div,
+[data-theme="dark"] .stock-score-hero{background:var(--surface)!important;border-color:var(--border)!important}
