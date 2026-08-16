@@ -2095,3 +2095,31 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 .portfolio-filter-help{margin:0 0 9px;color:var(--ink-muted);font-size:11px;line-height:1.45}
 .sector-empty{display:grid;gap:5px}.sector-empty b{color:var(--ink);font-size:14px}.sector-empty span{color:var(--ink-muted);font-size:12px}
 @media(max-width:760px){.stock-table-head,.stock-radar-row{grid-template-columns:minmax(0,1fr) repeat(var(--stock-cols,4),66px)!important;gap:5px!important}.stock-table-head span:not(:first-child){font-size:8px!important;line-height:1.05!important}.stock-table-head span:nth-child(3):after,.stock-table-head span:nth-child(4):after,.stock-table-head span:nth-child(5):after{content:none!important}.stock-row-metric b{font-size:13px!important;max-width:66px!important}.stock-row-metric small{font-size:7px!important;max-width:66px!important;white-space:normal!important;line-height:1.05!important}.stock-discover-explainer{padding:10px 11px}.stock-simple-filter-label{font-size:10px}}
+
+
+/* v0.90.0 — mobile navigation stability + discovery clarity */
+@media (max-width:760px){
+  html,body{min-height:100%;}
+  body{padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;}
+  .app-shell__content{padding-bottom:calc(132px + env(safe-area-inset-bottom))!important;}
+  .view.is-active{padding-bottom:calc(118px + env(safe-area-inset-bottom))!important;}
+  .bottom-nav{
+    position:fixed!important;
+    left:0!important;right:0!important;bottom:0!important;top:auto!important;
+    z-index:999!important;
+    transform:none!important;
+    margin:0!important;
+    width:100vw!important;
+    min-height:calc(78px + env(safe-area-inset-bottom))!important;
+    background:var(--surface,#fffdf8)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    box-shadow:0 -10px 30px rgba(38,31,22,.10)!important;
+    isolation:isolate;
+  }
+  .bottom-nav:before{content:'';position:absolute;inset:0;background:var(--surface,#fffdf8);z-index:-1;}
+  .stock-discover-fallback-note{margin:0 0 12px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface-sunken);display:grid;gap:4px;}
+  .stock-discover-fallback-note b{font-size:13px;color:var(--ink);}
+  .stock-discover-fallback-note span{font-size:11px;line-height:1.45;color:var(--ink-muted);}
+  .catalog-status{font-size:12px!important;line-height:1.2;color:var(--ink-muted);text-transform:none;letter-spacing:0;font-weight:800;}
+}

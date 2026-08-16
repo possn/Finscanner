@@ -1654,13 +1654,13 @@
   const STOCK_SECTOR_THEME_LABELS={all:"Todos",technology:"Tecnologia",healthcare:"Healthcare",biotech:"Biotech",water:"Água",agriculture:"Agricultura",energy:"Energia",financials:"Financeiro",industrials:"Industriais",consumer:"Consumo",realestate:"Imobiliário",utilities:"Utilities",materials:"Materiais",defense:"Defesa",semiconductors:"Semicondutores"};
   function stockSectorThemeMatch(r,key){
     if(!key||key==='all') return true;
-    const hay=`${r.sector||''} ${r.industry||''} ${r.name||''} ${r.ticker||''}`.toLowerCase();
+    const hay=`${r.sector||''} ${r.industry||''} ${r.stock_theme||''} ${r.name||''} ${r.ticker||''}`.toLowerCase();
     const any=(words)=>words.some(w=>hay.includes(w));
     if(key==='technology') return any(['technology','software','internet','information technology','it services','computer','electronic']);
-    if(key==='healthcare') return any(['healthcare','health care','medical','pharma','pharmaceutical','diagnostic','hospital','health services']);
+    if(key==='healthcare') return any(['healthcare','health care','medical','pharma','pharmaceutical','diagnostic','hospital','health services','medical device','healthcare plans']);
     if(key==='biotech') return any(['biotech','biotechnology','biopharma','biopharmaceutical','genomic','gene therapy']);
-    if(key==='water') return any(['water','wastewater','irrigation','aqua']);
-    if(key==='agriculture') return any(['agricultur','farm','fertiliz','seed','crop','grain','agribusiness']);
+    if(key==='water') return any(['water','wastewater','irrigation','aqua','drainage','filtration','pump']);
+    if(key==='agriculture') return any(['agricultur','farm','fertiliz','seed','crop','grain','agribusiness','agricultural inputs']);
     if(key==='energy') return any(['energy','oil','gas','petroleum','solar','wind','renewable','uranium']);
     if(key==='financials') return any(['financial','bank','insurance','capital markets','asset management','credit services']);
     if(key==='industrials') return any(['industrial','machinery','aerospace','transport','logistics','construction','electrical equipment']);
@@ -1698,16 +1698,46 @@
     return `Qualidade ${Math.round(Number(r.quality_pct||0))} · Crescimento ${Math.round(Number(r.growth_pct||0))} · Valor ${Math.round(Number(r.value_pct||0))}`;
   }
   function renderStockDiscover(rows){
-    if(!els.stockDiscoverBody) return; const p=state.stockDiscoverPreset||'compounders';
+    if(!els.stockDiscoverBody) return;
+    const p=state.stockDiscoverPreset||'compounders';
     const sectorKey=state.stockSectorTheme||'all';
-    if(els.stockDiscoverExplainer){const sectorText=sectorKey==='all'?'todos os setores':STOCK_SECTOR_THEME_LABELS[sectorKey];els.stockDiscoverExplainer.innerHTML=`<b>${escapeHtml(DISCOVER_LABELS[p]||p)}</b><span>${escapeHtml(DISCOVER_EXPLANATIONS[p]||'')}</span><small>Setor/tema: ${escapeHtml(sectorText)}.</small>`;}
-    const pool=rows.filter(r=>stockPresetMatch(r,p)&&stockSectorThemeMatch(r,sectorKey)).sort((a,b)=>discoverRankValue(b,p)-discoverRankValue(a,p)).slice(0,12);
+    const sectorText=sectorKey==='all'?'todos os setores':STOCK_SECTOR_THEME_LABELS[sectorKey];
+    if(els.stockDiscoverExplainer){
+      els.stockDiscoverExplainer.innerHTML=`<b>${escapeHtml(DISCOVER_LABELS[p]||p)}</b><span>${escapeHtml(DISCOVER_EXPLANATIONS[p]||'')}</span><small>Setor/tema: ${escapeHtml(sectorText)}.</small>`;
+    }
+    const sectorPool=rows.filter(r=>stockSectorThemeMatch(r,sectorKey));
+    let exact=sectorPool.filter(r=>stockPresetMatch(r,p)).sort((a,b)=>discoverRankValue(b,p)-discoverRankValue(a,p));
+    let mode='exact';
+    let pool=exact;
+    if(!pool.length && sectorKey!=='all' && sectorPool.length){
+      mode='sector-fallback';
+      pool=[...sectorPool].sort((a,b)=>(Number(b.score??-1)-Number(a.score??-1)) || (Number(b.market_cap??0)-Number(a.market_cap??0)));
+    }
+    if(!pool.length && sectorKey==='all'){
+      mode='broad-fallback';
+      pool=rows.filter(r=>Number.isFinite(Number(r.score))).sort((a,b)=>Number(b.score??-1)-Number(a.score??-1));
+    }
+    pool=pool.slice(0,16);
     els.stockDiscoverCategories?.querySelectorAll('[data-discover-preset]').forEach(b=>b.classList.toggle('is-active',b.dataset.discoverPreset===p));
-    if(!pool.length){els.stockDiscoverBody.innerHTML=`<div class="sector-empty"><b>Sem empresas nesta combinação.</b><span>Experimenta outro setor/tema ou outra forma de procurar.</span></div>`;return;}
-    els.stockDiscoverBody.innerHTML=`<div class="stock-discover-strip">${pool.map((r,i)=>`<article class="stock-discover-card" data-discover-open="${escapeHtml(r.ticker)}"><div class="stock-discover-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4><div class="stock-discover-score">${r.score==null?'—':Math.round(r.score)}<small>/100</small></div><p>${escapeHtml(discoverReason(r,p))}</p><div class="stock-discover-actions"><button data-discover-open="${escapeHtml(r.ticker)}">Deep dive</button><button data-discover-filter="${escapeHtml(p)}">Ver lista</button></div></article>`).join('')}</div>`;
+    if(!pool.length){
+      els.stockDiscoverBody.innerHTML=`<div class="sector-empty"><b>Ainda sem cobertura suficiente.</b><span>O catálogo conhece esta categoria, mas ainda não existem empresas analisadas com dados suficientes. O workflow vai enriquecendo o universo progressivamente.</span></div>`;
+      return;
+    }
+    const note=mode==='sector-fallback'
+      ? `<div class="stock-discover-fallback-note"><b>Nenhuma cumpre todos os critérios de “${escapeHtml(DISCOVER_LABELS[p]||p)}”.</b><span>A mostrar as melhores empresas já conhecidas em ${escapeHtml(sectorText)} para não esconder o setor.</span></div>`
+      : mode==='broad-fallback'
+        ? `<div class="stock-discover-fallback-note"><b>Critério muito restritivo para a cobertura atual.</b><span>A mostrar as empresas com melhor score disponível.</span></div>`
+        : '';
+    els.stockDiscoverBody.innerHTML=`${note}<div class="stock-discover-strip">${pool.map((r,i)=>{
+      const analysed=Number.isFinite(Number(r.score));
+      const status=analysed?`${Math.round(Number(r.score))}<small>/100</small>`:`<span class="catalog-status">a analisar</span>`;
+      const reason=analysed?discoverReason(r,p):`${r.stock_theme||r.industry||r.sector||'Catálogo global'} · dados a enriquecer`;
+      return `<article class="stock-discover-card" data-discover-open="${escapeHtml(r.ticker)}"><div class="stock-discover-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4><div class="stock-discover-score">${status}</div><p>${escapeHtml(reason)}</p><div class="stock-discover-actions"><button data-discover-open="${escapeHtml(r.ticker)}">${analysed?'Abrir dossier':'Ver ficha'}</button><button data-discover-filter="${escapeHtml(p)}">Ver lista</button></div></article>`;
+    }).join('')}</div>`;
     els.stockDiscoverBody.querySelectorAll('[data-discover-open]').forEach(el=>el.addEventListener('click',e=>{if(e.target.closest('[data-discover-filter]'))return;openDetail(el.dataset.discoverOpen);}));
     els.stockDiscoverBody.querySelectorAll('[data-discover-filter]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();state.stockPreset=btn.dataset.discoverFilter;applyFilters();els.list?.scrollIntoView({behavior:'smooth',block:'start'});}));
   }
+
 
 
   function stockPortfolioCardHtml(r, meta = {}) {
@@ -5720,7 +5750,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.89.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.90.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

@@ -19,6 +19,14 @@ A exploração avançada (filtros, Sector Intelligence, perspetivas e tabela com
 Não é necessário alterar workflows nem ficheiros `data/` nesta release.
 
 
+## v0.90.0 — Stable Footer & Broader Stock Discovery
+
+- Footer mobile fixed and opaque, with extra safe-area/content padding so content never scrolls behind it.
+- Discovery now degrades gracefully: if a strict investment profile + sector has no exact matches, the app shows the best known companies in that sector instead of an empty screen.
+- Added resilient sector/theme discovery anchors for Water, Agriculture, Healthcare, Biotech, Defense and Semiconductors.
+- Equity rows from previous successful workflow runs are carried forward when Yahoo is temporarily incomplete, so the stock universe grows instead of disappearing between runs.
+- Metadata-only catalogue rows are clearly marked as awaiting analysis; no scores are fabricated.
+
 ## v0.89.0 — Stocks Clarity & Sector Discovery
 - Novos setores/temas: Tecnologia, Healthcare, Biotech, Água, Agricultura, Energia, Financeiro, Industriais, Consumo, Imobiliário, Utilities, Materiais, Defesa e Semicondutores.
 - Presets de descoberta renomeados em linguagem simples, com explicação visível.
