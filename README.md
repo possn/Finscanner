@@ -1,6 +1,6 @@
-# Finscanner v0.84.0 — Thesis Momentum Discovery
+# Finscanner v0.85.0 — Thesis Momentum Discovery
 
-## v0.84.0
+## v0.85.0
 - Stocks Discover: Improving Fast, Persistent Deterioration, Positive Reversal.
 - Home: Thesis Momentum dropbox with the strongest multi-horizon signals.
 - Uses the existing Thesis Momentum Score; does not change the fundamental Finscanner Score.
@@ -575,3 +575,12 @@ Change Intelligence now uses the persisted thesis history at approximately 7 and
 - Company Dossier inclui cartão de Momentum dentro da tese.
 - Thesis Monitor ganha rankings expansíveis de momentum positivo e negativo.
 - Home Portfolio & Teses passa a priorizar movimentos persistentes, não apenas o delta de um dia.
+
+
+## v0.85.0 — Funds Discovery & Fee Saver Integrity
+- Expands the tracked ETF universe across AI, semiconductors, defense, nuclear, clean energy, gold, dividend, growth, small-cap, Europe, ex-US/global and bonds.
+- The daily pipeline persists explicit fund_theme, fund_style and fund_region metadata for curated ETFs.
+- Funds filters now use those explicit tags plus derived metadata.
+- Fee Saver evaluates every portfolio ETF that is recognised by the daily universe and has a valid TER.
+- Cheaper alternatives require comparability evidence (holdings overlap or strict category/region/style match); 0.00% unconfirmed TER values are rejected as missing rather than advertised as free.
+- Fee Saver exposes coverage counts and opens a side-by-side comparison before any replacement decision.

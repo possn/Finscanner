@@ -4175,6 +4175,9 @@
     add("Cybersecurity", /cyber|security technology|hack\b/);
     add("Robotics", /robot|automation|robo\b|autonomous/);
     add("Clean Energy", /clean energy|renewable|solar|wind|tan\b/);
+    // Curated pipeline metadata is authoritative when present.
+    const explicitTheme = String(r.fund_theme || '').trim();
+    if (explicitTheme && !themes.includes(explicitTheme)) themes.unshift(explicitTheme);
 
     let style = "Broad";
     const explicitStyle = rawStyle.toLowerCase();
@@ -4385,35 +4388,80 @@
     els.fundsList.querySelectorAll('[data-fund-open]').forEach(x => x.addEventListener('click', () => openDetail(x.dataset.fundOpen)));
   }
 
+  function validFundFee(r) {
+    const n = Number(r?.expense_ratio);
+    // Zero is commonly a missing/failed source value in this dataset. Do not
+    // advertise a 0.00% alternative unless a future source explicitly confirms it.
+    return Number.isFinite(n) && n > 0.005 && n < 5 ? n : null;
+  }
+
+  function fundPeerEvidence(held, alt) {
+    const hm = fundMeta(held), am = fundMeta(alt);
+    const ov = fundOverlap(held, alt);
+    const overlap = ov && Number.isFinite(Number(ov.value)) ? Number(ov.value) : null;
+    const sameTheme = hm.themes.length && am.themes.some(t => hm.themes.includes(t));
+    const sameSector = String(held.sector || '').trim() && String(held.sector || '').toLowerCase() === String(alt.sector || '').toLowerCase();
+    const sameGeo = hm.geo === am.geo;
+    const sameStyle = hm.style === am.style;
+    const broad = /broad market|bond/i.test(String(held.sector || ''));
+
+    let confidence = 'none';
+    let reason = '';
+    if (overlap != null && overlap >= .50) { confidence = 'high'; reason = `${Math.round(overlap*100)}% overlap observado`; }
+    else if (overlap != null && overlap >= .30 && (sameTheme || sameSector)) { confidence = 'medium'; reason = `${Math.round(overlap*100)}% overlap + mesma exposição`; }
+    else if (overlap == null && sameSector && sameGeo && sameStyle && (sameTheme || broad)) { confidence = 'medium'; reason = 'mesma categoria, região e estilo'; }
+    else if (overlap != null && overlap >= .20 && sameSector && sameGeo && sameStyle) { confidence = 'low'; reason = `${Math.round(overlap*100)}% overlap + mesma categoria`; }
+    return { confidence, reason, overlap, sameTheme, sameSector, sameGeo, sameStyle };
+  }
+
   function renderFundFeeSaver(allFunds) {
     if (!els.fundFeeSaver) return;
-    const owned = lsGet(LS_PORTFOLIO);
-    const ownedFunds = allFunds.filter(r => owned[r.ticker] && Number.isFinite(Number(r.expense_ratio)));
+    const owned = loadPortfolio();
+    const ownedTickers = Object.keys(owned || {});
+    const ownedFunds = allFunds.filter(r => owned[r.ticker]);
+    const withFee = ownedFunds.filter(r => validFundFee(r) != null);
+    const missingFromUniverse = ownedTickers.filter(t => !state.data?.stocks?.some(r => r.ticker === t));
     const candidates = [];
-    for (const held of ownedFunds) {
-      const hm = fundMeta(held);
-      const peers = allFunds.filter(r => r.ticker !== held.ticker && Number.isFinite(Number(r.expense_ratio)) && fundMeta(r).style === hm.style && (r.region === held.region || fundMeta(r).geo === hm.geo));
-      peers.sort((a,b) => {
-        const ao = fundOverlap(held,a)?.value ?? -1, bo = fundOverlap(held,b)?.value ?? -1;
-        if (ao >= 0 || bo >= 0) return bo-ao || Number(a.expense_ratio)-Number(b.expense_ratio);
-        return Number(a.expense_ratio)-Number(b.expense_ratio);
-      });
-      const alt = peers.find(x => { const ov=fundOverlap(held,x); return !ov || ov.value >= .15; }) || peers[0];
-      if (!alt) continue;
-      const diff = Number(held.expense_ratio) - Number(alt.expense_ratio);
-      if (diff <= 0.02) continue;
-      candidates.push({held, alt, diff});
+
+    for (const held of withFee) {
+      const heldFee = validFundFee(held);
+      const peers = allFunds
+        .filter(r => r.ticker !== held.ticker && validFundFee(r) != null && validFundFee(r) < heldFee - .02)
+        .map(alt => ({ alt, ev: fundPeerEvidence(held, alt), fee: validFundFee(alt) }))
+        .filter(x => x.ev.confidence !== 'none')
+        .sort((a,b) => {
+          const rank = {high:3, medium:2, low:1, none:0};
+          return rank[b.ev.confidence]-rank[a.ev.confidence]
+            || (b.ev.overlap ?? -1)-(a.ev.overlap ?? -1)
+            || a.fee-b.fee;
+        });
+      const best = peers[0];
+      if (!best) continue;
+      const diff = heldFee - best.fee;
+      candidates.push({held, alt:best.alt, diff, evidence:best.ev, heldFee, altFee:best.fee});
     }
-    candidates.sort((a,b)=>b.diff-a.diff);
+    candidates.sort((a,b) => {
+      const rank={high:3,medium:2,low:1};
+      return rank[b.evidence.confidence]-rank[a.evidence.confidence] || b.diff-a.diff;
+    });
+
+    const coverage = `<div class="fee-saver-coverage"><b>${ownedFunds.length}</b><span>ETFs da carteira reconhecidos</span><b>${withFee.length}</b><span>com TER válido</span><b>${candidates.length}</b><span>alternativas comparáveis mais baratas</span></div>`;
     if (!candidates.length) {
-      els.fundFeeSaver.innerHTML = `<p class="muted">Não encontrei ainda uma alternativa claramente mais barata entre os ETFs rastreados da tua carteira.</p>`;
+      els.fundFeeSaver.innerHTML = coverage + `<p class="muted">Analisei os ETFs da carteira que existem no universo rastreado, mas não encontrei uma alternativa <strong>comparável e claramente mais barata</strong> com evidência suficiente. Não vou sugerir um ETF apenas porque tem TER menor.</p>${missingFromUniverse.length ? `<p class="fund-method-note">${missingFromUniverse.length} posições importadas ainda não existem no universo diário e não podem ser avaliadas aqui até o workflow as incorporar.</p>` : ''}`;
       return;
     }
-    els.fundFeeSaver.innerHTML = candidates.slice(0,4).map(({held,alt,diff}) => {
+    els.fundFeeSaver.innerHTML = coverage + candidates.slice(0,8).map(({held,alt,diff,evidence,heldFee,altFee}) => {
       const annual10k = diff / 100 * 10000;
-      return `<button class="fee-saver-row" data-fund-open="${escapeHtml(alt.ticker)}"><span><strong>${escapeHtml(held.ticker)} → ${escapeHtml(alt.ticker)}</strong><small>${fmtExpenseRatio(Number(held.expense_ratio))} → ${fmtExpenseRatio(Number(alt.expense_ratio))}</small></span><b>≈ €${annual10k.toFixed(0)}/10k ano</b></button>`;
-    }).join("") + `<p class="fund-method-note">Quando existem holdings observadas, o Fee Saver favorece alternativas com maior overlap antes do custo. Ainda assim confirma índice, réplica, moeda, tracking difference e fiscalidade.</p>`;
+      const conf = evidence.confidence === 'high' ? 'alta' : evidence.confidence === 'medium' ? 'média' : 'baixa';
+      return `<details class="fee-saver-item"><summary><span><strong>${escapeHtml(held.ticker)} → ${escapeHtml(alt.ticker)}</strong><small>${fmtExpenseRatio(heldFee)} → ${fmtExpenseRatio(altFee)}</small></span><b>≈ €${annual10k.toFixed(0)}/10k/ano</b></summary><div class="fee-saver-detail"><p><strong>Comparabilidade ${conf}:</strong> ${escapeHtml(evidence.reason)}.</p><div><button type="button" data-fund-open="${escapeHtml(alt.ticker)}">Abrir ${escapeHtml(alt.ticker)}</button><button type="button" data-fund-pair-a="${escapeHtml(held.ticker)}" data-fund-pair-b="${escapeHtml(alt.ticker)}">Comparar lado a lado</button></div></div></details>`;
+    }).join("") + `<p class="fund-method-note">Fee Saver avalia cada ETF reconhecido da tua carteira. Uma alternativa só aparece se for mais barata <em>e</em> houver evidência de comparabilidade por holdings/overlap ou por categoria + região + estilo. TER 0.00% sem confirmação é tratado como dado inválido. Confirma sempre índice, réplica, moeda, tracking difference, KID e fiscalidade.</p>`;
     els.fundFeeSaver.querySelectorAll('[data-fund-open]').forEach(x => x.addEventListener('click',()=>openDetail(x.dataset.fundOpen)));
+    els.fundFeeSaver.querySelectorAll('[data-fund-pair-a]').forEach(btn=>btn.addEventListener('click',()=>{
+      if (els.fundCompareA) els.fundCompareA.value=btn.dataset.fundPairA;
+      if (els.fundCompareB) els.fundCompareB.value=btn.dataset.fundPairB;
+      renderFundCompare();
+      els.fundCompareResult?.scrollIntoView({behavior:'smooth',block:'center'});
+    }));
   }
 
   function populateFundCompare(allFunds) {
@@ -5068,7 +5116,7 @@
     renderFundCards(rows);
     if (els.fundsList) {
       const cards = els.fundsList.innerHTML;
-      els.fundsList.innerHTML = fundFilterSummary(rows, allFunds) + (rows.length ? cards : `<div class="fund-filter-empty"><strong>Sem correspondência exata.</strong><p>Experimenta retirar uma das dimensões — tema, geografia ou estilo — para alargar a pesquisa.</p></div>`);
+      els.fundsList.innerHTML = fundFilterSummary(rows, allFunds) + (rows.length ? cards : `<div class="fund-filter-empty"><strong>Sem ETF rastreado nesta combinação.</strong><p>O filtro está a funcionar, mas o universo diário ainda não contém um ETF com estas etiquetas. Depois de atualizares esta release, corre o workflow para carregar o universo Funds expandido.</p></div>`);
       els.fundsList.querySelector('[data-fund-clear-filters]')?.addEventListener('click',()=>{
         state.fundTheme='all'; state.fundGeo='all'; state.fundStyle='all';
         if (els.fundsSearch) els.fundsSearch.value='';
@@ -5500,7 +5548,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.84.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.85.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
