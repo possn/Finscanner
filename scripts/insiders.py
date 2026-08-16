@@ -33,6 +33,15 @@ from urllib3.util.retry import Retry
 
 log = logging.getLogger("insiders")
 
+# Cap on how many detailed "why did this filing return zero transactions"
+# diagnostics get written at INFO level per run — with ~370 US tickers x
+# up to 12 filings each, logging every single one would flood
+# pipeline_log.txt. The first N are enough to diagnose the failure mode
+# (wrong document guessed vs. HTTP block vs. unexpected schema); the rest
+# still get logged, just at DEBUG so they don't dominate the file.
+_DIAG_LOG_LIMIT = 15
+_diag_logged = 0
+
 SEC_USER_AGENT = os.getenv("SEC_USER_AGENT") or "Finscanner research-tool finscanner-app@proton.me"
 HEADERS = {
     "User-Agent": SEC_USER_AGENT,
@@ -221,8 +230,19 @@ def _fetch_structured_filing(cik: str, filing: dict, ticker: str) -> tuple[list[
             parsed, raw_count = _parse_ownership_xml(resp.content, ticker, filing["accession"])
             if raw_count > 0 or parsed:
                 return parsed, raw_count, document
+            # Fetch succeeded (2xx) and XML parsed without error, but zero
+            # <nonDerivativeTransaction> elements were found at the expected
+            # path. This is the silent-failure case that was previously
+            # invisible in logs — record enough of the raw response to tell
+            # apart "wrong document" (HTML/error page) from "right document,
+            # unexpected schema" (namespace or path mismatch).
+            snippet = resp.content[:200].decode("utf-8", errors="replace").replace("\n", " ")
+            last_error = f"fetched {url} (HTTP {resp.status_code}, {len(resp.content)} bytes) but found 0 transactions — content starts: {snippet!r}"
+        except requests.HTTPError as e:
+            status = e.response.status_code if e.response is not None else "?"
+            last_error = f"HTTP {status} fetching {url}"
         except Exception as e:
-            last_error = f"{type(e).__name__}: {e}"
+            last_error = f"{type(e).__name__}: {e} (url={url})"
     return [], 0, last_error
 
 
@@ -250,7 +270,12 @@ def insider_activity(ticker: str, days: int = 365, max_detail_filings: int = 12)
         else:
             fetch_errors += 1
             if detail:
-                log.debug("%s %s detail unavailable: %s", ticker, filing["accession"], detail)
+                global _diag_logged
+                if _diag_logged < _DIAG_LOG_LIMIT:
+                    log.info("%s %s detail unavailable: %s", ticker, filing["accession"], detail)
+                    _diag_logged += 1
+                else:
+                    log.debug("%s %s detail unavailable: %s", ticker, filing["accession"], detail)
 
     transactions.sort(key=lambda x: x.get("date") or "", reverse=True)
     today = dt.date.today()
