@@ -115,6 +115,7 @@
     homeOpportunityStrip: document.getElementById("home-opportunity-strip"),
     homeAttentionSummary: document.getElementById("home-attention-summary"),
     homeChangeBrief: document.getElementById("home-change-brief"),
+    homeMomentumBrief: document.getElementById("home-momentum-brief"),
     homePortfolioBrief: document.getElementById("home-portfolio-brief"),
     homePortfolioFitBrief: document.getElementById("home-portfolio-fit-brief"),
     homeInsiderBrief: document.getElementById("home-insider-brief"),
@@ -719,8 +720,17 @@
         : `<p class="home-brief-empty">Ainda não há alterações materiais face à atualização anterior. O motor ignora pequenas oscilações isoladas e fica mais útil após dois ou mais workflows diários.</p>`;
     }
 
+    if (els.homeMomentumBrief) {
+      const mm=rows.map(r=>({r,m:thesisMomentumSnapshot(r)}));
+      const fast=mm.filter(x=>x.m.score>=72 && (Number.isFinite(x.m.s7)||Number.isFinite(x.m.s30))).sort((a,b)=>b.m.score-a.m.score).slice(0,4);
+      const down=mm.filter(x=>x.m.score<=35 && Number.isFinite(x.m.s30) && x.m.s30<=-3).sort((a,b)=>a.m.score-b.m.score).slice(0,4);
+      const rev=mm.filter(x=>x.m.score>=55 && Number.isFinite(x.m.sd) && x.m.sd>0 && Number.isFinite(x.m.s30) && x.m.s30<0).sort((a,b)=>b.m.score-a.m.score).slice(0,4);
+      const grp=(title,list,tone)=>list.length?`<section class="momentum-brief-group"><h4>${title}</h4>${list.map(x=>briefRowHtml(x.r,`Momentum ${x.m.score}/100${Number.isFinite(x.m.s30)?` · 30d ${x.m.s30>0?'+':''}${x.m.s30.toFixed(1)}`:''}`,tone)).join('')}</section>`:'';
+      els.homeMomentumBrief.innerHTML = fast.length||down.length||rev.length ? `${grp('Improving Fast',fast,'good')}${grp('Persistent Deterioration',down,'bad')}${grp('Positive Reversal',rev,'good')}` : `<p class="home-brief-empty">Ainda não há padrões de momentum suficientemente persistentes.</p>`;
+    }
+
     if (els.homePortfolioBrief) {
-      const list = [...strengthening.slice(0,3).map(r=>({r,meta:`↑ ${Number(r.thesis_score_delta||0)>=0?'+':''}${Number(r.thesis_score_delta||0).toFixed(1)} score`,tone:'good'})), ...weakening.slice(0,3).map(r=>({r,meta:`↓ ${Number(r.thesis_score_delta||0).toFixed(1)} score`,tone:'bad'}))];
+      const list = [...strengthening.map(r=>({r,m:thesisMomentumSnapshot(r)})).sort((a,b)=>b.m.score-a.m.score).slice(0,3).map(x=>({r:x.r,meta:`Momentum ${x.m.score}/100${Number.isFinite(x.m.s30)?` · 30d ${x.m.s30>0?'+':''}${x.m.s30.toFixed(1)}`:''}`,tone:'good'})), ...weakening.map(r=>({r,m:thesisMomentumSnapshot(r)})).sort((a,b)=>a.m.score-b.m.score).slice(0,3).map(x=>({r:x.r,meta:`Momentum ${x.m.score}/100${Number.isFinite(x.m.s30)?` · 30d ${x.m.s30>0?'+':''}${x.m.s30.toFixed(1)}`:''}`,tone:'bad'}))];
       els.homePortfolioBrief.innerHTML = list.length ? list.map(x=>briefRowHtml(x.r,x.meta,x.tone)).join('') : `<p class="home-brief-empty">Sem mudanças materiais de tese nas posições analisadas.</p>`;
     }
 
@@ -877,6 +887,50 @@
     return {days:vals.length, median, rel:(Number(current)/median - 1)*100};
   }
 
+
+  function thesisMomentumSnapshot(r) {
+    const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+    const sd=Number(r.thesis_score_delta);
+    const s7=Number(r.thesis_score_delta_7d);
+    const s30=Number(r.thesis_score_delta_30d);
+    const er=Number(r.analyst_eps_next_y_revision_delta_pp);
+    const insider=Number(r.insider_net_value_delta);
+    let score=50, confidence=25;
+    const reasons=[];
+    if (Number.isFinite(sd)) { score += clamp(sd*2.4,-12,12); confidence += 15; if (Math.abs(sd)>=1) reasons.push(`hoje ${sd>0?'+':''}${sd.toFixed(1)}`); }
+    if (Number.isFinite(s7) && r.thesis_history_7d_date) { score += clamp(s7*1.35,-14,14); confidence += 20; reasons.push(`7d ${s7>0?'+':''}${s7.toFixed(1)}`); }
+    if (Number.isFinite(s30) && r.thesis_history_30d_date) { score += clamp(s30*.8,-16,16); confidence += 25; reasons.push(`30d ${s30>0?'+':''}${s30.toFixed(1)}`); }
+    if (r.thesis_direction==='strengthening') { score += 7; reasons.push('tese ↑'); }
+    else if (r.thesis_direction==='weakening') { score -= 7; reasons.push('tese ↓'); }
+    else if (r.thesis_direction==='changed') { score -= 3; reasons.push('tese mudou'); }
+    if (Number.isFinite(er)) { score += clamp(er*1.8,-7,7); confidence += 8; if (Math.abs(er)>=.5) reasons.push(`EPS rev. ${er>0?'+':''}${er.toFixed(1)}pp`); }
+    if (Number.isFinite(insider) && Math.abs(insider)>=50000) {
+      const sign=Math.sign(insider); const pts=clamp(Math.log10(Math.abs(insider)+1)-4.5,0,4)*sign;
+      score += pts; confidence += 5; reasons.push(insider>0?'insider +':'insider −');
+    }
+    const dirs=[sd,s7,s30].filter(Number.isFinite).map(Math.sign).filter(Boolean);
+    if (dirs.length>=2 && dirs.every(x=>x===dirs[0])) { score += dirs[0]*6; reasons.push(dirs[0]>0?'persistência positiva':'persistência negativa'); }
+    else if (Number.isFinite(s7) && Number.isFinite(s30) && Math.sign(s7) && Math.sign(s30) && Math.sign(s7)!==Math.sign(s30)) { reasons.push('reversão'); confidence=Math.max(30,confidence-10); }
+    score=Math.round(clamp(score,0,100)); confidence=Math.round(clamp(confidence,25,100));
+    let label='Estável', cls='neutral';
+    if (score>=72) { label='Momentum forte ↑'; cls='good'; }
+    else if (score>=60) { label='A melhorar'; cls='good'; }
+    else if (score<=28) { label='Momentum fraco ↓'; cls='bad'; }
+    else if (score<=40) { label='A deteriorar'; cls='bad'; }
+    return {score,confidence,label,cls,reasons,sd,s7,s30};
+  }
+
+  function thesisMomentumHtml(r) {
+    const m=thesisMomentumSnapshot(r);
+    const d=v=>Number.isFinite(v)?`${v>0?'+':''}${v.toFixed(1)}`:'—';
+    return `<section class="thesis-momentum-card ${m.cls}">
+      <div class="thesis-momentum-head"><div><span class="eyebrow">THESIS MOMENTUM</span><strong>${m.score}<i>/100</i></strong></div><span>${escapeHtml(m.label)}</span></div>
+      <div class="thesis-momentum-horizons"><div><span>Hoje</span><b>${d(m.sd)}</b></div><div><span>7 dias</span><b>${d(m.s7)}</b></div><div><span>30 dias</span><b>${d(m.s30)}</b></div><div><span>Confiança</span><b>${m.confidence}%</b></div></div>
+      <p>${escapeHtml(m.reasons.slice(0,4).join(' · ') || 'Ainda sem histórico suficiente para identificar uma tendência persistente.')}</p>
+      <small>Score de momentum temporal; não altera o Finscanner Score fundamental.</small>
+    </section>`;
+  }
+
   function thesisBadge(r) {
     const label = r.thesis_type || "Sem tese";
     const slug = r.thesis_slug || "watch";
@@ -900,6 +954,7 @@
     return `<div class="thesis-panel thesis-${r.thesis_slug || "watch"}">
       <div class="thesis-panel__head"><div>${thesisBadge(r)}<strong>${escapeHtml(r.thesis_summary || "")}</strong></div><span>confiança ${escapeHtml(r.thesis_confidence || "—")}</span></div>
       <div class="trajectory-strip"><div>${thesisDirectionBadge(r)}<strong>${escapeHtml(r.thesis_evolution_summary || "Direção ainda não calculada.")}</strong></div>${previous}</div>
+      ${thesisMomentumHtml(r)}
       <div class="thesis-panel__cols"><div><em>A favor</em><ul>${evidence}</ul></div><div><em>O que pode invalidar</em><ul>${risks}</ul></div></div>
       <div class="trajectory-drivers"><em>O que está a mudar</em><ul>${drivers}</ul></div>
     </div>`;
@@ -1409,6 +1464,9 @@
       if(!Number.isFinite(px)||!vals.length) return false; const lo=Math.min(...vals); return lo>0 && px <= lo*1.15 && s>=50 && r.zombie!=="yes";
     }
     if (preset === "improving") return r.thesis_direction === "strengthening" || Number(r.thesis_score_delta ?? 0) >= 5;
+    if (preset === "improving-fast") { const m=thesisMomentumSnapshot(r); return m.score>=72 && (Number.isFinite(m.s7)||Number.isFinite(m.s30)); }
+    if (preset === "persistent-down") { const m=thesisMomentumSnapshot(r); return m.score<=35 && Number.isFinite(m.s30) && m.s30<=-3; }
+    if (preset === "positive-reversal") { const m=thesisMomentumSnapshot(r); const sd=Number(m.sd), s30=Number(m.s30); return m.score>=55 && Number.isFinite(sd) && sd>0 && Number.isFinite(s30) && s30<0; }
     if (preset === "revisions") {
       const qrev=Number(r.analyst_eps_next_q_revision_30d_pct);
       const yrev=Number(r.analyst_eps_next_y_revision_30d_pct);
@@ -1571,7 +1629,7 @@
     bindSectorLabActions(rows,sector);
   }
 
-  const DISCOVER_LABELS = {compounders:"Compounders",quality:"High Quality",garp:"GARP",growth:"Growth",value:"Value",dividend:"Dividend",insider:"Insider Buying","near-low":"Near 52W Low",improving:"Improving Thesis",earnings:"Earnings Soon"};
+  const DISCOVER_LABELS = {compounders:"Compounders",quality:"High Quality",garp:"GARP",growth:"Growth",value:"Value",dividend:"Dividend",insider:"Insider Buying","near-low":"Near 52W Low",improving:"Improving Thesis","improving-fast":"Improving Fast","persistent-down":"Persistent Deterioration","positive-reversal":"Positive Reversal",earnings:"Earnings Soon"};
   function discoverRankValue(r,preset){
     if(preset==='compounders') return (Number(r.quality_pct||0)*.35)+(Number(r.growth_pct||0)*.30)+(Number(r.stability_pct||0)*.20)+(Number(r.score||0)*.15);
     if(preset==='quality') return Number(r.quality_pct ?? r.profitability_pct ?? -1);
@@ -1581,6 +1639,9 @@
     if(preset==='insider') return Math.log10(Math.abs(Number(r.insider_net_value_30d||0))+1)*10+Number(r.insider_buy_count_30d||0)*4;
     if(preset==='near-low'){const px=Number(r.current_price),h=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[],v=h.map(x=>Number(x.close??x.price??x.value)).filter(Number.isFinite); if(!Number.isFinite(px)||!v.length)return -999; const lo=Math.min(...v); return lo>0?100-(px/lo-1)*100:-999;}
     if(preset==='improving') return Number(r.thesis_score_delta??0)*10+Number(r.score??0);
+    if(preset==='improving-fast') { const m=thesisMomentumSnapshot(r); return m.score*2 + (Number.isFinite(m.s30)?m.s30:0); }
+    if(preset==='persistent-down') { const m=thesisMomentumSnapshot(r); return (100-m.score)*2 + Math.abs(Number.isFinite(m.s30)?m.s30:0); }
+    if(preset==='positive-reversal') { const m=thesisMomentumSnapshot(r); return m.score + Math.max(0,Number(m.sd)||0)*4 + Math.abs(Math.min(0,Number(m.s30)||0)); }
     if(preset==='earnings'){const d=Number(r.analyst_days_to_earnings); return Number.isFinite(d)?100-Math.min(100,Math.max(0,d)*10):-999;}
     return Number(r.score??-1);
   }
@@ -1588,6 +1649,9 @@
     if(preset==='compounders') return `Q ${Math.round(Number(r.quality_pct||0))} · G ${Math.round(Number(r.growth_pct||0))} · estabilidade ${Math.round(Number(r.stability_pct||0))}`;
     if(preset==='insider') return `${Number(r.insider_buy_count_30d||0)} compra(s) · ${fmtMoney(Math.abs(Number(r.insider_net_value_30d||0)),r.currency||'USD')} net 30d`;
     if(preset==='improving') return `tese ↑ · score ${Number(r.thesis_score_delta||0)>=0?'+':''}${Number(r.thesis_score_delta||0).toFixed(1)}`;
+    if(preset==='improving-fast') { const m=thesisMomentumSnapshot(r); return `Momentum ${m.score}/100${Number.isFinite(m.s7)?` · 7d ${m.s7>0?'+':''}${m.s7.toFixed(1)}`:''}`; }
+    if(preset==='persistent-down') { const m=thesisMomentumSnapshot(r); return `Momentum ${m.score}/100${Number.isFinite(m.s30)?` · 30d ${m.s30.toFixed(1)}`:''}`; }
+    if(preset==='positive-reversal') { const m=thesisMomentumSnapshot(r); return `Reversão positiva · hoje ${Number.isFinite(m.sd)?(m.sd>0?'+':'')+m.sd.toFixed(1):'—'} · 30d ${Number.isFinite(m.s30)?m.s30.toFixed(1):'—'}`; }
     if(preset==='earnings') return `${Number.isFinite(Number(r.analyst_days_to_earnings))?Math.max(0,Math.round(Number(r.analyst_days_to_earnings)))+' dias':'—'} até earnings`;
     return `Q ${Math.round(Number(r.quality_pct||0))} · G ${Math.round(Number(r.growth_pct||0))} · V ${Math.round(Number(r.value_pct||0))}`;
   }
@@ -4096,27 +4160,38 @@
   let fundCompareOptionsPopulated = false;
 
   function fundMeta(r) {
-    const text = `${r.ticker || ""} ${r.name || ""} ${r.sector || ""}`.toLowerCase();
+    const rawTheme = `${r.fund_theme || ""} ${r.theme || ""}`.trim();
+    const rawStyle = `${r.fund_style || r.style || ""}`.trim();
+    const rawGeo = `${r.fund_region || r.region || r.country || ""}`.trim();
+    const text = `${r.ticker || ""} ${r.name || ""} ${r.sector || ""} ${r.industry || ""} ${r.fund_category || ""} ${rawTheme} ${rawStyle} ${rawGeo}`.toLowerCase();
     const themes = [];
-    const add = (label, re) => { if (re.test(text)) themes.push(label); };
-    add("AI", /artificial|\bai\b|cloud|innovation/);
-    add("Semiconductors", /semiconductor|chip|soxx|smh/);
-    add("Defense", /defen[cs]e|aerospace|ita\b/);
-    add("Energy", /energy|oil|gas|xle\b/);
+    const add = (label, re) => { if (re.test(text) && !themes.includes(label)) themes.push(label); };
+    add("AI", /artificial intelligence|\bai\b|machine learning|cloud computing|innovation|generative ai/);
+    add("Semiconductors", /semiconductor|chip|soxx|smh|microchip/);
+    add("Defense", /defen[cs]e|aerospace|military|ita\b/);
+    add("Energy", /energy|oil|gas|xle\b|petroleum/);
     add("Nuclear", /uranium|nuclear|ura\b/);
-    add("Gold", /gold|gld\b|miners|precious/);
-    add("Cybersecurity", /cyber|hack\b/);
-    add("Robotics", /robot|automation|robo\b/);
-    add("Clean Energy", /clean energy|solar|tan\b/);
+    add("Gold", /gold|gld\b|miners|precious metal/);
+    add("Cybersecurity", /cyber|security technology|hack\b/);
+    add("Robotics", /robot|automation|robo\b|autonomous/);
+    add("Clean Energy", /clean energy|renewable|solar|wind|tan\b/);
 
     let style = "Broad";
-    if (/bond|treasury|fixed income|aggregate/.test(text)) style = "Bonds";
-    else if (/dividend|income|yield/.test(text)) style = "Dividend";
-    else if (/small cap|iwm\b/.test(text)) style = "Small Cap";
-    else if (/growth|innovation|nasdaq|qqq\b/.test(text)) style = "Growth";
+    const explicitStyle = rawStyle.toLowerCase();
+    if (/bond|fixed income/.test(explicitStyle) || /bond|treasury|fixed income|aggregate/.test(text)) style = "Bonds";
+    else if (/dividend|income|yield/.test(explicitStyle) || /dividend|income|yield/.test(text)) style = "Dividend";
+    else if (/small/.test(explicitStyle) || /small cap|iwm\b/.test(text)) style = "Small Cap";
+    else if (/growth/.test(explicitStyle) || /growth|innovation|nasdaq|qqq\b/.test(text)) style = "Growth";
 
-    let geo = r.region || "Global";
-    if (["Germany","France","Netherlands","Spain","Italy","Portugal","Switzerland","Sweden","Denmark","Poland","Norway","Finland","Austria","Belgium","Europe"].includes(geo)) geo = "Europe";
+    let geo = rawGeo || "Global";
+    const g = geo.toLowerCase();
+    const europeCountries = ["germany","france","netherlands","spain","italy","portugal","switzerland","sweden","denmark","poland","norway","finland","austria","belgium","ireland","europe","eurozone","euro zone"];
+    if (europeCountries.some(x => g.includes(x)) || /europe|stoxx|eurozone|euro stoxx/.test(text)) geo = "Europe";
+    else if (/united kingdom|\buk\b|britain/.test(g) || /ftse 100|uk equities/.test(text)) geo = "United Kingdom";
+    else if (/japan/.test(g) || /nikkei|topix/.test(text)) geo = "Japan";
+    else if (/emerging/.test(g) || /emerging market|\bem\b/.test(text)) geo = "Emerging Markets";
+    else if (/united states|usa|\bus\b/.test(g) || /s&p 500|nasdaq 100|us equities/.test(text)) geo = "United States";
+    else if (/global|world|international/.test(g) || /all.?world|msci world|global equities/.test(text)) geo = "Global";
     return { themes, style, geo };
   }
 
@@ -4958,6 +5033,17 @@
     }));
   }
 
+  function fundFilterSummary(rows, allFunds) {
+    const bits=[];
+    if (state.fundTheme !== 'all') bits.push(state.fundTheme);
+    if (state.fundGeo !== 'all') bits.push(state.fundGeo);
+    if (state.fundStyle !== 'all') bits.push(state.fundStyle);
+    const q=(els.fundsSearch?.value||'').trim();
+    if (q) bits.push(`“${q}”`);
+    const label = bits.length ? bits.join(' · ') : 'Todos os ETFs';
+    return `<div class="fund-live-result-head"><div><span class="eyebrow">MATCHING ETFs</span><h3>${escapeHtml(label)}</h3><p>${rows.length} ETF${rows.length===1?'':'s'} encontrado${rows.length===1?'':'s'} em ${allFunds.length} no universo rastreado.</p></div>${bits.length?'<button type="button" data-fund-clear-filters>Limpar filtros</button>':''}</div>`;
+  }
+
   function renderFunds() {
     if (!state.data) return;
     const allFunds = state.data.stocks.filter(r => r.quote_type === "ETF");
@@ -4980,6 +5066,17 @@
     if (els.fundsCount) els.fundsCount.textContent = `${rows.length} de ${allFunds.length}`;
     renderFundRankings(allFunds);
     renderFundCards(rows);
+    if (els.fundsList) {
+      const cards = els.fundsList.innerHTML;
+      els.fundsList.innerHTML = fundFilterSummary(rows, allFunds) + (rows.length ? cards : `<div class="fund-filter-empty"><strong>Sem correspondência exata.</strong><p>Experimenta retirar uma das dimensões — tema, geografia ou estilo — para alargar a pesquisa.</p></div>`);
+      els.fundsList.querySelector('[data-fund-clear-filters]')?.addEventListener('click',()=>{
+        state.fundTheme='all'; state.fundGeo='all'; state.fundStyle='all';
+        if (els.fundsSearch) els.fundsSearch.value='';
+        [els.fundThemeFilters,els.fundGeoFilters,els.fundStyleFilters].forEach(group=>group?.querySelectorAll('.fund-chip').forEach(b=>b.classList.toggle('is-active',b.dataset.fundTheme==='all'||b.dataset.fundGeo==='all'||b.dataset.fundStyle==='all')));
+        renderFunds();
+      });
+      els.fundsList.querySelectorAll('[data-fund-open]').forEach(x => x.addEventListener('click', () => openDetail(x.dataset.fundOpen)));
+    }
     renderFundFeeSaver(allFunds);
     renderFundPortfolioIntel(allFunds);
     renderFundCompare();
@@ -5117,6 +5214,15 @@
         return (rank[b.thesis_direction]||0)-(rank[a.thesis_direction]||0) || Math.abs(b.thesis_score_delta||0)-Math.abs(a.thesis_score_delta||0);
       });
     const radar = changing.length ? `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">THESIS CHANGE RADAR</span><h3>O que está a mudar</h3></div><span class="section-count">${changing.length}</span></div><div class="trajectory-cards">${changing.slice(0,12).map(r => `<button class="trajectory-card trajectory-card--${r.thesis_direction}" data-ticker="${r.ticker}"><div><strong>${escapeHtml(r.ticker)}</strong>${thesisDirectionBadge(r)}</div><small>${escapeHtml(r.name || "")}</small><p>${escapeHtml(r.thesis_evolution_summary || "")}</p>${r.thesis_score_delta == null ? "" : `<span>Δ score ${Number(r.thesis_score_delta)>=0?"+":""}${Number(r.thesis_score_delta).toFixed(1)}</span>`}</button>`).join("")}</div></section>` : `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">THESIS CHANGE RADAR</span><h3>O que está a mudar</h3></div></div><p class="empty-state">Ainda não há mudanças persistidas suficientes. O radar ganhará profundidade a cada execução diária.</p></section>`;
+    const momentumRows = rows.map(r=>({r,m:thesisMomentumSnapshot(r)}));
+    const improvingMomentum = momentumRows.filter(x=>x.m.score>=60).sort((a,b)=>b.m.score-a.m.score).slice(0,8);
+    const weakeningMomentum = momentumRows.filter(x=>x.m.score<=40).sort((a,b)=>a.m.score-b.m.score).slice(0,8);
+    const momentumCard=x=>`<button class="momentum-rank-card ${x.m.cls}" data-ticker="${escapeHtml(x.r.ticker)}"><span><b>${escapeHtml(x.r.ticker)}</b><small>${escapeHtml(x.r.name||'')}</small></span><strong>${x.m.score}<i>/100</i></strong><em>${escapeHtml(x.m.label)}</em><small>${escapeHtml(x.m.reasons.slice(0,3).join(' · ')||'histórico em formação')}</small></button>`;
+    const momentum = `<section class="thesis-momentum-radar"><div class="section-heading"><div><span class="eyebrow">THESIS MOMENTUM</span><h3>Persistência 7d / 30d</h3><p>Separa tendência persistente de uma oscilação diária. Não altera o score fundamental.</p></div></div>
+      <details class="momentum-dropbox" open><summary><span><b>Momentum positivo</b><small>${improvingMomentum.length} empresas</small></span></summary><div class="momentum-rank-strip">${improvingMomentum.length?improvingMomentum.map(momentumCard).join(''):'<p class="empty-state">Sem momentum positivo suficientemente persistente.</p>'}</div></details>
+      <details class="momentum-dropbox"><summary><span><b>Momentum negativo</b><small>${weakeningMomentum.length} empresas</small></span></summary><div class="momentum-rank-strip">${weakeningMomentum.length?weakeningMomentum.map(momentumCard).join(''):'<p class="empty-state">Sem deterioração persistente relevante.</p>'}</div></details>
+    </section>`;
+
     const order = ["Quality Compounder","GARP","Deep Value","Turnaround","Insider Accumulation","Balanced Candidate","High Growth / High Dilution","Leveraged Growth","Value Trap Risk","Watch / No Edge"];
     const groups = new Map();
     rows.forEach(r => { if (!groups.has(r.thesis_type)) groups.set(r.thesis_type, []); groups.get(r.thesis_type).push(r); });
@@ -5124,7 +5230,7 @@
       const items = groups.get(k).sort((a,b)=>(b.score ?? -1)-(a.score ?? -1));
       return `<section class="thesis-group"><div class="section-heading"><div>${thesisBadge(items[0])}<h3>${escapeHtml(k)}</h3></div><span class="section-count">${items.length}</span></div><div class="thesis-cards">${items.slice(0,12).map(r => `<button class="thesis-card" data-ticker="${r.ticker}"><div><strong>${escapeHtml(r.ticker)}</strong><small>${escapeHtml(r.name || "")}</small></div><span>${r.score ?? "—"}</span><p>${escapeHtml(r.thesis_summary || "")}</p>${thesisDirectionBadge(r)}</button>`).join("")}</div></section>`;
     }).join("");
-    els.thesesList.innerHTML = radar + grouped;
+    els.thesesList.innerHTML = momentum + radar + grouped;
     els.thesesList.querySelectorAll("[data-ticker]").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
   }
 
@@ -5394,7 +5500,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.80.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.84.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

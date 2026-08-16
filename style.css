@@ -1968,3 +1968,27 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
   .dossier-section-picker{display:flex}
   .dossier-nav-chips{display:none!important}
 }
+
+/* v0.82.0 — Thesis Momentum Score */
+.thesis-momentum-card{margin:16px 0;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--surface-soft);display:grid;gap:14px}
+.thesis-momentum-card.good{border-color:color-mix(in srgb,#198754 32%,var(--border));background:color-mix(in srgb,#198754 7%,var(--surface))}
+.thesis-momentum-card.bad{border-color:color-mix(in srgb,#c4434f 32%,var(--border));background:color-mix(in srgb,#c4434f 6%,var(--surface))}
+.thesis-momentum-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.thesis-momentum-head>div{display:grid;gap:5px}.thesis-momentum-head strong{font-size:34px;line-height:1;color:var(--ink)}.thesis-momentum-head strong i{font-size:14px;font-style:normal;color:var(--ink-faint)}.thesis-momentum-head>span{font-weight:850;color:var(--ink)}
+.thesis-momentum-horizons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.thesis-momentum-horizons>div{padding:10px;border-radius:12px;background:var(--surface);border:1px solid var(--border);display:grid;gap:4px}.thesis-momentum-horizons span{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)}.thesis-momentum-horizons b{font-size:14px;color:var(--ink)}
+.thesis-momentum-card p,.thesis-momentum-card small{margin:0;color:var(--ink-muted)}
+.thesis-momentum-radar{display:grid;gap:12px;margin:0 0 24px}.momentum-dropbox{border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden}.momentum-dropbox summary{list-style:none;padding:16px 18px;cursor:pointer}.momentum-dropbox summary::-webkit-details-marker{display:none}.momentum-dropbox summary span{display:flex;align-items:center;justify-content:space-between;gap:12px}.momentum-dropbox summary b{color:var(--ink)}.momentum-dropbox summary small{color:var(--ink-muted)}
+.momentum-rank-strip{display:flex;gap:12px;overflow-x:auto;padding:0 16px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.momentum-rank-strip::-webkit-scrollbar{display:none}.momentum-rank-card{flex:0 0 min(285px,78vw);text-align:left;border:1px solid var(--border);border-radius:16px;background:var(--surface-soft);padding:14px;display:grid;grid-template-columns:1fr auto;gap:7px;color:var(--ink)}.momentum-rank-card>span{display:grid}.momentum-rank-card>span small,.momentum-rank-card>small{color:var(--ink-muted)}.momentum-rank-card>strong{font-size:24px}.momentum-rank-card>strong i{font-size:11px;font-style:normal;color:var(--ink-faint)}.momentum-rank-card>em{grid-column:1/-1;font-style:normal;font-weight:800}.momentum-rank-card>small{grid-column:1/-1}.momentum-rank-card.good>em{color:#198754}.momentum-rank-card.bad>em{color:#c4434f}
+@media(max-width:760px){.thesis-momentum-horizons{grid-template-columns:repeat(2,minmax(0,1fr))}.thesis-momentum-head strong{font-size:30px}}
+
+/* v0.83.0 — thesis momentum discovery */
+.momentum-brief-group{display:grid;gap:8px;margin:0 0 14px}.momentum-brief-group:last-child{margin-bottom:0}.momentum-brief-group h4{margin:0 0 2px;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+
+/* v0.84.0 — Funds filters return immediate visible matches */
+.fund-results-live{margin-top:14px;margin-bottom:18px}
+.fund-live-result-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin:0 0 12px;padding:16px 18px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}
+.fund-live-result-head h3{margin:3px 0 2px;font-size:1.08rem;color:var(--ink)}
+.fund-live-result-head p{margin:0;color:var(--muted);font-size:.88rem}
+.fund-live-result-head button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:999px;padding:9px 12px;font-weight:700}
+.fund-filter-empty{padding:20px;border:1px dashed var(--line);border-radius:20px;background:var(--surface);color:var(--ink)}
+.fund-filter-empty p{margin:.35rem 0 0;color:var(--muted)}
+@media(max-width:700px){.fund-live-result-head{align-items:flex-start}.fund-live-result-head button{font-size:.78rem}.fund-results-live .fund-result-card{scroll-margin-top:90px}}

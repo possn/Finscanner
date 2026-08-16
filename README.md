@@ -1,4 +1,12 @@
-# Finscanner v0.81.0 — Interaction & Portfolio Import Repair
+# Finscanner v0.84.0 — Thesis Momentum Discovery
+
+## v0.84.0
+- Stocks Discover: Improving Fast, Persistent Deterioration, Positive Reversal.
+- Home: Thesis Momentum dropbox with the strongest multi-horizon signals.
+- Uses the existing Thesis Momentum Score; does not change the fundamental Finscanner Score.
+- Mobile progressive disclosure preserved.
+
+## Previous release — v0.82.0 — Thesis Momentum Intelligence
 
 Repair release: delegated navigation for dynamic Home buttons, explicit iOS-safe portfolio file picker, DivTracker Combined CSV compatibility, portfolio localStorage backup/restore, and visible import status.
 
@@ -553,7 +561,17 @@ A Home inclui agora “O que mudou”, comparando a atualização atual com o sn
 Change Intelligence now uses the persisted thesis history at approximately 7 and 30 days to separate a one-day event from evidence that is persisting, confirming or reversing. Run the daily data workflow after installation to populate the new derived fields.
 
 
-## v0.81.0 — iOS Interaction + Automatic Insider Monitor
+## v0.82.0 — iOS Interaction + Automatic Insider Monitor
 - Home dossier links use capture-phase delegation plus hash fallback, so re-rendered cards remain tappable on iOS PWA.
 - Portfolio import uses a native file input over the visible control; no hidden programmatic picker dependency.
 - Insider scheduled workflow remains hourly for real qualifying Form 4 alerts and adds one daily health heartbeat to prove the automatic monitor is alive.
+
+
+## v0.82.0 — Thesis Momentum Intelligence
+
+- Novo Thesis Momentum Score 0–100, separado do Finscanner Score fundamental.
+- Combina deltas de hoje, 7 dias e 30 dias, direção da tese, revisões de EPS e contexto insider.
+- Mostra confiança e persistência/reversão sem inventar dados ausentes.
+- Company Dossier inclui cartão de Momentum dentro da tese.
+- Thesis Monitor ganha rankings expansíveis de momentum positivo e negativo.
+- Home Portfolio & Teses passa a priorizar movimentos persistentes, não apenas o delta de um dia.

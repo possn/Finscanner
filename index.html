@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.81.0">
+<link rel="stylesheet" href="style.css?v=0.84.0">
 </head>
 <body>
 
@@ -101,6 +101,10 @@
           <div id="home-change-brief" class="home-brief-body"></div>
         </details>
         <details class="home-brief-detail">
+          <summary><span><b>Thesis Momentum</b><small>Improving Fast · Persistent Deterioration · Positive Reversal</small></span><i>⌄</i></summary>
+          <div id="home-momentum-brief" class="home-brief-body"></div>
+        </details>
+        <details class="home-brief-detail">
           <summary><span><b>Portfolio & teses</b><small>Posições cuja evidência melhorou ou piorou</small></span><i>⌄</i></summary>
           <div id="home-portfolio-brief" class="home-brief-body"></div>
         </details>
@@ -185,7 +189,7 @@
       <section class="stock-discover-hub" aria-label="Discover stocks">
         <div class="section-heading"><div><span class="eyebrow">DISCOVER</span><h3>Descobrir por tese de investimento</h3><p>Escolhe uma lente e percorre os candidatos mais fortes sem entrar logo na tabela completa.</p></div></div>
         <div id="stock-discover-categories" class="stock-discover-categories">
-          <button class="is-active" data-discover-preset="compounders">Compounders</button><button data-discover-preset="quality">Quality</button><button data-discover-preset="garp">GARP</button><button data-discover-preset="growth">Growth</button><button data-discover-preset="value">Value</button><button data-discover-preset="dividend">Dividend</button><button data-discover-preset="insider">Insider Buying</button><button data-discover-preset="near-low">Near 52W Low</button><button data-discover-preset="improving">Improving Thesis</button><button data-discover-preset="earnings">Earnings Soon</button>
+          <button class="is-active" data-discover-preset="compounders">Compounders</button><button data-discover-preset="quality">Quality</button><button data-discover-preset="garp">GARP</button><button data-discover-preset="growth">Growth</button><button data-discover-preset="value">Value</button><button data-discover-preset="dividend">Dividend</button><button data-discover-preset="insider">Insider Buying</button><button data-discover-preset="near-low">Near 52W Low</button><button data-discover-preset="improving">Improving Thesis</button><button data-discover-preset="improving-fast">Improving Fast</button><button data-discover-preset="persistent-down">Persistent Deterioration</button><button data-discover-preset="positive-reversal">Positive Reversal</button><button data-discover-preset="earnings">Earnings Soon</button>
         </div>
         <div id="stock-discover-body" class="stock-discover-body"><div class="sector-empty">A carregar oportunidades…</div></div>
       </section>
@@ -357,6 +361,10 @@
         </div>
       </section>
 
+      <section class="fund-results fund-results-live">
+        <div id="funds-list" class="funds-card-list"></div>
+      </section>
+
       <section class="fund-tools-grid">
         <article class="fund-tool-panel fee-saver-panel">
           <span class="eyebrow">FEE SAVER</span>
@@ -379,10 +387,6 @@
         <p class="muted">A analisar os ETFs da tua carteira…</p>
       </section>
 
-      <section class="fund-results">
-        <div class="section-heading"><div><span class="eyebrow">DISCOVER FUNDS</span><h3>Resultados</h3></div></div>
-        <div id="funds-list" class="funds-card-list"></div>
-      </section>
     </section>
     <section id="view-news" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">NOTÍCIAS</span><h2>Notícias das tuas posições e watchlist.</h2><p>Notícias recentes agregadas por ticker. Podes também pesquisar qualquer ticker manualmente. Se a fonte direta bloquear o browser, ficam sempre disponíveis pesquisas externas por empresa.</p></div></section>
       <div class="commandbar"><input id="news-search" type="text" placeholder="pesquisar notícias de um ticker…" autocomplete="off" spellcheck="false"></div>
@@ -539,6 +543,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.81.0"></script>
+<script src="app.js?v=0.84.0"></script>
 </body>
 </html>
