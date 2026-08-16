@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import time
 import os
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 
@@ -250,6 +251,7 @@ def _row_series(frame, labels, limit=6):
 
 
 def fetch_one(ticker: str) -> RawMetrics:
+    _wait_for_cooldown()
     m = RawMetrics(ticker=ticker)
     yahoo_symbol = _yahoo_symbol(ticker)
     try:
@@ -696,24 +698,70 @@ def fetch_one(ticker: str) -> RawMetrics:
 
     except Exception as e:
         m.error = str(e)
+        if _is_rate_limit_error(e):
+            _register_rate_limit_hit()
         log.warning("%s: fetch failed (%s)", ticker, e)
 
     return m
 
 
-def fetch_many(tickers: list[str], pause: float = 0.0, workers_override: int | None = None, retries: int = 1) -> list[RawMetrics]:
+# Shared, thread-safe rate-limit cooldown. Root cause found in a real run's
+# log: yfinance raises YFRateLimitError near-instantly and in bulk once
+# Yahoo's per-IP limit trips (hundreds of tickers failing within the same
+# second) — the old code treated each failure as independent and kept
+# hammering at full concurrency, which both wastes the run (most of the
+# universe silently drops out) and likely deepens whatever penalty Yahoo
+# is applying. Any worker that sees a rate-limit error now sets a shared
+# "resume no earlier than" timestamp with escalating backoff; every worker
+# checks it before each request and sleeps if still in cooldown, so the
+# whole pool backs off together instead of independently retrying into
+# the same wall.
+_cooldown_lock = threading.Lock()
+_cooldown_until = 0.0
+_cooldown_strikes = 0
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    name = type(exc).__name__
+    msg = str(exc)
+    return "RateLimit" in name or "Too Many Requests" in msg or "rate limit" in msg.lower()
+
+
+def _wait_for_cooldown():
+    with _cooldown_lock:
+        remaining = _cooldown_until - time.time()
+    if remaining > 0:
+        time.sleep(remaining)
+
+
+def _register_rate_limit_hit():
+    global _cooldown_until, _cooldown_strikes
+    with _cooldown_lock:
+        _cooldown_strikes += 1
+        # Escalating cooldown: 20s, 40s, 80s, ... capped at 5 minutes so a
+        # very long block doesn't eat the whole Actions run budget either.
+        backoff = min(300, 20 * (2 ** (_cooldown_strikes - 1)))
+        candidate = time.time() + backoff
+        if candidate > _cooldown_until:
+            _cooldown_until = candidate
+            log.warning("Yahoo rate-limit detected — pausing all fetch workers for %ds (strike %d)", backoff, _cooldown_strikes)
+
+
+def fetch_many(tickers: list[str], pause: float = 0.0, workers_override: int | None = None, retries: int = 3) -> list[RawMetrics]:
     """Fetch fundamentals concurrently but conservatively.
 
     Portfolio coverage expanded the universe materially; the old sequential loop
     could take longer than the GitHub Action budget and left the UI on an old
     stocks.json even though newer front-end releases were deployed. A small
     worker pool keeps Yahoo request pressure bounded while making a full refresh
-    practical. Failed rows are retried once after the parallel pass.
+    practical. Failed rows are retried after the parallel pass, with the shared
+    cooldown (see _wait_for_cooldown) making later retry passes actually wait
+    out a rate-limit window instead of immediately reproducing it.
     """
     tickers = list(dict.fromkeys(tickers))
     if not tickers:
         return []
-    workers = max(1, min(8, int(workers_override if workers_override is not None else os.getenv("FINSCANNER_FETCH_WORKERS", "5"))))
+    workers = max(1, min(4, int(workers_override if workers_override is not None else os.getenv("FINSCANNER_FETCH_WORKERS", "4"))))
     results_by_ticker: dict[str, RawMetrics] = {}
     completed = 0
     log.info("Fetching %d tickers with %d workers", len(tickers), workers)
@@ -734,8 +782,12 @@ def fetch_many(tickers: list[str], pause: float = 0.0, workers_override: int | N
         failed = [tk for tk in tickers if getattr(results_by_ticker.get(tk), "error", None)]
         if not failed:
             break
-        log.info("Retrying %d failed ticker(s), pass %d/%d", len(failed), attempt + 1, retries)
-        time.sleep(1.5 * (attempt + 1))
+        # Exponential backoff between retry passes (not just the per-worker
+        # cooldown above) — a pass that hit a rate-limit wall needs more
+        # than a couple seconds before trying the same tickers again.
+        backoff = min(120, 8 * (2 ** attempt))
+        log.info("Retrying %d failed ticker(s), pass %d/%d (waiting %ds first)", len(failed), attempt + 1, retries, backoff)
+        time.sleep(backoff)
         # Retry sequentially: after a Yahoo throttle event, another burst of
         # parallel requests tends to reproduce the same failure.
         for i, tk in enumerate(failed):
@@ -746,5 +798,9 @@ def fetch_many(tickers: list[str], pause: float = 0.0, workers_override: int | N
                 time.sleep(pause)
             if (i + 1) % 50 == 0:
                 log.info("retry pass %d: %d/%d", attempt + 1, i + 1, len(failed))
+
+    still_failed = sum(1 for tk in tickers if getattr(results_by_ticker.get(tk), "error", None))
+    if still_failed:
+        log.warning("%d/%d tickers still failed after all retries — likely a sustained Yahoo rate-limit or genuinely delisted/invalid tickers", still_failed, len(tickers))
 
     return [results_by_ticker[tk] for tk in tickers if tk in results_by_ticker]
