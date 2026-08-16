@@ -1,4 +1,4 @@
-# Finscanner v0.88.0 — Global Stocks → Portfolio Workflow
+# Finscanner v0.91.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
 
 A área **Stocks** passa a seguir a mesma arquitetura simples que a área Funds:
 
@@ -19,16 +19,18 @@ A exploração avançada (filtros, Sector Intelligence, perspetivas e tabela com
 Não é necessário alterar workflows nem ficheiros `data/` nesta release.
 
 
-## v0.90.0 — Stable Footer & Broader Stock Discovery
-
-- Footer mobile fixed and opaque, with extra safe-area/content padding so content never scrolls behind it.
-- Discovery now degrades gracefully: if a strict investment profile + sector has no exact matches, the app shows the best known companies in that sector instead of an empty screen.
-- Added resilient sector/theme discovery anchors for Water, Agriculture, Healthcare, Biotech, Defense and Semiconductors.
-- Equity rows from previous successful workflow runs are carried forward when Yahoo is temporarily incomplete, so the stock universe grows instead of disappearing between runs.
-- Metadata-only catalogue rows are clearly marked as awaiting analysis; no scores are fabricated.
 
 ## v0.89.0 — Stocks Clarity & Sector Discovery
 - Novos setores/temas: Tecnologia, Healthcare, Biotech, Água, Agricultura, Energia, Financeiro, Industriais, Consumo, Imobiliário, Utilities, Materiais, Defesa e Semicondutores.
 - Presets de descoberta renomeados em linguagem simples, com explicação visível.
 - A tabela principal deixa de mostrar grades A/B/C/D e abreviações Q/G/V: mostra scores 0–100 com nomes Qualidade, Crescimento e Valor.
 - Portfolio Radar também usa nomes explícitos.
+
+## v0.91.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
+
+- Discovery no longer treats the raw Finscanner Score as a complete ranking. Ordering now also considers data confidence and company size, with strong penalties for low-confidence microcaps and financial-risk flags.
+- "Empresas sólidas" becomes quality-first, so an anomalous Stability/Value sub-score cannot by itself push a tiny speculative company above an established high-quality company.
+- Discovery cards show a simple size/confidence label so users can understand why one candidate ranks above another.
+- Portfolio holdings gain an explicit triage suggestion: **Reforçar**, **Manter**, **Reduzir / rever**, or **Vender / sair?**, with 2–3 reasons and confidence. This is decision support, never an automatic order.
+- Crypto positions are explicitly excluded from the equity action model.
+- The Company Dossier shows the same suggestion when the stock is held in the imported portfolio.

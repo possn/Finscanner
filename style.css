@@ -2123,3 +2123,17 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
   .stock-discover-fallback-note span{font-size:11px;line-height:1.45;color:var(--ink-muted);}
   .catalog-status{font-size:12px!important;line-height:1.2;color:var(--ink-muted);text-transform:none;letter-spacing:0;font-weight:800;}
 }
+
+/* v0.91.0 — trust-adjusted discovery + portfolio action guidance */
+.stock-discover-trust{display:block;margin-top:-2px;color:var(--muted);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.035em}
+.stock-card-action{display:grid;gap:2px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface-soft)}
+.stock-card-action span{font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:800}
+.stock-card-action strong{font-size:1rem}.stock-card-action small{color:var(--muted);line-height:1.35}
+.stock-card-action.good,.stock-action-suggestion.good{border-color:color-mix(in srgb,#14865f 35%,var(--line));background:color-mix(in srgb,#dff5ea 58%,var(--surface))}
+.stock-card-action.bad,.stock-action-suggestion.bad{border-color:color-mix(in srgb,#b84b56 35%,var(--line));background:color-mix(in srgb,#fde7e8 55%,var(--surface))}
+.stock-action-suggestion{grid-column:1/-1;display:grid;gap:5px;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--surface-soft)}
+.stock-action-suggestion>span{font-size:.7rem;font-weight:850;letter-spacing:.12em;color:var(--muted)}
+.stock-action-suggestion>strong{font-size:1.25rem}.stock-action-suggestion p{margin:0;color:var(--text)}.stock-action-suggestion small{color:var(--muted);line-height:1.4}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .stock-card-action.good,html:not([data-theme="light"]) .stock-action-suggestion.good{background:rgba(29,105,76,.22)}html:not([data-theme="light"]) .stock-card-action.bad,html:not([data-theme="light"]) .stock-action-suggestion.bad{background:rgba(139,50,58,.22)}}
+html[data-theme="dark"] .stock-card-action.good,html[data-theme="dark"] .stock-action-suggestion.good{background:rgba(29,105,76,.22)}
+html[data-theme="dark"] .stock-card-action.bad,html[data-theme="dark"] .stock-action-suggestion.bad{background:rgba(139,50,58,.22)}

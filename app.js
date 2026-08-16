@@ -1672,6 +1672,89 @@
     if(key==='semiconductors') return any(['semiconductor','chip']);
     return true;
   }
+  function stockEvidenceTrustAdjustment(r){
+    const cap = Number(r.market_cap);
+    const conf = String(r.data_confidence || '').toLowerCase();
+    let adj = conf === 'high' ? 12 : conf === 'medium' ? 4 : conf === 'low' ? -16 : -6;
+    if (Number.isFinite(cap)) {
+      if (cap >= 50e9) adj += 12;
+      else if (cap >= 10e9) adj += 9;
+      else if (cap >= 2e9) adj += 5;
+      else if (cap >= 500e6) adj += 1;
+      else if (cap >= 100e6) adj -= 10;
+      else adj -= 20;
+    } else adj -= 8;
+    if (r.zombie === 'yes' || r.zombie === true) adj -= 25;
+    if (String(r.carry_forward || r.data_status || '').toLowerCase().includes('carry')) adj -= 4;
+    return adj;
+  }
+
+  function stockDiscoveryRankValue(r,preset){
+    const q=Number(r.quality_pct ?? r.profitability_pct ?? 0);
+    const g=Number(r.growth_pct ?? 0);
+    const st=Number(r.stability_pct ?? 0);
+    const sc=Number(r.score ?? 0);
+    let base=discoverRankValue(r,preset);
+    // “Empresas sólidas” is deliberately quality-first. A tiny/low-confidence company
+    // must not outrank a globally established high-quality company just because one
+    // sub-score is unusually high. This changes discovery order, never the raw score.
+    if(preset==='compounders') base=q*.45 + g*.25 + st*.15 + sc*.15;
+    else if(preset==='quality') base=q*.70 + sc*.20 + st*.10;
+    else if(preset==='garp') base=q*.35 + g*.30 + Number(r.value_pct||0)*.25 + sc*.10;
+    return base + stockEvidenceTrustAdjustment(r);
+  }
+
+  function stockActionSuggestion(r, portfolio=null, universe=null){
+    if (String(r.quote_type||'').toLowerCase().includes('crypto') || String(r.ticker||'').toUpperCase().endsWith('.CC')) return {label:'Fora deste modelo',tone:'neutral',confidence:'—',reasons:['o modelo de ações não deve gerar ordem para criptoativos']};
+    const score=Number(r.score), q=Number(r.quality_pct ?? r.profitability_pct), g=Number(r.growth_pct), v=Number(r.value_pct);
+    const mom=thesisMomentumSnapshot(r);
+    const conf=String(r.data_confidence||'').toLowerCase();
+    const weak=r.thesis_direction==='weakening';
+    const strong=r.thesis_direction==='strengthening';
+    const zombie=r.zombie==='yes'||r.zombie===true;
+    const pf=(portfolio&&universe)?portfolioFitSnapshot(r,portfolio,universe):null;
+    const reasons=[];
+    let label='Manter', tone='neutral', confidence='média';
+    if(conf==='low' || !Number.isFinite(score) || !Number.isFinite(q)){
+      return {label:'Rever dados',tone:'neutral',confidence:'baixa',reasons:['cobertura insuficiente para uma sugestão robusta']};
+    }
+    const severe = zombie || score < 38 || (weak && mom.score <= 32 && q < 50);
+    if(severe){
+      label='Vender / sair?'; tone='bad';
+      if(zombie) reasons.push('risco financeiro elevado');
+      if(score<38) reasons.push(`score baixo (${Math.round(score)})`);
+      if(weak) reasons.push('tese a deteriorar');
+    } else {
+      const concentrated = pf && (pf.directPct >= 8 || pf.sectorPct >= 30 || pf.hiddenPct >= 12);
+      const reinforce = score>=68 && q>=68 && !weak && mom.score>=55 && (g>=60 || v>=45) && !concentrated;
+      if(reinforce){
+        label='Reforçar'; tone='good';
+        reasons.push(`score ${Math.round(score)}`,`qualidade ${Math.round(q)}`);
+        if(strong||mom.score>=65) reasons.push('tese/momentum favorável');
+        if(Number.isFinite(v)&&v>=55) reasons.push('valor razoável');
+      } else if(weak || score<50 || mom.score<42){
+        label='Reduzir / rever'; tone='bad';
+        if(weak) reasons.push('tese a deteriorar');
+        if(score<50) reasons.push(`score ${Math.round(score)}`);
+        if(mom.score<42) reasons.push('momentum fraco');
+      } else {
+        label='Manter'; tone='neutral';
+        reasons.push(`score ${Math.round(score)}`);
+        if(concentrated) reasons.push('já existe concentração na carteira');
+        else if(Number.isFinite(q)) reasons.push(`qualidade ${Math.round(q)}`);
+      }
+    }
+    confidence = conf==='high' ? 'alta' : 'média';
+    return {label,tone,confidence,reasons:reasons.slice(0,3)};
+  }
+
+  function stockActionSuggestionHtml(r){
+    const portfolio=loadPortfolio();
+    if(!portfolio || !portfolio[r.ticker]) return '';
+    const a=stockActionSuggestion(r,portfolio,state.data?.stocks||[]);
+    return `<div class="stock-action-suggestion ${a.tone}"><span>SUGESTÃO DE TRIAGEM</span><strong>${escapeHtml(a.label)}</strong><p>${escapeHtml(a.reasons.join(' · '))}</p><small>Confiança ${escapeHtml(a.confidence)} · apoio à decisão, não ordem automática de compra/venda.</small></div>`;
+  }
+
   function discoverRankValue(r,preset){
     if(preset==='compounders') return (Number(r.quality_pct||0)*.35)+(Number(r.growth_pct||0)*.30)+(Number(r.stability_pct||0)*.20)+(Number(r.score||0)*.15);
     if(preset==='quality') return Number(r.quality_pct ?? r.profitability_pct ?? -1);
@@ -1703,19 +1786,19 @@
     const sectorKey=state.stockSectorTheme||'all';
     const sectorText=sectorKey==='all'?'todos os setores':STOCK_SECTOR_THEME_LABELS[sectorKey];
     if(els.stockDiscoverExplainer){
-      els.stockDiscoverExplainer.innerHTML=`<b>${escapeHtml(DISCOVER_LABELS[p]||p)}</b><span>${escapeHtml(DISCOVER_EXPLANATIONS[p]||'')}</span><small>Setor/tema: ${escapeHtml(sectorText)}.</small>`;
+      els.stockDiscoverExplainer.innerHTML=`<b>${escapeHtml(DISCOVER_LABELS[p]||p)}</b><span>${escapeHtml(DISCOVER_EXPLANATIONS[p]||'')}</span><small>Setor/tema: ${escapeHtml(sectorText)}. A ordem considera também robustez dos dados e dimensão; o score bruto, sozinho, não define o ranking.</small>`;
     }
     const sectorPool=rows.filter(r=>stockSectorThemeMatch(r,sectorKey));
-    let exact=sectorPool.filter(r=>stockPresetMatch(r,p)).sort((a,b)=>discoverRankValue(b,p)-discoverRankValue(a,p));
+    let exact=sectorPool.filter(r=>stockPresetMatch(r,p)).sort((a,b)=>stockDiscoveryRankValue(b,p)-stockDiscoveryRankValue(a,p));
     let mode='exact';
     let pool=exact;
     if(!pool.length && sectorKey!=='all' && sectorPool.length){
       mode='sector-fallback';
-      pool=[...sectorPool].sort((a,b)=>(Number(b.score??-1)-Number(a.score??-1)) || (Number(b.market_cap??0)-Number(a.market_cap??0)));
+      pool=[...sectorPool].sort((a,b)=>stockDiscoveryRankValue(b,p)-stockDiscoveryRankValue(a,p));
     }
     if(!pool.length && sectorKey==='all'){
       mode='broad-fallback';
-      pool=rows.filter(r=>Number.isFinite(Number(r.score))).sort((a,b)=>Number(b.score??-1)-Number(a.score??-1));
+      pool=rows.filter(r=>Number.isFinite(Number(r.score))).sort((a,b)=>stockDiscoveryRankValue(b,p)-stockDiscoveryRankValue(a,p));
     }
     pool=pool.slice(0,16);
     els.stockDiscoverCategories?.querySelectorAll('[data-discover-preset]').forEach(b=>b.classList.toggle('is-active',b.dataset.discoverPreset===p));
@@ -1724,15 +1807,17 @@
       return;
     }
     const note=mode==='sector-fallback'
-      ? `<div class="stock-discover-fallback-note"><b>Nenhuma cumpre todos os critérios de “${escapeHtml(DISCOVER_LABELS[p]||p)}”.</b><span>A mostrar as melhores empresas já conhecidas em ${escapeHtml(sectorText)} para não esconder o setor.</span></div>`
+      ? `<div class="stock-discover-fallback-note"><b>Nenhuma cumpre todos os critérios de “${escapeHtml(DISCOVER_LABELS[p]||p)}”.</b><span>A mostrar as mais próximas dos critérios em ${escapeHtml(sectorText)}, priorizando qualidade, dimensão e confiança dos dados.</span></div>`
       : mode==='broad-fallback'
-        ? `<div class="stock-discover-fallback-note"><b>Critério muito restritivo para a cobertura atual.</b><span>A mostrar as empresas com melhor score disponível.</span></div>`
+        ? `<div class="stock-discover-fallback-note"><b>Critério muito restritivo para a cobertura atual.</b><span>A mostrar os candidatos mais robustos, ajustados por qualidade, dimensão e confiança dos dados.</span></div>`
         : '';
     els.stockDiscoverBody.innerHTML=`${note}<div class="stock-discover-strip">${pool.map((r,i)=>{
       const analysed=Number.isFinite(Number(r.score));
       const status=analysed?`${Math.round(Number(r.score))}<small>/100</small>`:`<span class="catalog-status">a analisar</span>`;
       const reason=analysed?discoverReason(r,p):`${r.stock_theme||r.industry||r.sector||'Catálogo global'} · dados a enriquecer`;
-      return `<article class="stock-discover-card" data-discover-open="${escapeHtml(r.ticker)}"><div class="stock-discover-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4><div class="stock-discover-score">${status}</div><p>${escapeHtml(reason)}</p><div class="stock-discover-actions"><button data-discover-open="${escapeHtml(r.ticker)}">${analysed?'Abrir dossier':'Ver ficha'}</button><button data-discover-filter="${escapeHtml(p)}">Ver lista</button></div></article>`;
+      const cap=Number(r.market_cap); const capLabel=Number.isFinite(cap)?(cap>=200e9?'mega cap':cap>=10e9?'large cap':cap>=2e9?'mid cap':cap>=300e6?'small cap':'micro cap'):'dimensão desconhecida';
+      const confLabel=r.data_confidence?`confiança ${String(r.data_confidence).toLowerCase()}`:'confiança desconhecida';
+      return `<article class="stock-discover-card" data-discover-open="${escapeHtml(r.ticker)}"><div class="stock-discover-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4><div class="stock-discover-score">${status}</div><p>${escapeHtml(reason)}</p><small class="stock-discover-trust">${escapeHtml(capLabel)} · ${escapeHtml(confLabel)}</small><div class="stock-discover-actions"><button data-discover-open="${escapeHtml(r.ticker)}">${analysed?'Abrir dossier':'Ver ficha'}</button><button data-discover-filter="${escapeHtml(p)}">Ver lista</button></div></article>`;
     }).join('')}</div>`;
     els.stockDiscoverBody.querySelectorAll('[data-discover-open]').forEach(el=>el.addEventListener('click',e=>{if(e.target.closest('[data-discover-filter]'))return;openDetail(el.dataset.discoverOpen);}));
     els.stockDiscoverBody.querySelectorAll('[data-discover-filter]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();state.stockPreset=btn.dataset.discoverFilter;applyFilters();els.list?.scrollIntoView({behavior:'smooth',block:'start'});}));
@@ -1750,7 +1835,7 @@
     const chips = [Number.isFinite(q)?`Qualidade ${Math.round(q)}`:null, Number.isFinite(g)?`Crescimento ${Math.round(g)}`:null, Number.isFinite(v)?`Valor ${Math.round(v)}`:null].filter(Boolean).join(' · ');
     return `<article class="stock-portfolio-card" data-stock-portfolio-open="${escapeHtml(r.ticker)}">
       <div class="stock-portfolio-card__top"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4></div>${Number.isFinite(score)?`<strong>${Math.round(score)}<small>/100</small></strong>`:''}</div>
-      ${meta.badge?`<span class="stock-portfolio-badge ${escapeHtml(meta.badgeTone||'neutral')}">${escapeHtml(meta.badge)}</span>`:''}
+      ${meta.action?`<div class="stock-card-action ${escapeHtml(meta.action.tone||'neutral')}"><span>Sugestão</span><strong>${escapeHtml(meta.action.label)}</strong><small>${escapeHtml((meta.action.reasons||[]).join(' · '))}</small></div>`:(meta.badge?`<span class="stock-portfolio-badge ${escapeHtml(meta.badgeTone||'neutral')}">${escapeHtml(meta.badge)}</span>`:'')}
       <p class="stock-portfolio-thesis ${thesisClass}">${thesis}</p>
       ${chips?`<small>${escapeHtml(chips)}</small>`:''}
       ${meta.note?`<p class="stock-portfolio-note">${escapeHtml(meta.note)}</p>`:''}
@@ -1780,10 +1865,9 @@
         const total = enriched.reduce((s,x)=>s+x.eur,0);
         els.stockMyBody.innerHTML = `<div class="stock-portfolio-strip-inner">${enriched.slice(0,16).map(x=>{
           const w = total>0 ? x.eur/total*100 : null;
-          const risk = x.row.thesis_direction==='weakening' || x.row.zombie==='yes' || Number(x.row.score)<45;
-          const badge = risk ? 'Rever' : x.row.thesis_direction==='strengthening' ? 'A melhorar' : 'Na carteira';
+          const action = stockActionSuggestion(x.row, portfolio, state.data?.stocks||rows);
           const note = Number.isFinite(w) ? `${w.toFixed(1)}% das ações valorizadas da carteira` : '';
-          return stockPortfolioCardHtml(x.row,{badge,badgeTone:risk?'bad':x.row.thesis_direction==='strengthening'?'good':'neutral',note});
+          return stockPortfolioCardHtml(x.row,{action,note});
         }).join('')}</div>`;
         if(els.stockMyCount) els.stockMyCount.textContent=`${held.length} ações`;
       }
@@ -2561,6 +2645,7 @@
         <button class="detail-watch star-btn ${starred ? 'is-active' : ''}" data-ticker="${r.ticker}" aria-label="Watchlist">${starred ? '★ Saved' : '☆ Save'}</button>
         <div class="stock-facts"><div><span>PRICE</span><strong>${r.current_price ?? '—'} ${r.currency || ''}</strong></div><div><span>MARKET CAP</span><strong>${fmtCap(r.market_cap)}</strong></div><div><span>EXCHANGE</span><strong>${escapeHtml(r.exchange || r.full_exchange_name || marketOf(r.ticker) || '—')}</strong></div></div>
         <div class="stock-score-hero"><span class="eyebrow">FINSCANNER SCORE</span><strong>${r.score ?? "—"}</strong>${scoreOrbs(r.score)}<p>${verdict.label}</p><small>${verdict.text}</small></div>
+        ${stockActionSuggestionHtml(r)}
       </div>
       ${dossierNavHtml()}
       <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
@@ -5750,7 +5835,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.90.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.91.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
