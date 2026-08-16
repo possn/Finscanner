@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T20:05:17.988798Z",
+  "generated_at": "2026-08-16T20:44:15.890405Z",
   "note": "Pre\u00e7os de futuros (n\u00e3o spot) para ouro/prata/cobre/platina/pal\u00e1dio. Ur\u00e2nio \u00e9 um proxy via ETF de mineradoras. A camada f\u00edsica e de deliveries usa fontes oficiais/gratuitas (CME, CFTC, SGE e, quando acess\u00edvel, WGC). Cada bloco exp\u00f5e a fonte e o estado; dados indispon\u00edveis n\u00e3o s\u00e3o estimados.",
   "ways_to_play": {
     "own_metal": [
@@ -21,19 +21,19 @@
     ]
   },
   "physical": {
-    "generated_at": "2026-08-16T20:03:54.700933Z",
+    "generated_at": "2026-08-16T20:42:52.631719Z",
     "comex": {
       "gold": {
         "source": "CME Group",
         "source_url": "https://www.cmegroup.com/delivery_reports/Gold_Stocks.xls",
-        "fetched_at": "2026-08-16T20:03:54.700943Z",
+        "fetched_at": "2026-08-16T20:42:52.631736Z",
         "status": "unavailable",
         "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=25)"
       },
       "silver": {
         "source": "CME Group",
         "source_url": "https://www.cmegroup.com/delivery_reports/Silver_stocks.xls",
-        "fetched_at": "2026-08-16T20:04:19.973491Z",
+        "fetched_at": "2026-08-16T20:43:17.726565Z",
         "status": "unavailable",
         "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=25)"
       }
@@ -41,7 +41,7 @@
     "deliveries": {
       "source": "CME Group",
       "source_url": "https://www.cmegroup.com/delivery_reports/MetalsIssuesAndStopsReport.pdf",
-      "fetched_at": "2026-08-16T20:04:45.152630Z",
+      "fetched_at": "2026-08-16T20:43:42.781508Z",
       "status": "unavailable",
       "error": "HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=30)"
     },
@@ -49,7 +49,7 @@
       "gold": {
         "source": "CFTC Disaggregated COT",
         "source_url": "https://www.cftc.gov/dea/newcot/f_disagg.txt",
-        "fetched_at": "2026-08-16T20:05:15.379579Z",
+        "fetched_at": "2026-08-16T20:44:12.972351Z",
         "status": "ok",
         "report_date": "2026-08-11",
         "open_interest": 400309,
@@ -68,7 +68,7 @@
       "gold_benchmark": {
         "source": "Shanghai Gold Exchange",
         "source_url": "https://en.sge.com.cn/data_BenchmarkPrice",
-        "fetched_at": "2026-08-16T20:05:15.595033Z",
+        "fetched_at": "2026-08-16T20:44:13.081744Z",
         "status": "unavailable",
         "error": "benchmark table not found"
       }
@@ -76,7 +76,7 @@
     "central_banks": {
       "source": "World Gold Council / IMF IFS",
       "source_url": "https://www.gold.org/goldhub/data/gold-reserves-by-country",
-      "fetched_at": "2026-08-16T20:05:17.026731Z",
+      "fetched_at": "2026-08-16T20:44:14.682997Z",
       "status": "unavailable",
       "error": "403 Client Error: Forbidden for url: https://www.gold.org/download/file/7741/Changes_latest_as_of_Aug2026_IFS.xlsx"
     }
@@ -106,120 +106,42 @@
           "url": "https://www.gold.org/goldhub/data/central-bank-gold-reserves-survey-2025"
         }
       ],
-      "data": {
-        "price": 4437.3,
-        "day_change_pct": 1.69,
-        "range_90d_low": 3985.6,
-        "range_90d_high": 4857.6,
-        "range_1y_low": 3273.7,
-        "range_1y_high": 5318.4,
-        "sma_200": 4486.555,
-        "vs_200d_pct": -1.1,
-        "position_52w_pct": 56.9,
-        "change_ytd_pct": 2.8,
-        "change_1y_pct": 32.4,
-        "volatility_annualized_pct": 26.7
-      }
+      "data": null
     },
     {
       "ticker": "SI=F",
       "label": "Prata",
       "kind": "futures",
       "unit": "USD/oz",
-      "data": {
-        "price": 65.108,
-        "day_change_pct": 0.36,
-        "range_90d_low": 55.898,
-        "range_90d_high": 88.888,
-        "range_1y_low": 35.689,
-        "range_1y_high": 115.08,
-        "sma_200": 70.579,
-        "vs_200d_pct": -7.8,
-        "position_52w_pct": 37.1,
-        "change_ytd_pct": -7.7,
-        "change_1y_pct": 82.4,
-        "volatility_annualized_pct": 60.6
-      }
+      "data": null
     },
     {
       "ticker": "HG=F",
       "label": "Cobre",
       "kind": "futures",
       "unit": "USD/lb",
-      "data": {
-        "price": 6.613,
-        "day_change_pct": 0.31,
-        "range_90d_low": 5.748,
-        "range_90d_high": 6.703,
-        "range_1y_low": 4.331,
-        "range_1y_high": 6.703,
-        "sma_200": 5.871,
-        "vs_200d_pct": 12.6,
-        "position_52w_pct": 96.2,
-        "change_ytd_pct": 17.3,
-        "change_1y_pct": 34.6,
-        "volatility_annualized_pct": 35.7
-      }
+      "data": null
     },
     {
       "ticker": "PL=F",
       "label": "Platina",
       "kind": "futures",
       "unit": "USD/oz",
-      "data": {
-        "price": 1756.9,
-        "day_change_pct": 1.84,
-        "range_90d_low": 1550.2,
-        "range_90d_high": 2187.1,
-        "range_1y_low": 1133.7,
-        "range_1y_high": 2852.4,
-        "sma_200": 1916.772,
-        "vs_200d_pct": -8.3,
-        "position_52w_pct": 36.3,
-        "change_ytd_pct": -17.3,
-        "change_1y_pct": 55.0,
-        "volatility_annualized_pct": 52.9
-      }
+      "data": null
     },
     {
       "ticker": "PA=F",
       "label": "Pal\u00e1dio",
       "kind": "futures",
       "unit": "USD/oz",
-      "data": {
-        "price": 1325.5,
-        "day_change_pct": 0.22,
-        "range_90d_low": 1161.3,
-        "range_90d_high": 1590.4,
-        "range_1y_low": 1006.5,
-        "range_1y_high": 2169.9,
-        "sma_200": 1507.471,
-        "vs_200d_pct": -12.1,
-        "position_52w_pct": 27.4,
-        "change_ytd_pct": -20.5,
-        "change_1y_pct": 31.7,
-        "volatility_annualized_pct": 54.4
-      }
+      "data": null
     },
     {
       "ticker": "URA",
       "label": "Ur\u00e2nio (proxy: Global X Uranium ETF)",
       "kind": "etf_proxy",
       "unit": "USD",
-      "data": {
-        "price": 44.93,
-        "day_change_pct": -0.71,
-        "range_90d_low": 37.52,
-        "range_90d_high": 58.26,
-        "range_1y_low": 19.337,
-        "range_1y_high": 61.81,
-        "sma_200": 48.33,
-        "vs_200d_pct": -7.0,
-        "position_52w_pct": 60.3,
-        "change_ytd_pct": -2.5,
-        "change_1y_pct": 95.7,
-        "volatility_annualized_pct": 49.0
-      }
+      "data": null
     }
   ],
   "physical_history": {
