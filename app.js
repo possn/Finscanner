@@ -2758,8 +2758,14 @@
       ${conviction.score?`<div class="conviction-dossier ${conviction.direction}"><div><span>INSIDER CONVICTION</span><strong>${conviction.score}<small>/100</small></strong></div><div><b>${escapeHtml(conviction.label)} · ${conviction.direction==='buy'?'compra':'venda'}</b><p>${escapeHtml(conviction.reasons.join(' · '))}</p></div></div>`:''}
       <div class="insider-year-summary"><span><b>${buys??'—'}</b> compras</span><span><b>${sells??'—'}</b> vendas</span><span>comprado <b>${fmtMoney(buyV,r.currency||'USD')}</b></span><span>vendido <b>${fmtMoney(sellV,r.currency||'USD')}</b></span></div>
       <div class="insider-chart-controls" data-insider-chart-controls><button class="is-active" data-insider-chart-filter="all">Todos</button><button data-insider-chart-filter="buy">Compras</button><button data-insider-chart-filter="sell">Vendas</button></div>
+      <div class="smartmoney-price-key"><span class="smartmoney-price-line"></span><span>Linha = preço da ação nos últimos 12 meses</span></div>
       <div class="insider-chart-wrap"><canvas id="insider-price-chart" class="insider-price-chart" height="220"></canvas><div id="insider-chart-tooltip" class="insider-chart-tooltip" hidden></div></div>
-      <div class="insider-chart-legend"><span class="buy">▲ compra insider</span><span class="sell">▼ venda insider</span><span class="congress-buy">▲ compra Congresso</span><span class="congress-sell">▼ venda Congresso</span></div>
+      <div class="smartmoney-chart-key" aria-label="Legenda do gráfico Smart Money">
+        <div><span class="smartmoney-symbol ins-buy">▲</span><span><b>Compra insider</b><small>executivo/diretor da empresa</small></span></div>
+        <div><span class="smartmoney-symbol ins-sell">▼</span><span><b>Venda insider</b><small>executivo/diretor da empresa</small></span></div>
+        <div><span class="smartmoney-symbol cong-buy">△</span><span><b>Compra Congresso</b><small>House ou Senado</small></span></div>
+        <div><span class="smartmoney-symbol cong-sell">▽</span><span><b>Venda Congresso</b><small>House ou Senado</small></span></div>
+      </div>
       <div class="insider-ledger">${txList}</div>
       <p class="detail-note">Só códigos SEC P e S. O tamanho visual dos marcadores usa o valor da transação quando conhecido. Ausência de marcador pode significar cobertura SEC parcial.</p>
     </section>`;

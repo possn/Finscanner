@@ -1,6 +1,6 @@
-# Finscanner v0.98.0 — Smart Money Dossier
+# Finscanner v0.98.1 — Smart Money Dossier
 
-## v0.98.0 — Smart Money dentro das 5 tabs
+## v0.98.1 — Smart Money dentro das 5 tabs
 - Mantém a barra de tabs sempre visível no iPhone, acima da navegação global.
 - Overview · Growth · Earnings · Pillars · Deep Dive · Final Take deixam de desaparecer ao fazer scroll.
 - Acrescenta espaço inferior ao dossier para nenhum conteúdo ficar escondido atrás da barra.
@@ -51,5 +51,5 @@ Não é necessário alterar workflows nem ficheiros `data/` nesta release.
 - Crypto positions are explicitly excluded from the equity action model.
 - The Company Dossier shows the same suggestion when the stock is held in the imported portfolio.
 
-### v0.98.0 — Price Context + ETF Dossier Repair
+### v0.98.1 — Price Context + ETF Dossier Repair
 O pipeline guarda uma série semanal `price_history_1y` para o universo rastreado e catálogo ETF. Esta série alimenta os gráficos de Smart Money e o novo gráfico de preço dos Fund Dossiers. Fund Fit deixa de exibir uma pontuação global quando não existem dimensões observadas suficientes.

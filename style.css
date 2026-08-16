@@ -2298,3 +2298,20 @@ html[data-theme="dark"] .stock-card-action.bad,html[data-theme="dark"] .stock-ac
 .insider-chart-legend .congress-buy{color:#2463a8}.insider-chart-legend .congress-sell{color:#9a5a24}
 .fund-enrichment-banner{grid-column:1/-1;padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:var(--card-soft,#f4ecdc);margin-bottom:12px}.fund-enrichment-banner strong{display:block;font-size:15px}.fund-enrichment-banner p{margin:5px 0 0;line-height:1.45;color:var(--muted)}
 .stock-flow-steps:has([data-stock-jump="discover"]){grid-template-columns:repeat(2,minmax(0,1fr))}
+
+
+/* v0.98.1 — mobile navigation priority + Smart Money chart clarity */
+@media (max-width:700px){
+  .bottom-nav{z-index:200!important;pointer-events:auto!important;}
+  .bottom-nav button{pointer-events:auto!important;touch-action:manipulation!important;}
+  .dossier-tab-nav{z-index:120!important;bottom:calc(86px + env(safe-area-inset-bottom,0px))!important;}
+  #detail-content{padding-bottom:205px!important;}
+}
+.smartmoney-chart-key{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 6px}
+.smartmoney-chart-key>div{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border,#ddd3c2);border-radius:14px;background:var(--surface,#fffaf0);font-size:12px;line-height:1.25;color:var(--ink,#243125)}
+.smartmoney-chart-key b{display:block;font-size:12px}.smartmoney-chart-key small{display:block;color:var(--ink-muted,#6f7869);margin-top:2px}
+.smartmoney-symbol{font-size:18px;font-weight:900;line-height:1}.smartmoney-symbol.ins-buy{color:#17a673}.smartmoney-symbol.ins-sell{color:#e34e59}.smartmoney-symbol.cong-buy{color:#2463a8}.smartmoney-symbol.cong-sell{color:#9a5a24}
+.smartmoney-price-key{display:flex;align-items:center;gap:8px;margin:8px 0 12px;font-size:12px;color:var(--ink-muted,#6f7869)}
+.smartmoney-price-line{width:28px;height:0;border-top:3px solid #5aa99a;border-radius:999px}
+.insider-chart-legend{display:none!important}
+@media(max-width:520px){.smartmoney-chart-key{grid-template-columns:1fr}}
