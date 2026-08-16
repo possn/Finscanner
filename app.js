@@ -52,6 +52,8 @@
     portfolioRebalancingLab: document.getElementById("portfolio-rebalancing-lab"),
     exposurePanel: document.getElementById("exposure-panel"),
     portfolioFile: document.getElementById("portfolio-file"),
+    portfolioImportTrigger: document.getElementById("portfolio-import-trigger"),
+    portfolioImportStatus: document.getElementById("portfolio-import-status"),
     portfolioClear: document.getElementById("portfolio-clear"),
     portfolioFilters: document.getElementById("portfolio-filters"),
     portfolioThesisMonitor: document.getElementById("portfolio-thesis-monitor"),
@@ -112,6 +114,7 @@
     briefingGreeting: document.getElementById("briefing-greeting"),
     homeOpportunityStrip: document.getElementById("home-opportunity-strip"),
     homeAttentionSummary: document.getElementById("home-attention-summary"),
+    homeChangeBrief: document.getElementById("home-change-brief"),
     homePortfolioBrief: document.getElementById("home-portfolio-brief"),
     homePortfolioFitBrief: document.getElementById("home-portfolio-fit-brief"),
     homeInsiderBrief: document.getElementById("home-insider-brief"),
@@ -141,6 +144,7 @@
   // no sync between devices — that would need a backend, which breaks the
   // "free, static site" constraint.
   const LS_PORTFOLIO = "finscanner:portfolio";
+  const LS_PORTFOLIO_BACKUP = "finscanner:portfolio:backup";
   const LS_WATCHLIST = "finscanner:watchlist";
   const LS_SECTOR_COMPARE = "finscanner:sectorCompare";
   const LS_INSIDER_ALERTS = "finscanner:insiderAlerts";
@@ -152,8 +156,31 @@
     catch { return {}; }
   }
   function lsSet(key, obj) {
-    try { localStorage.setItem(key, JSON.stringify(obj)); } catch (e) { console.warn("localStorage write failed", e); }
+    try {
+      const payload = JSON.stringify(obj);
+      localStorage.setItem(key, payload);
+      if (key === LS_PORTFOLIO) localStorage.setItem(LS_PORTFOLIO_BACKUP, payload);
+    } catch (e) { console.warn("localStorage write failed", e); }
   }
+  function restorePortfolioIfNeeded() {
+    const primary = lsGet(LS_PORTFOLIO);
+    if (primary && Object.keys(primary).length) return primary;
+    const candidates = [LS_PORTFOLIO_BACKUP, "portfolio", "finscanner_portfolio", "finscanner:owned", "owned"];
+    for (const key of candidates) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object" && Object.keys(parsed).length) {
+          localStorage.setItem(LS_PORTFOLIO, JSON.stringify(parsed));
+          localStorage.setItem(LS_PORTFOLIO_BACKUP, JSON.stringify(parsed));
+          return parsed;
+        }
+      } catch {}
+    }
+    return {};
+  }
+  restorePortfolioIfNeeded();
   // Portfolio entries are objects: { qty: number|null, value: number|null }.
   // `true` (from the old boolean "owned" toggle) is treated as qty:1 for
   // backward compatibility with positions marked before the import
@@ -455,6 +482,18 @@
     btn.addEventListener("click", () => switchView(btn.dataset.goto));
   });
 
+  // Robust event delegation for content that is re-rendered with innerHTML.
+  // This prevents dynamically generated dossier links from silently losing handlers.
+  document.addEventListener("click", (e) => {
+    const openBtn = e.target.closest?.(".briefing-open, .home-opportunity-card, [data-brief-ticker]");
+    if (openBtn) {
+      const ticker = openBtn.dataset.ticker || openBtn.dataset.briefTicker;
+      if (ticker) { e.preventDefault(); openDetail(ticker); return; }
+    }
+    const goto = e.target.closest?.("[data-brief-goto]");
+    if (goto?.dataset.briefGoto) { e.preventDefault(); switchView(goto.dataset.briefGoto); }
+  });
+
   function renderHome() {
     if (els.briefingGreeting) {
       const h = new Date().getHours();
@@ -469,7 +508,6 @@
     const signal = strengthen ? "Tese a reforçar" : insider ? "Smart money" : "Qualidade em destaque";
     const body = strengthen ? (top.thesis_evolution_summary || top.thesis_summary) : insider ? `Compras líquidas de insiders: ${fmtMoney(top.insider_net_value_30d, top.currency || "USD")}.` : `Score ${Math.round(top.score)} · qualidade ${Math.round(top.quality_pct ?? 0)} · crescimento ${Math.round(top.growth_pct ?? 0)}.`;
     els.briefingCard.innerHTML = `<span class="briefing-signal">${escapeHtml(signal)}</span><small>${escapeHtml(top.ticker)}</small><h3>${escapeHtml(top.name || top.ticker)}</h3><p>${escapeHtml(body || "")}</p><button class="briefing-open" data-ticker="${escapeHtml(top.ticker)}">Abrir dossier →</button>`;
-    els.briefingCard.querySelector(".briefing-open")?.addEventListener("click", () => openDetail(top.ticker));
 
     renderHomeOpportunities(rows, top.ticker);
     renderHomeDailyBrief(rows);
@@ -492,12 +530,145 @@
     if (els.homeAttentionSummary) {
       const ownedCount = portfolioRows.length;
       const highInsider = insider.filter(x=>x.score>=65).length;
+      const portfolio = loadPortfolio();
+      const hasPortfolio = portfolio && Object.keys(portfolio).length > 0;
+
+      const bestCompanies = rows
+        .filter(r => r.zombie !== 'yes' && r.zombie !== true && Number(r.score) >= 55)
+        .map(r => {
+          const q = Number(r.quality_pct ?? r.profitability_pct ?? 0);
+          const v = Number(r.value_pct ?? 0);
+          const g = Number(r.growth_pct ?? 0);
+          const thesis = r.thesis_direction === 'strengthening' ? 8 : r.thesis_direction === 'weakening' ? -6 : 0;
+          const rank = Number(r.score||0)*0.52 + q*0.18 + v*0.15 + g*0.15 + thesis;
+          return {r, rank};
+        })
+        .sort((a,b)=>b.rank-a.rank).slice(0,3);
+
+      const bestFit = hasPortfolio ? rows
+        .filter(r => r.zombie !== 'yes' && r.zombie !== true && Number(r.score) >= 50)
+        .map(r => ({r, pf: portfolioFitSnapshot(r, portfolio, state.data?.stocks || [])}))
+        .filter(x => x.pf && !x.pf.held && Number.isFinite(x.pf.fit))
+        .sort((a,b) => (b.pf.fit + Number(b.r.score||0)*0.18) - (a.pf.fit + Number(a.r.score||0)*0.18))
+        .slice(0,3) : [];
+
+      const risks = portfolioRows
+        .map(r => {
+          let risk = 0; const reasons = [];
+          if (r.thesis_direction === 'weakening') { risk += 40 + Math.min(20, Math.abs(Number(r.thesis_score_delta||0))*2); reasons.push('tese ↓'); }
+          if (r.zombie === 'yes' || r.zombie === true) { risk += 35; reasons.push('zombie'); }
+          if (Number(r.score) < 45) { risk += 18; reasons.push(`score ${Math.round(Number(r.score||0))}`); }
+          const d = Number(r.analyst_days_to_earnings);
+          if (Number.isFinite(d) && d >= 0 && d <= 3) { risk += 10; reasons.push(d===0?'earnings hoje':`earnings ${Math.round(d)}d`); }
+          return {r, risk, reasons};
+        })
+        .filter(x => x.risk > 0).sort((a,b)=>b.risk-a.risk).slice(0,3);
+
+      const lane = (title, sub, body, tone='') => `<section class="attention-lane ${tone}"><header><span><b>${title}</b><small>${sub}</small></span></header><div>${body}</div></section>`;
+      const bestHtml = bestCompanies.length ? bestCompanies.map(x=>briefRowHtml(x.r, `Score ${Math.round(Number(x.r.score||0))} · Q ${Math.round(Number(x.r.quality_pct ?? x.r.profitability_pct ?? 0))}`, 'good')).join('') : `<p class="home-brief-empty">Sem candidatos com dados suficientes.</p>`;
+      const fitHtml = bestFit.length ? bestFit.map(x=>briefRowHtml(x.r, `Fit ${Math.round(x.pf.fit)}/100 · Score ${Math.round(Number(x.r.score||0))}`, x.pf.fit>=75?'good':'neutral')).join('') : `<p class="home-brief-empty">${hasPortfolio?'Sem candidatos com encaixe suficiente neste momento.':'Importa o portfolio para ativar este ranking.'}</p>`;
+      const riskHtml = risks.length ? risks.map(x=>briefRowHtml(x.r, x.reasons.join(' · '), 'bad')).join('') : `<p class="home-brief-empty">Sem riscos prioritários detetados nas posições analisadas.</p>`;
+
       els.homeAttentionSummary.innerHTML = `<div class="home-brief-kpis">
         <div><b>${strengthening.length}</b><span>teses a melhorar</span></div>
         <div><b>${weakening.length}</b><span>teses a piorar</span></div>
         <div><b>${earnings.length}</b><span>earnings ≤7d</span></div>
         <div><b>${highInsider}</b><span>insider opp. ≥65</span></div>
-      </div><p class="home-brief-note">${ownedCount ? `${ownedCount} posições do portfolio têm análise disponível neste briefing.` : 'Importa o portfolio para personalizar este resumo.'}</p>`;
+      </div>
+      <div class="attention-ranking">
+        ${lane('Best Companies','força absoluta multifator',bestHtml,'attention-lane--best')}
+        ${lane('Best Portfolio Fit','boas empresas que melhoram a carteira',fitHtml,'attention-lane--fit')}
+        ${lane('Risks to Review','posições que merecem revisão primeiro',riskHtml,'attention-lane--risk')}
+      </div>
+      <p class="home-brief-note">${ownedCount ? `${ownedCount} posições do portfolio têm análise disponível neste briefing.` : 'Importa o portfolio para personalizar este resumo.'}</p>`;
+    }
+
+    if (els.homeChangeBrief) {
+      const byTicker = new Map();
+      const ensure = r => {
+        if (!byTicker.has(r.ticker)) byTicker.set(r.ticker,{r, events:[]});
+        return byTicker.get(r.ticker);
+      };
+      const add = (r, kind, weight, meta, tone='neutral', direction=0) => ensure(r).events.push({kind,weight,meta,tone,direction});
+
+      rows.forEach(r => {
+        const sd = Number(r.thesis_score_delta);
+        if (Number.isFinite(sd) && Math.abs(sd) >= 1) add(r,'score',Math.abs(sd)*3,`Score ${sd>0?'+':''}${sd.toFixed(1)} vs última atualização`,sd>0?'good':'bad',Math.sign(sd));
+        if (r.thesis_direction === 'changed') add(r,'thesis-change',34,`Mudança de tese${r.thesis_previous_type ? ` · ${r.thesis_previous_type} → ${r.thesis_type||'nova tese'}` : ''}`,'bad',-1);
+        else if (r.thesis_direction === 'strengthening') add(r,'thesis',21,'Tese a reforçar','good',1);
+        else if (r.thesis_direction === 'weakening') add(r,'thesis',25,'Tese a enfraquecer','bad',-1);
+        const id = Number(r.insider_net_value_delta);
+        if (Number.isFinite(id) && Math.abs(id) >= 50000) add(r,'insider',Math.min(26,Math.log10(Math.abs(id)+1)*3),`Insider flow ${id>0?'+':''}${fmtMoney(id,r.currency||'USD')} vs última atualização`,id>0?'good':'bad',Math.sign(id));
+        const er = Number(r.analyst_eps_next_y_revision_delta_pp);
+        if (Number.isFinite(er) && Math.abs(er) >= 0.25) add(r,'eps-revision',Math.min(22,Math.abs(er)*2.5),`Revisão EPS 30d ${er>0?'+':''}${er.toFixed(1)} pp`,er>0?'good':'bad',Math.sign(er));
+        const pt = Number(r.analyst_price_target_upside_delta_pp);
+        if (Number.isFinite(pt) && Math.abs(pt) >= 1) add(r,'target',Math.min(16,Math.abs(pt)),`Upside alvo ${pt>0?'+':''}${pt.toFixed(1)} pp`,pt>0?'good':'bad',Math.sign(pt));
+        if (r.analyst_latest_earnings_date_changed && r.analyst_latest_eps_surprise_pct != null) {
+          const sp=Number(r.analyst_latest_eps_surprise_pct);
+          if (Number.isFinite(sp)) add(r,'earnings',25,`Novo earnings · surpresa EPS ${sp>0?'+':''}${sp.toFixed(1)}%`,sp>=0?'good':'bad',Math.sign(sp));
+        }
+      });
+
+      const classified=[...byTicker.values()].map(x=>{
+        const ev=x.events.sort((a,b)=>b.weight-a.weight);
+        const kinds=new Set(ev.map(e=>e.kind));
+        const sd=Number(x.r.thesis_score_delta||0), er=Number(x.r.analyst_eps_next_y_revision_delta_pp||0);
+        const s7=Number(x.r.thesis_score_delta_7d), s30=Number(x.r.thesis_score_delta_30d);
+        const e7=Number(x.r.analyst_eps_next_y_revision_delta_7d_pp), e30=Number(x.r.analyst_eps_next_y_revision_delta_30d_pp);
+        const has7=Number.isFinite(s7) && x.r.thesis_history_7d_date;
+        const has30=Number.isFinite(s30) && x.r.thesis_history_30d_date;
+        const aligned = ev.filter(e=>e.direction!==0).reduce((a,e)=>a+e.direction,0);
+        let cls='noise', confidence=35;
+        if (kinds.has('thesis-change') || (kinds.has('thesis') && Math.abs(sd)>=3) || (Math.abs(sd)>=5 && Math.abs(er)>=1 && Math.sign(sd)===Math.sign(er))) {
+          cls='structural'; confidence=Math.min(95,70+ev.length*4+Math.min(12,Math.abs(sd)*2));
+        } else if (kinds.has('earnings') || Math.abs(er)>=2 || kinds.has('insider') || Math.abs(sd)>=2) {
+          cls='event'; confidence=Math.min(85,55+ev.length*4+Math.min(10,Math.abs(er)*2));
+        }
+        // Multiple small signals that point the same way are promoted from noise.
+        if(cls==='noise' && ev.length>=3 && Math.abs(aligned)>=2){ cls='event'; confidence=58; }
+
+        // Persistence lens: daily change is interpreted in the context of ~7d and ~30d snapshots.
+        // This deliberately describes persistence, not expected future returns.
+        let persistence='new', persistenceLabel='Nova alteração', persistenceTone='neutral';
+        let persistenceDetail=has7 ? `7d ${s7>=0?'+':''}${s7.toFixed(1)} score` : 'histórico 7d ainda curto';
+        const currentSign = Math.sign(sd || aligned || er);
+        const sign7 = has7 ? Math.sign(s7) : 0;
+        const sign30 = has30 ? Math.sign(s30) : 0;
+        const aligned7 = currentSign && sign7 && currentSign===sign7;
+        const aligned30 = currentSign && sign30 && currentSign===sign30;
+        const reversal = currentSign && ((sign7 && currentSign!==sign7) || (sign30 && currentSign!==sign30));
+        if (has30 && aligned7 && aligned30 && (Math.abs(s30)>=3 || Math.abs(e30)>=1)) {
+          persistence='persistent'; persistenceLabel='Persistente 30d'; persistenceTone=currentSign>0?'good':'bad';
+          persistenceDetail=`7d ${s7>=0?'+':''}${s7.toFixed(1)} · 30d ${s30>=0?'+':''}${s30.toFixed(1)} score`;
+          confidence=Math.min(97,confidence+10);
+          if(cls==='event' && Math.abs(s30)>=5) cls='structural';
+        } else if (has7 && aligned7 && (Math.abs(s7)>=2 || Math.abs(e7)>=0.75)) {
+          persistence='confirming'; persistenceLabel='A confirmar 7d'; persistenceTone=currentSign>0?'good':'bad';
+          persistenceDetail=`7d ${s7>=0?'+':''}${s7.toFixed(1)} score${has30?` · 30d ${s30>=0?'+':''}${s30.toFixed(1)}`:''}`;
+          confidence=Math.min(92,confidence+5);
+        } else if (reversal) {
+          persistence='reversal'; persistenceLabel='Reversão'; persistenceTone='warn';
+          persistenceDetail=`hoje ${sd>=0?'+':''}${sd.toFixed(1)} · ${has7?`7d ${s7>=0?'+':''}${s7.toFixed(1)}`:''}${has30?` · 30d ${s30>=0?'+':''}${s30.toFixed(1)}`:''}`;
+          confidence=Math.max(45,confidence-5);
+        } else if (has30) {
+          persistence='isolated'; persistenceLabel='Isolada'; persistenceTone='neutral';
+          persistenceDetail=`30d ${s30>=0?'+':''}${s30.toFixed(1)} score`;
+        }
+
+        const best=ev[0];
+        const score=(cls==='structural'?100:cls==='event'?55:0)+(best?.weight||0)+(ev.length-1)*3+(persistence==='persistent'?18:persistence==='confirming'?8:persistence==='reversal'?4:0);
+        return {...x,cls,confidence,score,best,persistence,persistenceLabel,persistenceTone,persistenceDetail};
+      });
+      const structural=classified.filter(x=>x.cls==='structural').sort((a,b)=>b.score-a.score).slice(0,5);
+      const events=classified.filter(x=>x.cls==='event').sort((a,b)=>b.score-a.score).slice(0,5);
+      const noiseCount=classified.filter(x=>x.cls==='noise').length;
+      const persistentCount=classified.filter(x=>x.persistence==='persistent' && x.cls!=='noise').length;
+      const confirmingCount=classified.filter(x=>x.persistence==='confirming' && x.cls!=='noise').length;
+      const reversalCount=classified.filter(x=>x.persistence==='reversal' && x.cls!=='noise').length;
+      const group=(label,subtitle,list,cls)=>list.length?`<section class="change-intel-group ${cls}"><header><span><b>${label}</b><small>${subtitle}</small></span><em>${list.length}</em></header><div>${list.map(x=>`<div class="change-intel-item">${briefRowHtml(x.r,x.best.meta,x.best.tone)}<div class="change-temporal-meta"><span class="change-persistence ${x.persistenceTone}">${x.persistenceLabel}</span><small>${x.persistenceDetail}</small><span class="change-confidence">conf. ${Math.round(x.confidence)}%</span></div></div>`).join('')}</div></section>`:'';
+      els.homeChangeBrief.innerHTML = structural.length || events.length
+        ? `<div class="change-intel-summary"><span><b>${structural.length}</b> estruturais</span><span><b>${events.length}</b> eventos</span><span><b>${persistentCount}</b> persistentes 30d</span><span><b>${confirmingCount}</b> a confirmar 7d</span>${reversalCount?`<span><b>${reversalCount}</b> reversões</span>`:''}<span><b>${noiseCount}</b> ruído filtrado</span></div>${group('Mudança estrutural','pode alterar a tese ou o valor económico',structural,'structural')}${group('Evento relevante','merece atenção, mas precisa confirmação',events,'event')}${noiseCount?`<p class="change-noise-note">${noiseCount} oscilações pequenas foram ocultadas. A persistência de 7/30 dias aumenta a confiança; uma reversão reduz a urgência até confirmação.</p>`:''}`
+        : `<p class="home-brief-empty">Ainda não há alterações materiais face à atualização anterior. O motor ignora pequenas oscilações isoladas e fica mais útil após dois ou mais workflows diários.</p>`;
     }
 
     if (els.homePortfolioBrief) {
@@ -533,8 +704,6 @@
       els.homeMarketBrief.innerHTML = `<div class="home-brief-kpis home-brief-kpis--three"><div><b>${rows.length}</b><span>ações analisadas</span></div><div><b>${quality}</b><span>score ≥75</span></div><div><b>${med==null?'—':Math.round(med)}</b><span>score mediano</span></div></div><button class="home-brief-link" data-brief-goto="metals">${escapeHtml(goldText)} · abrir Metals →</button>`;
     }
 
-    document.querySelectorAll('[data-brief-ticker]').forEach(btn=>btn.addEventListener('click',()=>openDetail(btn.dataset.briefTicker)));
-    document.querySelectorAll('[data-brief-goto]').forEach(btn=>btn.addEventListener('click',()=>switchView(btn.dataset.briefGoto)));
   }
 
   function renderHomeOpportunities(rows, featuredTicker) {
@@ -564,7 +733,6 @@
         <span class="home-opportunity-card__open">Abrir dossier →</span>
       </button>`;
     }).join("");
-    els.homeOpportunityStrip.querySelectorAll(".home-opportunity-card").forEach(btn => btn.addEventListener("click", () => openDetail(btn.dataset.ticker)));
   }
 
   function marketOf(ticker) {
@@ -2247,7 +2415,16 @@
     return mapped ? t.slice(0, dot) + mapped : t;
   }
 
-  function parseCsvLine(line) {
+  function detectCsvDelimiter(firstLine) {
+    const comma = (firstLine.match(/,/g) || []).length;
+    const semi = (firstLine.match(/;/g) || []).length;
+    const tab = (firstLine.match(/\t/g) || []).length;
+    if (semi > comma && semi >= tab) return ";";
+    if (tab > comma && tab > semi) return "\t";
+    return ",";
+  }
+
+  function parseCsvLine(line, delimiter = ",") {
     const out = [];
     let cur = "", quoted = false;
     for (let i = 0; i < line.length; i++) {
@@ -2255,7 +2432,7 @@
       if (ch === '"') {
         if (quoted && line[i + 1] === '"') { cur += '"'; i++; }
         else quoted = !quoted;
-      } else if (ch === ',' && !quoted) { out.push(cur.trim()); cur = ""; }
+      } else if (ch === delimiter && !quoted) { out.push(cur.trim()); cur = ""; }
       else cur += ch;
     }
     out.push(cur.trim());
@@ -2287,9 +2464,11 @@
   }
 
   function parseCsvPortfolio(text) {
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    const cleanText = String(text || "").replace(/^\uFEFF/, "");
+    const lines = cleanText.split(/\r?\n/).filter(l => l.trim());
     if (!lines.length) return {};
-    const header = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+    const delimiter = detectCsvDelimiter(lines[0]);
+    const header = parseCsvLine(lines[0], delimiter).map(h => h.trim().toLowerCase());
     const tickerIdx = header.findIndex(h => ["ticker", "symbol"].includes(h));
     const qtyIdx = header.findIndex(h => ["quantity", "qty", "shares", "units"].includes(h));
     const valueIdx = header.findIndex(h => ["value", "amount", "market_value", "market value"].includes(h));
@@ -2306,7 +2485,7 @@
     if (qtyIdx !== -1 && costIdx !== -1) {
       const txByTicker = {};
       for (let i = 1; i < lines.length; i++) {
-        const cols = parseCsvLine(lines[i]);
+        const cols = parseCsvLine(lines[i], delimiter);
         const rawTicker = cols[tickerIdx];
         if (!rawTicker) continue;
         const ticker = normalizeTicker(rawTicker);
@@ -2375,7 +2554,7 @@
     // Generic position CSV fallback.
     const portfolio = {};
     for (let i = 1; i < lines.length; i++) {
-      const cols = parseCsvLine(lines[i]);
+      const cols = parseCsvLine(lines[i], delimiter);
       const rawTicker = cols[tickerIdx];
       if (!rawTicker) continue;
       const ticker = normalizeTicker(rawTicker);
@@ -2413,16 +2592,27 @@
     return finalizePortfolio(portfolio);
   }
 
+  function setPortfolioImportStatus(message = "", tone = "neutral") {
+    if (!els.portfolioImportStatus) return;
+    els.portfolioImportStatus.textContent = message;
+    els.portfolioImportStatus.dataset.tone = tone;
+    els.portfolioImportStatus.hidden = !message;
+  }
+
   function handlePortfolioFile(file) {
+    if (!file) return;
+    setPortfolioImportStatus(`A importar ${file.name}…`, "neutral");
     const reader = new FileReader();
+    reader.onerror = () => setPortfolioImportStatus("Não foi possível ler o ficheiro selecionado.", "bad");
     reader.onload = () => {
       try {
-        const text = String(reader.result);
+        const text = String(reader.result || "");
         const portfolio = file.name.toLowerCase().endsWith(".json")
           ? parseJsonPortfolio(text)
           : parseCsvPortfolio(text);
         const tickers = Object.keys(portfolio);
         if (!tickers.length) {
+          setPortfolioImportStatus("Não encontrei posições válidas neste ficheiro.", "bad");
           alert("Não encontrei nenhuma posição válida no ficheiro.");
           return;
         }
@@ -2430,11 +2620,11 @@
         const universeTickers = new Set((state.data?.stocks || []).map(r => r.ticker));
         const matched = tickers.filter(t => universeTickers.has(t)).length;
         const missed = tickers.length - matched;
+        setPortfolioImportStatus(`✓ ${tickers.length} posições importadas · ${matched} com análise disponível${missed ? ` · ${missed} aguardam cobertura` : ""}.`, "good");
         renderPortfolio();
-        if (missed > 0) {
-          alert(`Importado: ${tickers.length} posições.\n${matched} já têm análise disponível; ${missed} ainda aguardam cobertura de dados.`);
-        }
+        if (state.activeView !== "portfolio") switchView("portfolio");
       } catch (e) {
+        setPortfolioImportStatus(`Erro ao importar: ${e.message}`, "bad");
         alert("Erro a ler o ficheiro: " + e.message);
         console.error(e);
       }
@@ -5078,15 +5268,20 @@
   on(els.exportAlertWatchlist, "click", () => { exportAlertWatchlist(); setTimeout(()=>alert('Watchlist exportada como alert_watchlist.json. Agora substitui data/alert_watchlist.json no GitHub e faz Commit changes. As instruções completas estão logo abaixo deste botão.'),120); });
   refreshInsiderAlertUi();
 
+  on(els.portfolioImportTrigger, "click", () => {
+    if (!els.portfolioFile) return;
+    els.portfolioFile.value = "";
+    els.portfolioFile.click();
+  });
   on(els.portfolioFile, "change", (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) handlePortfolioFile(file);
-    e.target.value = ""; // allow re-selecting the same file
   });
 
   on(els.portfolioClear, "click", () => {
     if (!confirm("Limpar todo o portfolio importado/marcado?")) return;
-    lsSet(LS_PORTFOLIO, {});
+    try { localStorage.setItem(LS_PORTFOLIO, "{}"); localStorage.setItem(LS_PORTFOLIO_BACKUP, "{}"); } catch {}
+    setPortfolioImportStatus("Portfolio removido deste dispositivo.", "neutral");
     renderPortfolio();
   });
 
@@ -5124,7 +5319,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.71.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.76.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.71.0">
+<link rel="stylesheet" href="style.css?v=0.76.0">
 </head>
 <body>
 
@@ -93,8 +93,12 @@
 
       <section class="daily-briefing-stack" aria-label="Briefing diário detalhado">
         <details class="home-brief-detail" open>
-          <summary><span><b>Hoje merece atenção</b><small>O essencial do dia num único bloco</small></span><i>⌄</i></summary>
+          <summary><span><b>Hoje merece atenção</b><small>Best Companies · Portfolio Fit · Risks to Review</small></span><i>⌄</i></summary>
           <div id="home-attention-summary" class="home-brief-body"><p class="home-brief-empty">A preparar o resumo diário…</p></div>
+        </details>
+        <details class="home-brief-detail">
+          <summary><span><b>Change Intelligence</b><small>Estrutural · evento relevante · ruído filtrado</small></span><i>⌄</i></summary>
+          <div id="home-change-brief" class="home-brief-body"></div>
         </details>
         <details class="home-brief-detail">
           <summary><span><b>Portfolio & teses</b><small>Posições cuja evidência melhorou ou piorou</small></span><i>⌄</i></summary>
@@ -446,11 +450,10 @@
 
     <section id="view-portfolio" class="view">
       <div class="import-bar">
-        <label class="import-btn">
-          Importar portfolio (CSV/JSON)
-          <input type="file" id="portfolio-file" accept=".csv,.json" hidden>
-        </label>
+        <button class="import-btn" id="portfolio-import-trigger" type="button">Importar portfolio (CSV/JSON)</button>
+        <input type="file" id="portfolio-file" accept=".csv,.json,text/csv,application/json" class="visually-hidden-file-input">
         <button class="import-btn import-btn--secondary" id="portfolio-clear">Limpar portfolio</button>
+        <div id="portfolio-import-status" class="portfolio-import-status" role="status" aria-live="polite"></div>
       </div>
       <div id="exposure-panel" class="exposure-panel"></div>
       <div id="portfolio-summary" class="portfolio-summary"></div>
@@ -534,6 +537,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.71.0"></script>
+<script src="app.js?v=0.76.0"></script>
 </body>
 </html>

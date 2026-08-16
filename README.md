@@ -1,3 +1,7 @@
+# Finscanner v0.76.0 — Interaction & Portfolio Import Repair
+
+Repair release: delegated navigation for dynamic Home buttons, explicit iOS-safe portfolio file picker, DivTracker Combined CSV compatibility, portfolio localStorage backup/restore, and visible import status.
+
 ## v0.59.0 — Company Dossier Architecture
 
 - Reorganiza o dossier individual numa sequência de investigação: Snapshot → Score → Mudanças → Growth → Profitability → Balance → Valuation → Dividendos → Insiders → Estimates → Catalysts → Tese.
@@ -520,3 +524,30 @@ Comparação persistente até 8 empresas, BEST por pilar, composite multifator, 
 - Restored a warmer cream premium light theme on iPhone instead of hard-coded pure white legacy mobile surfaces.
 - Added Home → “Melhor encaixe na carteira”, ranking non-held stocks by Portfolio Fit when a portfolio is imported.
 - Preserved dark/system appearance, autocomplete, dossier navigation, workflows and data schemas.
+
+
+## v0.73.0 — Daily Attention Ranking
+- Home / Briefing reorganizado em três prioridades executivas: Best Companies, Best Portfolio Fit e Risks to Review.
+- Best Companies combina score, quality, value, growth e direção da tese sem alterar o Finscanner Score.
+- Best Portfolio Fit cruza encaixe estrutural com qualidade mínima e exclui posições já detidas diretamente.
+- Risks to Review prioriza posições da carteira com tese a deteriorar, classificação Zombie, score baixo e/ou earnings iminentes.
+- Rankings compactos e interativos; tocar numa empresa abre diretamente o Company Dossier.
+- Assets e Service Worker sincronizados em v0.73.0.
+
+
+## v0.73.0 — Temporal Daily Briefing
+A Home inclui agora “O que mudou”, comparando a atualização atual com o snapshot diário anterior para score/tese, insider flow, revisões de EPS, price-target upside e novos earnings quando existe histórico suficiente.
+
+
+## v0.75.0 — Change Intelligence Engine
+- O briefing temporal deixa de tratar todos os deltas da mesma forma.
+- Classifica alterações como **Mudança estrutural**, **Evento relevante** ou **Ruído**.
+- Mudanças de tese, score material confirmado por revisões e sinais alinhados recebem prioridade estrutural.
+- Earnings, insider flow, revisões e deltas moderados aparecem como eventos a confirmar.
+- Oscilações pequenas e isoladas são filtradas para reduzir falsos alarmes.
+- A Home mostra confiança da classificação e quantos sinais foram ocultados como ruído.
+- Assets e Service Worker sincronizados em v0.75.0.
+
+
+## v0.75.0 — Multi-Horizon Change Persistence
+Change Intelligence now uses the persisted thesis history at approximately 7 and 30 days to separate a one-day event from evidence that is persisting, confirming or reversing. Run the daily data workflow after installation to populate the new derived fields.
