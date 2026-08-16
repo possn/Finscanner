@@ -162,8 +162,10 @@ def main():
 
     us_tickers = [s.ticker for s in scored if "." not in s.ticker and s.quote_type != "ETF"]
     insider_map = annotate_insiders(us_tickers)
-    insider_active_tickers = [t for t, info in insider_map.items() if info.get("transactions_365d")]
-    insider_price_map = fetch_insider_prices(insider_active_tickers)
+    # v0.97: price history is dossier infrastructure, not only an insider helper.
+    # Fetch weekly 1y histories in Yahoo batches for the live universe + complete ETF catalogue.
+    price_history_tickers = sorted(set(all_tickers) | set(ETF_UNIVERSE.keys()))
+    insider_price_map = fetch_insider_prices(price_history_tickers)
     raw_by_ticker = {r.ticker: r for r in raw}
     today = datetime.date.today().isoformat()
     thesis_history = thesis_history_mod.load(THESIS_HISTORY_PATH)
@@ -211,7 +213,17 @@ def main():
         row["insider_sell_value_365d"] = insider.get("sell_value_365d")
         row["insider_net_value_365d"] = insider.get("net_value_365d")
         row["insider_transactions_365d"] = insider.get("transactions_365d", [])
-        row["insider_price_history_1y"] = insider_price_map.get(s.ticker, [])
+        _hist = insider_price_map.get(s.ticker) or (previous_etfs.get(s.ticker, {}) if row.get("quote_type") == "ETF" else previous_equities.get(s.ticker, {})).get("price_history_1y") or []
+        row["price_history_1y"] = _hist
+        row["insider_price_history_1y"] = _hist  # backwards-compatible chart alias
+        if row.get("current_price") is None and _hist:
+            row["current_price"] = _hist[-1].get("close")
+        if row.get("quote_type") == "ETF" and len(_hist) >= 2:
+            try:
+                _a=float(_hist[0].get("close")); _b=float(_hist[-1].get("close"))
+                row["fund_return_1y_pct"] = round((_b/_a-1)*100, 2) if _a else None
+            except Exception:
+                row["fund_return_1y_pct"] = None
         row["insider_reason"] = insider.get("reason")
         row["insider_detail_filings_parsed"] = insider.get("detail_filings_parsed")
 
@@ -347,6 +359,17 @@ def main():
             carried["fund_category"] = meta.get("sector") or carried.get("fund_category")
             if meta.get("ucits"):
                 carried["fund_ucits"] = meta.get("ucits")
+            _hist = insider_price_map.get(ticker) or carried.get("price_history_1y") or carried.get("insider_price_history_1y") or []
+            carried["price_history_1y"] = _hist
+            carried["insider_price_history_1y"] = _hist
+            if carried.get("current_price") is None and _hist:
+                carried["current_price"] = _hist[-1].get("close")
+            if len(_hist) >= 2:
+                try:
+                    _a=float(_hist[0].get("close")); _b=float(_hist[-1].get("close"))
+                    carried["fund_return_1y_pct"] = round((_b/_a-1)*100, 2) if _a else None
+                except Exception:
+                    pass
             carried["pipeline_status"] = "catalog_carried_forward"
             rows.append(carried)
             continue
@@ -361,7 +384,6 @@ def main():
             "score": None,
             "data_confidence": "metadata_only",
             "data_coverage_pct": 0,
-            "current_price": None,
             "expense_ratio": None,
             "fund_total_assets": None,
             "top_holdings": [],
@@ -371,11 +393,15 @@ def main():
             "fund_style": meta.get("style"),
             "fund_category": meta.get("sector"),
             "fund_ucits": meta.get("ucits"),
+            "price_history_1y": insider_price_map.get(ticker, []),
+            "insider_price_history_1y": insider_price_map.get(ticker, []),
+            "fund_return_1y_pct": (round((insider_price_map[ticker][-1]["close"] / insider_price_map[ticker][0]["close"] - 1) * 100, 2) if len(insider_price_map.get(ticker, [])) >= 2 and insider_price_map[ticker][0].get("close") else None),
+            "current_price": (insider_price_map[ticker][-1].get("close") if insider_price_map.get(ticker) else None),
             "pipeline_status": "catalog_only",
         })
 
     payload = {
-        "schema_version": 510,
+        "schema_version": 511,
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
         "data_quality": {
             "portfolio_extra_requested": len(portfolio_extra),
