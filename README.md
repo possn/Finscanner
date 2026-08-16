@@ -1,4 +1,10 @@
-# Finscanner v0.93.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
+# Finscanner v0.96.0 — Smart Money Dossier
+
+## v0.96.0 — Smart Money dentro das 5 tabs
+- Mantém a barra de tabs sempre visível no iPhone, acima da navegação global.
+- Overview · Growth · Earnings · Pillars · Deep Dive · Final Take deixam de desaparecer ao fazer scroll.
+- Acrescenta espaço inferior ao dossier para nenhum conteúdo ficar escondido atrás da barra.
+
 
 A área **Stocks** passa a seguir a mesma arquitetura simples que a área Funds:
 
@@ -7,6 +13,16 @@ A área **Stocks** passa a seguir a mesma arquitetura simples que a área Funds:
 3. **Melhores adições** — empresas que ainda não estão na carteira e combinam qualidade absoluta com Portfolio Fit.
 
 A exploração avançada (filtros, Sector Intelligence, perspetivas e tabela completa) continua disponível dentro de uma dropbox única.
+
+
+## v0.94.0 — Finscanner AI Analyst
+
+- Company Dossier mantém as tabs Overview / Growth / Earnings / Pillars / Deep Dive / Final Take.
+- Final Take passa a poder pedir uma análise narrativa server-side a um LLM.
+- O payload inclui fundamentais, valuation, earnings/estimates, insiders, tese/momentum, séries disponíveis e contexto do portfolio.
+- A análise retorna JSON estruturado: resumo, apreciação, confiança, argumentos a favor/contra, pontos a vigiar, contexto da carteira e lacunas de dados.
+- A chave Gemini fica exclusivamente num Cloudflare Worker. A PWA guarda apenas o URL do Worker em localStorage.
+- Incluído `worker/ai-analyst-worker.js`, `worker/wrangler.toml` e instruções de deploy.
 
 ## Ficheiros a substituir
 
@@ -26,7 +42,7 @@ Não é necessário alterar workflows nem ficheiros `data/` nesta release.
 - A tabela principal deixa de mostrar grades A/B/C/D e abreviações Q/G/V: mostra scores 0–100 com nomes Qualidade, Crescimento e Valor.
 - Portfolio Radar também usa nomes explícitos.
 
-## v0.93.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
+## v0.93.0 — Dossier Tabs + Final Take
 
 - Discovery no longer treats the raw Finscanner Score as a complete ranking. Ordering now also considers data confidence and company size, with strong penalties for low-confidence microcaps and financial-risk flags.
 - "Empresas sólidas" becomes quality-first, so an anomalous Stability/Value sub-score cannot by itself push a tiny speculative company above an established high-quality company.

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.93.0">
+<link rel="stylesheet" href="style.css?v=0.96.0">
 </head>
 <body>
 
@@ -583,6 +583,11 @@
           <div><span class="eyebrow">MOVIMENTO</span><h3>Reduzir animações</h3><p>Útil se preferires uma interface mais estática.</p></div>
           <button id="settings-motion" class="settings-switch" role="switch" aria-checked="false"><span></span></button>
         </div>
+        <div class="settings-group settings-ai-group">
+          <div><span class="eyebrow">AI ANALYST</span><h3>Cloudflare Worker</h3><p>A chave Gemini fica apenas no Worker. Aqui guardas somente o endereço HTTPS do teu endpoint.</p></div>
+          <div class="settings-ai-form"><input id="settings-ai-url" type="url" placeholder="https://finscanner-ai.seu-subdominio.workers.dev" autocomplete="url" spellcheck="false"><button id="settings-ai-save" type="button">Guardar</button></div>
+          <small id="settings-ai-status" class="settings-ai-status" role="status" aria-live="polite"></small>
+        </div>
         <div class="settings-note"><strong>Dark mode protegido</strong><p>Os novos módulos usam os mesmos tokens de contraste. Esta definição aplica-se a Home, Stocks, Funds, Portfolio, Smart Money e dossiers.</p></div>
       </section>
     </section>
@@ -608,6 +613,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.93.0"></script>
+<script src="app.js?v=0.96.0"></script>
 </body>
 </html>

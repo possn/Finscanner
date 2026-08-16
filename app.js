@@ -108,6 +108,9 @@
     settingsContrast: document.getElementById("settings-contrast"),
     settingsTextSize: document.getElementById("settings-text-size"),
     settingsMotion: document.getElementById("settings-motion"),
+    settingsAiUrl: document.getElementById("settings-ai-url"),
+    settingsAiSave: document.getElementById("settings-ai-save"),
+    settingsAiStatus: document.getElementById("settings-ai-status"),
     insiderAlertToggle: document.getElementById("insider-alert-toggle"),
     insiderAlertStatus: document.getElementById("insider-alert-status"),
     exportAlertWatchlist: document.getElementById("export-alert-watchlist"),
@@ -143,7 +146,7 @@
     smartmoney: { title: "Smart Money", sub: "atividade de insiders · SEC Form 4" },
     theses: { title: "Teses", sub: "arquétipos quantitativos · hipóteses explicáveis" },
     compare: { title: "Comparar", sub: "comparação multifator lado a lado" },
-    settings: { title: "Definições", sub: "aparência · contraste · acessibilidade" },
+    settings: { title: "Definições", sub: "aparência · contraste · AI Analyst" },
   };
 
   // ---------- localStorage: portfolio (owned) + watchlist (starred) ----------
@@ -413,6 +416,18 @@
   const LS_CONTRAST = "finscanner:contrast";
   const LS_TEXT_SIZE = "finscanner:textSize";
   const LS_REDUCE_MOTION = "finscanner:reduceMotion";
+  const LS_AI_ANALYST_URL = "finscanner:aiAnalystUrl";
+  const LS_AI_TAKE_PREFIX = "finscanner:aiTake:";
+
+  function aiAnalystUrl(){
+    const configured=(localStorage.getItem(LS_AI_ANALYST_URL)||"").trim();
+    const embedded=String(window.FINSCANNER_AI_ANALYST_URL||"").trim();
+    return configured || embedded;
+  }
+  function normalizeWorkerUrl(v){ return String(v||"").trim().replace(/\/+$/,""); }
+  function aiTakeCacheKey(ticker){ return LS_AI_TAKE_PREFIX + String(ticker||"").toUpperCase(); }
+  function loadAiTake(ticker){ try{return JSON.parse(localStorage.getItem(aiTakeCacheKey(ticker))||"null");}catch(_){return null;} }
+  function saveAiTake(ticker,obj){ try{localStorage.setItem(aiTakeCacheKey(ticker),JSON.stringify(obj));}catch(_){} }
   const systemThemeQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 
   function currentThemePreference(){ return localStorage.getItem(LS_THEME) || "system"; }
@@ -429,6 +444,7 @@
     els.settingsTextSize?.querySelectorAll('[data-text-choice]').forEach(b=>b.classList.toggle('is-active',b.dataset.textChoice===text));
     const motion=localStorage.getItem(LS_REDUCE_MOTION)==='true';
     if(els.settingsMotion){els.settingsMotion.classList.toggle('is-active',motion);els.settingsMotion.setAttribute('aria-checked',String(motion));}
+    if(els.settingsAiUrl) els.settingsAiUrl.value=aiAnalystUrl();
   }
   function applyAppearance() {
     const pref=currentThemePreference(), theme=resolvedTheme(pref);
@@ -449,6 +465,13 @@
   els.settingsContrast?.querySelectorAll('[data-contrast-choice]').forEach(btn=>on(btn,'click',()=>{localStorage.setItem(LS_CONTRAST,btn.dataset.contrastChoice);applyAppearance();}));
   els.settingsTextSize?.querySelectorAll('[data-text-choice]').forEach(btn=>on(btn,'click',()=>{localStorage.setItem(LS_TEXT_SIZE,btn.dataset.textChoice);applyAppearance();}));
   on(els.settingsMotion,'click',()=>{const next=localStorage.getItem(LS_REDUCE_MOTION)!=='true';localStorage.setItem(LS_REDUCE_MOTION,String(next));applyAppearance();});
+  on(els.settingsAiSave,'click',()=>{
+    const url=normalizeWorkerUrl(els.settingsAiUrl?.value);
+    if(url && !/^https:\/\//i.test(url)){ if(els.settingsAiStatus) els.settingsAiStatus.textContent='Usa um endereço HTTPS do Cloudflare Worker.'; return; }
+    if(url) localStorage.setItem(LS_AI_ANALYST_URL,url); else localStorage.removeItem(LS_AI_ANALYST_URL);
+    if(els.settingsAiStatus) els.settingsAiStatus.textContent=url?'AI Analyst configurado neste dispositivo.':'Configuração AI removida.';
+    syncSettingsUi();
+  });
   systemThemeQuery?.addEventListener?.('change',()=>{if(currentThemePreference()==='system')applyAppearance();});
   initTheme();
 
@@ -2414,7 +2437,7 @@
   }
 
   const DOSSIER_TABS = [
-    ['overview','Overview'],['growth','Growth'],['earnings','Earnings'],['pillars','Pillars'],['deep','Deep Dive'],['take','Final Take']
+    ['overview','Overview'],['growth','Growth'],['earnings','Earnings'],['pillars','Pillars'],['deep','Deep Dive']
   ];
 
   function dossierNavHtml() {
@@ -2449,6 +2472,71 @@
     }, true);
   }
 
+  function compactSeries(arr, limit=8){
+    if(!Array.isArray(arr)) return [];
+    return arr.slice(-limit).map(x=>({date:x?.date||x?.period||x?.end||null,value:x?.value??x?.reportedValue??x?.raw??x}));
+  }
+  function stockAiEvidence(r){
+    const portfolio=loadPortfolio();
+    const pos=portfolio?.[r.ticker]||null;
+    const fit=portfolio ? portfolioFitSnapshot(r,portfolio,state.data?.stocks||[]) : null;
+    const action=pos ? stockActionSuggestion(r,portfolio,state.data?.stocks||[]) : null;
+    const history=state.thesisHistory?.[r.ticker]||state.history?.[r.ticker]||null;
+    const tx=Array.isArray(r.insider_transactions_365d)?r.insider_transactions_365d.slice(0,20):[];
+    return {
+      generated_at: state.data?.generated_at||null,
+      identity:{ticker:r.ticker,name:r.name,sector:r.sector,industry:r.industry,market_cap:r.market_cap,currency:r.currency,current_price:r.current_price,exchange:r.exchange||r.market},
+      score:{finscanner:r.score,quality:r.quality_pct??r.profitability_pct,growth:r.growth_pct,value:r.value_pct,stability:r.stability_pct,profitability:r.profitability_pct,cash:r.cash_pct,verdict:r.verdict,score_model:r.score_model,data_coverage:r.data_coverage_pct??r.coverage_pct,confidence:r.confidence},
+      fundamentals:{revenue_growth:r.revenue_growth,revenue_yoy_latest:r.revenue_yoy_latest,revenue_yoy_acceleration_pp:r.revenue_yoy_acceleration_pp,earnings_growth:r.earnings_growth,eps_yoy_latest:r.eps_yoy_latest,earnings_quarterly_growth:r.earnings_quarterly_growth,gross_margin:r.gross_margin,operating_margin:r.operating_margin,profit_margin:r.profit_margin,roe:r.roe,roa:r.roa,roce_proxy:r.roce_proxy,free_cash_flow:r.free_cash_flow,fcf_yield:r.fcf_yield,net_cash:r.net_cash,debt_to_equity:r.debt_to_equity,interest_coverage:r.interest_coverage,current_ratio:r.current_ratio,quick_ratio:r.quick_ratio,diluted_shares_yoy:r.diluted_shares_yoy,repurchases_last_quarter:r.repurchases_last_quarter,dividend_yield:r.dividend_yield,payout_ratio:r.payout_ratio,dividend_fcf_coverage:r.dividend_fcf_coverage},
+      valuation:{trailing_pe:r.trailing_pe,forward_pe:r.forward_pe,price_to_book:r.price_to_book,enterprise_to_ebitda:r.enterprise_to_ebitda,peg_ratio:r.peg_ratio,forward_pe_vs_sector_pct:r.forward_pe_vs_sector_pct,sector_forward_pe_median:r.sector_forward_pe_median,peer_count:r.peer_count},
+      earnings:{days_to_earnings:r.analyst_days_to_earnings,next_earnings_date:r.analyst_next_earnings_date,last_eps_actual:r.analyst_last_eps_actual,last_eps_estimate:r.analyst_last_eps_estimate,last_eps_surprise_pct:r.analyst_last_eps_surprise_pct,last_revenue_actual:r.analyst_last_revenue_actual,last_revenue_estimate:r.analyst_last_revenue_estimate,last_revenue_surprise_pct:r.analyst_last_revenue_surprise_pct,eps_revision_30d_pct:r.analyst_eps_revision_30d_pct,target_mean:r.analyst_target_mean,target_upside_pct:r.analyst_target_upside_pct},
+      insiders:{net_value_30d:r.insider_net_value_30d,buy_count_30d:r.insider_buy_count_30d,sell_count_30d:r.insider_sell_count_30d,transactions:tx.map(t=>({date:t.date,code:t.code,owner:t.owner||t.insider_name,role:t.role,shares:t.shares,price:t.price,value:t.value}))},
+      thesis:{direction:r.thesis_direction,current:r.thesis_current||r.thesis_label||r.thesis,previous:r.thesis_previous,momentum:r.thesis_momentum_score,momentum_label:r.thesis_momentum_label,momentum_7d:r.thesis_momentum_7d,momentum_30d:r.thesis_momentum_30d},
+      trends:{quarterly_revenue:compactSeries(r.quarterly_revenue),quarterly_eps:compactSeries(r.quarterly_eps),quarterly_rnd:compactSeries(r.quarterly_rnd),history},
+      portfolio:pos?{owned:true,position:pos,fit:fit?{score:fit.fit,label:fit.label,reasons:fit.reasons,sector_pct:fit.sectorPct,etf_hidden_pct:fit.hiddenPct,direct_pct:fit.directPct}:null,local_suggestion:action?{label:action.label,confidence:action.confidence,reasons:action.reasons}:null}:{owned:false,fit:fit?{score:fit.fit,label:fit.label,reasons:fit.reasons,sector_pct:fit.sectorPct,etf_hidden_pct:fit.hiddenPct,direct_pct:fit.directPct}:null}
+    };
+  }
+
+  function aiTakePanelHtml(r){
+    const cached=loadAiTake(r.ticker);
+    const configured=!!aiAnalystUrl();
+    if(cached?.analysis){
+      const a=cached.analysis;
+      const list=(xs)=>`<ul>${(Array.isArray(xs)&&xs.length?xs:['—']).slice(0,5).map(x=>`<li>${escapeHtml(String(x))}</li>`).join('')}</ul>`;
+      return `<div class="ai-analyst-card" data-ai-card><div class="ai-analyst-head"><div><span class="eyebrow">FINSCANNER AI ANALYST</span><h4>${escapeHtml(a.headline||'Análise integrada')}</h4></div><span class="ai-confidence">${Number.isFinite(Number(a.confidence))?Math.round(Number(a.confidence))+'%':'—'}</span></div><p class="ai-summary">${escapeHtml(a.summary||'')}</p><div class="ai-verdict"><b>${escapeHtml(a.verdict_label||a.verdict||'Apreciação')}</b><span>${escapeHtml(a.portfolio_note||'')}</span></div><div class="ai-columns"><div><b>A favor</b>${list(a.bull_case)}</div><div><b>Contra</b>${list(a.bear_case)}</div><div><b>Vigiar</b>${list(a.watch)}</div></div>${Array.isArray(a.data_gaps)&&a.data_gaps.length?`<details><summary>Limitações dos dados</summary>${list(a.data_gaps)}</details>`:''}<div class="ai-actions"><button type="button" data-ai-regenerate="${escapeHtml(r.ticker)}">Atualizar análise</button><small>${cached.generated_at?`gerado ${escapeHtml(new Date(cached.generated_at).toLocaleString('pt-PT'))}`:''}</small></div></div>`;
+    }
+    return `<div class="ai-analyst-card ai-analyst-empty" data-ai-card><span class="eyebrow">FINSCANNER AI ANALYST</span><h4>Análise integrada por LLM</h4><p>O modelo recebe apenas a evidência estruturada que o Finscanner já recolheu: fundamentais, valuation, earnings, estimates, insiders, tese, tendências e contexto da tua carteira. Não navega na web nem inventa dados em falta.</p>${configured?`<button type="button" class="ai-primary" data-ai-generate="${escapeHtml(r.ticker)}">Gerar análise AI</button>`:`<button type="button" class="ai-primary" data-ai-configure>Configurar AI Analyst</button><small>É necessário indicar o URL do Worker em Definições.</small>`}<div class="ai-status" data-ai-status></div></div>`;
+  }
+
+  async function runAiAnalysis(ticker, force=false){
+    const r=(state.data?.stocks||[]).find(x=>String(x.ticker).toUpperCase()===String(ticker).toUpperCase());
+    if(!r) return;
+    const url=aiAnalystUrl();
+    if(!url){ els.detail.hidden=true; switchView('settings'); setTimeout(()=>els.settingsAiUrl?.focus(),100); return; }
+    const card=els.detailContent?.querySelector('[data-ai-card]');
+    const status=card?.querySelector('[data-ai-status]');
+    if(status) status.textContent='A analisar toda a evidência disponível…';
+    card?.classList.add('is-loading');
+    try{
+      const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'analyze_stock',force,evidence:stockAiEvidence(r)})});
+      const body=await resp.json().catch(()=>({}));
+      if(!resp.ok) throw new Error(body.error||`HTTP ${resp.status}`);
+      const stored={generated_at:new Date().toISOString(),analysis:body.analysis||body,model:body.model||null};
+      saveAiTake(r.ticker,stored);
+      openDetail(r.ticker); showDossierTab('take');
+    }catch(err){
+      card?.classList.remove('is-loading');
+      if(status) status.textContent=`Não foi possível gerar a análise: ${err.message||err}`;
+    }
+  }
+
+  function bindAiAnalyst(r){
+    if(!els.detailContent) return;
+    els.detailContent.querySelectorAll('[data-ai-generate]').forEach(b=>b.addEventListener('click',()=>runAiAnalysis(r.ticker,false)));
+    els.detailContent.querySelectorAll('[data-ai-regenerate]').forEach(b=>b.addEventListener('click',()=>runAiAnalysis(r.ticker,true)));
+    els.detailContent.querySelectorAll('[data-ai-configure]').forEach(b=>b.addEventListener('click',()=>{els.detail.hidden=true;switchView('settings');setTimeout(()=>els.settingsAiUrl?.focus(),100);}));
+  }
+
   function finalTakeHtml(r){
     const portfolio=loadPortfolio();
     const action=portfolio&&portfolio[r.ticker]?stockActionSuggestion(r,portfolio,state.data?.stocks||[]):null;
@@ -2471,18 +2559,34 @@
     if(Number.isFinite(sc)&&sc>=70&&positives.length>=2&&!risks.length) take='Perfil multifator forte. A evidência atual é favorável, mas a decisão deve continuar dependente de valuation, catalisadores e contexto da carteira.';
     else if(risks.length>=2) take='A relação risco/qualidade merece cautela. Há sinais que justificam revisão antes de aumentar exposição.';
     else if(positives.length>=2) take='Há vários fatores favoráveis, mas ainda existem pontos que precisam de confirmação antes de tratar a tese como forte.';
-    return `<section class="final-take-card dossier-block" data-tab-panel="take"><span class="eyebrow">FINSCANNER TAKE</span><h3>${escapeHtml(action?.label || 'Apreciação final')}</h3><p class="final-take-lead">${escapeHtml(take)}</p>${action?`<div class="final-take-action ${action.tone}"><b>Sugestão de triagem: ${escapeHtml(action.label)}</b><span>confiança ${escapeHtml(action.confidence)}</span><p>${escapeHtml(action.reasons.join(' · '))}</p></div>`:''}<div class="final-take-columns"><div><b>A favor</b><ul>${(positives.length?positives:['sem vantagem forte identificada']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><b>Riscos</b><ul>${(risks.length?risks:['sem risco estrutural dominante identificado']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><b>O que vigiar</b><ul>${(watch.length?watch:['próxima atualização de fundamentais e tese']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div></div><div class="ai-ready-note"><b>Análise LLM</b><p>Este bloco usa apenas regras explicáveis locais. A mesma ficha pode ser enviada a um LLM server-side para produzir uma apreciação narrativa final sem expor a chave API no iPhone.</p></div></section>`;
+    return `<section class="final-take-card dossier-block"><span class="eyebrow">FINSCANNER TAKE</span><h3>${escapeHtml(action?.label || 'Apreciação final')}</h3><p class="final-take-lead">${escapeHtml(take)}</p>${action?`<div class="final-take-action ${action.tone}"><b>Sugestão de triagem: ${escapeHtml(action.label)}</b><span>confiança ${escapeHtml(action.confidence)}</span><p>${escapeHtml(action.reasons.join(' · '))}</p></div>`:''}<div class="final-take-columns"><div><b>A favor</b><ul>${(positives.length?positives:['sem vantagem forte identificada']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><b>Riscos</b><ul>${(risks.length?risks:['sem risco estrutural dominante identificado']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><b>O que vigiar</b><ul>${(watch.length?watch:['próxima atualização de fundamentais e tese']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div></div>${aiTakePanelHtml(r)}</section>`;
   }
 
   function assignDossierPanels(){
     const q=(sel)=>[...els.detailContent.querySelectorAll(sel)];
     const mark=(sel,tab)=>q(sel).forEach(el=>{el.dataset.tabPanel=tab; el.classList.add('dossier-tab-panel');});
-    mark('.verdict-panel, #dossier-changes, .score-model-note, .owned-toggle, .stock-portfolio-fit-box','overview');
+
+    // Overview is deliberately short: current verdict, recent change, portfolio context and final take.
+    mark('.verdict-panel, #dossier-changes, .owned-toggle, .stock-portfolio-fit-box, .final-take-card','overview');
+    // Growth is the trajectory screen.
     mark('#dossier-growth','growth');
+    // Earnings groups the flash, estimates and catalysts.
     mark('#dossier-earnings-flash, #dossier-estimates, #dossier-catalysts','earnings');
-    mark('#dossier-score, #dossier-profitability, #dossier-balance, #dossier-valuation, #dossier-dividends, #dossier-insiders','pillars');
-    mark('.legacy-metrics, #dossier-thesis, .detail-row, .detail-note','deep');
-    const intro=els.detailContent.querySelector('.dossier-flow-intro'); if(intro){intro.dataset.tabPanel='deep'; intro.classList.add('dossier-tab-panel');}
+    // Pillars groups the score components and the core business/financial blocks.
+    mark('#dossier-score, #dossier-profitability, #dossier-balance, #dossier-valuation, #dossier-dividends, #dossier-insiders, #dossier-congress','pillars');
+
+    // Everything else is research depth. Keep it collapsed behind one disclosure.
+    const deepCandidates=q('.score-model-note, .legacy-metrics, #dossier-thesis, .detail-row, .detail-note, .dossier-flow-intro');
+    if(deepCandidates.length){
+      const details=document.createElement('details');
+      details.className='dossier-deep-research dossier-tab-panel';
+      details.dataset.tabPanel='deep';
+      details.innerHTML='<summary><div><span class="eyebrow">PESQUISA APROFUNDADA</span><strong>Ver métricas, modelo, tese quantitativa e contexto técnico</strong><small>Informação adicional para quando quiseres investigar mais.</small></div><b>+</b></summary><div class="dossier-deep-research-body"></div>';
+      const body=details.querySelector('.dossier-deep-research-body');
+      const nav=els.detailContent.querySelector('.dossier-tab-nav');
+      (nav?.parentNode||els.detailContent).appendChild(details);
+      deepCandidates.forEach(el=>{ el.classList.remove('dossier-tab-panel'); delete el.dataset.tabPanel; body.appendChild(el); });
+    }
     showDossierTab('overview');
   }
 
@@ -2563,6 +2667,74 @@
       </div>
       <p class="detail-note">Estimativas e price targets são opiniões de analistas agregadas pela fonte e podem mudar sem aviso. Não são previsões do Finscanner e não entram no score principal.</p>
     </section>`;
+  }
+
+  const CONGRESS_API_BASE = "https://www.bargo.ai/free-apis/congress/v1/trades";
+  const LS_CONGRESS_PREFIX = "finscanner:congress:v1:";
+
+  function congressCacheKey(ticker){ return LS_CONGRESS_PREFIX + String(ticker||'').toUpperCase(); }
+  function loadCongressCache(ticker){
+    try { const x=JSON.parse(localStorage.getItem(congressCacheKey(ticker))||'null'); if(!x) return null; if(Date.now()-Number(x.saved_at||0)>12*3600*1000) return null; return x.data||null; } catch(_) { return null; }
+  }
+  function saveCongressCache(ticker,data){ try{ localStorage.setItem(congressCacheKey(ticker),JSON.stringify({saved_at:Date.now(),data})); }catch(_){} }
+  function congressAmountMid(range){
+    if(!range) return null;
+    const nums=String(range).replace(/,/g,'').match(/\$?([\d.]+)\s*([KMB])?/gi)||[];
+    const vals=nums.map(x=>{const m=x.replace(/[$,\s]/g,'').match(/([\d.]+)([KMB])?/i);if(!m)return NaN;let v=Number(m[1]);const u=(m[2]||'').toUpperCase();if(u==='K')v*=1e3;if(u==='M')v*=1e6;if(u==='B')v*=1e9;return v}).filter(Number.isFinite);
+    return vals.length>=2?(vals[0]+vals[1])/2:vals[0]??null;
+  }
+  function normalizeCongressTrades(payload,ticker){
+    const rows=Array.isArray(payload?.trades)?payload.trades:Array.isArray(payload)?payload:[];
+    return rows.filter(x=>String(x.ticker||'').toUpperCase()===String(ticker||'').toUpperCase()).map(x=>({
+      member:x.member||x.name||'Membro do Congresso', chamber:String(x.chamber||'').toLowerCase(), state:x.state||'', type:String(x.type||'').toLowerCase().includes('sale')?'sell':'buy', amount_range:x.amount_range||x.amount||'—', transaction_date:x.transaction_date||x.date||null, disclosure_date:x.disclosure_date||x.filed_date||null, est_price:Number(x.est_price), perf_pct:Number(x.perf_pct), filing_portal:x.filing_portal||null, value_mid:congressAmountMid(x.amount_range||x.amount)
+    })).filter(x=>x.transaction_date);
+  }
+  async function fetchCongressTrades(ticker,force=false){
+    if(!force){const cached=loadCongressCache(ticker);if(cached)return cached;}
+    const from=new Date(Date.now()-92*864e5).toISOString().slice(0,10);
+    const url=`${CONGRESS_API_BASE}/${encodeURIComponent(String(ticker).replace(/\..*/,''))}?from=${from}&limit=100`;
+    const res=await fetch(url,{headers:{Accept:'application/json'}});
+    if(!res.ok) throw new Error(`Congress API ${res.status}`);
+    const raw=await res.json(); const trades=normalizeCongressTrades(raw,String(ticker).replace(/\..*/,''));
+    const data={trades,source:'Bargo Congress API',fetched_at:new Date().toISOString()}; saveCongressCache(ticker,data); return data;
+  }
+  function congressSummary(trades=[]){
+    const buys=trades.filter(t=>t.type==='buy'), sells=trades.filter(t=>t.type==='sell');
+    const buyMid=buys.reduce((a,t)=>a+(Number(t.value_mid)||0),0), sellMid=sells.reduce((a,t)=>a+(Number(t.value_mid)||0),0);
+    const net=buyMid-sellMid; const senate=trades.filter(t=>t.chamber==='senate').length, house=trades.filter(t=>t.chamber==='house').length;
+    let label='Sem atividade recente',tone='neutral';
+    if(buys.length||sells.length){ if(net>Math.max(15000,sellMid*.15)){label='Mais compras declaradas';tone='positive'} else if(net<-Math.max(15000,buyMid*.15)){label='Mais vendas declaradas';tone='negative'} else {label='Atividade equilibrada';tone='neutral'} }
+    return {buys:buys.length,sells:sells.length,buyMid,sellMid,net,senate,house,label,tone};
+  }
+  function smartMoneyOverviewHtml(r){
+    const ib=Number((r.insider_buy_value_365d ?? r.insider_buy_value_30d) || 0), is=Number((r.insider_sell_value_365d ?? r.insider_sell_value_30d) || 0), inet=ib-is;
+    const ilabel=(ib||is)?(inet>0?'Insiders mais compradores':inet<0?'Insiders mais vendedores':'Insiders equilibrados'):'Insiders sem sinal recente';
+    return `<section class="smartmoney-overview dossier-tab-panel" data-tab-panel="overview" id="dossier-smartmoney-overview"><div class="section-heading"><div><span class="eyebrow">SMART MONEY</span><h3>Quem está a comprar ou vender?</h3><p>Resumo rápido. O detalhe fica em Pillars.</p></div></div><div class="smartmoney-overview-grid"><article><span>INSIDERS · SEC FORM 4</span><strong class="${inet>0?'positive-text':inet<0?'negative-text':''}">${escapeHtml(ilabel)}</strong><small>${Number((r.insider_buy_count_365d ?? r.insider_buy_count_30d) || 0)} compras · ${Number((r.insider_sell_count_365d ?? r.insider_sell_count_30d) || 0)} vendas</small></article><article data-congress-overview><span>CONGRESSO EUA</span><strong>A carregar…</strong><small>House + Senate · divulgações recentes</small></article></div></section>`;
+  }
+  function congressionalActivityShellHtml(r){
+    return `<div class="congress-activity-panel"><div class="section-heading"><div><span class="eyebrow">CONGRESSIONAL ACTIVITY · STOCK ACT</span><h3>Compras e vendas no Congresso</h3><p>House e Senate. Valores são intervalos declarados; a leitura usa o ponto médio apenas para resumir o fluxo.</p></div><span class="congress-balance" data-congress-balance>—</span></div><div class="congress-summary" data-congress-summary><span>A carregar divulgações recentes…</span></div><div class="insider-chart-controls" data-congress-controls><button class="is-active" data-congress-filter="all">Todos</button><button data-congress-filter="buy">Compras</button><button data-congress-filter="sell">Vendas</button><button data-congress-filter="senate">Senado</button><button data-congress-filter="house">House</button></div><div class="insider-chart-wrap"><canvas id="congress-price-chart" class="insider-price-chart" height="220"></canvas><div id="congress-chart-tooltip" class="insider-chart-tooltip" hidden></div></div><div class="congress-ledger" data-congress-ledger></div><p class="detail-note">Fonte agregada: <a href="https://www.bargo.ai/free-apis/congress" target="_blank" rel="noopener">Bargo Congress API</a>, baseada nos PTR oficiais House Clerk e Senate eFD. As divulgações têm atraso legal e os montantes são reportados em intervalos.</p></div>`;
+  }
+  function renderCongressPanel(r,data,filter='all'){
+    const all=data?.trades||[]; let trades=all;
+    if(filter==='buy'||filter==='sell')trades=all.filter(t=>t.type===filter); else if(filter==='senate'||filter==='house')trades=all.filter(t=>t.chamber===filter);
+    const sm=congressSummary(all); const bal=document.querySelector('[data-congress-balance]'); if(bal){bal.textContent=sm.label;bal.className='congress-balance '+sm.tone;}
+    const sum=document.querySelector('[data-congress-summary]'); if(sum)sum.innerHTML=`<span><b>${sm.buys}</b> compras</span><span><b>${sm.sells}</b> vendas</span><span><b>${sm.senate}</b> Senado</span><span><b>${sm.house}</b> House</span><span>saldo estimado <b class="${sm.net>=0?'positive-text':'negative-text'}">${sm.net>=0?'+':'−'}${fmtMoney(Math.abs(sm.net),'USD')}</b></span>`;
+    const ov=document.querySelector('[data-congress-overview]'); if(ov)ov.innerHTML=`<span>CONGRESSO EUA</span><strong class="${sm.tone==='positive'?'positive-text':sm.tone==='negative'?'negative-text':''}">${escapeHtml(sm.label)}</strong><small>${sm.buys} compras · ${sm.sells} vendas · últimos ~3 meses</small>`;
+    const ledger=document.querySelector('[data-congress-ledger]'); if(ledger) ledger.innerHTML=trades.length?trades.slice(0,20).map(t=>`<article class="congress-row ${t.type}"><div><span>${t.type==='buy'?'▲ COMPRA':'▼ VENDA'} · ${escapeHtml(t.transaction_date)}</span><strong>${escapeHtml(t.member)}</strong><small>${escapeHtml((t.chamber||'').toUpperCase())}${t.state?' · '+escapeHtml(t.state):''} · declarado ${escapeHtml(t.disclosure_date||'—')}</small></div><div><b>${escapeHtml(t.amount_range||'—')}</b>${Number.isFinite(t.perf_pct)?`<small>${t.perf_pct>=0?'+':''}${t.perf_pct.toFixed(1)}% desde transação*</small>`:''}</div></article>`).join(''):`<p class="detail-note">Sem transações declaradas neste filtro.</p>`;
+    drawCongressChart(r,trades);
+  }
+  function drawCongressChart(r,trades=[]){
+    const canvas=document.getElementById('congress-price-chart'); if(!canvas)return; const history=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]; const tooltip=document.getElementById('congress-chart-tooltip');
+    const ratio=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||680),cssH=220;canvas.width=Math.round(cssW*ratio);canvas.height=Math.round(cssH*ratio);canvas.style.height=cssH+'px';const ctx=canvas.getContext('2d');ctx.scale(ratio,ratio);ctx.clearRect(0,0,cssW,cssH);
+    if(history.length<2){ctx.fillStyle='#8a93a1';ctx.font='13px system-ui';ctx.fillText('Histórico de preço indisponível para este ticker.',18,40);return;}
+    const pts=history.map(x=>({date:String(x.date),close:Number(x.close)})).filter(x=>Number.isFinite(x.close));if(pts.length<2)return;const parse=d=>new Date(d+'T00:00:00Z').getTime(),minT=parse(pts[0].date),maxT=parse(pts.at(-1).date);let minP=Math.min(...pts.map(x=>x.close)),maxP=Math.max(...pts.map(x=>x.close));if(maxP===minP){minP-=1;maxP+=1}const pad={l:46,r:18,t:18,b:30},w=cssW-pad.l-pad.r,h=cssH-pad.t-pad.b,xOf=d=>pad.l+((parse(d)-minT)/(maxT-minT))*w,yOf=v=>pad.t+h-((v-minP)/(maxP-minP))*h;
+    ctx.strokeStyle='#e7e9ee';ctx.lineWidth=1;for(let i=0;i<4;i++){const y=pad.t+i*h/3;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+w,y);ctx.stroke()}ctx.strokeStyle='#c78b21';ctx.lineWidth=2.2;ctx.beginPath();pts.forEach((p,i)=>{const x=xOf(p.date),y=yOf(p.close);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+    const nearest=date=>pts.reduce((a,b)=>Math.abs(parse(b.date)-parse(date))<Math.abs(parse(a.date)-parse(date))?b:a,pts[0]);const vals=trades.map(t=>Number(t.value_mid)).filter(v=>v>0),maxV=vals.length?Math.max(...vals):1,markers=[];
+    trades.forEach(t=>{if(!t.transaction_date||parse(t.transaction_date)<minT||parse(t.transaction_date)>maxT)return;const p=Number.isFinite(t.est_price)?t.est_price:nearest(t.transaction_date).close,x=xOf(t.transaction_date),y=yOf(p),size=6+Math.min(8,Math.sqrt(Math.max(0,Number(t.value_mid)||0)/maxV)*8);ctx.fillStyle=t.type==='buy'?'#17a673':'#e34e59';ctx.beginPath();if(t.type==='buy'){ctx.moveTo(x,y-size);ctx.lineTo(x-size,y+size*.7);ctx.lineTo(x+size,y+size*.7)}else{ctx.moveTo(x,y+size);ctx.lineTo(x-size,y-size*.7);ctx.lineTo(x+size,y-size*.7)}ctx.closePath();ctx.fill();markers.push({x,y,size,t});});
+    canvas.onclick=e=>{const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;let m=null,d=1e9;markers.forEach(z=>{const q=Math.hypot(x-z.x,y-z.y);if(q<d){d=q;m=z}});if(!m||d>30){if(tooltip)tooltip.hidden=true;return}const t=m.t;if(tooltip){tooltip.hidden=false;tooltip.innerHTML=`<strong>${t.type==='buy'?'COMPRA':'VENDA'} · ${escapeHtml(t.member)}</strong><span>${escapeHtml((t.chamber||'').toUpperCase())} · ${escapeHtml(t.amount_range||'—')}</span><span>transação ${escapeHtml(t.transaction_date)} · divulgação ${escapeHtml(t.disclosure_date||'—')}</span>`;tooltip.style.left=Math.max(6,Math.min(cssW-260,m.x-100))+'px';tooltip.style.top=Math.max(8,m.y-86)+'px';}};
+  }
+  async function bindCongressionalActivity(r){
+    const shell=document.getElementById('dossier-congress'); if(!shell)return; try{const data=await fetchCongressTrades(r.ticker);renderCongressPanel(r,data,'all');const controls=shell.querySelector('[data-congress-controls]');controls?.querySelectorAll('[data-congress-filter]').forEach(btn=>btn.addEventListener('click',()=>{controls.querySelectorAll('button').forEach(b=>b.classList.toggle('is-active',b===btn));renderCongressPanel(r,data,btn.dataset.congressFilter||'all')}));}catch(err){console.warn('Congressional activity unavailable',err);const sum=shell.querySelector('[data-congress-summary]');if(sum)sum.innerHTML='<span>Atividade congressional indisponível neste momento. O restante dossier continua funcional.</span>';const ov=document.querySelector('[data-congress-overview]');if(ov)ov.innerHTML='<span>CONGRESSO EUA</span><strong>Indisponível</strong><small>Tenta novamente mais tarde</small>';}
   }
 
   function insiderTxKey(ticker, tx) {
@@ -2711,6 +2883,7 @@
       <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário nativo: acrescenta eficiência, provisões de crédito, capital contabilístico e crescimento do net interest income; CET1/NPL continuam dependentes de fonte regulatória." : scoreModelFor(r) === "reit" ? "Modelo REIT nativo por proxy: FFO, P/FFO, payout FFO e net-debt/EBITDA entram no score; AFFO, NAV e ocupação continuam dependentes de fontes especializadas." : scoreModelFor(r) === "insurance" ? "Modelo Insurance Native por proxy: qualidade, sinistros/custos, capitalização, valuation e rendimento. Combined ratio e solvência regulatória só aparecem quando houver fonte estruturada fiável." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
       <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
       ${stockPortfolioFitHtml(r)}
+      ${smartMoneyOverviewHtml(r)}
 
       <section class="dossier-block" id="dossier-score">
         <h3 class="dossier-title">How the score breaks down</h3>
@@ -2771,6 +2944,7 @@
       </details>
 
       <section class="dossier-block" id="dossier-insiders">${insiderActivitySectionHtml(r)}</section>
+      <section class="dossier-block" id="dossier-congress">${congressionalActivityShellHtml(r)}</section>
       <section class="dossier-block" id="dossier-estimates">${analystIntelligenceHtml(r)}</section>
       <section class="dossier-block" id="dossier-catalysts">${catalystIntelligenceHtml(r)}</section>
       <section class="dossier-block dossier-thesis-final" id="dossier-thesis">
@@ -2791,8 +2965,10 @@
     `;
     els.detail.hidden = false;
     bindInsiderChart(r);
+    bindCongressionalActivity(r);
     bindDossierNav();
     assignDossierPanels();
+    bindAiAnalyst(r);
 
     document.getElementById("owned-checkbox").addEventListener("change", () => {
       toggleOwned(r.ticker);
@@ -5762,19 +5938,27 @@
       const q = input.value.trim().toUpperCase();
       if (!q) { box.hidden = true; box.innerHTML = ''; return; }
       const matches = state.data.stocks
-        .filter(r => r.quote_type !== 'ETF' && !isAustralianScannerRow(r))
+        .filter(r => !isAustralianScannerRow(r))
         .filter(r => `${r.ticker} ${r.name||''}`.toUpperCase().includes(q))
-        .sort((a,b) => (a.ticker.toUpperCase().startsWith(q)?-1:0) - (b.ticker.toUpperCase().startsWith(q)?-1:0) || (b.score??0)-(a.score??0))
-        .slice(0,7);
-      box.innerHTML = matches.map(r => `<button type="button" data-stock-suggest="${escapeHtml(r.ticker)}"><strong>${escapeHtml(r.ticker)}</strong><span>${escapeHtml(r.name||'')}</span><em>${r.score==null?'—':Number(r.score).toFixed(0)}</em></button>`).join('');
+        .sort((a,b) => {
+          const aq=String(a.ticker||'').toUpperCase(), bq=String(b.ticker||'').toUpperCase();
+          const exactA=aq===q?0:aq.startsWith(q)?1:2, exactB=bq===q?0:bq.startsWith(q)?1:2;
+          if(exactA!==exactB) return exactA-exactB;
+          const typeA=a.quote_type==='ETF'?1:0, typeB=b.quote_type==='ETF'?1:0;
+          if(typeA!==typeB) return typeA-typeB;
+          return (Number(b.market_cap)||0)-(Number(a.market_cap)||0) || (Number(b.score)||0)-(Number(a.score)||0);
+        })
+        .slice(0,10);
+      box.innerHTML = matches.map(r => `<button type="button" data-stock-suggest="${escapeHtml(r.ticker)}"><strong>${escapeHtml(r.ticker)}</strong><span>${escapeHtml(r.name||'')}</span><em>${r.quote_type==='ETF'?'ETF':(r.score==null?'AÇÃO':Math.round(Number(r.score))+'/100')}</em></button>`).join('');
       box.hidden = !matches.length;
       box.querySelectorAll('[data-stock-suggest]').forEach(btn=>btn.addEventListener('mousedown',e=>e.preventDefault()));
       box.querySelectorAll('[data-stock-suggest]').forEach(btn=>btn.addEventListener('click',()=>{
-        input.value = btn.dataset.stockSuggest;
-        if(syncInput) syncInput.value = input.value;
+        const ticker=btn.dataset.stockSuggest;
+        input.value = ticker;
+        if(syncInput) syncInput.value = ticker;
         box.hidden = true;
-        applyFilters();
-        input.focus({preventScroll:true});
+        const row=state.data?.stocks?.find(r=>String(r.ticker).toUpperCase()===String(ticker).toUpperCase());
+        if(row?.quote_type==='ETF') openFundDetail(row); else openDetail(ticker);
       }));
     };
     input.addEventListener('input', update);
@@ -5896,7 +6080,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.93.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.96.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
