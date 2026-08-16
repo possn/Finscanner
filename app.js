@@ -2709,7 +2709,9 @@
   function smartMoneyOverviewHtml(r){
     const ib=Number((r.insider_buy_value_365d ?? r.insider_buy_value_30d) || 0), is=Number((r.insider_sell_value_365d ?? r.insider_sell_value_30d) || 0), inet=ib-is;
     const ilabel=(ib||is)?(inet>0?'Insiders mais compradores':inet<0?'Insiders mais vendedores':'Insiders equilibrados'):'Insiders sem sinal recente';
-    return `<section class="smartmoney-overview dossier-tab-panel" data-tab-panel="overview" id="dossier-smartmoney-overview"><div class="section-heading"><div><span class="eyebrow">SMART MONEY</span><h3>Quem está a comprar ou vender?</h3><p>Resumo rápido. O detalhe fica em Pillars.</p></div></div><div class="smartmoney-overview-grid"><article><span>INSIDERS · SEC FORM 4</span><strong class="${inet>0?'positive-text':inet<0?'negative-text':''}">${escapeHtml(ilabel)}</strong><small>${Number((r.insider_buy_count_365d ?? r.insider_buy_count_30d) || 0)} compras · ${Number((r.insider_sell_count_365d ?? r.insider_sell_count_30d) || 0)} vendas</small></article><article data-congress-overview><span>CONGRESSO EUA</span><strong>A carregar…</strong><small>House + Senate · divulgações recentes</small></article></div></section>`;
+    const txs=(Array.isArray(r.insider_transactions_365d)?r.insider_transactions_365d:(Array.isArray(r.insider_transactions)?r.insider_transactions:[])).slice(0,5);
+    const insiderRows=txs.length?txs.map(tx=>`<div class="smartmoney-mini-row ${tx.type==='buy'?'buy':'sell'}"><span>${tx.type==='buy'?'▲ COMPRA':'▼ VENDA'}</span><strong>${escapeHtml(tx.owner||'Insider')}</strong><small>${escapeHtml(tx.role||'')}${tx.value!=null?` · ${fmtMoney(tx.value,r.currency||'USD')}`:''}${tx.date?` · ${escapeHtml(tx.date)}`:''}</small></div>`).join(''):'<p class="detail-note">Sem transações P/S detalhadas disponíveis.</p>';
+    return `<section class="smartmoney-overview dossier-tab-panel" data-tab-panel="overview" id="dossier-smartmoney-overview"><div class="section-heading"><div><span class="eyebrow">SMART MONEY</span><h3>Quem está a comprar ou vender?</h3><p>Resumo rápido. Os gráficos completos ficam em Pillars.</p></div></div><div class="smartmoney-overview-grid"><article><span>INSIDERS · SEC FORM 4</span><strong class="${inet>0?'positive-text':inet<0?'negative-text':''}">${escapeHtml(ilabel)}</strong><small>${Number((r.insider_buy_count_365d ?? r.insider_buy_count_30d) || 0)} compras · ${Number((r.insider_sell_count_365d ?? r.insider_sell_count_30d) || 0)} vendas</small></article><article data-congress-overview><span>CONGRESSO EUA</span><strong>A carregar…</strong><small>House + Senate · divulgações recentes</small></article></div><details class="smartmoney-quick-details"><summary>Ver quem comprou/vendeu e quanto <b>+</b></summary><div class="smartmoney-quick-grid"><section><h4>Insiders</h4>${insiderRows}</section><section><h4>Congresso EUA</h4><div data-congress-overview-ledger><p class="detail-note">A carregar divulgações…</p></div></section></div><button type="button" class="smartmoney-open-pillars" data-open-smartmoney-pillars>Ver gráficos de preço e transações em Pillars →</button></details></section>`;
   }
   function congressionalActivityShellHtml(r){
     return `<div class="congress-activity-panel"><div class="section-heading"><div><span class="eyebrow">CONGRESSIONAL ACTIVITY · STOCK ACT</span><h3>Compras e vendas no Congresso</h3><p>House e Senate. Valores são intervalos declarados; a leitura usa o ponto médio apenas para resumir o fluxo.</p></div><span class="congress-balance" data-congress-balance>—</span></div><div class="congress-summary" data-congress-summary><span>A carregar divulgações recentes…</span></div><div class="insider-chart-controls" data-congress-controls><button class="is-active" data-congress-filter="all">Todos</button><button data-congress-filter="buy">Compras</button><button data-congress-filter="sell">Vendas</button><button data-congress-filter="senate">Senado</button><button data-congress-filter="house">House</button></div><div class="insider-chart-wrap"><canvas id="congress-price-chart" class="insider-price-chart" height="220"></canvas><div id="congress-chart-tooltip" class="insider-chart-tooltip" hidden></div></div><div class="congress-ledger" data-congress-ledger></div><p class="detail-note">Fonte agregada: <a href="https://www.bargo.ai/free-apis/congress" target="_blank" rel="noopener">Bargo Congress API</a>, baseada nos PTR oficiais House Clerk e Senate eFD. As divulgações têm atraso legal e os montantes são reportados em intervalos.</p></div>`;
@@ -2720,6 +2722,7 @@
     const sm=congressSummary(all); const bal=document.querySelector('[data-congress-balance]'); if(bal){bal.textContent=sm.label;bal.className='congress-balance '+sm.tone;}
     const sum=document.querySelector('[data-congress-summary]'); if(sum)sum.innerHTML=`<span><b>${sm.buys}</b> compras</span><span><b>${sm.sells}</b> vendas</span><span><b>${sm.senate}</b> Senado</span><span><b>${sm.house}</b> House</span><span>saldo estimado <b class="${sm.net>=0?'positive-text':'negative-text'}">${sm.net>=0?'+':'−'}${fmtMoney(Math.abs(sm.net),'USD')}</b></span>`;
     const ov=document.querySelector('[data-congress-overview]'); if(ov)ov.innerHTML=`<span>CONGRESSO EUA</span><strong class="${sm.tone==='positive'?'positive-text':sm.tone==='negative'?'negative-text':''}">${escapeHtml(sm.label)}</strong><small>${sm.buys} compras · ${sm.sells} vendas · últimos ~3 meses</small>`;
+    const ovLedger=document.querySelector('[data-congress-overview-ledger]'); if(ovLedger) ovLedger.innerHTML=all.length?all.slice(0,5).map(t=>`<div class="smartmoney-mini-row ${t.type}"><span>${t.type==='buy'?'▲ COMPRA':'▼ VENDA'}</span><strong>${escapeHtml(t.member)}</strong><small>${escapeHtml(t.amount_range||'—')}${t.transaction_date?` · ${escapeHtml(t.transaction_date)}`:''}</small></div>`).join(''):'<p class="detail-note">Sem divulgações recentes para este ticker.</p>';
     const ledger=document.querySelector('[data-congress-ledger]'); if(ledger) ledger.innerHTML=trades.length?trades.slice(0,20).map(t=>`<article class="congress-row ${t.type}"><div><span>${t.type==='buy'?'▲ COMPRA':'▼ VENDA'} · ${escapeHtml(t.transaction_date)}</span><strong>${escapeHtml(t.member)}</strong><small>${escapeHtml((t.chamber||'').toUpperCase())}${t.state?' · '+escapeHtml(t.state):''} · declarado ${escapeHtml(t.disclosure_date||'—')}</small></div><div><b>${escapeHtml(t.amount_range||'—')}</b>${Number.isFinite(t.perf_pct)?`<small>${t.perf_pct>=0?'+':''}${t.perf_pct.toFixed(1)}% desde transação*</small>`:''}</div></article>`).join(''):`<p class="detail-note">Sem transações declaradas neste filtro.</p>`;
     drawCongressChart(r,trades);
   }
@@ -2955,19 +2958,22 @@
 
       ${finalTakeHtml(r)}
 
-      <h3 class="dossier-title" data-tab-panel="deep">Risco & contexto</h3>
-      <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
-      <div class="detail-row"><span>Atividade insiders</span><span>${insider}</span></div>
-      <div class="detail-row"><span>Market cap</span><span>${fmtCap(r.market_cap)}</span></div>
-      <div class="detail-row"><span>Preço atual</span><span>${r.current_price ?? "—"} ${r.currency || ""}</span></div>
-      ${r.quote_type === "ETF" ? `<div class="detail-row"><span>Expense ratio</span><span>${fmtExpenseRatio(r.expense_ratio)}</span></div><div class="detail-row"><span>Exposição AI</span><span>${r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "—"}</span></div>` : ""}
-      <p class="detail-note">O verdict é uma classificação quantitativa explicável e relativa ao universo analisado. Não constitui previsão de retorno nem aconselhamento financeiro.</p>
+      <section class="dossier-risk-context legacy-metrics">
+        <h3 class="dossier-title">Risco & contexto</h3>
+        <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
+        <div class="detail-row"><span>Atividade insiders</span><span>${insider}</span></div>
+        <div class="detail-row"><span>Market cap</span><span>${fmtCap(r.market_cap)}</span></div>
+        <div class="detail-row"><span>Preço atual</span><span>${r.current_price ?? "—"} ${r.currency || ""}</span></div>
+        ${r.quote_type === "ETF" ? `<div class="detail-row"><span>Expense ratio</span><span>${fmtExpenseRatio(r.expense_ratio)}</span></div><div class="detail-row"><span>Exposição AI</span><span>${r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "—"}</span></div>` : ""}
+        <p class="detail-note">O verdict é uma classificação quantitativa explicável e relativa ao universo analisado. Não constitui previsão de retorno nem aconselhamento financeiro.</p>
+      </section>
     `;
     els.detail.hidden = false;
     bindInsiderChart(r);
     bindCongressionalActivity(r);
     bindDossierNav();
     assignDossierPanels();
+    els.detailContent.querySelectorAll('[data-open-smartmoney-pillars]').forEach(btn=>btn.addEventListener('click',()=>{ showDossierTab('pillars'); setTimeout(()=>document.getElementById('dossier-insiders')?.scrollIntoView({behavior:'smooth',block:'start'}),40); }));
     bindAiAnalyst(r);
 
     document.getElementById("owned-checkbox").addEventListener("change", () => {
@@ -5926,26 +5932,16 @@
 
   function bindStockAutocomplete(input, syncInput) {
     if (!input) return;
-    let box = document.createElement('div');
-    box.className = 'stock-autocomplete-box stock-autocomplete-portal';
-    box.hidden = true;
-    document.body.appendChild(box);
-
-    const positionBox = () => {
-      if (box.hidden || !input.isConnected) return;
-      const r = input.getBoundingClientRect();
-      const gap = 7;
-      const viewportH = window.visualViewport?.height || window.innerHeight;
-      const below = viewportH - r.bottom - gap;
-      const desired = Math.min(360, Math.max(180, viewportH * 0.42));
-      const openUp = below < 180 && r.top > below;
-      box.style.left = `${Math.max(10, r.left)}px`;
-      box.style.width = `${Math.max(240, Math.min(r.width, window.innerWidth - 20))}px`;
-      box.style.right = 'auto';
-      box.style.maxHeight = `${Math.max(150, Math.min(desired, openUp ? r.top - 18 : below - 8))}px`;
-      box.style.top = openUp ? 'auto' : `${r.bottom + gap}px`;
-      box.style.bottom = openUp ? `${Math.max(10, window.innerHeight - r.top + gap)}px` : 'auto';
-    };
+    const host = input.closest('.stock-search-row, .commandbar') || input.parentElement;
+    if (!host) return;
+    host.style.position = 'relative';
+    let box = host.querySelector('.stock-autocomplete-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'stock-autocomplete-box stock-autocomplete-inline';
+      box.hidden = true;
+      host.appendChild(box);
+    }
 
     const rankMatch = (r, q) => {
       const t = String(r.ticker || '').toUpperCase();
@@ -5983,12 +5979,12 @@
           if (typeA !== typeB) return typeA-typeB;
           return (Number(b.market_cap)||0)-(Number(a.market_cap)||0) || (Number(b.score)||0)-(Number(a.score)||0);
         })
-        .slice(0,10);
-      box.innerHTML = matches.map(r => `<button type="button" data-stock-suggest="${escapeHtml(r.ticker)}"><strong>${escapeHtml(r.ticker)}</strong><span>${escapeHtml(r.name||'')}</span><em>${r.quote_type==='ETF'?'ETF':(r.score==null?'AÇÃO':Math.round(Number(r.score))+'/100')}</em></button>`).join('');
-      box.hidden = !matches.length;
-      if (!box.hidden) positionBox();
+        .slice(0,8);
+      box.innerHTML = matches.length ? matches.map(r => `<button type="button" data-stock-suggest="${escapeHtml(r.ticker)}"><strong>${escapeHtml(r.ticker)}</strong><span>${escapeHtml(r.name||'')}</span><em>${r.quote_type==='ETF'?'ETF':(r.score==null?'AÇÃO':Math.round(Number(r.score))+'/100')}</em></button>`).join('') : `<div class="stock-autocomplete-empty">Sem correspondência no universo rastreado.</div>`;
+      box.hidden = false;
       box.querySelectorAll('[data-stock-suggest]').forEach(btn => {
         btn.addEventListener('pointerdown', e => { e.preventDefault(); choose(btn.dataset.stockSuggest); });
+        btn.addEventListener('click', e => { e.preventDefault(); choose(btn.dataset.stockSuggest); });
       });
     };
 
@@ -6002,11 +5998,7 @@
       }
       if (e.key === 'Escape') box.hidden = true;
     });
-    input.addEventListener('blur',()=>setTimeout(()=>{box.hidden=true},180));
-    window.addEventListener('resize', positionBox, {passive:true});
-    window.addEventListener('scroll', positionBox, {passive:true, capture:true});
-    window.visualViewport?.addEventListener('resize', positionBox, {passive:true});
-    window.visualViewport?.addEventListener('scroll', positionBox, {passive:true});
+    input.addEventListener('blur',()=>setTimeout(()=>{box.hidden=true},220));
   }
 
   // The hero search is navigation, not a live table filter. Typing must never make exact matches disappear.
@@ -6117,7 +6109,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.96.1").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.96.3").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
