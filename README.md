@@ -1,4 +1,4 @@
-# Finscanner v0.91.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
+# Finscanner v0.93.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
 
 A área **Stocks** passa a seguir a mesma arquitetura simples que a área Funds:
 
@@ -26,7 +26,7 @@ Não é necessário alterar workflows nem ficheiros `data/` nesta release.
 - A tabela principal deixa de mostrar grades A/B/C/D e abreviações Q/G/V: mostra scores 0–100 com nomes Qualidade, Crescimento e Valor.
 - Portfolio Radar também usa nomes explícitos.
 
-## v0.91.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
+## v0.93.0 — Trust-Adjusted Discovery + Portfolio Action Suggestions
 
 - Discovery no longer treats the raw Finscanner Score as a complete ranking. Ordering now also considers data confidence and company size, with strong penalties for low-confidence microcaps and financial-risk flags.
 - "Empresas sólidas" becomes quality-first, so an anomalous Stability/Value sub-score cannot by itself push a tiny speculative company above an established high-quality company.

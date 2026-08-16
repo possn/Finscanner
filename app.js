@@ -2413,56 +2413,77 @@
     return `<section class="winston-dossier-flow"><div class="w-section-intro dossier-flow-intro"><span>FINANCIAL STORY</span><h3>Leitura por blocos</h3><p>Valor atual, tendência, contexto e interpretação — organizados numa sequência única para investigação.</p></div>${metricStorySection('Growth Profile','GROWTH',growthCards,'dossier-growth')}${metricStorySection('Profitability & Capital','QUALITY',qualityCards,'dossier-profitability')}${metricStorySection('Cash & Balance Sheet','FINANCIAL STRENGTH',cashCards,'dossier-balance')}${metricStorySection('Valuation','MARKET CONTEXT',marketCards,'dossier-valuation')}</section>`;
   }
 
-  const DOSSIER_SECTIONS = [
-    ['dossier-overview','Snapshot'],['dossier-score','Score'],['dossier-changes','Mudanças'],
-    ['dossier-growth','Growth'],['dossier-profitability','Profit'],['dossier-balance','Balanço'],
-    ['dossier-valuation','Valuation'],['dossier-dividends','Dividendos'],['dossier-insiders','Insiders'],
-    ['dossier-estimates','Estimates'],['dossier-catalysts','Catalysts'],['dossier-thesis','Tese']
+  const DOSSIER_TABS = [
+    ['overview','Overview'],['growth','Growth'],['earnings','Earnings'],['pillars','Pillars'],['deep','Deep Dive'],['take','Final Take']
   ];
 
   function dossierNavHtml() {
-    // Native select is deliberately used on mobile: iOS handles it reliably even
-    // inside a fixed, independently scrolling PWA overlay. Chips remain as a
-    // secondary desktop affordance and use the same single jump function.
-    return `<nav class="dossier-nav" aria-label="Navegação do dossier">
-      <label class="dossier-section-picker"><span>Ir para</span><select data-dossier-select aria-label="Ir para secção do dossier">${DOSSIER_SECTIONS.map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
-      <div class="dossier-nav-chips">${DOSSIER_SECTIONS.map(([id,label])=>`<button type="button" data-dossier-jump="${id}" onclick="window.__finscannerDossierJump && window.__finscannerDossierJump('${id}', this); return false;">${label}</button>`).join('')}</div>
+    return `<nav class="dossier-nav dossier-tab-nav" aria-label="Navegação do dossier">
+      <label class="dossier-section-picker"><span>Secção</span><select data-dossier-tab-select aria-label="Escolher secção do dossier">${DOSSIER_TABS.map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
+      <div class="dossier-nav-chips dossier-tab-chips">${DOSSIER_TABS.map(([id,label],i)=>`<button type="button" class="${i===0?'is-active':''}" data-dossier-tab="${id}">${label}</button>`).join('')}</div>
     </nav>`;
   }
 
-  function dossierJumpTo(id, sourceBtn=null) {
-    const target = document.getElementById(id);
-    if (!target || !els.detail || els.detail.hidden) return false;
-    // scrollIntoView is the most reliable path in iOS Safari/PWA because it
-    // automatically scrolls the nearest scrollable ancestor (.detail-overlay).
-    try { target.scrollIntoView({ behavior: appSettings().reduceMotion ? 'auto' : 'smooth', block: 'start', inline: 'nearest' }); }
-    catch (_) { target.scrollIntoView(true); }
-    // Small correction keeps the section heading clear of the overlay edge.
-    setTimeout(() => { try { els.detail.scrollTop = Math.max(0, els.detail.scrollTop - 10); } catch (_) {} }, appSettings().reduceMotion ? 0 : 260);
-    const nav = els.detailContent.querySelector('.dossier-nav');
-    const buttons = [...els.detailContent.querySelectorAll('[data-dossier-jump]')];
-    buttons.forEach(x => x.classList.toggle('is-active', x.dataset.dossierJump === id));
-    const select = nav?.querySelector('[data-dossier-select]');
-    if (select && select.value !== id) select.value = id;
-    const btn = sourceBtn || buttons.find(x => x.dataset.dossierJump === id);
-    if (btn) { try { btn.scrollIntoView({behavior:'auto',block:'nearest',inline:'center'}); } catch (_) {} }
-    return true;
+  function showDossierTab(tab='overview') {
+    if (!els.detailContent) return;
+    const valid = new Set(DOSSIER_TABS.map(x=>x[0]));
+    if (!valid.has(tab)) tab='overview';
+    els.detailContent.querySelectorAll('[data-tab-panel]').forEach(el=>{
+      el.classList.toggle('is-active', el.dataset.tabPanel===tab);
+    });
+    els.detailContent.querySelectorAll('[data-dossier-tab]').forEach(btn=>btn.classList.toggle('is-active',btn.dataset.dossierTab===tab));
+    const sel=els.detailContent.querySelector('[data-dossier-tab-select]');
+    if(sel) sel.value=tab;
+    try { els.detail.scrollTo({top:0,behavior:appSettings().reduceMotion?'auto':'smooth'}); } catch(_) { try{els.detail.scrollTop=0}catch(__){} }
   }
-  window.__finscannerDossierJump = dossierJumpTo;
 
   function bindDossierNav() {
-    const nav = els.detailContent.querySelector('.dossier-nav');
+    const nav = els.detailContent.querySelector('.dossier-tab-nav');
     if (!nav) return;
-    const select = nav.querySelector('[data-dossier-select]');
-    select?.addEventListener('change', () => dossierJumpTo(select.value));
-    // Delegation is kept as a non-inline fallback for desktop and accessibility.
-    nav.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-dossier-jump]');
-      if (!btn) return;
+    nav.querySelector('[data-dossier-tab-select]')?.addEventListener('change', e=>showDossierTab(e.target.value));
+    nav.addEventListener('click', e=>{
+      const btn=e.target.closest('[data-dossier-tab]');
+      if(!btn) return;
       e.preventDefault();
-      e.stopPropagation();
-      dossierJumpTo(btn.dataset.dossierJump, btn);
+      showDossierTab(btn.dataset.dossierTab);
     }, true);
+  }
+
+  function finalTakeHtml(r){
+    const portfolio=loadPortfolio();
+    const action=portfolio&&portfolio[r.ticker]?stockActionSuggestion(r,portfolio,state.data?.stocks||[]):null;
+    const q=Number(r.quality_pct ?? r.profitability_pct), g=Number(r.growth_pct), v=Number(r.value_pct), st=Number(r.stability_pct), sc=Number(r.score);
+    const positives=[], risks=[], watch=[];
+    if(Number.isFinite(q)&&q>=65) positives.push(`qualidade ${Math.round(q)}/100`);
+    if(Number.isFinite(g)&&g>=65) positives.push(`crescimento ${Math.round(g)}/100`);
+    if(Number.isFinite(v)&&v>=60) positives.push(`valuation ${Math.round(v)}/100`);
+    if(Number.isFinite(st)&&st>=65) positives.push(`estabilidade ${Math.round(st)}/100`);
+    if(r.thesis_direction==='strengthening') positives.push('tese a reforçar');
+    if(r.thesis_direction==='weakening') risks.push('tese a deteriorar');
+    if(r.zombie==='yes'||r.zombie===true) risks.push('risco financeiro elevado');
+    if(Number.isFinite(q)&&q<45) risks.push(`qualidade baixa (${Math.round(q)})`);
+    if(Number.isFinite(g)&&g<35) risks.push(`crescimento fraco (${Math.round(g)})`);
+    if(Number.isFinite(v)&&v<35) risks.push('valuation exigente');
+    const d=Number(r.analyst_days_to_earnings); if(Number.isFinite(d)&&d<=14) watch.push(`resultados em ${Math.max(0,Math.round(d))} dias`);
+    const rev=Number(r.analyst_eps_revision_30d_pct); if(Number.isFinite(rev)&&Math.abs(rev)>=1) watch.push(`revisões EPS ${rev>0?'+':''}${rev.toFixed(1)}% em 30d`);
+    const inet=Number(r.insider_net_value_30d); if(Number.isFinite(inet)&&inet!==0) watch.push(inet>0?'compras líquidas de insiders':'vendas líquidas de insiders');
+    let take='Perfil equilibrado, sem uma vantagem multifator suficientemente clara.';
+    if(Number.isFinite(sc)&&sc>=70&&positives.length>=2&&!risks.length) take='Perfil multifator forte. A evidência atual é favorável, mas a decisão deve continuar dependente de valuation, catalisadores e contexto da carteira.';
+    else if(risks.length>=2) take='A relação risco/qualidade merece cautela. Há sinais que justificam revisão antes de aumentar exposição.';
+    else if(positives.length>=2) take='Há vários fatores favoráveis, mas ainda existem pontos que precisam de confirmação antes de tratar a tese como forte.';
+    return `<section class="final-take-card dossier-block" data-tab-panel="take"><span class="eyebrow">FINSCANNER TAKE</span><h3>${escapeHtml(action?.label || 'Apreciação final')}</h3><p class="final-take-lead">${escapeHtml(take)}</p>${action?`<div class="final-take-action ${action.tone}"><b>Sugestão de triagem: ${escapeHtml(action.label)}</b><span>confiança ${escapeHtml(action.confidence)}</span><p>${escapeHtml(action.reasons.join(' · '))}</p></div>`:''}<div class="final-take-columns"><div><b>A favor</b><ul>${(positives.length?positives:['sem vantagem forte identificada']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><b>Riscos</b><ul>${(risks.length?risks:['sem risco estrutural dominante identificado']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div><b>O que vigiar</b><ul>${(watch.length?watch:['próxima atualização de fundamentais e tese']).slice(0,5).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div></div><div class="ai-ready-note"><b>Análise LLM</b><p>Este bloco usa apenas regras explicáveis locais. A mesma ficha pode ser enviada a um LLM server-side para produzir uma apreciação narrativa final sem expor a chave API no iPhone.</p></div></section>`;
+  }
+
+  function assignDossierPanels(){
+    const q=(sel)=>[...els.detailContent.querySelectorAll(sel)];
+    const mark=(sel,tab)=>q(sel).forEach(el=>{el.dataset.tabPanel=tab; el.classList.add('dossier-tab-panel');});
+    mark('.verdict-panel, #dossier-changes, .score-model-note, .owned-toggle, .stock-portfolio-fit-box','overview');
+    mark('#dossier-growth','growth');
+    mark('#dossier-earnings-flash, #dossier-estimates, #dossier-catalysts','earnings');
+    mark('#dossier-score, #dossier-profitability, #dossier-balance, #dossier-valuation, #dossier-dividends, #dossier-insiders','pillars');
+    mark('.legacy-metrics, #dossier-thesis, .detail-row, .detail-note','deep');
+    const intro=els.detailContent.querySelector('.dossier-flow-intro'); if(intro){intro.dataset.tabPanel='deep'; intro.classList.add('dossier-tab-panel');}
+    showDossierTab('overview');
   }
 
   function scoreDescriptor(v) {
@@ -2602,6 +2623,42 @@
     controls.querySelectorAll('[data-insider-chart-filter]').forEach(btn=>btn.addEventListener('click',()=>{controls.querySelectorAll('button').forEach(b=>b.classList.toggle('is-active',b===btn));drawInsiderChart(r,btn.dataset.insiderChartFilter||'all')}));
   }
 
+
+  function earningsFlashHtml(r) {
+    const date = r.analyst_latest_earnings_date || r.analyst_next_earnings_date || null;
+    const actual = Number(r.analyst_latest_eps_actual);
+    const estimate = Number(r.analyst_latest_eps_estimate);
+    const surprise = Number(r.analyst_latest_eps_surprise_pct);
+    const revGrowth = Number(r.revenue_yoy_latest ?? r.revenue_growth);
+    const epsGrowth = Number(r.eps_yoy_latest ?? r.earnings_growth);
+    const hasActual = Number.isFinite(actual);
+    const hasEstimate = Number.isFinite(estimate);
+    const hasSurprise = Number.isFinite(surprise);
+    const isPast = Boolean(r.analyst_latest_earnings_date);
+    const status = isPast ? 'EARNINGS FLASH' : 'EARNINGS PREVIEW';
+    const headline = isPast
+      ? (hasSurprise ? `EPS ${surprise >= 0 ? 'acima' : 'abaixo'} do esperado em ${Math.abs(surprise).toFixed(1)}%.` : 'Últimos resultados disponíveis para leitura rápida.')
+      : (r.analyst_days_to_earnings != null ? `Resultados em ${Math.max(0, Math.round(Number(r.analyst_days_to_earnings)))} dias.` : 'Próximo evento de resultados ainda sem data confirmada.');
+    const epsResult = hasActual && hasEstimate ? ((actual-estimate) / (Math.abs(estimate)||1))*100 : (hasSurprise ? surprise : null);
+    const tone = Number.isFinite(epsResult) ? (epsResult >= 0 ? 'positive' : 'negative') : 'neutral';
+    const numberRows = [
+      ['EPS', hasActual ? actual.toFixed(2) : '—', hasEstimate ? `est. ${estimate.toFixed(2)}` : 'estimativa —', Number.isFinite(epsResult) ? `${epsResult>=0?'✓ +':'↓ '}${epsResult.toFixed(1)}%` : '—', tone],
+      ['Receita YoY', Number.isFinite(revGrowth) ? fmtRawPct(revGrowth) : '—', 'crescimento', Number.isFinite(revGrowth) ? (revGrowth>=0?'positivo':'negativo') : '—', Number.isFinite(revGrowth) ? (revGrowth>=0?'positive':'negative') : 'neutral'],
+      ['EPS YoY', Number.isFinite(epsGrowth) ? fmtRawPct(epsGrowth) : '—', 'crescimento', Number.isFinite(epsGrowth) ? (epsGrowth>=0?'positivo':'negativo') : '—', Number.isFinite(epsGrowth) ? (epsGrowth>=0?'positive':'negative') : 'neutral']
+    ];
+    const rows = numberRows.map(([m,a,c,res,t])=>`<div class="earnings-flash-row"><span>${m}</span><strong>${a}</strong><em>${c}</em><b class="${t}">${res}</b></div>`).join('');
+    const what=[];
+    if(Number.isFinite(revGrowth)) what.push(`A receita ${revGrowth>=0?'cresceu':'caiu'} ${Math.abs(revGrowth*100).toFixed(1)}% em termos homólogos.`);
+    if(Number.isFinite(epsGrowth)) what.push(`O crescimento do EPS está em ${fmtRawPct(epsGrowth)}.`);
+    if(Number.isFinite(r.net_margin_latest)) what.push(`Margem líquida atual: ${fmtRawPct(r.net_margin_latest)}${Number.isFinite(Number(r.net_margin_yoy_change_pp)) ? ` (${Number(r.net_margin_yoy_change_pp)>=0?'+':''}${Number(r.net_margin_yoy_change_pp).toFixed(1)} pp YoY)` : ''}.`);
+    if(Number.isFinite(Number(r.free_cash_flow))) what.push(`Free cash flow: ${fmtMoney(r.free_cash_flow, r.currency)}.`);
+    return `<section class="earnings-flash dossier-block" id="dossier-earnings-flash">
+      <div class="earnings-flash-head"><div><span class="eyebrow">⚡ ${status}${date?` · ${escapeHtml(date)}`:''}</span><h3>${escapeHtml(headline)}</h3></div><span class="earnings-flash-tag">Números primeiro</span></div>
+      <div class="earnings-flash-grid">${rows}</div>
+      <details class="earnings-flash-story"><summary>O que aconteceu</summary><div>${what.length ? what.map(x=>`<p>${escapeHtml(x)}</p>`).join('') : '<p>Ainda não existem dados suficientes para uma leitura narrativa fiável.</p>'}</div></details>
+    </section>`;
+  }
+
   function openDetail(ticker) {
     const r = state.data.stocks.find(s => s.ticker === ticker);
     if (!r) return;
@@ -2648,6 +2705,7 @@
         ${stockActionSuggestionHtml(r)}
       </div>
       ${dossierNavHtml()}
+      ${earningsFlashHtml(r)}
       <div class="verdict-panel ${verdict.cls}"><strong>${verdict.label}</strong><p>${verdict.text}</p><span>Cobertura de dados: ${r.data_coverage_pct ?? "—"}% · confiança ${r.data_confidence || "—"}</span></div>
       <section class="dossier-block" id="dossier-changes">${stockChangeSignalsHtml(r)}</section>
       <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário nativo: acrescenta eficiência, provisões de crédito, capital contabilístico e crescimento do net interest income; CET1/NPL continuam dependentes de fonte regulatória." : scoreModelFor(r) === "reit" ? "Modelo REIT nativo por proxy: FFO, P/FFO, payout FFO e net-debt/EBITDA entram no score; AFFO, NAV e ocupação continuam dependentes de fontes especializadas." : scoreModelFor(r) === "insurance" ? "Modelo Insurance Native por proxy: qualidade, sinistros/custos, capitalização, valuation e rendimento. Combined ratio e solvência regulatória só aparecem quando houver fonte estruturada fiável." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
@@ -2721,7 +2779,9 @@
         ${hasHistory ? `<section class="score-history-card"><div><span class="eyebrow">SCORE HISTORY</span><h3>Trajetória do score</h3><p>${Object.keys(series).length} observações disponíveis</p></div><canvas id="sparkline" width="340" height="70" class="sparkline"></canvas></section>` : ""}
       </section>
 
-      <h3 class="dossier-title">Risco & contexto</h3>
+      ${finalTakeHtml(r)}
+
+      <h3 class="dossier-title" data-tab-panel="deep">Risco & contexto</h3>
       <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
       <div class="detail-row"><span>Atividade insiders</span><span>${insider}</span></div>
       <div class="detail-row"><span>Market cap</span><span>${fmtCap(r.market_cap)}</span></div>
@@ -2732,6 +2792,7 @@
     els.detail.hidden = false;
     bindInsiderChart(r);
     bindDossierNav();
+    assignDossierPanels();
 
     document.getElementById("owned-checkbox").addEventListener("change", () => {
       toggleOwned(r.ticker);
@@ -5835,7 +5896,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.91.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.93.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
