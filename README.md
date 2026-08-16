@@ -1,4 +1,4 @@
-# Finscanner v0.77.0 — Interaction & Portfolio Import Repair
+# Finscanner v0.78.0 — Interaction & Portfolio Import Repair
 
 Repair release: delegated navigation for dynamic Home buttons, explicit iOS-safe portfolio file picker, DivTracker Combined CSV compatibility, portfolio localStorage backup/restore, and visible import status.
 
@@ -553,7 +553,7 @@ A Home inclui agora “O que mudou”, comparando a atualização atual com o sn
 Change Intelligence now uses the persisted thesis history at approximately 7 and 30 days to separate a one-day event from evidence that is persisting, confirming or reversing. Run the daily data workflow after installation to populate the new derived fields.
 
 
-## v0.77.0 — iOS Interaction + Automatic Insider Monitor
+## v0.78.0 — iOS Interaction + Automatic Insider Monitor
 - Home dossier links use capture-phase delegation plus hash fallback, so re-rendered cards remain tappable on iOS PWA.
 - Portfolio import uses a native file input over the visible control; no hidden programmatic picker dependency.
 - Insider scheduled workflow remains hourly for real qualifying Form 4 alerts and adds one daily health heartbeat to prove the automatic monitor is alive.

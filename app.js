@@ -181,6 +181,17 @@
     return {};
   }
   restorePortfolioIfNeeded();
+
+  // Canonical portfolio accessor. Several intelligence modules call this
+  // helper because it also restores the local backup when an iOS/PWA update
+  // temporarily exposes an empty primary key. Keep all portfolio reads on
+  // this path when they are used by dynamic views.
+  function loadPortfolio() {
+    const current = lsGet(LS_PORTFOLIO);
+    if (current && Object.keys(current).length) return current;
+    return restorePortfolioIfNeeded();
+  }
+
   // Portfolio entries are objects: { qty: number|null, value: number|null }.
   // `true` (from the old boolean "owned" toggle) is treated as qty:1 for
   // backward compatibility with positions marked before the import
@@ -485,22 +496,24 @@
   // Interaction router for all dynamically rendered controls. Capture phase is
   // deliberate: it survives nested cards, re-renders and iOS PWA click quirks.
   function safeOpenTicker(ticker) {
-    const tk = String(ticker || "").trim();
-    if (!tk) return false;
+    const raw = String(ticker || "").trim();
+    if (!raw) return false;
+    const hit = state.data?.stocks?.find?.(r => String(r.ticker || "").toUpperCase() === raw.toUpperCase());
+    const tk = hit?.ticker || raw;
     try {
       openDetail(tk);
-      return !els.detail?.hidden;
+      if (!els.detail?.hidden) return true;
+      console.warn("Ticker not found for dossier", tk);
+      return false;
     } catch (err) {
       console.error("openDetail failed", tk, err);
-      // Never leave a tap apparently dead: fall back to the Stocks search.
-      try {
-        switchView("stocks");
-        if (els.search) els.search.value = tk;
-        const hero = document.getElementById("stock-hero-search");
-        if (hero) hero.value = tk;
-        applyFilters();
-        window.scrollTo({top:0, behavior:"auto"});
-      } catch {}
+      // Do not silently redirect to Stocks: that masked runtime failures and
+      // made every button look as though it navigated to the same screen.
+      const msg = document.createElement("div");
+      msg.className = "interaction-error-toast";
+      msg.textContent = `Não foi possível abrir ${tk}. Tenta novamente após recarregar a app.`;
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 3200);
       return false;
     }
   }
@@ -5357,7 +5370,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.77.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.78.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

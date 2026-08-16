@@ -1852,3 +1852,7 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 .portfolio-import-status[data-tone="good"]{color:#207a57;background:#edf8f2;border-color:#cde8da}
 .portfolio-import-status[data-tone="bad"]{color:#a63e45;background:#fff0f1;border-color:#f1c9cd}
 .briefing-open,.home-opportunity-card,.home-brief-row,.home-brief-link{pointer-events:auto!important;touch-action:manipulation;cursor:pointer}
+
+/* v0.78 interaction repair */
+.interaction-error-toast{position:fixed;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:99999;padding:14px 16px;border-radius:14px;background:var(--surface-strong,#172036);color:var(--text-on-strong,#fff);box-shadow:0 10px 30px rgba(0,0,0,.18);font-weight:700;text-align:center}
+.home-opportunity-card,.briefing-open,.home-brief-row{pointer-events:auto;touch-action:manipulation}
