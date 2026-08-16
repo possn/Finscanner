@@ -489,3 +489,34 @@ Smart Money passa a distinguir tamanho de operação de qualidade de oportunidad
 - Portfolio ledger search preserves focus while typing and offers ticker/company autocomplete.
 - Stock searches offer autocomplete suggestions; Enter/Tab accepts the first suggestion.
 - Fixed “Analyzar” typo to “Analisar”.
+
+
+## v0.71.0 — Fund Head-to-Head Decision View
+
+- Comparação de ETFs passa de ficha técnica para decisão: Fund Fit, custo, tamanho, diversificação, concentração e overlap.
+- Assinala BEST COST, BEST SIZE, LESS CONCENTRATED e BEST FIT quando aplicável.
+- Conclusão editorial explícita, sem confundir menor TER com equivalência estrutural.
+- Papel na carteira de cada ETF lado a lado.
+- Informação densa organizada em dropboxes: Essencial, Overlap & composição, Papel na carteira.
+- Service Worker e assets sincronizados em v0.71.0.
+
+
+## v0.71.0 — Stock Compare Decision View
+Comparação persistente até 8 empresas, BEST por pilar, composite multifator, conclusão editorial e detalhe em dropboxes.
+
+
+## v0.71.0 — Portfolio + Stocks Integration
+- Company Dossier passa a mostrar Portfolio Fit quando existe portfolio importado.
+- Portfolio Fit cruza qualidade/valor/crescimento/tese com concentração setorial/geográfica e exposição indireta via ETFs.
+- Stock Compare inclui Portfolio Fit como pilar quando há dados de carteira.
+- Novo dropbox “Impacto na tua carteira” compara concentração, overlap, diversificação e exposição direta de cada empresa.
+- Fit é estrutural e não assume um montante de nova compra; não é recomendação.
+- Assets e Service Worker sincronizados em v0.71.0.
+
+
+## v0.71.0 — Stock Discover UX Consolidation
+- Removed the duplicate, non-functional stock thesis preset strip above Discover.
+- Discover is now the single thesis selector in Stocks.
+- Restored a warmer cream premium light theme on iPhone instead of hard-coded pure white legacy mobile surfaces.
+- Added Home → “Melhor encaixe na carteira”, ranking non-held stocks by Portfolio Fit when a portfolio is imported.
+- Preserved dark/system appearance, autocomplete, dossier navigation, workflows and data schemas.

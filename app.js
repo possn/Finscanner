@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", smartMoneyScope: "all", smartMoneyType: "all", smartMoneyHubMode: "feed", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockDiscoverPreset: "compounders", stockPerspective: "overview", stockCustomColumns: null, sectorLabMode: "discover", sectorCompareSelection: [], sectorDeepDive: null, insiderChartFilter: "all" };
+  const state = { data: null, filtered: [], metals: null, metalsBrief: null, selectedMetal: "GC=F", fx: null, fxHistory: null, history: null, valuationHistory: null, thesisHistory: null, news: null, activeView: "home", portfolioFilter: "all", portfolioExposureMode: "positions", portfolioAllocationDisplay: "pct", thesisScope: "all", thesisDirectionFilter: "all", fundTheme: "all", fundGeo: "all", fundStyle: "all", fundRank: "core", smartMoneyScope: "all", smartMoneyType: "all", smartMoneyHubMode: "feed", portfolioTableSort: "value-desc", portfolioTableQuery: "", stockPreset: "all", stockDiscoverPreset: "compounders", stockPerspective: "overview", stockCustomColumns: null, sectorLabMode: "discover", sectorCompareSelection: [], sectorDeepDive: null, insiderChartFilter: "all" };
 
   const els = {
     list: document.getElementById("list"),
@@ -84,6 +84,8 @@
     fundCompareB: document.getElementById("fund-compare-b"),
     fundCompareResult: document.getElementById("fund-compare-result"),
     fundPortfolioIntel: document.getElementById("fund-portfolio-intel"),
+    fundRankingChips: document.getElementById("fund-ranking-chips"),
+    fundRankingResults: document.getElementById("fund-ranking-results"),
     newsList: document.getElementById("news-list"),
     newsSearch: document.getElementById("news-search"),
     smartmoneyList: document.getElementById("smartmoney-list"),
@@ -111,6 +113,7 @@
     homeOpportunityStrip: document.getElementById("home-opportunity-strip"),
     homeAttentionSummary: document.getElementById("home-attention-summary"),
     homePortfolioBrief: document.getElementById("home-portfolio-brief"),
+    homePortfolioFitBrief: document.getElementById("home-portfolio-fit-brief"),
     homeInsiderBrief: document.getElementById("home-insider-brief"),
     homeEarningsBrief: document.getElementById("home-earnings-brief"),
     homeMarketBrief: document.getElementById("home-market-brief"),
@@ -500,6 +503,16 @@
     if (els.homePortfolioBrief) {
       const list = [...strengthening.slice(0,3).map(r=>({r,meta:`↑ ${Number(r.thesis_score_delta||0)>=0?'+':''}${Number(r.thesis_score_delta||0).toFixed(1)} score`,tone:'good'})), ...weakening.slice(0,3).map(r=>({r,meta:`↓ ${Number(r.thesis_score_delta||0).toFixed(1)} score`,tone:'bad'}))];
       els.homePortfolioBrief.innerHTML = list.length ? list.map(x=>briefRowHtml(x.r,x.meta,x.tone)).join('') : `<p class="home-brief-empty">Sem mudanças materiais de tese nas posições analisadas.</p>`;
+    }
+
+    if (els.homePortfolioFitBrief) {
+      const portfolio = loadPortfolio();
+      const hasPortfolio = portfolio && Object.keys(portfolio).length > 0;
+      const fitRows = hasPortfolio ? rows.map(r => ({r, pf: portfolioFitSnapshot(r, portfolio, state.data?.stocks || [])}))
+        .filter(x => x.pf && !x.pf.held && Number.isFinite(x.pf.fit) && x.pf.fit >= 55)
+        .sort((a,b) => b.pf.fit - a.pf.fit)
+        .slice(0,6) : [];
+      els.homePortfolioFitBrief.innerHTML = fitRows.length ? fitRows.map(x => briefRowHtml(x.r, `Portfolio Fit ${Math.round(x.pf.fit)}/100 · ${x.pf.label}`, x.pf.fit >= 75 ? 'good' : 'neutral')).join('') : `<p class="home-brief-empty">${hasPortfolio ? 'Ainda não há candidatos com encaixe estrutural suficiente nos dados disponíveis.' : 'Importa o portfolio para calcular quais empresas melhoram mais a estrutura atual.'}</p>`;
     }
 
     if (els.homeInsiderBrief) {
@@ -1369,7 +1382,7 @@
     if(!pool.length){els.stockDiscoverBody.innerHTML=`<div class="sector-empty">Sem candidatos com dados suficientes para ${escapeHtml(DISCOVER_LABELS[p]||p)}.</div>`;return;}
     els.stockDiscoverBody.innerHTML=`<div class="stock-discover-strip">${pool.map((r,i)=>`<article class="stock-discover-card" data-discover-open="${escapeHtml(r.ticker)}"><div class="stock-discover-rank">#${i+1}</div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4><div class="stock-discover-score">${r.score==null?'—':Math.round(r.score)}<small>/100</small></div><p>${escapeHtml(discoverReason(r,p))}</p><div class="stock-discover-actions"><button data-discover-open="${escapeHtml(r.ticker)}">Deep dive</button><button data-discover-filter="${escapeHtml(p)}">Ver lista</button></div></article>`).join('')}</div>`;
     els.stockDiscoverBody.querySelectorAll('[data-discover-open]').forEach(el=>el.addEventListener('click',e=>{if(e.target.closest('[data-discover-filter]'))return;openDetail(el.dataset.discoverOpen);}));
-    els.stockDiscoverBody.querySelectorAll('[data-discover-filter]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();state.stockPreset=btn.dataset.discoverFilter;document.querySelectorAll('#preset-filters [data-preset]').forEach(b=>b.classList.toggle('is-active',b.dataset.preset===state.stockPreset));applyFilters();els.list?.scrollIntoView({behavior:'smooth',block:'start'});}));
+    els.stockDiscoverBody.querySelectorAll('[data-discover-filter]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();state.stockPreset=btn.dataset.discoverFilter;applyFilters();els.list?.scrollIntoView({behavior:'smooth',block:'start'});}));
   }
 
   function applyFilters() {
@@ -2104,6 +2117,7 @@
       <section class="dossier-block" id="dossier-changes">${stockChangeSignalsHtml(r)}</section>
       <div class="score-model-note"><span>${scoreModelLabel(r)}</span><p>${escapeHtml(r.score_model_note || (scoreModelFor(r) === "bank" ? "Modelo bancário nativo: acrescenta eficiência, provisões de crédito, capital contabilístico e crescimento do net interest income; CET1/NPL continuam dependentes de fonte regulatória." : scoreModelFor(r) === "reit" ? "Modelo REIT nativo por proxy: FFO, P/FFO, payout FFO e net-debt/EBITDA entram no score; AFFO, NAV e ocupação continuam dependentes de fontes especializadas." : scoreModelFor(r) === "insurance" ? "Modelo Insurance Native por proxy: qualidade, sinistros/custos, capitalização, valuation e rendimento. Combined ratio e solvência regulatória só aparecem quando houver fonte estruturada fiável." : "Modelo geral multifator para empresas não financeiras especializadas."))}</p></div>
       <label class="owned-toggle"><input type="checkbox" id="owned-checkbox" ${owned ? "checked" : ""}><span>Tenho esta posição (guardado só neste dispositivo)</span></label>
+      ${stockPortfolioFitHtml(r)}
 
       <section class="dossier-block" id="dossier-score">
         <h3 class="dossier-title">How the score breaks down</h3>
@@ -2557,6 +2571,65 @@
       improvingPct: weightSum(r=>r.quote_type!=="ETF" && r.thesis_direction==="strengthening"),
       worseningPct: weightSum(r=>r.quote_type!=="ETF" && r.thesis_direction==="weakening"),
     };
+  }
+
+
+
+  function portfolioFitSnapshot(r, portfolio = loadPortfolio(), rows = (state.data?.stocks || [])) {
+    if (!r || r.quote_type === 'ETF' || !portfolio || !Object.keys(portfolio).length || !rows?.length) return null;
+    const byTicker = Object.fromEntries(rows.map(x => [x.ticker, x]));
+    const valued = Object.entries(portfolio).map(([ticker, entry]) => {
+      const row = byTicker[ticker];
+      const eur = row ? positionValue(entry, row, true) : null;
+      return { ticker, row, eur };
+    }).filter(x => x.row && Number.isFinite(x.eur) && x.eur > 0);
+    const total = valued.reduce((sum,x)=>sum+x.eur,0);
+    if (!(total > 0)) return null;
+
+    const sectorWeights = new Map(), geographyWeights = new Map(), indirectExposure = new Map();
+    for (const x of valued) {
+      const row=x.row;
+      if (row.quote_type === 'ETF') {
+        for (const [sec,w] of normalizeSectorWeights(row)) sectorWeights.set(sec,(sectorWeights.get(sec)||0)+x.eur*Math.max(0,Math.min(1,w)));
+        const geo=String(row.fund_region||row.region||row.country||'').trim();
+        if (geo) geographyWeights.set(geo,(geographyWeights.get(geo)||0)+x.eur);
+        for (const [sym,h] of fundHoldingsMap(row)) indirectExposure.set(sym,(indirectExposure.get(sym)||0)+x.eur*Number(h.weight||0));
+      } else {
+        const sec=row.sector||'Sem setor'; sectorWeights.set(sec,(sectorWeights.get(sec)||0)+x.eur);
+        const geo=String(row.country||row.region||'').trim(); if (geo) geographyWeights.set(geo,(geographyWeights.get(geo)||0)+x.eur);
+      }
+    }
+    const sector=r.sector||'Sem setor', geo=String(r.country||r.region||'').trim();
+    const sectorPct=((sectorWeights.get(sector)||0)/total)*100;
+    const geoPct=geo?((geographyWeights.get(geo)||0)/total)*100:0;
+    const hiddenPct=((indirectExposure.get(r.ticker)||0)/total)*100;
+    const directEntry=portfolio[r.ticker];
+    const directRow=directEntry ? byTicker[r.ticker] : null;
+    const directValue=directRow ? positionValue(directEntry,directRow,true) : null;
+    const directPct=Number.isFinite(directValue) ? directValue/total*100 : 0;
+
+    const q=Number(r.quality_pct??r.profitability_pct??0), v=Number(r.value_pct??0), g=Number(r.growth_pct??0), score=Number(r.score??0);
+    const thesis=r.thesis_direction==='strengthening'?8:r.thesis_direction==='weakening'?-8:0;
+    const diversification=Math.max(0,100-sectorPct*2.2-geoPct*.55);
+    const hiddenPenalty=Math.min(25,hiddenPct*5);
+    const investment=0.34*score+0.25*q+0.20*v+0.13*g+thesis;
+    const fit=Math.max(0,Math.min(100,0.72*investment+0.28*diversification-hiddenPenalty));
+    const reasons=[];
+    if(q>=75) reasons.push(`Quality ${Math.round(q)}`);
+    if(v>=65) reasons.push(`Value ${Math.round(v)}`);
+    if(g>=65) reasons.push(`Growth ${Math.round(g)}`);
+    if(r.thesis_direction==='strengthening') reasons.push('tese ↑');
+    if(sectorPct<10) reasons.push(`${sector} pouco representado`); else if(sectorPct>=25) reasons.push(`${sector} já pesa ${sectorPct.toFixed(0)}%`);
+    if(hiddenPct>=1) reasons.push(`${hiddenPct.toFixed(1)}% já via ETFs`);
+    if(directPct>=1) reasons.push(`${directPct.toFixed(1)}% já diretamente`);
+    const label=fit>=78?'Excelente encaixe':fit>=68?'Bom encaixe':fit>=58?'Encaixe moderado':'Encaixe fraco';
+    return {fit, label, investment, diversification, sectorPct, geoPct, hiddenPct, directPct, reasons, held:!!directEntry};
+  }
+
+  function stockPortfolioFitHtml(r) {
+    const pf=portfolioFitSnapshot(r);
+    if(!pf) return '';
+    return `<details class="stock-portfolio-fit-box" ${pf.held?'':'open'}><summary><div><span class="eyebrow">PORTFOLIO FIT</span><b>${pf.held?'Impacto desta posição na carteira':'Como encaixa na tua carteira'}</b><small>${escapeHtml(pf.label)}</small></div><strong>${Math.round(pf.fit)}<i>/100</i></strong></summary><div class="stock-portfolio-fit-body"><div class="portfolio-fit-metrics"><span>Setor atual<b>${pf.sectorPct.toFixed(1)}%</b></span><span>Via ETFs<b>${pf.hiddenPct.toFixed(1)}%</b></span><span>Diversificação<b>${Math.round(pf.diversification)}</b></span>${pf.held?`<span>Posição direta<b>${pf.directPct.toFixed(1)}%</b></span>`:''}</div><p>${escapeHtml(pf.reasons.slice(0,4).join(' · ') || 'Sem sinais fortes de concentração ou sobreposição nos dados observados.')}</p><small>Fit estrutural, não recomendação de compra. Não assume um montante de investimento novo.</small></div></details>`;
   }
 
   // ---------- donut chart (plain <canvas>, no chart library) ----------
@@ -4018,17 +4091,74 @@
     if (!els.fundCompareResult || !state.data) return;
     const a = state.data.stocks.find(r => r.ticker === els.fundCompareA?.value && r.quote_type === 'ETF');
     const b = state.data.stocks.find(r => r.ticker === els.fundCompareB?.value && r.quote_type === 'ETF');
-    if (!a || !b) { els.fundCompareResult.innerHTML = '<p class="muted">Escolhe dois fundos para comparar custos, exposição e classificação.</p>'; return; }
+    if (!a || !b) { els.fundCompareResult.innerHTML = '<p class="muted">Escolhe dois fundos para comparar custo, tamanho, concentração, overlap e papel na carteira.</p>'; return; }
     const am = fundMeta(a), bm = fundMeta(b);
+    const af = fundPortfolioFit(a), bf = fundPortfolioFit(b);
     const feeA = Number.isFinite(Number(a.expense_ratio)) ? Number(a.expense_ratio) : null;
     const feeB = Number.isFinite(Number(b.expense_ratio)) ? Number(b.expense_ratio) : null;
-    const cheaper = feeA != null && feeB != null ? (feeA < feeB ? a.ticker : feeB < feeA ? b.ticker : 'igual') : '—';
+    const aumA = Number(a.fund_total_assets), aumB = Number(b.fund_total_assets);
     const overlap = fundOverlap(a,b);
-    const overlapHtml = overlap ? `<div class="fund-overlap"><span class="eyebrow">OBSERVED HOLDINGS OVERLAP</span><strong>${pctFundWeight(overlap.value)}</strong><p>Limite inferior calculado apenas nas holdings devolvidas pela fonte (${pctFundWeight(overlap.coverageA)} de ${escapeHtml(a.ticker)}; ${pctFundWeight(overlap.coverageB)} de ${escapeHtml(b.ticker)}).</p>${overlap.shared.length ? `<div class="shared-holdings">${overlap.shared.slice(0,6).map(h=>`<span>${escapeHtml(h.symbol)} ${pctFundWeight(h.weight)}</span>`).join('')}</div>`:''}</div>` : `<p class="fund-method-note">A fonte não devolveu holdings suficientes para calcular overlap observado.</p>`;
-    els.fundCompareResult.innerHTML = `<div class="fund-h2h-grid">
-      <div><strong>${escapeHtml(a.ticker)}</strong><span>${escapeHtml(am.geo)} · ${escapeHtml(am.style)}</span><b>${feeA==null?'—':fmtExpenseRatio(feeA)}</b><small>${a.fund_total_assets==null?'AUM —':`AUM ${fmtCap(a.fund_total_assets)}`}</small></div>
-      <div><strong>${escapeHtml(b.ticker)}</strong><span>${escapeHtml(bm.geo)} · ${escapeHtml(bm.style)}</span><b>${feeB==null?'—':fmtExpenseRatio(feeB)}</b><small>${b.fund_total_assets==null?'AUM —':`AUM ${fmtCap(b.fund_total_assets)}`}</small></div>
-    </div><p class="fund-h2h-verdict">Mais barato: <strong>${escapeHtml(cheaper)}</strong></p>${overlapHtml}`;
+    const sameStructure = am.geo === bm.geo && am.style === bm.style;
+    const overlapValue = overlap ? Number(overlap.value) : null;
+    const comparable = sameStructure || (Number.isFinite(overlapValue) && overlapValue >= .35);
+    const cheaper = feeA != null && feeB != null ? (feeA < feeB ? a.ticker : feeB < feeA ? b.ticker : 'igual') : null;
+    const larger = Number.isFinite(aumA) && Number.isFinite(aumB) ? (aumA > aumB ? a.ticker : aumB > aumA ? b.ticker : 'igual') : null;
+    const lessConcentrated = af.concentrationScore === bf.concentrationScore ? 'igual' : (af.concentrationScore > bf.concentrationScore ? a.ticker : b.ticker);
+    const betterFit = af.overall === bf.overall ? 'igual' : (af.overall > bf.overall ? a.ticker : b.ticker);
+
+    let lead = betterFit === 'igual' ? a : (betterFit === a.ticker ? a : b);
+    let other = lead === a ? b : a;
+    let verdict = `${lead.ticker} tem o Fund Fit mais forte (${lead===a?af.overall:bf.overall}/100).`;
+    if (comparable && cheaper && cheaper !== 'igual') verdict += ` Entre os dois, ${cheaper} é mais barato.`;
+    if (Number.isFinite(overlapValue) && overlapValue >= .65) verdict += ` O overlap observado de ${pctFundWeight(overlapValue)} sugere duplicação relevante; normalmente não precisas dos dois para a mesma função.`;
+    else if (Number.isFinite(overlapValue) && overlapValue <= .25) verdict += ` O overlap observado é baixo (${pctFundWeight(overlapValue)}), por isso podem cumprir funções complementares.`;
+    if (!comparable) verdict += ` A comparação estrutural é limitada: geografia/estilo diferem, por isso evita escolher apenas pelo TER.`;
+
+    const roleSentence = `${a.ticker}: ${af.role}. ${b.ticker}: ${bf.role}.`;
+    const bestBadges = (ticker) => [
+      cheaper === ticker ? '<span>BEST COST</span>' : '',
+      larger === ticker ? '<span>BEST SIZE</span>' : '',
+      lessConcentrated === ticker ? '<span>LESS CONCENTRATED</span>' : '',
+      betterFit === ticker ? '<span>BEST FIT</span>' : ''
+    ].filter(Boolean).join('');
+
+    const scoreRow = (label, av, bv, fmt=(x)=>String(x)) => {
+      const an=Number(av), bn=Number(bv); const okA=Number.isFinite(an), okB=Number.isFinite(bn);
+      let winner=''; if(okA&&okB&&an!==bn) winner=an>bn?'a':'b';
+      return `<div class="fund-compare-row"><span>${escapeHtml(label)}</span><strong class="${winner==='a'?'is-best':''}">${okA?fmt(an):'—'}</strong><strong class="${winner==='b'?'is-best':''}">${okB?fmt(bn):'—'}</strong></div>`;
+    };
+
+    const overlapHtml = overlap ? `<div class="fund-overlap"><span class="eyebrow">OBSERVED HOLDINGS OVERLAP</span><strong>${pctFundWeight(overlap.value)}</strong><p>Limite inferior calculado apenas nas holdings devolvidas pela fonte (${pctFundWeight(overlap.coverageA)} de ${escapeHtml(a.ticker)}; ${pctFundWeight(overlap.coverageB)} de ${escapeHtml(b.ticker)}).</p>${overlap.shared.length ? `<div class="shared-holdings">${overlap.shared.slice(0,8).map(h=>`<span>${escapeHtml(h.symbol)} ${pctFundWeight(h.weight)}</span>`).join('')}</div>`:''}</div>` : `<p class="fund-method-note">A fonte não devolveu holdings suficientes para calcular overlap observado.</p>`;
+
+    els.fundCompareResult.innerHTML = `
+      <section class="fund-decision-verdict">
+        <span class="eyebrow">DECISION VIEW</span>
+        <h3>${escapeHtml(lead.ticker)} parece mais forte para a função atual</h3>
+        <p>${escapeHtml(verdict)}</p>
+        <small>${escapeHtml(roleSentence)}</small>
+      </section>
+      <div class="fund-h2h-grid decision">
+        <div><div class="fund-best-badges">${bestBadges(a.ticker)}</div><strong>${escapeHtml(a.ticker)}</strong><span>${escapeHtml(am.geo)} · ${escapeHtml(am.style)}</span><b>${feeA==null?'—':fmtExpenseRatio(feeA)}</b><small>${a.fund_total_assets==null?'AUM —':`AUM ${fmtCap(a.fund_total_assets)}`}</small><em>${escapeHtml(af.role)} · Fit ${af.overall}</em></div>
+        <div><div class="fund-best-badges">${bestBadges(b.ticker)}</div><strong>${escapeHtml(b.ticker)}</strong><span>${escapeHtml(bm.geo)} · ${escapeHtml(bm.style)}</span><b>${feeB==null?'—':fmtExpenseRatio(feeB)}</b><small>${b.fund_total_assets==null?'AUM —':`AUM ${fmtCap(b.fund_total_assets)}`}</small><em>${escapeHtml(bf.role)} · Fit ${bf.overall}</em></div>
+      </div>
+      <details class="fund-compare-box" open>
+        <summary><b>Essencial</b><span>${escapeHtml(a.ticker)} vs ${escapeHtml(b.ticker)}</span></summary>
+        <div class="fund-compare-table-head"><span>Métrica</span><strong>${escapeHtml(a.ticker)}</strong><strong>${escapeHtml(b.ticker)}</strong></div>
+        ${scoreRow('Fund Fit',af.overall,bf.overall,x=>`${Math.round(x)}/100`)}
+        ${scoreRow('Cost score',af.costScore,bf.costScore,x=>`${Math.round(x)}`)}
+        ${scoreRow('Size score',af.sizeScore,bf.sizeScore,x=>`${Math.round(x)}`)}
+        ${scoreRow('Diversification',af.diversificationScore,bf.diversificationScore,x=>`${Math.round(x)}`)}
+        ${scoreRow('Concentration',af.concentrationScore,bf.concentrationScore,x=>`${Math.round(x)}`)}
+      </details>
+      <details class="fund-compare-box">
+        <summary><b>Overlap & composição</b><span>${overlap?`${pctFundWeight(overlap.value)} observado`:'dados insuficientes'}</span></summary>
+        ${overlapHtml}
+      </details>
+      <details class="fund-compare-box">
+        <summary><b>Papel na carteira</b><span>${escapeHtml(af.role)} · ${escapeHtml(bf.role)}</span></summary>
+        <div class="fund-role-compare"><article><strong>${escapeHtml(a.ticker)} · ${escapeHtml(af.role)}</strong><p>${escapeHtml(af.roleReason)}</p></article><article><strong>${escapeHtml(b.ticker)} · ${escapeHtml(bf.role)}</strong><p>${escapeHtml(bf.roleReason)}</p></article></div>
+      </details>
+      <p class="fund-method-note">A conclusão é heurística e usa apenas dados observáveis. Confirma índice, réplica, moeda, domicílio, UCITS, tracking difference, fiscalidade e liquidez antes de substituir um ETF.</p>`;
   }
 
 
@@ -4478,6 +4608,94 @@
     }));
   }
 
+  function fundRankProfile(r, mode) {
+    const fit = fundPortfolioFit(r);
+    const meta = fundMeta(r);
+    const fee = Number.isFinite(Number(r.expense_ratio)) ? Number(r.expense_ratio) : null;
+    const aum = Number.isFinite(Number(r.fund_total_assets)) ? Number(r.fund_total_assets) : null;
+    const name = `${r.ticker||''} ${r.name||''} ${r.fund_category||''}`.toLowerCase();
+    const owned = isOwned(r.ticker);
+    const ucits = fundUcitsStatus(r);
+    const hasHoldings = fundHoldingsMap(r).size > 0;
+    const base = fit.overall;
+    let score = base, eligible = true, reasons=[];
+
+    if (mode === 'core') {
+      const broadish = meta.style === 'Broad' && !meta.themes.length;
+      eligible = broadish || /world|global|all.?world|msci|s&p 500|stoxx|broad|total market/.test(name);
+      score = fit.overall*.55 + fit.diversificationScore*.20 + fit.costScore*.15 + fit.sizeScore*.10;
+      if (fit.role === 'Core') { score += 7; reasons.push('perfil Core'); }
+      if (fit.role === 'Redundant') { score -= 14; reasons.push('overlap elevado na carteira'); }
+      reasons.push(`Fund Fit ${fit.overall}`);
+    } else if (mode === 'europe') {
+      eligible = meta.geo === 'Europe' || /europe|stoxx|euro zone|eurozone|euro stoxx/.test(name);
+      score = fit.overall*.60 + fit.costScore*.15 + fit.sizeScore*.15 + fit.diversificationScore*.10;
+      reasons.push('exposição europeia', `Fit ${fit.overall}`);
+    } else if (mode === 'ex-us') {
+      const us = meta.geo === 'United States' || /\bus\b|united states|s&p 500|nasdaq/.test(name);
+      const explicitEx = /ex[- ]?us|excluding us|world ex/.test(name);
+      eligible = explicitEx || (!us && (meta.geo === 'Global' || meta.geo === 'Europe' || meta.geo === 'Emerging Markets' || /world|international|developed|emerging/.test(name)));
+      score = fit.overall*.55 + fit.diversificationScore*.20 + fit.costScore*.15 + fit.sizeScore*.10;
+      if (explicitEx) { score += 7; reasons.push('ex-US explícito'); } else reasons.push('não-US pela classificação disponível');
+    } else if (mode === 'dividend') {
+      eligible = meta.style === 'Dividend' || /dividend|income|yield/.test(name);
+      score = fit.overall*.55 + fit.costScore*.15 + fit.sizeScore*.15 + fit.diversificationScore*.15;
+      reasons.push('orientado a rendimento', `custo ${fee==null?'—':fee.toFixed(2)+'%'}`);
+    } else if (mode === 'low-cost') {
+      eligible = fee != null;
+      score = fit.costScore*.55 + fit.overall*.25 + fit.sizeScore*.10 + fit.diversificationScore*.10;
+      reasons.push(`TER ${fee==null?'—':fee.toFixed(2)+'%'}`, `Fit ${fit.overall}`);
+    } else if (mode === 'diversifier') {
+      eligible = true;
+      const overlapPenalty = fit.maxOverlap == null ? 0 : Math.min(30, fit.maxOverlap*40);
+      const diversifierBonus = fit.role === 'Diversifier' ? 12 : 0;
+      score = fit.overall*.40 + fit.diversificationScore*.30 + fit.concentrationScore*.15 + fit.costScore*.15 + diversifierBonus - overlapPenalty;
+      reasons.push(fit.maxOverlap==null?'overlap sem dados':`máx. overlap ${(fit.maxOverlap*100).toFixed(0)}%`, fit.role);
+    }
+
+    if (owned) { score += 2; reasons.push('já na carteira'); }
+    if (ucits.status === 'confirmed') { score += 2; reasons.push('UCITS confirmado'); }
+    if (!hasHoldings) score -= 4;
+    if (aum != null && aum < 50e6) score -= 5;
+    return {r, fit, meta, fee, aum, ucits, eligible, score:Math.max(0,Math.min(100,Math.round(score))), reasons};
+  }
+
+  function fundRankLabel(mode) {
+    return ({core:'Best Core',europe:'Best Europe','ex-us':'Global ex-US',dividend:'Best Dividend','low-cost':'Best Low Cost',diversifier:'Best Diversifier'})[mode] || 'ETF ranking';
+  }
+
+  function renderFundRankings(allFunds) {
+    if (!els.fundRankingResults) return;
+    const mode = state.fundRank || 'core';
+    els.fundRankingChips?.querySelectorAll('[data-fund-rank]').forEach(b=>b.classList.toggle('is-active',b.dataset.fundRank===mode));
+    const ranked = allFunds.map(r=>fundRankProfile(r,mode)).filter(x=>x.eligible).sort((a,b)=>b.score-a.score || (a.fee??999)-(b.fee??999)).slice(0,8);
+    if (!ranked.length) {
+      els.fundRankingResults.innerHTML = `<div class="fund-ranking-empty"><p>Não há ETFs com dados suficientes para <strong>${escapeHtml(fundRankLabel(mode))}</strong> no universo atual.</p></div>`;
+      return;
+    }
+    const cards = ranked.map((x,i)=>{
+      const role=x.fit.role;
+      const overlap=x.fit.maxOverlap==null?'—':`${Math.round(x.fit.maxOverlap*100)}%`;
+      const badges=[x.ucits.status==='confirmed'?'UCITS':null, role, x.fee!=null?`${x.fee.toFixed(2)}% TER`:null].filter(Boolean);
+      return `<article class="fund-rank-card">
+        <div class="fund-rank-top"><span class="fund-rank-pos">#${i+1}</span><span class="fund-rank-score">${x.score}<small>/100</small></span></div>
+        <button class="fund-rank-main" data-fund-open="${escapeHtml(x.r.ticker)}"><b>${escapeHtml(x.r.ticker)}</b><strong>${escapeHtml(x.r.name||'ETF')}</strong><small>${escapeHtml(x.meta.geo)} · ${escapeHtml(x.meta.style)}</small></button>
+        <div class="fund-rank-badges">${badges.map(b=>`<span>${escapeHtml(b)}</span>`).join('')}</div>
+        <div class="fund-rank-kpis"><div><span>Fit</span><b>${x.fit.overall}</b></div><div><span>Cost</span><b>${x.fit.costScore}</b></div><div><span>Overlap</span><b>${overlap}</b></div></div>
+        <p>${escapeHtml(x.reasons.slice(0,3).join(' · '))}</p>
+        <div class="fund-rank-actions"><button data-fund-open="${escapeHtml(x.r.ticker)}">Abrir dossier</button>${i>0?`<button data-fund-pair-a="${escapeHtml(ranked[0].r.ticker)}" data-fund-pair-b="${escapeHtml(x.r.ticker)}">Comparar com #1</button>`:''}</div>
+      </article>`;
+    }).join('');
+    els.fundRankingResults.innerHTML = `<div class="fund-ranking-headline"><span>${escapeHtml(fundRankLabel(mode))}</span><small>Score contextual · usa apenas dados observados</small></div><div class="fund-rank-carousel">${cards}</div><p class="fund-method-note">O ranking é heurístico e contextual à carteira deste dispositivo. Combina Fund Fit, custo, dimensão, diversificação, concentração e overlap quando disponível. Confirma sempre KID/prospeto, índice, tracking difference, réplica, moeda e fiscalidade antes de decidir.</p>`;
+    els.fundRankingResults.querySelectorAll('[data-fund-open]').forEach(btn=>btn.addEventListener('click',()=>{ const r=allFunds.find(x=>x.ticker===btn.dataset.fundOpen); if(r) openFundDetail(r); }));
+    els.fundRankingResults.querySelectorAll('[data-fund-pair-a]').forEach(btn=>btn.addEventListener('click',()=>{
+      if (els.fundCompareA) els.fundCompareA.value=btn.dataset.fundPairA;
+      if (els.fundCompareB) els.fundCompareB.value=btn.dataset.fundPairB;
+      renderFundCompare();
+      els.fundCompareResult?.scrollIntoView({behavior:'smooth',block:'center'});
+    }));
+  }
+
   function renderFunds() {
     if (!state.data) return;
     const allFunds = state.data.stocks.filter(r => r.quote_type === "ETF");
@@ -4498,6 +4716,7 @@
     });
 
     if (els.fundsCount) els.fundsCount.textContent = `${rows.length} de ${allFunds.length}`;
+    renderFundRankings(allFunds);
     renderFundCards(rows);
     renderFundFeeSaver(allFunds);
     renderFundPortfolioIntel(allFunds);
@@ -4664,47 +4883,87 @@
     return hit || null;
   }
 
+  function stockCompareMetric(r, key) {
+    const map = {
+      score: r.score,
+      quality: r.quality_pct,
+      growth: r.growth_pct,
+      profitability: r.profitability_pct ?? r.quality_pct,
+      cash: r.cashflow_pct ?? r.balance_pct,
+      stability: r.stability_pct,
+      value: r.value_pct,
+      insider: insiderConvictionScore(r)?.score ?? null,
+      estimates: r.analyst_score ?? r.revision_score ?? null,
+    };
+    const v = Number(map[key]);
+    return Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : null;
+  }
+
+  function stockCompareVerdict(picks) {
+    if (!picks.length) return null;
+    const weights = { score:.18, quality:.16, growth:.13, profitability:.13, cash:.10, stability:.10, value:.12, insider:.04, estimates:.04 };
+    const ranked = picks.map(r => {
+      let total=0, used=0;
+      for (const [k,w] of Object.entries(weights)) {
+        const v=stockCompareMetric(r,k); if(v==null) continue; total += v*w; used += w;
+      }
+      return {r, composite: used ? total/used : 0, coverage: used};
+    }).sort((a,b)=>b.composite-a.composite);
+    const first=ranked[0], second=ranked[1];
+    if (!first) return null;
+    const strengths=[];
+    const metrics=[['quality','qualidade'],['profitability','rentabilidade'],['growth','crescimento'],['value','valuation'],['cash','cash/balanço'],['stability','estabilidade']];
+    const best={};
+    for(const [k] of metrics){ const vals=ranked.map(x=>[x.r,stockCompareMetric(x.r,k)]).filter(([,v])=>v!=null); if(vals.length){const m=Math.max(...vals.map(x=>x[1]));best[k]=vals.filter(x=>x[1]===m).map(x=>x[0].ticker);} }
+    for(const [k,label] of metrics) if((best[k]||[]).includes(first.r.ticker)) strengths.push(label);
+    const gap = second ? first.composite-second.composite : null;
+    let tone='mixed', title=`${first.r.ticker} lidera a comparação`;
+    if(gap!=null && gap>=8){tone='good'; title=`${first.r.ticker} tem a vantagem multifator mais clara`;}
+    else if(gap!=null && gap<3){title=`${first.r.ticker} lidera, mas a diferença é pequena`;}
+    const reason = strengths.length ? `Vence sobretudo em ${strengths.slice(0,3).join(', ')}.` : 'A vantagem resulta do conjunto dos fatores com dados disponíveis.';
+    return {first, second, gap, tone, title, reason, ranked};
+  }
+
+  function formatGrowthRate(v) { const n=Number(v); if(!Number.isFinite(n)) return '—'; const x=Math.abs(n)<=3 ? n*100 : n; return `${x>=0?'+':''}${x.toFixed(1)}%`; }
+
   function renderCompare() {
     if (!state.data) return;
-    const raw = (els.compareInput?.value || "").split(/[,;]+/).map(s => s.trim()).filter(Boolean).slice(0, 4);
-    if (!raw.length) { els.compareList.innerHTML = '<p class="empty-state">Escreve até 4 tickers ou nomes de empresas, separados por vírgulas.</p>'; return; }
+    const raw = (els.compareInput?.value || "").split(/[,;]+/).map(s => s.trim()).filter(Boolean).slice(0, 8);
+    if (!raw.length) { els.compareList.innerHTML = '<p class="empty-state">Escreve até 8 tickers ou nomes de empresas, separados por vírgulas.</p>'; return; }
 
     const picks = [];
     const misses = [];
     const seen = new Set();
     for (const term of raw) {
       const hit = resolveCompareTicker(term);
-      if (hit && !seen.has(hit.ticker)) { picks.push(hit); seen.add(hit.ticker); }
+      if (hit && hit.quote_type !== 'ETF' && !seen.has(hit.ticker)) { picks.push(hit); seen.add(hit.ticker); }
       else if (!hit) misses.push(term);
     }
+    if (!picks.length) { els.compareList.innerHTML = '<p class="empty-state">Nenhuma empresa encontrada no universo atual.</p>'; return; }
 
-    const cards = picks.map(r => {
-      const isEtf = r.quote_type === "ETF";
-      const rows = isEtf ? [
-        ["Expense ratio", r.expense_ratio != null ? fmtExpenseRatio(r.expense_ratio) : "—"],
-        ["Exposição AI", r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "sem dados"],
-        ["Setor", r.sector || "—"],
-        ["Preço", r.current_price != null ? r.current_price : "—"],
-      ] : [
-        ["Qualidade", r.quality_pct ?? "—"],
-        ["Crescimento", r.growth_pct ?? "—"],
-        ["Balanço", r.balance_pct ?? "—"],
-        ["Cash flow", r.cashflow_pct ?? "—"],
-        ["Valor", r.value_pct ?? "—"],
-        ["Estabilidade", r.stability_pct ?? "—"],
-        ["P/E fwd", fmtRatio(r.forward_pe)],
-      ];
-      return `<article class="compare-card">
-        <span class="eyebrow">${escapeHtml(r.ticker)}${isEtf ? " · ETF" : ""}</span>
-        <h3>${escapeHtml(r.name || r.ticker)}</h3>
-        <div class="compare-score">${r.score ?? "—"}</div>
-        ${rows.map(([label, val]) => `<div class="detail-row"><span>${label}</span><b>${val}</b></div>`).join("")}
-      </article>`;
-    }).join("");
+    const portfolio = loadPortfolio();
+    const portfolioFits = Object.fromEntries(picks.map(r=>[r.ticker,portfolioFitSnapshot(r,portfolio,state.data.stocks)]));
+    const hasPortfolioFit = Object.values(portfolioFits).some(Boolean);
+    const metricDefs=[['score','Score'],['quality','Quality'],['profitability','Profit'],['growth','Growth'],['cash','Cash'],['stability','Stable'],['value','Value'],['insider','Insider'],['estimates','Estimates']];
+    if(hasPortfolioFit) metricDefs.push(['portfolioFit','Portfolio Fit']);
+    const best={};
+    for(const [k] of metricDefs){ const vals=picks.map(r=>[r,k==='portfolioFit' ? portfolioFits[r.ticker]?.fit ?? null : stockCompareMetric(r,k)]).filter(([,v])=>v!=null); if(vals.length){const m=Math.max(...vals.map(x=>x[1]));best[k]=new Set(vals.filter(x=>x[1]===m).map(x=>x[0].ticker));} }
+    const verdict=stockCompareVerdict(picks);
+    const decision = verdict ? `<section class="stock-compare-verdict ${verdict.tone}"><span class="eyebrow">DECISION VIEW</span><h3>${escapeHtml(verdict.title)}</h3><p>${escapeHtml(verdict.reason)} ${verdict.gap!=null?`Vantagem composta: ${verdict.gap.toFixed(1)} pts.`:''}</p><div class="stock-compare-leader"><strong>${escapeHtml(verdict.first.r.ticker)}</strong><span>${verdict.first.composite.toFixed(0)}/100 composite</span><button data-compare-open="${escapeHtml(verdict.first.r.ticker)}">Abrir dossier →</button></div></section>` : '';
+
+    const table = `<div class="stock-compare-table-wrap"><div class="stock-compare-table" style="--compare-cols:${picks.length}"><div class="stock-compare-head"><span>Métrica</span>${picks.map(r=>`<button data-compare-open="${escapeHtml(r.ticker)}"><b>${escapeHtml(r.ticker)}</b><small>${escapeHtml(r.name||'')}</small></button>`).join('')}</div>${metricDefs.map(([k,l])=>`<div class="stock-compare-row"><span>${escapeHtml(l)}</span>${picks.map(r=>{const v=k==='portfolioFit' ? portfolioFits[r.ticker]?.fit ?? null : stockCompareMetric(r,k); const win=best[k]?.has(r.ticker); return `<strong class="${win?'is-best':''}">${v==null?'—':Math.round(v)}${win?'<small>BEST</small>':''}</strong>`}).join('')}</div>`).join('')}</div></div>`;
+
+    const fundamentals = picks.map(r=>`<article class="stock-compare-mini"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span><h4>${escapeHtml(r.name||r.ticker)}</h4></div><div class="stock-compare-mini-grid"><span>Fwd P/E<b>${fmtRatio(r.forward_pe)}</b></span><span>Market cap<b>${r.market_cap!=null?new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(r.market_cap):'—'}</b></span><span>Rev growth<b>${r.revenue_growth!=null?formatGrowthRate(r.revenue_growth):'—'}</b></span><span>EPS growth<b>${r.earnings_growth!=null?formatGrowthRate(r.earnings_growth):'—'}</b></span></div><button data-compare-open="${escapeHtml(r.ticker)}">Deep dive</button></article>`).join('');
+
+    const thesis = picks.map(r=>`<article class="stock-compare-thesis"><div><b>${escapeHtml(r.ticker)}</b>${thesisDirectionBadge(r)}</div><p>${escapeHtml(r.thesis_summary||'Sem tese resumida disponível.')}</p><small>${escapeHtml(r.sector||'Setor não disponível')}</small></article>`).join('');
+
+    const portfolioImpact = hasPortfolioFit ? picks.map(r=>{const pf=portfolioFits[r.ticker]; if(!pf) return ''; return `<article class="stock-compare-portfolio-card"><div><span class="eyebrow">${escapeHtml(r.ticker)}</span><strong>${Math.round(pf.fit)}<small>/100</small></strong></div><h4>${escapeHtml(pf.label)}</h4><div class="stock-compare-portfolio-grid"><span>Setor atual<b>${pf.sectorPct.toFixed(1)}%</b></span><span>Via ETFs<b>${pf.hiddenPct.toFixed(1)}%</b></span><span>Diversificação<b>${Math.round(pf.diversification)}</b></span><span>Direto<b>${pf.directPct.toFixed(1)}%</b></span></div><p>${escapeHtml(pf.reasons.slice(0,3).join(' · ')||'Sem concentração material observada.')}</p><button data-compare-open="${escapeHtml(r.ticker)}">Ver no dossier</button></article>`}).join('') : '';
 
     const missNote = misses.length ? `<p class="unmatched-note">Não encontrado no universo rastreado: ${misses.map(escapeHtml).join(", ")}</p>` : "";
-    els.compareList.innerHTML = (cards || '<p class="empty-state">Nenhum ticker ou nome encontrado no universo atual.</p>') + missNote;
+    els.compareList.innerHTML = `${decision}<details class="stock-compare-box" open><summary><div><b>Scorecard multifator</b><span>BEST por pilar${hasPortfolioFit?' · inclui Portfolio Fit':''}</span></div></summary>${table}</details>${hasPortfolioFit?`<details class="stock-compare-box stock-compare-portfolio-box"><summary><div><b>Impacto na tua carteira</b><span>concentração · overlap · diversificação</span></div></summary><div class="stock-compare-portfolio-list">${portfolioImpact}</div><p class="detail-note">Portfolio Fit é estrutural e independente do tamanho de uma nova compra. Serve para comparar encaixe, não para definir posição.</p></details>`:''}<details class="stock-compare-box"><summary><div><b>Fundamentais</b><span>valuation · crescimento · dimensão</span></div></summary><div class="stock-compare-mini-list">${fundamentals}</div></details><details class="stock-compare-box"><summary><div><b>Tese & contexto</b><span>trajetória e resumo</span></div></summary><div class="stock-compare-thesis-list">${thesis}</div></details>${missNote}`;
+    els.compareList.querySelectorAll('[data-compare-open]').forEach(btn=>btn.addEventListener('click',()=>openDetail(btn.dataset.compareOpen)));
   }
+
 
 
   if (els.stockPerspectives) {
@@ -4733,20 +4992,6 @@
     state.stockDiscoverPreset=btn.dataset.discoverPreset||'compounders';
     renderStockDiscover((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
   }));
-
-  document.querySelectorAll("#preset-filters [data-preset]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const p = btn.dataset.preset;
-      const wasActive = btn.classList.contains("is-active");
-      state.stockPreset = wasActive ? "all" : p;
-      document.querySelectorAll("#preset-filters [data-preset]").forEach(b => b.classList.toggle("is-active", !wasActive && b === btn));
-      els.zombieOnly.checked = false;
-      if (!wasActive) {
-        els.sortBy.value = p === "quality" ? "quality-desc" : p === "growth" ? "growth-desc" : p === "value" || p === "garp" ? "qv-desc" : p === "revisions" ? "revision-desc" : p === "earnings" ? "earnings-asc" : "score-desc";
-      }
-      applyFilters();
-    });
-  });
 
   function bindStockAutocomplete(input, syncInput) {
     if (!input) return;
@@ -4798,7 +5043,6 @@
     [els.stockMinScore,els.stockMinQuality,els.stockMinGrowth,els.stockMinValue,els.stockMaxFpe].forEach(el=>{if(el)el.value="";});
     if(els.stockMinCap) els.stockMinCap.value="0";
     state.stockPreset="all";
-    document.querySelectorAll("#preset-filters [data-preset]").forEach(b=>b.classList.remove("is-active"));
     applyFilters();
   });
 
@@ -4852,6 +5096,7 @@
   els.compareInput?.addEventListener("input", renderCompare);
 
   [els.fundsSearch].filter(Boolean).forEach(el => el.addEventListener("input", renderFunds));
+  els.fundRankingChips?.addEventListener("click", (e)=>{ const b=e.target.closest("[data-fund-rank]"); if(!b) return; state.fundRank=b.dataset.fundRank; renderFunds(); });
   els.fundThemeFilters?.querySelectorAll('[data-fund-theme]').forEach(btn => btn.addEventListener('click', () => {
     state.fundTheme = btn.dataset.fundTheme;
     els.fundThemeFilters.querySelectorAll('[data-fund-theme]').forEach(x => x.classList.toggle('is-active', x === btn));
@@ -4879,7 +5124,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.66.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.71.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

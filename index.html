@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Finscanner — dossiê diário do mercado</title>
 <meta name="description" content="Scanner de ações, ETFs e metais com dados fundamentais gratuitos: score composto, deteção de zombie stocks, atividade de insiders, auditoria de comissões e análise de exposição do portfolio.">
-<meta name="theme-color" content="#fef5e8">
+<meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.66.0">
+<link rel="stylesheet" href="style.css?v=0.71.0">
 </head>
 <body>
 
@@ -101,6 +101,10 @@
           <div id="home-portfolio-brief" class="home-brief-body"></div>
         </details>
         <details class="home-brief-detail">
+          <summary><span><b>Melhor encaixe na carteira</b><small>Boas empresas que acrescentam mais à estrutura atual</small></span><i>⌄</i></summary>
+          <div id="home-portfolio-fit-brief" class="home-brief-body"></div>
+        </details>
+        <details class="home-brief-detail">
           <summary><span><b>Insider opportunities</b><small>Compras com maior conviction e contexto</small></span><i>⌄</i></summary>
           <div id="home-insider-brief" class="home-brief-body"></div>
         </details>
@@ -172,9 +176,6 @@
         <span class="eyebrow">STOCK RADAR</span>
         <h2>Encontra empresas que merecem investigação.</h2>
         <p>Score explicável, métricas fundamentais, valuation relativo e trajetória da tese.</p>
-        <div class="preset-filters" id="preset-filters">
-          <button data-preset="compounders">Compounders</button><button data-preset="quality">High Quality</button><button data-preset="garp">GARP</button><button data-preset="growth">Growth</button><button data-preset="value">Value</button><button data-preset="dividend">Dividend</button><button data-preset="insider">Insider Buying</button><button data-preset="near-low">Near 52W Low</button><button data-preset="improving">Improving Thesis</button><button data-preset="earnings">Earnings Soon</button>
-        </div>
       </section>
 
       <section class="stock-discover-hub" aria-label="Discover stocks">
@@ -288,6 +289,19 @@
         <span class="eyebrow">ETF INTELLIGENCE</span>
         <h2>Encontra o fundo certo — e não pagues mais pelo mesmo.</h2>
         <p>Pesquisa por tema, geografia, estilo e rendimento. Compara custos e encontra alternativas mais baratas dentro do universo rastreado.</p>
+      </section>
+
+      <section id="fund-ranking-hub" class="fund-ranking-hub">
+        <div class="section-heading"><div><span class="eyebrow">FUND DISCOVERY RANKINGS</span><h3>Melhores candidatos por função</h3><p>Ranking contextual: qualidade estrutural do ETF + papel potencial na tua carteira. Não é uma recomendação automática.</p></div></div>
+        <div id="fund-ranking-chips" class="fund-ranking-chips" aria-label="Rankings de ETFs">
+          <button class="is-active" data-fund-rank="core">Best Core</button>
+          <button data-fund-rank="europe">Best Europe</button>
+          <button data-fund-rank="ex-us">Global ex-US</button>
+          <button data-fund-rank="dividend">Best Dividend</button>
+          <button data-fund-rank="low-cost">Best Low Cost</button>
+          <button data-fund-rank="diversifier">Best Diversifier</button>
+        </div>
+        <div id="fund-ranking-results" class="fund-ranking-results"><p class="muted">A calcular ranking…</p></div>
       </section>
 
       <section class="fund-discovery">
@@ -428,7 +442,7 @@
         </div>
       </div>
       <div id="theses-list" class="dossier theses-view"></div></section>
-    <section id="view-compare" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">COMPARE</span><h2>Compara até 4 empresas lado a lado.</h2><p>Score, qualidade, crescimento, cash flow, valuation e risco no mesmo quadro.</p></div></section><div class="commandbar"><input id="compare-input" type="text" placeholder="AAPL, MSFT, ASML.AS, BMW.DE"></div><div id="compare-list" class="compare-grid"></div></section>
+    <section id="view-compare" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">COMPARE</span><h2>Compara até 8 empresas lado a lado.</h2><p>Score, qualidade, crescimento, profitability, cash, estabilidade, valuation e smart money no mesmo quadro — com uma conclusão explícita.</p></div></section><div class="commandbar"><input id="compare-input" type="text" placeholder="AAPL, MSFT, ASML.AS, BMW.DE…" autocomplete="off" spellcheck="false"></div><div id="compare-list" class="compare-grid"></div></section>
 
     <section id="view-portfolio" class="view">
       <div class="import-bar">
@@ -520,6 +534,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.66.0"></script>
+<script src="app.js?v=0.71.0"></script>
 </body>
 </html>
