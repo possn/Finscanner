@@ -203,18 +203,36 @@ def _recent_form4_rows(cik: str, days: int) -> list[dict]:
 
 
 def _document_candidates(primary: str) -> list[str]:
-    """Structured XML is commonly the same basename as the HTML primary doc."""
+    """Return candidate paths for the RAW structured XML of a filing,
+    ordered most-likely-correct first.
+
+    Root cause (found via real diagnostic logging on a live run): SEC's
+    submissions API returns primaryDocument as something like
+    "xslF345X06/form4.xml" for Form 4 filings. That "xslF345X0N/" folder
+    is EDGAR's XSL-rendering view — ANY request for a file inside it
+    returns the human-readable HTML rendering, regardless of the
+    requested filename or its .xml extension. Confirmed empirically:
+    fetching ".../xslF345X06/form4.xml" returns HTTP 200 with an HTML
+    document starting "<!DOCTYPE html ... SEC FORM ...", not XML.
+
+    The actual raw XML lives at the accession root WITHOUT that xsl
+    folder segment — i.e. ".../{accession}/form4.xml", same filename,
+    one directory up. That's the primary candidate now.
+    """
     primary = (primary or "").strip()
     if not primary:
         return []
     p = PurePosixPath(primary)
     out = []
+    # Primary fix: strip a leading "xslF...N/" (or any "xsl*/") view-folder
+    # segment — this is the actual raw XML in the overwhelming majority
+    # of Form 3/4/5 filings.
+    if len(p.parts) > 1 and p.parts[0].lower().startswith("xsl"):
+        out.append(str(PurePosixPath(*p.parts[1:])))
+    # Fallbacks kept for filings that don't follow the xsl-folder pattern.
     if p.suffix.lower() in {".htm", ".html"}:
         out.append(str(p.with_suffix(".xml")))
-    if p.suffix.lower() == ".xml":
-        out.append(primary)
-    else:
-        out.append(primary)
+    out.append(primary)
     # stable dedupe
     return list(dict.fromkeys(out))
 
