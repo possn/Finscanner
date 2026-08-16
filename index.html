@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.76.0">
+<link rel="stylesheet" href="style.css?v=0.77.0">
 </head>
 <body>
 
@@ -450,8 +450,10 @@
 
     <section id="view-portfolio" class="view">
       <div class="import-bar">
-        <button class="import-btn" id="portfolio-import-trigger" type="button">Importar portfolio (CSV/JSON)</button>
-        <input type="file" id="portfolio-file" accept=".csv,.json,text/csv,application/json" class="visually-hidden-file-input">
+        <label class="import-btn portfolio-file-picker" id="portfolio-import-label" role="button" tabindex="0">
+          <span>Importar portfolio (CSV/JSON)</span>
+          <input type="file" id="portfolio-file" accept=".csv,.json,text/csv,application/json" aria-label="Importar portfolio CSV ou JSON">
+        </label>
         <button class="import-btn import-btn--secondary" id="portfolio-clear">Limpar portfolio</button>
         <div id="portfolio-import-status" class="portfolio-import-status" role="status" aria-live="polite"></div>
       </div>
@@ -537,6 +539,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.76.0"></script>
+<script src="app.js?v=0.77.0"></script>
 </body>
 </html>

@@ -482,17 +482,51 @@
     btn.addEventListener("click", () => switchView(btn.dataset.goto));
   });
 
-  // Robust event delegation for content that is re-rendered with innerHTML.
-  // This prevents dynamically generated dossier links from silently losing handlers.
-  document.addEventListener("click", (e) => {
-    const openBtn = e.target.closest?.(".briefing-open, .home-opportunity-card, [data-brief-ticker]");
-    if (openBtn) {
-      const ticker = openBtn.dataset.ticker || openBtn.dataset.briefTicker;
-      if (ticker) { e.preventDefault(); openDetail(ticker); return; }
+  // Interaction router for all dynamically rendered controls. Capture phase is
+  // deliberate: it survives nested cards, re-renders and iOS PWA click quirks.
+  function safeOpenTicker(ticker) {
+    const tk = String(ticker || "").trim();
+    if (!tk) return false;
+    try {
+      openDetail(tk);
+      return !els.detail?.hidden;
+    } catch (err) {
+      console.error("openDetail failed", tk, err);
+      // Never leave a tap apparently dead: fall back to the Stocks search.
+      try {
+        switchView("stocks");
+        if (els.search) els.search.value = tk;
+        const hero = document.getElementById("stock-hero-search");
+        if (hero) hero.value = tk;
+        applyFilters();
+        window.scrollTo({top:0, behavior:"auto"});
+      } catch {}
+      return false;
     }
-    const goto = e.target.closest?.("[data-brief-goto]");
+  }
+  function dossierHash(ticker) { return `#dossier=${encodeURIComponent(String(ticker || ""))}`; }
+  function routeDossierHash() {
+    const m = String(location.hash || "").match(/^#dossier=(.+)$/);
+    if (!m) return;
+    const tk = decodeURIComponent(m[1] || "");
+    if (state.data?.stocks?.length) safeOpenTicker(tk);
+  }
+  document.addEventListener("click", (e) => {
+    const target = e.target instanceof Element ? e.target : null;
+    const openBtn = target?.closest("[data-open-dossier], .briefing-open, .home-opportunity-card, [data-brief-ticker]");
+    if (openBtn) {
+      const ticker = openBtn.dataset.openDossier || openBtn.dataset.ticker || openBtn.dataset.briefTicker;
+      if (ticker) {
+        e.preventDefault();
+        if (location.hash !== dossierHash(ticker)) history.replaceState(null, "", dossierHash(ticker));
+        safeOpenTicker(ticker);
+        return;
+      }
+    }
+    const goto = target?.closest("[data-brief-goto]");
     if (goto?.dataset.briefGoto) { e.preventDefault(); switchView(goto.dataset.briefGoto); }
-  });
+  }, true);
+  window.addEventListener("hashchange", routeDossierHash);
 
   function renderHome() {
     if (els.briefingGreeting) {
@@ -507,14 +541,15 @@
     if (!top) return;
     const signal = strengthen ? "Tese a reforçar" : insider ? "Smart money" : "Qualidade em destaque";
     const body = strengthen ? (top.thesis_evolution_summary || top.thesis_summary) : insider ? `Compras líquidas de insiders: ${fmtMoney(top.insider_net_value_30d, top.currency || "USD")}.` : `Score ${Math.round(top.score)} · qualidade ${Math.round(top.quality_pct ?? 0)} · crescimento ${Math.round(top.growth_pct ?? 0)}.`;
-    els.briefingCard.innerHTML = `<span class="briefing-signal">${escapeHtml(signal)}</span><small>${escapeHtml(top.ticker)}</small><h3>${escapeHtml(top.name || top.ticker)}</h3><p>${escapeHtml(body || "")}</p><button class="briefing-open" data-ticker="${escapeHtml(top.ticker)}">Abrir dossier →</button>`;
+    els.briefingCard.innerHTML = `<span class="briefing-signal">${escapeHtml(signal)}</span><small>${escapeHtml(top.ticker)}</small><h3>${escapeHtml(top.name || top.ticker)}</h3><p>${escapeHtml(body || "")}</p><a class="briefing-open" href="${dossierHash(top.ticker)}" data-open-dossier="${escapeHtml(top.ticker)}">Abrir dossier →</a>`;
 
     renderHomeOpportunities(rows, top.ticker);
     renderHomeDailyBrief(rows);
+    if (location.hash.startsWith("#dossier=")) setTimeout(routeDossierHash, 0);
   }
 
   function briefRowHtml(r, meta, tone="neutral") {
-    return `<button class="home-brief-row ${tone}" data-brief-ticker="${escapeHtml(r.ticker)}"><span><b>${escapeHtml(r.ticker)}</b><small>${escapeHtml(r.name || r.ticker)}</small></span><em>${escapeHtml(meta)}</em></button>`;
+    return `<a class="home-brief-row ${tone}" href="${dossierHash(r.ticker)}" data-open-dossier="${escapeHtml(r.ticker)}"><span><b>${escapeHtml(r.ticker)}</b><small>${escapeHtml(r.name || r.ticker)}</small></span><em>${escapeHtml(meta)}</em></a>`;
   }
 
   function renderHomeDailyBrief(rows) {
@@ -725,13 +760,13 @@
       const v = Math.round(Number(r.value_pct ?? 0));
       const g = Math.round(Number(r.growth_pct ?? 0));
       const direction = r.thesis_direction === "strengthening" ? "↗ tese a reforçar" : r.thesis_direction === "weakening" ? "↘ tese a enfraquecer" : "→ tese estável";
-      return `<button class="home-opportunity-card" data-ticker="${escapeHtml(r.ticker)}">
+      return `<a class="home-opportunity-card" href="${dossierHash(r.ticker)}" data-open-dossier="${escapeHtml(r.ticker)}">
         <span class="home-opportunity-card__meta"><b>${escapeHtml(r.ticker)}</b><em>${Math.round(Number(r.score ?? 0))}</em></span>
         <strong>${escapeHtml(r.name || r.ticker)}</strong>
         <small>${escapeHtml(direction)}</small>
         <span class="home-opportunity-card__axes"><i>Q ${q}</i><i>V ${v}</i><i>G ${g}</i></span>
         <span class="home-opportunity-card__open">Abrir dossier →</span>
-      </button>`;
+      </a>`;
     }).join("");
   }
 
@@ -5271,7 +5306,10 @@
   on(els.portfolioImportTrigger, "click", () => {
     if (!els.portfolioFile) return;
     els.portfolioFile.value = "";
-    els.portfolioFile.click();
+    try {
+      if (typeof els.portfolioFile.showPicker === "function") els.portfolioFile.showPicker();
+      else els.portfolioFile.click();
+    } catch { els.portfolioFile.click(); }
   });
   on(els.portfolioFile, "change", (e) => {
     const file = e.target.files?.[0];
@@ -5319,7 +5357,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.76.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.77.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

@@ -1846,7 +1846,7 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 
 
 /* v0.76.0 interaction/import repair */
-.visually-hidden-file-input{position:fixed!important;left:-9999px!important;top:-9999px!important;width:1px!important;height:1px!important;opacity:.01!important;pointer-events:none!important}
+.portfolio-file-picker{position:relative!important;overflow:hidden!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;touch-action:manipulation!important}.portfolio-file-picker input[type=file]{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:.001!important;cursor:pointer!important;pointer-events:auto!important;font-size:100px!important}.briefing-open,.home-opportunity-card,.home-brief-row{text-decoration:none!important;-webkit-tap-highlight-color:transparent}
 .import-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .portfolio-import-status{flex-basis:100%;padding:9px 12px;border-radius:12px;border:1px solid var(--line-soft,var(--fs-line));background:var(--surface-soft,#f7efe1);font-size:13px;color:var(--ink-soft,#596273)}
 .portfolio-import-status[data-tone="good"]{color:#207a57;background:#edf8f2;border-color:#cde8da}
