@@ -4184,6 +4184,7 @@
     if (/bond|fixed income/.test(explicitStyle) || /bond|treasury|fixed income|aggregate/.test(text)) style = "Bonds";
     else if (/dividend|income|yield/.test(explicitStyle) || /dividend|income|yield/.test(text)) style = "Dividend";
     else if (/small/.test(explicitStyle) || /small cap|iwm\b/.test(text)) style = "Small Cap";
+    else if (/value/.test(explicitStyle) || /value factor|value etf/.test(text)) style = "Value";
     else if (/growth/.test(explicitStyle) || /growth|innovation|nasdaq|qqq\b/.test(text)) style = "Growth";
 
     let geo = rawGeo || "Global";
@@ -4368,21 +4369,20 @@
 
   function renderFundCards(rows) {
     if (!els.fundsList) return;
-    els.fundsList.innerHTML = rows.length ? rows.map(r => {
+    const portfolio = loadPortfolio();
+    els.fundsList.innerHTML = rows.length ? rows.slice(0,120).map(r => {
       const m = fundMeta(r);
-      const fee = r.expense_ratio == null ? "—" : fmtExpenseRatio(Number(r.expense_ratio));
-      const ai = r.ai_exposure_pct == null ? "—" : `${Number(r.ai_exposure_pct).toFixed(1)}%`;
+      const feeN = validFundFee(r);
+      const fee = feeN == null ? "TER —" : `TER ${fmtExpenseRatio(feeN)}`;
+      const aum = r.fund_total_assets == null ? "AUM —" : `AUM ${fmtCap(r.fund_total_assets)}`;
       const theme = m.themes[0] || r.sector || "Diversified";
-      return `<article class="fund-result-card" data-ticker="${escapeHtml(r.ticker)}">
-        <div class="fund-result-top"><div><span class="eyebrow">${escapeHtml(theme)}</span><h3>${escapeHtml(r.ticker)}</h3><p>${escapeHtml(r.name || "ETF")}</p></div><button class="fund-open" data-fund-open="${escapeHtml(r.ticker)}">Abrir →</button></div>
-        <div class="fund-result-metrics">
-          <div><span>Expense ratio</span><strong>${fee}</strong></div>
-          <div><span>Região</span><strong>${escapeHtml(m.geo)}</strong></div>
-          <div><span>Estilo</span><strong>${escapeHtml(m.style)}</strong></div>
-          <div><span>AI exposure</span><strong>${ai}</strong></div>
-          <div><span>AUM</span><strong>${r.fund_total_assets == null ? "—" : fmtCap(r.fund_total_assets)}</strong></div>
-          <div><span>Top holdings</span><strong>${Array.isArray(r.top_holdings) ? r.top_holdings.length : 0}</strong></div>
-        </div>
+      const owned = !!portfolio?.[r.ticker];
+      const catalogOnly = r.pipeline_status === 'catalog_only';
+      const ucits = String(r.fund_ucits||'').toLowerCase()==='confirmed';
+      return `<article class="fund-result-card fund-result-simple" data-ticker="${escapeHtml(r.ticker)}">
+        <div class="fund-result-top"><div><span class="eyebrow">${escapeHtml(theme)}</span><h3>${escapeHtml(r.ticker)} ${owned?'<em class="fund-owned-badge">NA TUA CARTEIRA</em>':''}</h3><p>${escapeHtml(r.name || "ETF")}</p></div><button class="fund-open" data-fund-open="${escapeHtml(r.ticker)}">Abrir →</button></div>
+        <div class="fund-result-tags"><span>${escapeHtml(m.geo)}</span><span>${escapeHtml(m.style)}</span>${ucits?'<span>UCITS</span>':''}<span>${fee}</span><span>${aum}</span></div>
+        ${catalogOnly?'<small class="fund-catalog-note">Catálogo global · dados de mercado ainda a enriquecer</small>':''}
       </article>`;
     }).join("") : '<p class="empty-state">Nenhum ETF corresponde a estes filtros.</p>';
     els.fundsList.querySelectorAll('[data-fund-open]').forEach(x => x.addEventListener('click', () => openDetail(x.dataset.fundOpen)));
@@ -4445,7 +4445,8 @@
       return rank[b.evidence.confidence]-rank[a.evidence.confidence] || b.diff-a.diff;
     });
 
-    const coverage = `<div class="fee-saver-coverage"><b>${ownedFunds.length}</b><span>ETFs da carteira reconhecidos</span><b>${withFee.length}</b><span>com TER válido</span><b>${candidates.length}</b><span>alternativas comparáveis mais baratas</span></div>`;
+    const globalWithFee = allFunds.filter(r => validFundFee(r) != null).length;
+    const coverage = `<div class="fee-saver-coverage"><b>${allFunds.length}</b><span>ETFs no catálogo global</span><b>${globalWithFee}</b><span>com TER observado</span><b>${ownedFunds.length}</b><span>ETFs teus reconhecidos</span><b>${candidates.length}</b><span>alternativas comparáveis melhores</span></div>`;
     if (!candidates.length) {
       els.fundFeeSaver.innerHTML = coverage + `<p class="muted">Analisei os ETFs da carteira que existem no universo rastreado, mas não encontrei uma alternativa <strong>comparável e claramente mais barata</strong> com evidência suficiente. Não vou sugerir um ETF apenas porque tem TER menor.</p>${missingFromUniverse.length ? `<p class="fund-method-note">${missingFromUniverse.length} posições importadas ainda não existem no universo diário e não podem ser avaliadas aqui até o workflow as incorporar.</p>` : ''}`;
       return;
@@ -4690,7 +4691,7 @@
   }
 
   function fundReplacementCandidates(held, allFunds) {
-    const feeHeld=fundExpenseCostPct(held);
+    const feeHeld=validFundFee(held);
     const aumHeld=Number(held?.fund_total_assets);
     const ucHeld=fundUcitsStatus(held);
     const out=[];
@@ -4698,7 +4699,7 @@
       if (!alt || alt.ticker===held.ticker) continue;
       const comp=fundReplacementCompatibility(held,alt);
       if (comp.score < .22) continue;
-      const feeAlt=fundExpenseCostPct(alt);
+      const feeAlt=validFundFee(alt);
       const aumAlt=Number(alt.fund_total_assets);
       const ucAlt=fundUcitsStatus(alt);
       const cheaper=feeHeld!=null && feeAlt!=null && feeAlt < feeHeld-.005;
@@ -4869,6 +4870,45 @@
     </article>`;
   }
 
+  function renderSimpleEtfDecisionCenter(held, totalValue) {
+    const clusters = buildFundOverlapClusters(held, 0.30);
+    if (!clusters.length) {
+      return `<section class="etf-decision-center"><div class="section-heading"><div><span class="eyebrow">ETF REVIEW</span><h3>Sobreposição da tua carteira</h3></div></div><div class="etf-review-ok"><strong>Não encontrei pares com overlap observado suficiente.</strong><p>Isto não prova ausência de duplicação: alguns ETFs ainda têm holdings incompletas. Só mostro uma sugestão quando existe evidência observável.</p></div></section>`;
+    }
+    const cards = clusters.map((cluster, idx) => {
+      const scoreCandidate = (x) => {
+        const fee = validFundFee(x.row);
+        const aum = Number(x.row?.fund_total_assets);
+        const coverage = Number(x.coverage)||0;
+        const avgOverlap = cluster.filter(y=>y!==x).map(y=>fundOverlap(x.row,y.row)?.value).filter(Number.isFinite);
+        const represent = avgOverlap.length ? avgOverlap.reduce((a,b)=>a+b,0)/avgOverlap.length : 0;
+        let score = represent*50 + Math.min(20,coverage*20);
+        if (fee!=null) score += Math.max(0,20-Math.min(20,fee*20));
+        if (Number.isFinite(aum)&&aum>0) score += Math.min(10,Math.log10(Math.max(1,aum/1e6))*2);
+        return score;
+      };
+      const ordered = cluster.slice().sort((a,b)=>scoreCandidate(b)-scoreCandidate(a));
+      const keep = ordered[0];
+      const review = ordered.slice(1);
+      const clusterValue = cluster.reduce((sum,x)=>sum+(Number(x.eur)||0),0);
+      const avgOv = review.map(x=>fundOverlap(keep.row,x.row)?.value).filter(Number.isFinite);
+      const overlap = avgOv.length ? avgOv.reduce((a,b)=>a+b,0)/avgOv.length : null;
+      const reasonBits=[];
+      const keepFee=validFundFee(keep.row);
+      if (keepFee!=null) reasonBits.push(`TER ${fmtExpenseRatio(keepFee)}`);
+      if (keep.row?.fund_total_assets) reasonBits.push(`AUM ${fmtCap(keep.row.fund_total_assets)}`);
+      if (overlap!=null) reasonBits.push(`${pctFundWeight(overlap)} overlap médio no grupo`);
+      const rows = review.map(x=>{
+        const ov=fundOverlap(keep.row,x.row)?.value;
+        const fee=validFundFee(x.row);
+        const feeText=fee!=null?` · TER ${fmtExpenseRatio(fee)}`:'';
+        return `<div class="etf-review-row"><div><b>REVER ${escapeHtml(x.ticker)}</b><small>${Number.isFinite(ov)?pctFundWeight(ov)+' overlap com '+escapeHtml(keep.ticker):'overlap parcial'}${feeText}</small></div><button data-fund-pair-a="${escapeHtml(keep.ticker)}" data-fund-pair-b="${escapeHtml(x.ticker)}">Comparar</button></div>`;
+      }).join('');
+      return `<details class="etf-review-group" ${idx===0?'open':''}><summary><div><span>Grupo ${idx+1} · ${cluster.length} ETFs</span><strong>${escapeHtml(keep.ticker)} parece o melhor candidato a manter</strong></div><b>${totalValue&&clusterValue?`${(clusterValue/totalValue*100).toFixed(1)}% da carteira`:''}</b></summary><div class="etf-keep-card"><span>MANTER / NÚCLEO</span><strong>${escapeHtml(keep.ticker)}</strong><p>${escapeHtml(reasonBits.join(' · ')||'melhor combinação observável de overlap, cobertura, dimensão e custo')}</p></div>${rows}<p class="fund-method-note">Sugestão para revisão, não ordem de venda. Confirma índice, UCITS, réplica, moeda, distribuição/acumulação, tracking difference e fiscalidade.</p></details>`;
+    }).join('');
+    return `<section class="etf-decision-center"><div class="section-heading"><div><span class="eyebrow">ETF REVIEW</span><h3>Que ETFs se sobrepõem e qual faz mais sentido manter</h3></div><span class="section-count">${clusters.length} grupo${clusters.length===1?'':'s'}</span></div><p class="fund-method-note">A leitura é simples: identifico grupos com overlap observado ≥30%, escolho um candidato a núcleo com base em representatividade, holdings cobertas, custo válido e dimensão, e marco os restantes para revisão.</p>${cards}</section>`;
+  }
+
   function renderFundPortfolioIntel(allFunds) {
     if (!els.fundPortfolioIntel) return;
     const portfolio = lsGet(LS_PORTFOLIO);
@@ -4947,14 +4987,14 @@
         <div><span>Top 10 subjacentes</span><strong>${top10Pct==null?'—':(top10Pct*100).toFixed(1)+'%'}</strong></div>
         <div><span>Holdings repetidas</span><strong>${duplicates.length}</strong></div>
       </div>
-      ${renderFundReplacementIntel(held, allFunds, totalValue)}
-      ${renderPortfolioSimplification(held,totalValue)}
+      ${renderSimpleEtfDecisionCenter(held, totalValue)}
+      <details class="fund-advanced-details"><summary><b>Ver análise técnica detalhada</b><span>look-through, holdings repetidas e cenários</span></summary>
       <div class="fund-portfolio-columns">
         <article><span class="eyebrow">ECONOMIC LOOK-THROUGH</span><h4>Maiores exposições observadas</h4><div class="portfolio-lookthrough-list">${topUnderlyingHtml}</div></article>
         <article><span class="eyebrow">OVERLAP HOTSPOTS</span><h4>ETFs mais semelhantes</h4><div class="fund-overlap-pairs">${pairHtml}</div></article>
       </div>
       <article class="duplicate-holdings-panel"><span class="eyebrow">DUPLICATE HOLDINGS</span><h4>Empresas repetidas entre vários ETFs</h4>${duplicateHtml}</article>
-      ${renderFundConsolidation(held, totalValue)}
+      </details>
     `;
 
     els.fundPortfolioIntel.querySelectorAll('[data-fund-pair-a]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -5111,12 +5151,14 @@
       return af - bf || (a.ticker||'').localeCompare(b.ticker||'');
     });
 
-    if (els.fundsCount) els.fundsCount.textContent = `${rows.length} de ${allFunds.length}`;
+    if (els.fundsCount) els.fundsCount.textContent = `${rows.length} resultados`;
+    const catalogCount = document.getElementById("fund-catalog-count");
+    if (catalogCount) catalogCount.textContent = `${allFunds.length} ETFs`;
     renderFundRankings(allFunds);
     renderFundCards(rows);
     if (els.fundsList) {
       const cards = els.fundsList.innerHTML;
-      els.fundsList.innerHTML = fundFilterSummary(rows, allFunds) + (rows.length ? cards : `<div class="fund-filter-empty"><strong>Sem ETF rastreado nesta combinação.</strong><p>O filtro está a funcionar, mas o universo diário ainda não contém um ETF com estas etiquetas. Depois de atualizares esta release, corre o workflow para carregar o universo Funds expandido.</p></div>`);
+      els.fundsList.innerHTML = fundFilterSummary(rows, allFunds) + (rows.length ? cards : `<div class="fund-filter-empty"><strong>Não encontrei ETF nesta combinação.</strong><p>Experimenta retirar uma dimensão. O universo inclui também ETFs de catálogo sem dados financeiros completos; se nem esses aparecem, a combinação é realmente vazia no catálogo atual.</p></div>`);
       els.fundsList.querySelector('[data-fund-clear-filters]')?.addEventListener('click',()=>{
         state.fundTheme='all'; state.fundGeo='all'; state.fundStyle='all';
         if (els.fundsSearch) els.fundsSearch.value='';
@@ -5536,6 +5578,11 @@
     els.fundStyleFilters.querySelectorAll('[data-fund-style]').forEach(x => x.classList.toggle('is-active', x === btn));
     renderFunds();
   }));
+  document.querySelectorAll('[data-fund-jump]').forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.fundJump === 'discover' ? 'fund-global-discovery' : btn.dataset.fundJump === 'mine' ? 'fund-portfolio-intel' : 'fund-better-alternatives';
+    document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+
   on(els.fundCompareA, 'change', renderFundCompare);
   on(els.fundCompareB, 'change', renderFundCompare);
 
@@ -5548,7 +5595,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.85.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.87.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 

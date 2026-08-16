@@ -1997,3 +1997,50 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 .fee-saver-coverage{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;padding:14px 0 18px;border-bottom:1px solid var(--line);margin-bottom:4px}.fee-saver-coverage b{font-size:1.05rem}.fee-saver-coverage span{color:var(--muted)}
 .fee-saver-item{border-bottom:1px solid var(--line)}.fee-saver-item summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;cursor:pointer}.fee-saver-item summary::-webkit-details-marker{display:none}.fee-saver-item summary span{display:flex;flex-direction:column;gap:3px}.fee-saver-item summary small{color:var(--muted)}.fee-saver-item summary b{color:var(--positive);white-space:nowrap}.fee-saver-detail{padding:0 0 16px}.fee-saver-detail p{margin:0 0 12px;color:var(--muted)}.fee-saver-detail>div{display:flex;gap:10px;flex-wrap:wrap}.fee-saver-detail button{border:1px solid var(--line-strong);background:var(--surface);color:var(--text);border-radius:999px;padding:9px 12px;font-weight:700}
 @media(max-width:700px){.fee-saver-item summary{align-items:flex-start}.fee-saver-item summary b{font-size:.88rem}.fee-saver-coverage{grid-template-columns:auto 1fr}}
+
+/* v0.87.0 — simplified ETF decision center */
+.etf-decision-center{margin:24px 0;padding:22px;border:1px solid var(--line);border-radius:24px;background:var(--surface)}
+.etf-review-group{border:1px solid var(--line);border-radius:20px;background:var(--surface-2);margin-top:14px;overflow:hidden}
+.etf-review-group>summary{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px;cursor:pointer;list-style:none}
+.etf-review-group>summary::-webkit-details-marker{display:none}
+.etf-review-group>summary span{display:block;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.etf-review-group>summary strong{display:block;margin-top:4px;font-size:1rem;color:var(--text)}
+.etf-keep-card{margin:0 16px 14px;padding:16px;border-radius:16px;background:var(--positive-soft);border:1px solid var(--positive-line)}
+.etf-keep-card span{font-size:.72rem;font-weight:800;letter-spacing:.1em;color:var(--positive)}
+.etf-keep-card strong{display:block;font-size:1.45rem;margin:4px 0;color:var(--text)}
+.etf-keep-card p{margin:0;color:var(--muted)}
+.etf-review-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-top:1px solid var(--line)}
+.etf-review-row b{display:block;color:var(--text)}
+.etf-review-row small{display:block;color:var(--muted);margin-top:3px}
+.etf-review-row button{flex:0 0 auto}
+.etf-review-ok{padding:18px;border-radius:16px;background:var(--surface-2);border:1px dashed var(--line)}
+.fund-advanced-details{margin-top:18px;border-top:1px solid var(--line);padding-top:8px}
+.fund-advanced-details>summary{display:flex;justify-content:space-between;gap:10px;padding:16px 0;cursor:pointer;color:var(--text)}
+.fund-advanced-details>summary span{color:var(--muted);font-size:.85rem}
+@media(max-width:700px){.etf-decision-center{padding:16px}.etf-review-row{align-items:flex-start;flex-direction:column}.etf-review-row button{width:100%}}
+
+/* v0.87 — simple global ETF workflow */
+.funds-hero-simple{max-width:none}
+.fund-simple-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.fund-simple-steps button{border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:16px;padding:14px;text-align:left;display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;box-shadow:var(--shadow-card)}
+.fund-simple-steps button>span{grid-row:1/3;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-sunken);font-weight:800}
+.fund-simple-steps b{font-size:15px}.fund-simple-steps small{color:var(--ink-muted);font-size:12px}
+.fund-discovery-primary{margin-top:10px}
+.fund-simple-block{scroll-margin-top:90px;margin:20px 0}
+.fund-tools-simple{scroll-margin-top:90px}
+.fund-result-simple .fund-result-top h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fund-owned-badge{font-style:normal;font-size:9px;letter-spacing:.08em;background:#e6f6ee;color:#237451;border-radius:999px;padding:4px 7px}
+.fund-result-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.fund-result-tags span{border:1px solid var(--border);background:var(--surface-sunken);border-radius:999px;padding:6px 9px;font-size:12px;color:var(--ink-muted);font-weight:700}
+.fund-catalog-note{display:block;margin-top:10px;color:var(--ink-faint)}
+.fund-ranking-hub.fund-advanced-details{margin:18px 0;padding:0;border:1px solid var(--border);border-radius:18px;background:var(--surface)}
+.fund-ranking-hub.fund-advanced-details>summary{padding:16px 18px}
+.fund-ranking-hub.fund-advanced-details[open]>.section-heading,.fund-ranking-hub.fund-advanced-details[open]>.fund-ranking-chips,.fund-ranking-hub.fund-advanced-details[open]>.fund-ranking-results{margin-left:18px;margin-right:18px}
+.fund-ranking-hub.fund-advanced-details[open]>.fund-ranking-results{margin-bottom:18px}
+@media(max-width:700px){
+  .fund-simple-steps{grid-template-columns:1fr}
+  .fund-simple-steps button{grid-template-columns:auto 1fr}
+  .funds-hero-simple h2{font-size:30px}
+  .fund-result-simple{padding:15px}
+}
+[data-theme="dark"] .fund-owned-badge{background:rgba(35,116,81,.22);color:#bfe7d3}

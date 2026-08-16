@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.85.0">
+<link rel="stylesheet" href="style.css?v=0.87.0">
 </head>
 <body>
 
@@ -293,33 +293,26 @@
 
 
     <section id="view-funds" class="view">
-      <section class="funds-hero">
+      <section class="funds-hero funds-hero-simple">
         <span class="eyebrow">ETF INTELLIGENCE</span>
-        <h2>Encontra o fundo certo — e não pagues mais pelo mesmo.</h2>
-        <p>Pesquisa por tema, geografia, estilo e rendimento. Compara custos e encontra alternativas mais baratas dentro do universo rastreado.</p>
-      </section>
-
-      <section id="fund-ranking-hub" class="fund-ranking-hub">
-        <div class="section-heading"><div><span class="eyebrow">FUND DISCOVERY RANKINGS</span><h3>Melhores candidatos por função</h3><p>Ranking contextual: qualidade estrutural do ETF + papel potencial na tua carteira. Não é uma recomendação automática.</p></div></div>
-        <div id="fund-ranking-chips" class="fund-ranking-chips" aria-label="Rankings de ETFs">
-          <button class="is-active" data-fund-rank="core">Best Core</button>
-          <button data-fund-rank="europe">Best Europe</button>
-          <button data-fund-rank="ex-us">Global ex-US</button>
-          <button data-fund-rank="dividend">Best Dividend</button>
-          <button data-fund-rank="low-cost">Best Low Cost</button>
-          <button data-fund-rank="diversifier">Best Diversifier</button>
+        <h2>Descobre ETFs globais. Depois vê o que faz sentido na tua carteira.</h2>
+        <p>O universo de pesquisa é independente do teu portfolio. A tua carteira é usada apenas depois, para medir overlap e encontrar alternativas potencialmente melhores.</p>
+        <div class="fund-simple-steps" aria-label="Atalhos de ETFs">
+          <button type="button" data-fund-jump="discover"><span>1</span><b>Descobrir ETFs</b><small>Todo o catálogo global rastreado</small></button>
+          <button type="button" data-fund-jump="mine"><span>2</span><b>Os meus ETFs</b><small>Overlap e redundâncias</small></button>
+          <button type="button" data-fund-jump="better"><span>3</span><b>Alternativas melhores</b><small>Comparáveis e mais eficientes</small></button>
         </div>
-        <div id="fund-ranking-results" class="fund-ranking-results"><p class="muted">A calcular ranking…</p></div>
       </section>
 
-      <section class="fund-discovery">
+      <section id="fund-global-discovery" class="fund-discovery fund-discovery-primary">
+        <div class="section-heading"><div><span class="eyebrow">1 · DESCOBRIR NO UNIVERSO GLOBAL</span><h3>Que ETF procuras?</h3><p>Escolhe uma ou mais características. Os resultados aparecem logo abaixo — quer estejam ou não na tua carteira.</p></div><span class="section-count" id="fund-catalog-count">—</span></div>
         <div class="fund-search-row">
           <input id="funds-search" type="text" placeholder="Pesquisar ticker ou nome…" autocomplete="off" spellcheck="false">
           <span class="section-count" id="funds-count">—</span>
         </div>
 
         <div class="fund-facet-group">
-          <span class="fund-facet-label">HOT THEMES</span>
+          <span class="fund-facet-label">TEMA</span>
           <div id="fund-theme-filters" class="fund-chip-row">
             <button class="fund-chip is-active" data-fund-theme="all">Todos</button>
             <button class="fund-chip" data-fund-theme="AI">AI</button>
@@ -336,7 +329,7 @@
 
         <div class="fund-facet-grid">
           <div class="fund-facet-group">
-            <span class="fund-facet-label">GEOGRAPHY</span>
+            <span class="fund-facet-label">GEOGRAFIA / EXPOSIÇÃO</span>
             <div id="fund-geo-filters" class="fund-chip-row compact">
               <button class="fund-chip is-active" data-fund-geo="all">Todos</button>
               <button class="fund-chip" data-fund-geo="United States">US</button>
@@ -348,11 +341,12 @@
             </div>
           </div>
           <div class="fund-facet-group">
-            <span class="fund-facet-label">STYLE / INCOME</span>
+            <span class="fund-facet-label">ESTILO / RENDIMENTO</span>
             <div id="fund-style-filters" class="fund-chip-row compact">
               <button class="fund-chip is-active" data-fund-style="all">Todos</button>
               <button class="fund-chip" data-fund-style="Broad">Broad</button>
               <button class="fund-chip" data-fund-style="Growth">Growth</button>
+              <button class="fund-chip" data-fund-style="Value">Value</button>
               <button class="fund-chip" data-fund-style="Small Cap">Small Cap</button>
               <button class="fund-chip" data-fund-style="Dividend">Dividend</button>
               <button class="fund-chip" data-fund-style="Bonds">Bonds</button>
@@ -365,26 +359,42 @@
         <div id="funds-list" class="funds-card-list"></div>
       </section>
 
-      <section class="fund-tools-grid">
+      <details id="fund-ranking-hub" class="fund-ranking-hub fund-advanced-details">
+        <summary><b>Ver rankings por função</b><span>Core · Europe · ex-US · Dividend · Low Cost · Diversifier</span></summary>
+        <div class="section-heading"><div><span class="eyebrow">RANKINGS</span><h3>Melhores candidatos por função</h3><p>Uma lente adicional sobre o catálogo global. Não substitui a comparação direta.</p></div></div>
+        <div id="fund-ranking-chips" class="fund-ranking-chips" aria-label="Rankings de ETFs">
+          <button class="is-active" data-fund-rank="core">Best Core</button>
+          <button data-fund-rank="europe">Best Europe</button>
+          <button data-fund-rank="ex-us">Global ex-US</button>
+          <button data-fund-rank="dividend">Best Dividend</button>
+          <button data-fund-rank="low-cost">Best Low Cost</button>
+          <button data-fund-rank="diversifier">Best Diversifier</button>
+        </div>
+        <div id="fund-ranking-results" class="fund-ranking-results"><p class="muted">A calcular ranking…</p></div>
+      </details>
+
+      <section id="fund-portfolio-intel" class="fund-portfolio-intel fund-simple-block">
+        <div class="section-heading"><div><span class="eyebrow">2 · OS MEUS ETFs</span><h3>Onde tens sobreposição?</h3><p>Aqui a análise usa apenas os ETFs que realmente tens, para identificar duplicação e sugerir qual merece ser o núcleo de cada grupo.</p></div></div>
+        <p class="muted">A analisar os ETFs da tua carteira…</p>
+      </section>
+
+      <section id="fund-better-alternatives" class="fund-tools-grid fund-tools-simple">
         <article class="fund-tool-panel fee-saver-panel">
-          <span class="eyebrow">FEE SAVER</span>
-          <h3>Estás a pagar demasiado?</h3>
-          <p>Analisa os ETFs da tua carteira e procura alternativas semelhantes com menor expense ratio.</p>
+          <span class="eyebrow">3 · ALTERNATIVAS MELHORES</span>
+          <h3>Há uma opção semelhante mais eficiente?</h3>
+          <p>Para cada ETF teu, procura no catálogo global alternativas comparáveis. Só sugere quando existe evidência de semelhança e uma vantagem observável, como menor TER.</p>
           <div id="fund-fee-saver"></div>
         </article>
         <article class="fund-tool-panel">
-          <span class="eyebrow">HEAD-TO-HEAD</span>
+          <span class="eyebrow">COMPARAR</span>
           <h3>Compara dois ETFs</h3>
+          <p>Escolhe qualquer dois ETFs do catálogo global e vê custo, tamanho, overlap e papel potencial.</p>
           <div class="fund-compare-controls">
             <select id="fund-compare-a"><option value="">ETF A</option></select>
             <select id="fund-compare-b"><option value="">ETF B</option></select>
           </div>
-          <div id="fund-compare-result" class="fund-compare-result"><p class="muted">Escolhe dois fundos para comparar custos, exposição e classificação.</p></div>
+          <div id="fund-compare-result" class="fund-compare-result"><p class="muted">Escolhe dois fundos para comparar.</p></div>
         </article>
-      </section>
-
-      <section id="fund-portfolio-intel" class="fund-portfolio-intel">
-        <p class="muted">A analisar os ETFs da tua carteira…</p>
       </section>
 
     </section>
@@ -543,6 +553,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.85.0"></script>
+<script src="app.js?v=0.87.0"></script>
 </body>
 </html>
