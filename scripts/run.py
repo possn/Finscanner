@@ -112,18 +112,26 @@ def main():
     # refreshed in rotation, so a name not fetched today should keep yesterday's
     # observed TER/AUM/holdings rather than falling back to metadata-only.
     previous_etfs = {}
+    previous_equities = {}
     try:
         if os.path.exists(OUT_PATH):
             with open(OUT_PATH, "r", encoding="utf-8") as _f:
                 _prev = json.load(_f)
+            _prev_rows = _prev.get("stocks") or []
             previous_etfs = {
                 str(r.get("ticker") or ""): r
-                for r in (_prev.get("stocks") or [])
+                for r in _prev_rows
                 if r.get("quote_type") == "ETF" and r.get("ticker")
             }
+            previous_equities = {
+                str(r.get("ticker") or ""): r
+                for r in _prev_rows
+                if r.get("quote_type") != "ETF" and r.get("ticker")
+            }
     except Exception as exc:
-        log.warning("Could not load previous ETF catalogue: %s", exc)
+        log.warning("Could not load previous catalogue: %s", exc)
         previous_etfs = {}
+        previous_equities = {}
 
     universe = build_universe()
     all_tickers = sorted({t for tickers in universe.values() for t in tickers})
