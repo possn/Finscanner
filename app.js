@@ -2585,35 +2585,6 @@
     </section>`;
   }
 
-  const CONGRESS_API_BASE = "https://www.bargo.ai/free-apis/congress/v1/trades";
-  const LS_CONGRESS_PREFIX = "finscanner:congress:v1:";
-
-  function congressCacheKey(ticker){ return LS_CONGRESS_PREFIX + String(ticker||'').toUpperCase(); }
-  function loadCongressCache(ticker){
-    try { const x=JSON.parse(localStorage.getItem(congressCacheKey(ticker))||'null'); if(!x) return null; if(Date.now()-Number(x.saved_at||0)>12*3600*1000) return null; return x.data||null; } catch(_) { return null; }
-  }
-  function saveCongressCache(ticker,data){ try{ localStorage.setItem(congressCacheKey(ticker),JSON.stringify({saved_at:Date.now(),data})); }catch(_){} }
-  function congressAmountMid(range){
-    if(!range) return null;
-    const nums=String(range).replace(/,/g,'').match(/\$?([\d.]+)\s*([KMB])?/gi)||[];
-    const vals=nums.map(x=>{const m=x.replace(/[$,\s]/g,'').match(/([\d.]+)([KMB])?/i);if(!m)return NaN;let v=Number(m[1]);const u=(m[2]||'').toUpperCase();if(u==='K')v*=1e3;if(u==='M')v*=1e6;if(u==='B')v*=1e9;return v}).filter(Number.isFinite);
-    return vals.length>=2?(vals[0]+vals[1])/2:vals[0]??null;
-  }
-  function normalizeCongressTrades(payload,ticker){
-    const rows=Array.isArray(payload?.trades)?payload.trades:Array.isArray(payload)?payload:[];
-    return rows.filter(x=>String(x.ticker||'').toUpperCase()===String(ticker||'').toUpperCase()).map(x=>({
-      member:x.member||x.name||'Membro do Congresso', chamber:String(x.chamber||'').toLowerCase(), state:x.state||'', type:String(x.type||'').toLowerCase().includes('sale')?'sell':'buy', amount_range:x.amount_range||x.amount||'—', transaction_date:x.transaction_date||x.date||null, disclosure_date:x.disclosure_date||x.filed_date||null, est_price:Number(x.est_price), perf_pct:Number(x.perf_pct), filing_portal:x.filing_portal||null, value_mid:congressAmountMid(x.amount_range||x.amount)
-    })).filter(x=>x.transaction_date);
-  }
-  async function fetchCongressTrades(ticker,force=false){
-    if(!force){const cached=loadCongressCache(ticker);if(cached)return cached;}
-    const from=new Date(Date.now()-92*864e5).toISOString().slice(0,10);
-    const url=`${CONGRESS_API_BASE}/${encodeURIComponent(String(ticker).replace(/\..*/,''))}?from=${from}&limit=100`;
-    const res=await fetch(url,{headers:{Accept:'application/json'}});
-    if(!res.ok) throw new Error(`Congress API ${res.status}`);
-    const raw=await res.json(); const trades=normalizeCongressTrades(raw,String(ticker).replace(/\..*/,''));
-    const data={trades,source:'Bargo Congress API',fetched_at:new Date().toISOString()}; saveCongressCache(ticker,data); return data;
-  }
   function congressSummary(trades=[]){
     const buys=trades.filter(t=>t.type==='buy'), sells=trades.filter(t=>t.type==='sell');
     const buyMid=buys.reduce((a,t)=>a+(Number(t.value_mid)||0),0), sellMid=sells.reduce((a,t)=>a+(Number(t.value_mid)||0),0);
@@ -2653,8 +2624,17 @@
     trades.forEach(t=>{if(!t.transaction_date||parse(t.transaction_date)<minT||parse(t.transaction_date)>maxT)return;const p=Number.isFinite(t.est_price)?t.est_price:nearest(t.transaction_date).close,x=xOf(t.transaction_date),y=yOf(p),size=6+Math.min(8,Math.sqrt(Math.max(0,Number(t.value_mid)||0)/maxV)*8);ctx.fillStyle=t.type==='buy'?'#17a673':'#e34e59';ctx.beginPath();if(t.type==='buy'){ctx.moveTo(x,y-size);ctx.lineTo(x-size,y+size*.7);ctx.lineTo(x+size,y+size*.7)}else{ctx.moveTo(x,y+size);ctx.lineTo(x-size,y-size*.7);ctx.lineTo(x+size,y-size*.7)}ctx.closePath();ctx.fill();markers.push({x,y,size,t});});
     canvas.onclick=e=>{const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;let m=null,d=1e9;markers.forEach(z=>{const q=Math.hypot(x-z.x,y-z.y);if(q<d){d=q;m=z}});if(!m||d>30){if(tooltip)tooltip.hidden=true;return}const t=m.t;if(tooltip){tooltip.hidden=false;tooltip.innerHTML=`<strong>${t.type==='buy'?'COMPRA':'VENDA'} · ${escapeHtml(t.member)}</strong><span>${escapeHtml((t.chamber||'').toUpperCase())} · ${escapeHtml(t.amount_range||'—')}</span><span>transação ${escapeHtml(t.transaction_date)} · divulgação ${escapeHtml(t.disclosure_date||'—')}</span>`;tooltip.style.left=Math.max(6,Math.min(cssW-260,m.x-100))+'px';tooltip.style.top=Math.max(8,m.y-86)+'px';}};
   }
-  async function bindCongressionalActivity(r){
-    const shell=document.getElementById('dossier-congress'); if(!shell)return; try{const data=await fetchCongressTrades(r.ticker);renderCongressPanel(r,data,'all');const controls=shell.querySelector('[data-congress-controls]');controls?.querySelectorAll('[data-congress-filter]').forEach(btn=>btn.addEventListener('click',()=>{controls.querySelectorAll('button').forEach(b=>b.classList.toggle('is-active',b===btn));renderCongressPanel(r,data,btn.dataset.congressFilter||'all')}));}catch(err){console.warn('Congressional activity unavailable',err);const sum=shell.querySelector('[data-congress-summary]');if(sum)sum.innerHTML='<span>Atividade congressional indisponível neste momento. O restante dossier continua funcional.</span>';const ov=document.querySelector('[data-congress-overview]');if(ov)ov.innerHTML='<span>CONGRESSO EUA</span><strong>Indisponível</strong><small>Tenta novamente mais tarde</small>';}
+  function bindCongressionalActivity(r){
+    const shell=document.getElementById('dossier-congress'); if(!shell)return;
+    // Congress trades are now fetched server-side during the pipeline run
+    // (scripts/congress.py) and shipped as part of the ticker's own row —
+    // no live fetch needed, and none of the CORS failures that made this
+    // panel silently show "Indisponível" for every single ticker before.
+    const trades=Array.isArray(r.congress_trades)?r.congress_trades:[];
+    const data={trades,source:'Bargo Congress API (pré-carregado)',fetched_at:state.data?.generated_at||null};
+    renderCongressPanel(r,data,'all');
+    const controls=shell.querySelector('[data-congress-controls]');
+    controls?.querySelectorAll('[data-congress-filter]').forEach(btn=>btn.addEventListener('click',()=>{controls.querySelectorAll('button').forEach(b=>b.classList.toggle('is-active',b===btn));renderCongressPanel(r,data,btn.dataset.congressFilter||'all')}));
   }
 
   function insiderTxKey(ticker, tx) {

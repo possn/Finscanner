@@ -25,6 +25,7 @@ import history as history_mod
 import valuation_history as valuation_history_mod
 from insiders import annotate as annotate_insiders
 from insider_prices import fetch_many as fetch_insider_prices
+from congress import fetch_congress_for_universe
 from metals import build_metals_payload
 from metals_brief import build_metals_brief
 import metals_history as metals_history_mod
@@ -62,7 +63,7 @@ _fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 _handler_stream.setFormatter(_fmt)
 _handler_console.setFormatter(_fmt)
 logging.basicConfig(level=logging.WARNING, handlers=[_handler_stream, _handler_console], force=True)
-for _name in ("run", "universe", "fundamentals", "analyst", "insiders", "insider_prices", "score", "thesis", "metals", "fx", "fx_history", "history", "valuation_history", "thesis_history", "news"):
+for _name in ("run", "universe", "fundamentals", "analyst", "insiders", "insider_prices", "congress", "score", "thesis", "metals", "fx", "fx_history", "history", "valuation_history", "thesis_history", "news"):
     logging.getLogger(_name).setLevel(logging.INFO)
 log = logging.getLogger("run")
 
@@ -162,6 +163,7 @@ def main():
 
     us_tickers = [s.ticker for s in scored if "." not in s.ticker and s.quote_type != "ETF"]
     insider_map = annotate_insiders(us_tickers)
+    congress_map = fetch_congress_for_universe(us_tickers)
     # v0.97: price history is dossier infrastructure, not only an insider helper.
     # Fetch weekly 1y histories in Yahoo batches for the live universe + complete ETF catalogue.
     price_history_tickers = sorted(set(all_tickers) | set(ETF_UNIVERSE.keys()))
@@ -206,6 +208,7 @@ def main():
         row["insider_sell_value_30d"] = insider.get("sell_value_30d")
         row["insider_net_value_30d"] = insider.get("net_value_30d")
         row["insider_transactions"] = insider.get("transactions", [])
+        row["congress_trades"] = congress_map.get(s.ticker, [])
         row["insider_form4_count_365d"] = insider.get("form4_count_365d")
         row["insider_buy_count_365d"] = insider.get("buy_count_365d")
         row["insider_sell_count_365d"] = insider.get("sell_count_365d")
