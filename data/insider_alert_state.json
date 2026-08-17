@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
-    "baselined": 302,
+    "alerts_sent": 2,
+    "baselined": 0,
     "detail_failures": 0,
     "lookback_days": 10,
-    "new_filings": 0,
+    "new_filings": 2,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -364,14 +364,25 @@
       "seen_accessions": []
     },
     "BORR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-14",
+          "owner": "Troim Tor Olav",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 2193400.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
       "seen_accessions": [
         "0001628280-26-056531",
         "0001628280-26-056533",
         "0001628280-26-056536",
         "0001628280-26-056928",
-        "0001628280-26-056941"
+        "0001628280-26-056941",
+        "0001628280-26-057216"
       ]
     },
     "BSX": {
@@ -1922,9 +1933,21 @@
       "seen_accessions": []
     },
     "VFC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-13",
+          "owner": "Carucci Richard",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 294600.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:36.845942+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000103379-26-000120"
+      ]
     },
     "VICI": {
       "event_history": [],
@@ -2058,5 +2081,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-15T22:36:39.312072+00:00"
+  "updated_at": "2026-08-17T11:44:47.983645+00:00"
 }
