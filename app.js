@@ -5011,6 +5011,80 @@
     fundCompareOptionsPopulated = true;
   }
 
+  // Deterministic comparative paragraph, modeled on Winston's "Winston's
+  // Read" feature but template-based (no LLM call, no cost) — every
+  // sentence here is a fact pulled straight from data already computed
+  // elsewhere (fundPortfolioFit, fundOverlap, fundHoldingsMap), just
+  // woven into fixed sentence structures rather than free-generated text.
+  function fundNarrativeRead(funds) {
+    if (!Array.isArray(funds) || funds.length < 2) return null;
+    const info = funds.map(r => {
+      const fit = fundPortfolioFit(r);
+      const fee = r.expense_ratio != null && Number.isFinite(Number(r.expense_ratio)) ? Number(r.expense_ratio) : null;
+      const aum = r.fund_total_assets != null && Number.isFinite(Number(r.fund_total_assets)) && Number(r.fund_total_assets) > 0 ? Number(r.fund_total_assets) : null;
+      const holdingsCount = fundHoldingsMap(r).size;
+      const ret1y = r.fund_return_1y_pct != null && Number.isFinite(Number(r.fund_return_1y_pct)) ? Number(r.fund_return_1y_pct) : null;
+      return { r, fit, fee, aum, holdingsCount, hasTrackRecord: ret1y != null, ret1y };
+    });
+    const strongest = info.slice().sort((a,b) => (b.fit.overall ?? -1) - (a.fit.overall ?? -1))[0];
+
+    const sentences = [];
+    // Fee: $ per $10k, cheapest to most expensive
+    const withFee = info.filter(x => x.fee != null).sort((a,b)=>a.fee-b.fee);
+    if (withFee.length >= 2) {
+      sentences.push(`Em custo por $10.000 investidos: ${withFee.map(x=>`$${Math.round(x.fee*100)} (${x.fee.toFixed(2)}%) para ${x.r.ticker}`).join(', ')}.`);
+    }
+    // Holdings count + concentration flag
+    const veryConcentrated = info.filter(x => x.holdingsCount > 0 && x.holdingsCount <= 3);
+    const holdingsParts = info.filter(x => x.holdingsCount > 0).map(x => `${x.holdingsCount} para ${x.r.ticker}`);
+    if (holdingsParts.length >= 2) {
+      sentences.push(`Em número de holdings observadas: ${holdingsParts.join(' vs. ')}.`);
+      if (veryConcentrated.length) sentences.push(`${veryConcentrated.map(x=>x.r.ticker).join(' e ')} ${veryConcentrated.length>1?'estão':'está'} extremamente concentrad${veryConcentrated.length>1?'os':'o'} — uma única posição a falhar pode arrastar o fundo todo.`);
+    }
+    // Track record
+    const noTrack = info.filter(x => !x.hasTrackRecord);
+    if (noTrack.length) sentences.push(`${noTrack.map(x=>x.r.ticker).join(' e ')} ainda não ${noTrack.length>1?'têm':'tem'} histórico de retorno a 1 ano.`);
+    const withTrack = info.filter(x => x.hasTrackRecord).sort((a,b)=>b.ret1y-a.ret1y);
+    if (withTrack.length === 1) {
+      sentences.push(`${withTrack[0].r.ticker} é o único com retorno observado a 1 ano (${withTrack[0].ret1y>=0?'+':''}${withTrack[0].ret1y.toFixed(1)}%).`);
+    } else if (withTrack.length > 1) {
+      sentences.push(`Em retorno a 1 ano: ${withTrack.map(x=>`${x.r.ticker} ${x.ret1y>=0?'+':''}${x.ret1y.toFixed(1)}%`).join(', ')}.`);
+    }
+    // Fund size / closure risk
+    const withAum = info.filter(x => x.aum != null).sort((a,b)=>b.aum-a.aum);
+    const tinyFunds = info.filter(x => x.aum != null && x.aum < 50e6);
+    if (withAum.length >= 2) {
+      sentences.push(`Em dimensão: ${withAum.map(x=>`${x.r.ticker} ${fmtCap(x.aum)}`).join(' vs. ')}.${tinyFunds.length ? ` ${tinyFunds.map(x=>x.r.ticker).join(' e ')} ${tinyFunds.length>1?'estão':'está'} perto de zero, o que aumenta o risco de o fundo fechar.` : ''}`);
+    }
+    // Pairwise overlap (only meaningful for exactly 2; for 3+ funds, summarize whether ALL pairs are low)
+    if (funds.length === 2) {
+      const ov = fundOverlap(funds[0], funds[1]);
+      if (ov) {
+        if (ov.value <= .05) sentences.push(`Overlap praticamente zero (${pctFundWeight(ov.value)}) entre ${funds[0].ticker} e ${funds[1].ticker} — cobrem partes bem diferentes do mesmo tema.`);
+        else if (ov.value >= .5) sentences.push(`Overlap elevado (${pctFundWeight(ov.value)}) entre ${funds[0].ticker} e ${funds[1].ticker} — normalmente não precisas dos dois.`);
+        else sentences.push(`Overlap moderado (${pctFundWeight(ov.value)}) entre ${funds[0].ticker} e ${funds[1].ticker}.`);
+      }
+    } else if (funds.length > 2) {
+      const pairs = [];
+      for (let i=0;i<funds.length;i++) for (let j=i+1;j<funds.length;j++) { const ov=fundOverlap(funds[i],funds[j]); if (ov) pairs.push(ov.value); }
+      if (pairs.length && Math.max(...pairs) <= .05) sentences.push(`Overlap praticamente zero entre todos — cobrem cantos bem diferentes do mesmo tema.`);
+    }
+    // Suitability closer, one clause per fund
+    const cheapest = withFee.length ? withFee[0] : null;
+    const mostConcentrated = info.filter(x=>x.holdingsCount>0).sort((a,b)=>a.holdingsCount-b.holdingsCount)[0];
+    const bestReturn = withTrack.length ? withTrack[0] : null;
+    const clauses = info.map(x => {
+      if (bestReturn === x && withTrack.length > 1) return `${x.r.ticker} tem o retorno observado mais forte`;
+      if (x === strongest) return `${x.r.ticker} tem o Fund Fit mais equilibrado dos ${info.length}`;
+      if (cheapest === x) return `${x.r.ticker} é a opção mais barata`;
+      if (mostConcentrated === x && x.holdingsCount <= 5) return `${x.r.ticker} pode servir quem aceita concentração extrema`;
+      return `${x.r.ticker} cobre um ângulo diferente do mesmo tema`;
+    });
+    if (clauses.length) sentences.push(clauses.join('; ') + '.');
+
+    return { strongestTicker: strongest.r.ticker, strongestScore: strongest.fit.overall, text: sentences.filter(Boolean).join(' ') };
+  }
+
   function renderFundCompare() {
     if (!els.fundCompareResult || !state.data) return;
     const a = state.data.stocks.find(r => r.ticker === els.fundCompareA?.value && r.quote_type === 'ETF');
@@ -5054,7 +5128,14 @@
 
     const overlapHtml = overlap ? `<div class="fund-overlap"><span class="eyebrow">OBSERVED HOLDINGS OVERLAP</span><strong>${pctFundWeight(overlap.value)}</strong><p>Limite inferior calculado apenas nas holdings devolvidas pela fonte (${pctFundWeight(overlap.coverageA)} de ${escapeHtml(a.ticker)}; ${pctFundWeight(overlap.coverageB)} de ${escapeHtml(b.ticker)}).</p>${overlap.shared.length ? `<div class="shared-holdings">${overlap.shared.slice(0,8).map(h=>`<span>${escapeHtml(h.symbol)} ${pctFundWeight(h.weight)}</span>`).join('')}</div>`:''}</div>` : `<p class="fund-method-note">A fonte não devolveu holdings suficientes para calcular overlap observado.</p>`;
 
+    const read = fundNarrativeRead([a, b]);
+
     els.fundCompareResult.innerHTML = `
+      ${read?.text ? `<section class="fund-finscanner-read">
+        <span class="eyebrow">FINSCANNER'S READ</span>
+        <h3>${escapeHtml(read.strongestTicker)} parece o mais equilibrado dos dois</h3>
+        <p>${escapeHtml(read.text)}</p>
+      </section>` : ''}
       <section class="fund-decision-verdict">
         <span class="eyebrow">DECISION VIEW</span>
         <h3>${escapeHtml(lead.ticker)} parece mais forte para a função atual</h3>
