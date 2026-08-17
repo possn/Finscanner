@@ -119,6 +119,8 @@
     briefingCard: document.getElementById("briefing-card"),
     briefingGreeting: document.getElementById("briefing-greeting"),
     homeOpportunityStrip: document.getElementById("home-opportunity-strip"),
+    homeEtfStrip: document.getElementById("home-etf-strip"),
+    homeNewsPreview: document.getElementById("home-news-preview"),
     homeAttentionSummary: document.getElementById("home-attention-summary"),
     homeChangeBrief: document.getElementById("home-change-brief"),
     homeMomentumBrief: document.getElementById("home-momentum-brief"),
@@ -564,6 +566,8 @@
     els.briefingCard.innerHTML = `<span class="briefing-signal">${escapeHtml(signal)}</span><small>${escapeHtml(top.ticker)}</small><h3>${escapeHtml(top.name || top.ticker)}</h3><p>${escapeHtml(body || "")}</p><a class="briefing-open" href="${dossierHash(top.ticker)}" data-open-dossier="${escapeHtml(top.ticker)}">Abrir dossier →</a>`;
 
     renderHomeOpportunities(rows, top.ticker);
+    renderHomeEtfOpportunities(state.data.stocks);
+    renderHomeNewsPreview();
     renderHomeDailyBrief(rows);
     if (location.hash.startsWith("#dossier=")) setTimeout(routeDossierHash, 0);
   }
@@ -797,6 +801,57 @@
         <span class="home-opportunity-card__open">Abrir dossier →</span>
       </a>`;
     }).join("");
+  }
+
+  function renderHomeEtfOpportunities(allRows) {
+    if (!els.homeEtfStrip || !Array.isArray(allRows)) return;
+    const etfs = allRows.filter(r => r.quote_type === "ETF" && Number.isFinite(Number(r.fund_return_1y_pct)) && r.expense_ratio != null);
+    const ranked = etfs.slice().sort((a, b) => Number(b.fund_return_1y_pct) - Number(a.fund_return_1y_pct)).slice(0, 8);
+    if (!ranked.length) {
+      els.homeEtfStrip.innerHTML = `<div class="home-opportunity-loading">Ainda não há ETFs com dados suficientes.</div>`;
+      return;
+    }
+    els.homeEtfStrip.innerHTML = ranked.map(r => {
+      const ret = Number(r.fund_return_1y_pct);
+      return `<a class="home-opportunity-card" href="${dossierHash(r.ticker)}" data-open-dossier="${escapeHtml(r.ticker)}">
+        <span class="home-opportunity-card__meta"><b>${escapeHtml(r.ticker)}</b><em>${ret >= 0 ? "+" : ""}${ret.toFixed(1)}%</em></span>
+        <strong>${escapeHtml(r.name || r.ticker)}</strong>
+        <small>${escapeHtml(r.fund_category || r.fund_theme || "ETF")}</small>
+        <span class="home-opportunity-card__axes"><i>TER ${fmtExpenseRatio(r.expense_ratio)}</i></span>
+        <span class="home-opportunity-card__open">Abrir dossier →</span>
+      </a>`;
+    }).join("");
+  }
+
+  // Shows the most recent headlines for the user's own portfolio + watchlist
+  // tickers directly on the home dashboard, so checking "today's news"
+  // doesn't require a trip to the separate Notícias tab. Deliberately scoped
+  // to the same tickers as that tab (not the whole universe) — a global feed
+  // across ~2000+ tickers would be noise, not a briefing.
+  function renderHomeNewsPreview() {
+    if (!els.homeNewsPreview) return;
+    const portfolio = lsGet(LS_PORTFOLIO);
+    const watchlist = lsGet(LS_WATCHLIST);
+    const tickers = [...new Set([...Object.keys(portfolio), ...Object.keys(watchlist)])];
+    if (!tickers.length) {
+      els.homeNewsPreview.innerHTML = `<p class="home-brief-empty">Adiciona posições ao portfolio ou marca tickers na watchlist (★) para veres aqui as notícias mais recentes.</p>`;
+      return;
+    }
+    const newsByTicker = state.news?.tickers || {};
+    const items = [];
+    tickers.forEach(ticker => {
+      (newsByTicker[ticker] || []).forEach(n => items.push({ ...n, ticker }));
+    });
+    if (!items.length) {
+      els.homeNewsPreview.innerHTML = state.news
+        ? `<p class="home-brief-empty">Sem notícias recentes pré-carregadas para a tua carteira/watchlist.</p>`
+        : `<p class="home-brief-empty">Notícias ainda não carregadas.</p>`;
+      return;
+    }
+    items.sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
+    els.homeNewsPreview.innerHTML = items.slice(0, 6).map(n =>
+      `<a class="home-brief-row" href="${escapeHtml(n.link)}" target="_blank" rel="noopener"><span><b>${escapeHtml(n.ticker)}</b><small>${escapeHtml(n.title)}</small></span><em>${escapeHtml(n.source || "")}</em></a>`
+    ).join("") + `<a class="home-brief-row" data-brief-goto="news"><span><b>→</b><small>Ver todas as notícias</small></span></a>`;
   }
 
   function marketOf(ticker) {
