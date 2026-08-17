@@ -1458,6 +1458,17 @@ a { color: inherit; }
 [data-theme="dark"] .eyebrow{color:#b8bdad!important}
 [data-theme="dark"] .insider-signal-badge.near-low{background:color-mix(in srgb,#d6a84b 14%,var(--surface));color:#e7bd69;border-color:color-mix(in srgb,#d6a84b 38%,var(--border))}
 [data-theme="dark"] button,[data-theme="dark"] select,[data-theme="dark"] input{color:var(--ink)!important}
+/* The generic rule above forces text color to var(--ink) on every button
+   in dark mode. These three components deliberately invert the palette
+   (background:var(--ink); color:var(--surface)) to render a solid CTA —
+   in dark mode --ink becomes the light color, so background and the
+   forced text color end up identical, making the label invisible.
+   Explicit override restores the intended light-on-dark/dark-on-light
+   contrast in both themes. */
+[data-theme="dark"] .portfolio-filter-chip.is-active,
+[data-theme="dark"] .stock-compare-leader button,
+[data-theme="dark"] .stock-compare-mini>button,
+[data-theme="dark"] .smartmoney-open-pillars{color:var(--surface)!important}
 [data-theme="dark"] ::placeholder{color:var(--ink-faint)!important;opacity:1}
 @media(max-width:760px){.briefing-card p{font-size:16px!important;line-height:1.52!important}.home-opportunity-card{flex-basis:min(84vw,320px)!important}.sector-discover-card{flex-basis:min(76vw,260px)!important}.portfolio-simplification-panel .section-heading{align-items:flex-start!important}.portfolio-simplification-panel .section-heading h3{font-size:18px!important;line-height:1.25!important}}
 

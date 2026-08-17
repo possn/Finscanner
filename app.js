@@ -1724,6 +1724,16 @@
     earnings:"Empresas com resultados previstos nos próximos dias."
   };
   const STOCK_SECTOR_THEME_LABELS={all:"Todos",technology:"Tecnologia",healthcare:"Healthcare",biotech:"Biotech",water:"Água",agriculture:"Agricultura",energy:"Energia",financials:"Financeiro",industrials:"Industriais",consumer:"Consumo",realestate:"Imobiliário",utilities:"Utilities",materials:"Materiais",defense:"Defesa",semiconductors:"Semicondutores"};
+  // GICS/Yahoo sector-industry text has no dedicated category for these
+  // niche themes — real drone/space companies get filed under generic
+  // "Aerospace & Defense" or "Communication Equipment", so no keyword list
+  // can find them from sector/industry text alone. Curated by hand;
+  // expand as gaps are found. Verified present in the tracked universe
+  // when added (17 ago): RCAT/ONDS/UMAC/KTOS (drones), RKLB/RDW (space).
+  const STOCK_THEME_TICKER_OVERRIDES = {
+    drones: ['RCAT','ONDS','UMAC','KTOS'],
+    space: ['RKLB','RDW'],
+  };
   const STOCK_THEME_DEFS = [
     {key:'technology', label:'Tecnologia', words:['technology','software','internet','information technology','it services','computer','electronic']},
     {key:'healthcare', label:'Healthcare', words:['healthcare','health care','medical','pharma','pharmaceutical','diagnostic','hospital','health services','medical device','healthcare plans']},
@@ -1762,6 +1772,7 @@
     // ("semiconductor" still matches "Semiconductors", "industrial" still
     // matches "Industrials").
     const def = STOCK_THEME_DEFS.find(d => d.key === key);
+    if (STOCK_THEME_TICKER_OVERRIDES[key]?.includes(String(r.ticker||'').toUpperCase())) return true;
     return def ? stockThemeWordMatch(hay, def.words) : true;
   }
   // Free-text theme search (e.g. typing "drone" surfaces the Drones theme
