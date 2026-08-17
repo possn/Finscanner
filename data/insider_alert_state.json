@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 5,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 9,
     "lookback_days": 10,
-    "new_filings": 18,
+    "new_filings": 13,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -695,9 +695,21 @@
       "seen_accessions": []
     },
     "DIS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 60,
+          "date": "2026-08-14",
+          "owner": "WOODFORD BRENT",
+          "role": "EVP, Control, Fin Plan & Tax",
+          "signal": "sell",
+          "type": "sell",
+          "value": 762233.78
+        }
+      ],
       "last_checked": "2026-08-15T22:36:06.484410+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001628280-26-057481"
+      ]
     },
     "DNN": {
       "event_history": [],
@@ -1382,7 +1394,8 @@
       "last_checked": "2026-08-15T22:36:20.813239+00:00",
       "seen_accessions": [
         "0000789019-26-000141",
-        "0000789019-26-000143"
+        "0000789019-26-000143",
+        "0000789019-26-000145"
       ]
     },
     "MWA": {
@@ -2178,9 +2191,31 @@
       "seen_accessions": []
     },
     "WULF": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-08-14",
+          "owner": "Bucella Michael C.",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 49985.305
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-17",
+          "owner": "Bucella Michael C.",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 49964.2
+        }
+      ],
       "last_checked": "2026-08-15T22:36:38.408784+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001083301-26-000169",
+        "0001083301-26-000170"
+      ]
     },
     "WYFI": {
       "event_history": [],
@@ -2223,5 +2258,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-17T21:44:47.830351+00:00"
+  "updated_at": "2026-08-17T22:45:31.793508+00:00"
 }
