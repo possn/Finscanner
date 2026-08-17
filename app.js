@@ -5945,6 +5945,10 @@
     els.stockDiscoverSectors?.querySelectorAll('.stock-sector-extra').forEach(x => x.hidden = false);
     e.currentTarget.hidden = true;
   });
+  document.getElementById('smartmoney-type-more-btn')?.addEventListener('click', (e) => {
+    els.smartmoneyTypeFilters?.querySelectorAll('.smartmoney-type-extra').forEach(x => x.hidden = false);
+    e.currentTarget.hidden = true;
+  });
 
   function bindStockAutocomplete(input, syncInput) {
     if (!input) return;
