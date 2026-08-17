@@ -3759,15 +3759,19 @@
   function portfolioThemeTags(row) {
     const text = `${row?.ticker||''} ${row?.name||''} ${row?.sector||''} ${row?.industry||''} ${row?.fund_theme||''}`.toLowerCase();
     const tags = new Set();
-    if (AI_EXPOSED_TICKERS.has(row?.ticker) || Number(row?.ai_exposure_pct||0) >= 20 || /artificial intelligence|\bai\b|semiconductor|chip|gpu|data center|cloud|software/.test(text)) tags.add('AI / Digital');
-    if (/semiconductor|chip|gpu/.test(text)) tags.add('Semiconductors');
-    if (/defen[cs]e|aerospace|military/.test(text)) tags.add('Defence / Aerospace');
-    if (/energy|oil|gas|petroleum|uranium|nuclear/.test(text)) tags.add('Energy');
-    if (/gold|silver|mining|miner|precious metal|basic materials/.test(text)) tags.add('Metals / Mining');
-    if (/health|pharma|biotech|medical/.test(text)) tags.add('Healthcare');
-    if (/bank|financial|insurance|asset management|capital markets/.test(text)) tags.add('Financials');
-    if (/real estate|reit/.test(text)) tags.add('Real Estate');
-    if (/consumer|retail|restaurant|automotive|luxury/.test(text)) tags.add('Consumer');
+    // Same word-boundary fix as stockSectorThemeMatch: unguarded substring
+    // regex here matched 'gas' inside 'Vegas'/'Antofagasta', 'bank' inside
+    // 'Softbank', 'energy' inside 'FirstEnergy' — tagging portfolio holdings
+    // with the wrong theme in exposure/concentration analysis.
+    if (AI_EXPOSED_TICKERS.has(row?.ticker) || Number(row?.ai_exposure_pct||0) >= 20 || /\bartificial intelligence|\bai\b|\bsemiconductor|\bchip|\bgpu|\bdata center|\bcloud|\bsoftware/.test(text)) tags.add('AI / Digital');
+    if (/\bsemiconductor|\bchip|\bgpu/.test(text)) tags.add('Semiconductors');
+    if (/\bdefen[cs]e|\baerospace|\bmilitary/.test(text)) tags.add('Defence / Aerospace');
+    if (/\benergy|\boil|\bgas|\bpetroleum|\buranium|\bnuclear/.test(text)) tags.add('Energy');
+    if (/\bgold|\bsilver|\bmining|\bminer|\bprecious metal|\bbasic materials/.test(text)) tags.add('Metals / Mining');
+    if (/\bhealth|\bpharma|\bbiotech|\bmedical/.test(text)) tags.add('Healthcare');
+    if (/\bbank|\bfinancial|\binsurance|\basset management|\bcapital markets/.test(text)) tags.add('Financials');
+    if (/\breal estate|\breit/.test(text)) tags.add('Real Estate');
+    if (/\bconsumer|\bretail|\brestaurant|\bautomotive|\bluxury/.test(text)) tags.add('Consumer');
     return [...tags];
   }
 
