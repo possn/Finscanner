@@ -3562,7 +3562,13 @@
       const perfRows = perf.covered.filter(x=>Number.isFinite(x.pnl)).sort((a,b)=>b.pnl-a.pnl);
       const winners = perfRows.filter(x=>x.pnl>0).slice(0,10);
       const losers = [...perfRows].filter(x=>x.pnl<0).sort((a,b)=>a.pnl-b.pnl).slice(0,10);
-      const perfList = (arr, cls) => arr.length ? `<div class="portfolio-performance-list ${cls}">${arr.map(x=>`<button data-ticker="${escapeHtml(x.ticker)}"><b>${escapeHtml(x.ticker)}</b><span>${x.pnlPct==null?'—':`${x.pnlPct>=0?'+':''}${x.pnlPct.toFixed(1)}%`}</span><strong>${x.pnl>=0?'+':''}${perfMoney(x.pnl)}</strong></button>`).join('')}</div>` : '<p class="unmatched-note">Sem posições suficientes.</p>';
+      const perfList = (arr, cls) => arr.length ? `<div class="portfolio-performance-list ${cls}">${arr.map(x=>{
+        const pctTxt = x.pnlPct==null?'—':`${x.pnlPct>=0?'+':''}${x.pnlPct.toFixed(1)}%`;
+        const eurTxt = `${x.pnl>=0?'+':''}${perfMoney(x.pnl)}`;
+        const primary = display==='pct' ? pctTxt : eurTxt;
+        const secondary = display==='pct' ? eurTxt : pctTxt;
+        return `<button data-ticker="${escapeHtml(x.ticker)}"><b>${escapeHtml(x.ticker)}</b><span>${secondary}</span><strong>${primary}</strong></button>`;
+      }).join('')}</div>` : '<p class="unmatched-note">Sem posições suficientes.</p>';
       content=`<div class="exposure-block portfolio-performance-block"><h3 class="exposure-title">Rentabilidade não realizada</h3><div class="portfolio-performance-columns"><div><h4>Maiores ganhos</h4>${perfList(winners,'positive')}</div><div><h4>Maiores perdas</h4>${perfList(losers,'negative')}</div></div><p class="unmatched-note">P/L calculado sobre o custo médio remanescente do ledger. Compras e vendas são convertidas para EUR à taxa ECB da data da transação; quando uma data/moeda não tem série disponível, a app identifica o fallback para FX atual.</p></div>`;
     } else {
       content=`<div class="exposure-block"><h3 class="exposure-title">Temas observados</h3>${barRows(themeRows,true)}<p class="unmatched-note">Os temas não são exclusivos: uma empresa pode pertencer a mais de um. IA/Digital é apenas um dos temas e deixa de ser tratado como exposição privilegiada.</p></div>`;
@@ -5970,7 +5976,7 @@
       cash: r.cashflow_pct ?? r.balance_pct,
       stability: r.stability_pct,
       value: r.value_pct,
-      insider: insiderConvictionScore(r)?.score ?? null,
+      insider: insiderConviction(r)?.score ?? null,
       estimates: r.analyst_score ?? r.revision_score ?? null,
     };
     const v = Number(map[key]);
