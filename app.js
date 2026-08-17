@@ -5949,6 +5949,10 @@
     els.smartmoneyTypeFilters?.querySelectorAll('.smartmoney-type-extra').forEach(x => x.hidden = false);
     e.currentTarget.hidden = true;
   });
+  document.getElementById('fund-theme-more-btn')?.addEventListener('click', (e) => {
+    els.fundThemeFilters?.querySelectorAll('.fund-theme-extra').forEach(x => x.hidden = false);
+    e.currentTarget.hidden = true;
+  });
 
   function bindStockAutocomplete(input, syncInput) {
     if (!input) return;
