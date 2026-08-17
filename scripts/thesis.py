@@ -162,6 +162,10 @@ def evolve(row: dict, previous: dict | None = None, previous_date: str | None = 
     analyst_eps_next_q_revision_delta = _delta(row.get("analyst_eps_next_q_revision_30d_pct"), previous.get("analyst_eps_next_q_revision_30d_pct"))
     analyst_price_target_upside_delta = _delta(row.get("analyst_price_target_upside_pct"), previous.get("analyst_price_target_upside_pct"))
     latest_earnings_date_changed = bool(previous.get("analyst_latest_earnings_date") and row.get("analyst_latest_earnings_date") and previous.get("analyst_latest_earnings_date") != row.get("analyst_latest_earnings_date"))
+    # NOTE: analyst_eps_next_y/q_revision and price_target_upside deltas are
+    # returned for the UI but intentionally do not score positive/negative
+    # below yet — no weighting has been validated for them. Candidate for a
+    # future, deliberate addition rather than an arbitrary threshold now.
 
     # Multi-horizon persistence context. These are deltas in the underlying
     # daily snapshots, not forecasts. They let the UI distinguish a one-day
@@ -200,8 +204,15 @@ def evolve(row: dict, previous: dict | None = None, previous_date: str | None = 
         elif growth_delta <= -5:
             negative += 1; drivers.append(f"Percentil de crescimento {growth_delta:.0f}.")
     if quality_delta is not None:
-        if quality_delta >= 5: positive += 1
-        elif quality_delta <= -5: negative += 1
+        if quality_delta >= 5:
+            positive += 1; drivers.append(f"Percentil de qualidade +{quality_delta:.0f}.")
+        elif quality_delta <= -5:
+            negative += 1; drivers.append(f"Percentil de qualidade {quality_delta:.0f}.")
+    # Valuation delta is shown as context but deliberately does not score
+    # positive/negative: a rising value_pct can mean the stock got cheaper
+    # (bullish entry) or that the price fell for a bad reason (bearish) —
+    # ambiguous without a price-direction signal, so we surface it without
+    # asserting a direction.
     if value_delta is not None and abs(value_delta) >= 8:
         drivers.append(f"Percentil de valuation {value_delta:+.0f} vs última observação.")
     if rev_acc is not None:
@@ -223,6 +234,11 @@ def evolve(row: dict, previous: dict | None = None, previous_date: str | None = 
         negative += 2; drivers.append(f"Diluição de {dilution:.1f}% YoY.")
     if row.get("zombie") == "yes":
         negative += 2; drivers.append("Cobertura de juros inferior a 1×.")
+    if insider_net_delta is not None and abs(insider_net_delta) >= 100_000:
+        if insider_net_delta > 0:
+            positive += 1; drivers.append("Fluxo líquido de insiders melhorou vs última observação.")
+        else:
+            negative += 1; drivers.append("Fluxo líquido de insiders piorou vs última observação.")
 
     changed = bool(prior_type and current_type and prior_type != current_type)
     if changed:
