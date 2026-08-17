@@ -18,7 +18,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    timeout-minutes: 120
 
     steps:
       - name: Check Portugal 06:00 window
