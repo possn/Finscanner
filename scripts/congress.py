@@ -100,7 +100,7 @@ def _fetch_one(ticker: str) -> tuple[str, list[dict]]:
         trades = _normalize(raw, query_ticker)
         return ticker, trades
     except Exception as e:
-        log.debug("%s: congress fetch failed (%s)", ticker, e)
+        log.warning("%s: congress fetch failed (%s: %s)", ticker, type(e).__name__, e)
         return ticker, []
 
 
