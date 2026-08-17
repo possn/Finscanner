@@ -2,9 +2,9 @@
   "last_change": {
     "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 1,
+    "detail_failures": 8,
     "lookback_days": 10,
-    "new_filings": 2,
+    "new_filings": 10,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -748,11 +748,23 @@
       "seen_accessions": []
     },
     "FAST": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-13",
+          "owner": "Papenfuss Donnalee Kathleen",
+          "role": "EVP-Strategy and Communication",
+          "signal": "sell",
+          "type": "sell",
+          "value": 475758.1914
+        }
+      ],
       "last_checked": "2026-08-15T22:36:08.995515+00:00",
       "seen_accessions": [
         "0001454708-26-000008",
-        "0001554387-26-000005"
+        "0001554387-26-000005",
+        "0001454708-26-000010",
+        "0002043506-26-000005"
       ]
     },
     "FDX": {
@@ -2092,5 +2104,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-17T13:10:05.976088+00:00"
+  "updated_at": "2026-08-17T15:44:29.468746+00:00"
 }
