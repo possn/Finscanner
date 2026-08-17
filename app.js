@@ -22,6 +22,9 @@
     stockTableHead: document.getElementById("stock-table-head"),
     stockDiscoverCategories: document.getElementById("stock-discover-categories"),
     stockDiscoverSectors: document.getElementById("stock-discover-sectors"),
+    stockThemeSearch: document.getElementById("stock-theme-search"),
+    stockThemeSearchBox: document.getElementById("stock-theme-search-box"),
+    stockThemeActive: document.getElementById("stock-theme-active"),
     stockDiscoverExplainer: document.getElementById("stock-discover-explainer"),
     stockDiscoverBody: document.getElementById("stock-discover-body"),
     stockMyBody: document.getElementById("stock-my-body"),
@@ -85,6 +88,9 @@
     fundsSectorFilter: document.getElementById("funds-sector-filter"),
     fundsRegionFilter: document.getElementById("funds-region-filter"),
     fundThemeFilters: document.getElementById("fund-theme-filters"),
+    fundThemeSearch: document.getElementById("fund-theme-search"),
+    fundThemeSearchBox: document.getElementById("fund-theme-search-box"),
+    fundThemeActive: document.getElementById("fund-theme-active"),
     fundGeoFilters: document.getElementById("fund-geo-filters"),
     fundStyleFilters: document.getElementById("fund-style-filters"),
     fundFeeSaver: document.getElementById("fund-fee-saver"),
@@ -1720,6 +1726,31 @@
     earnings:"Empresas com resultados previstos nos próximos dias."
   };
   const STOCK_SECTOR_THEME_LABELS={all:"Todos",technology:"Tecnologia",healthcare:"Healthcare",biotech:"Biotech",water:"Água",agriculture:"Agricultura",energy:"Energia",financials:"Financeiro",industrials:"Industriais",consumer:"Consumo",realestate:"Imobiliário",utilities:"Utilities",materials:"Materiais",defense:"Defesa",semiconductors:"Semicondutores"};
+  const STOCK_THEME_DEFS = [
+    {key:'technology', label:'Tecnologia', words:['technology','software','internet','information technology','it services','computer','electronic']},
+    {key:'healthcare', label:'Healthcare', words:['healthcare','health care','medical','pharma','pharmaceutical','diagnostic','hospital','health services','medical device','healthcare plans']},
+    {key:'biotech', label:'Biotech', words:['biotech','biotechnology','biopharma','biopharmaceutical','genomic','gene therapy']},
+    {key:'water', label:'Água', words:['water','wastewater','irrigation','aqua','drainage','filtration','pump']},
+    {key:'agriculture', label:'Agricultura', words:['agricultur','farm','fertiliz','seed','crop','grain','agribusiness','agricultural inputs']},
+    {key:'energy', label:'Energia', words:['energy','oil','gas','petroleum','solar','wind','renewable','uranium']},
+    {key:'financials', label:'Financeiro', words:['financial','bank','insurance','capital markets','asset management','credit services']},
+    {key:'industrials', label:'Industriais', words:['industrial','machinery','aerospace','transport','logistics','construction','electrical equipment']},
+    {key:'consumer', label:'Consumo', words:['consumer','retail','restaurant','apparel','beverage','household','leisure','auto manufacturer']},
+    {key:'realestate', label:'Imobiliário', words:['real estate','reit','property','mortgage']},
+    {key:'utilities', label:'Utilities', words:['utilities','utility','electric','regulated water','regulated gas']},
+    {key:'materials', label:'Materiais', words:['materials','mining','chemicals','steel','copper','gold','paper','packaging']},
+    {key:'defense', label:'Defesa', words:['defense','defence','aerospace & defense','aerospace and defense','military']},
+    {key:'semiconductors', label:'Semicondutores', words:['semiconductor','chip']},
+    {key:'drones', label:'Drones', words:['drone','uav','unmanned aerial','unmanned aircraft']},
+    {key:'space', label:'Espaço', words:['space','satellite','orbital','space launch']},
+    {key:'quantum', label:'Computação Quântica', words:['quantum computing','quantum']},
+    {key:'cannabis', label:'Canábis', words:['cannabis','marijuana']},
+    {key:'crypto', label:'Bitcoin / Cripto', words:['bitcoin','cryptocurrency','crypto','blockchain','digital asset']},
+    {key:'lithium', label:'Lítio / VE', words:['lithium','electric vehicle','ev battery','battery technology']},
+  ];
+  function stockThemeWordMatch(text, words) {
+    return words.some(w => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}`).test(text));
+  }
   function stockSectorThemeMatch(r,key){
     if(!key||key==='all') return true;
     const hay=`${r.sector||''} ${r.industry||''} ${r.stock_theme||''} ${r.name||''} ${r.ticker||''}`.toLowerCase();
@@ -1732,22 +1763,19 @@
     // via "Credit Services"). No trailing \b so plurals still match
     // ("semiconductor" still matches "Semiconductors", "industrial" still
     // matches "Industrials").
-    const any=(words)=>words.some(w=>new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}`).test(hay));
-    if(key==='technology') return any(['technology','software','internet','information technology','it services','computer','electronic']);
-    if(key==='healthcare') return any(['healthcare','health care','medical','pharma','pharmaceutical','diagnostic','hospital','health services','medical device','healthcare plans']);
-    if(key==='biotech') return any(['biotech','biotechnology','biopharma','biopharmaceutical','genomic','gene therapy']);
-    if(key==='water') return any(['water','wastewater','irrigation','aqua','drainage','filtration','pump']);
-    if(key==='agriculture') return any(['agricultur','farm','fertiliz','seed','crop','grain','agribusiness','agricultural inputs']);
-    if(key==='energy') return any(['energy','oil','gas','petroleum','solar','wind','renewable','uranium']);
-    if(key==='financials') return any(['financial','bank','insurance','capital markets','asset management','credit services']);
-    if(key==='industrials') return any(['industrial','machinery','aerospace','transport','logistics','construction','electrical equipment']);
-    if(key==='consumer') return any(['consumer','retail','restaurant','apparel','beverage','household','leisure','auto manufacturer']);
-    if(key==='realestate') return any(['real estate','reit','property','mortgage']);
-    if(key==='utilities') return any(['utilities','utility','electric','regulated water','regulated gas']);
-    if(key==='materials') return any(['materials','mining','chemicals','steel','copper','gold','paper','packaging']);
-    if(key==='defense') return any(['defense','defence','aerospace & defense','aerospace and defense','military']);
-    if(key==='semiconductors') return any(['semiconductor','chip']);
-    return true;
+    const def = STOCK_THEME_DEFS.find(d => d.key === key);
+    return def ? stockThemeWordMatch(hay, def.words) : true;
+  }
+  // Free-text theme search (e.g. typing "drone" surfaces the Drones theme
+  // even though its chip may be hidden behind "+9 mais setores"). Loose
+  // substring match on label + keyword aliases — deliberately looser than
+  // stockSectorThemeMatch's word-boundary company matching, since here the
+  // user is searching theme NAMES, not raw company text.
+  function stripAccents(s) { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function stockThemeSearch(query) {
+    const q = stripAccents(query).trim().toLowerCase();
+    if (!q) return [];
+    return STOCK_THEME_DEFS.filter(d => stripAccents(d.label).toLowerCase().includes(q) || d.words.some(w => w.includes(q) || q.includes(w)));
   }
   function stockEvidenceTrustAdjustment(r){
     const cap = Number(r.market_cap);
@@ -4618,22 +4646,46 @@
   let fundsSectorsPopulated = false;
   let fundCompareOptionsPopulated = false;
 
+  const FUND_THEME_DEFS = [
+    {key:'AI', aliases:['artificial intelligence','ai','machine learning','cloud computing','generative ai'], re:/artificial intelligence|\bai\b|machine learning|cloud computing|innovation|generative ai/},
+    {key:'Semiconductors', aliases:['semiconductor','chip','soxx','smh','microchip'], re:/\bsemiconductor|\bchip|\bsoxx\b|\bsmh\b|microchip/},
+    {key:'Defense', aliases:['defense','defence','military','aerospace','defesa'], re:/defen[cs]e|aerospace|military|\bita\b/},
+    {key:'Drones', aliases:['drone','uav','unmanned aerial'], re:/\bdrone|\buav\b|unmanned aerial|unmanned aircraft/},
+    {key:'Space', aliases:['space','satellite','orbital','espaco'], re:/\bspace\b|satellite|orbital/},
+    {key:'Energy', aliases:['energy','oil','gas','petroleum','energia'], re:/\benergy|\boil\b|\bgas\b|\bxle\b|petroleum/},
+    {key:'Nuclear', aliases:['uranium','nuclear'], re:/uranium|nuclear|\bura\b/},
+    {key:'Gold', aliases:['gold','precious metal','ouro'], re:/\bgold|\bgld\b|precious metal/},
+    {key:'Gold Miners', aliases:['gold miners','gold mining','minas de ouro'], re:/gold min(ing|ers)/},
+    {key:'Silver Miners', aliases:['silver miners','silver mining','minas de prata'], re:/silver min(ing|ers)/},
+    {key:'Cybersecurity', aliases:['cybersecurity','cyber security','hack','ciberseguranca'], re:/cyber|security technology|\bhack\b/},
+    {key:'Robotics', aliases:['robotics','robot','automation','autonomous','robotica'], re:/\brobot|automation|\brobo\b|autonomous/},
+    {key:'Clean Energy', aliases:['clean energy','renewable','solar','wind','energia limpa'], re:/clean energy|renewable|\bsolar\b|\bwind\b|\btan\b/},
+    {key:'Quantum Computing', aliases:['quantum computing','quantum','quantica'], re:/quantum comput|\bquantum\b/},
+    {key:'Bitcoin / Crypto', aliases:['bitcoin','crypto','cryptocurrency','blockchain','digital asset','cripto'], re:/bitcoin|crypto|blockchain|digital asset/},
+    {key:'Lithium / EV', aliases:['lithium','electric vehicle','ev battery','litio'], re:/\blithium\b|electric vehicle|ev battery/},
+    {key:'Cannabis', aliases:['cannabis','marijuana','canabis'], re:/cannabis|marijuana/},
+    {key:'Biotech', aliases:['biotech','biopharma'], re:/biotech|biopharma/},
+    {key:'Healthcare', aliases:['healthcare','health care','medical','pharma','saude'], re:/\bhealthcare\b|health care|\bmedical\b|pharma/},
+    {key:'Infrastructure', aliases:['infrastructure'], re:/infrastructure/},
+    {key:'Construction', aliases:['construction'], re:/construction/},
+    {key:'Industrials', aliases:['industrials','industrial'], re:/\bindustrial/},
+  ];
+  function fundThemeSearch(query) {
+    const q = stripAccents(query).trim().toLowerCase();
+    if (!q) return [];
+    return FUND_THEME_DEFS.filter(d => stripAccents(d.key).toLowerCase().includes(q) || d.aliases.some(w => w.includes(q) || q.includes(w)));
+  }
   function fundMeta(r) {
     const rawTheme = `${r.fund_theme || ""} ${r.theme || ""}`.trim();
     const rawStyle = `${r.fund_style || r.style || ""}`.trim();
     const rawGeo = `${r.fund_region || r.region || r.country || ""}`.trim();
     const text = `${r.ticker || ""} ${r.name || ""} ${r.sector || ""} ${r.industry || ""} ${r.fund_category || ""} ${rawTheme} ${rawStyle} ${rawGeo}`.toLowerCase();
     const themes = [];
-    const add = (label, re) => { if (re.test(text) && !themes.includes(label)) themes.push(label); };
-    add("AI", /artificial intelligence|\bai\b|machine learning|cloud computing|innovation|generative ai/);
-    add("Semiconductors", /semiconductor|chip|soxx|smh|microchip/);
-    add("Defense", /defen[cs]e|aerospace|military|ita\b/);
-    add("Energy", /energy|oil|gas|xle\b|petroleum/);
-    add("Nuclear", /uranium|nuclear|ura\b/);
-    add("Gold", /gold|gld\b|miners|precious metal/);
-    add("Cybersecurity", /cyber|security technology|hack\b/);
-    add("Robotics", /robot|automation|robo\b|autonomous/);
-    add("Clean Energy", /clean energy|renewable|solar|wind|tan\b/);
+    // Word-boundary fix on the risky short/bare keywords (gas, chip, ai,
+    // solar, wind, etc.) — same class of bug fixed in stockSectorThemeMatch
+    // (kept unguarded only for multi-word phrases where a stray substring
+    // hit inside an unrelated word is implausible).
+    FUND_THEME_DEFS.forEach(d => { if (d.re.test(text) && !themes.includes(d.key)) themes.push(d.key); });
     // Curated pipeline metadata is authoritative when present.
     const explicitTheme = String(r.fund_theme || '').trim();
     if (explicitTheme && !themes.includes(explicitTheme)) themes.unshift(explicitTheme);
@@ -5648,6 +5700,7 @@
       els.fundsList.querySelector('[data-fund-clear-filters]')?.addEventListener('click',()=>{
         state.fundTheme='all'; state.fundGeo='all'; state.fundStyle='all';
         if (els.fundsSearch) els.fundsSearch.value='';
+        if (els.fundThemeActive) { els.fundThemeActive.hidden = true; els.fundThemeActive.innerHTML = ''; }
         [els.fundThemeFilters,els.fundGeoFilters,els.fundStyleFilters].forEach(group=>group?.querySelectorAll('.fund-chip').forEach(b=>b.classList.toggle('is-active',b.dataset.fundTheme==='all'||b.dataset.fundGeo==='all'||b.dataset.fundStyle==='all')));
         renderFunds();
       });
@@ -5936,10 +5989,28 @@
     state.stockDiscoverPreset=btn.dataset.discoverPreset||'compounders';
     renderStockDiscover((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
   }));
-  els.stockDiscoverSectors?.querySelectorAll('[data-stock-sector-theme]').forEach(btn=>btn.addEventListener('click',()=>{
-    state.stockSectorTheme=btn.dataset.stockSectorTheme||'all';
-    els.stockDiscoverSectors.querySelectorAll('[data-stock-sector-theme]').forEach(x=>x.classList.toggle('is-active',x===btn));
+  function activateStockTheme(key) {
+    state.stockSectorTheme = key || 'all';
+    const def = STOCK_THEME_DEFS.find(d => d.key === state.stockSectorTheme);
+    let matchedHiddenChip = false;
+    els.stockDiscoverSectors?.querySelectorAll('[data-stock-sector-theme]').forEach(x => {
+      const match = x.dataset.stockSectorTheme === state.stockSectorTheme;
+      x.classList.toggle('is-active', match);
+      if (match && x.hidden) matchedHiddenChip = true;
+    });
+    if (matchedHiddenChip) {
+      els.stockDiscoverSectors?.querySelectorAll('.stock-sector-extra').forEach(x => x.hidden = false);
+      const moreBtn = document.getElementById('stock-sector-more-btn');
+      if (moreBtn) moreBtn.hidden = true;
+    }
+    if (els.stockThemeActive) {
+      if (def) { els.stockThemeActive.hidden = false; els.stockThemeActive.innerHTML = `<span>TEMA: <b>${escapeHtml(def.label)}</b></span><button type="button" id="stock-theme-clear">✕ limpar</button>`; }
+      else { els.stockThemeActive.hidden = true; els.stockThemeActive.innerHTML = ''; }
+    }
     renderStockDiscover((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
+  }
+  els.stockDiscoverSectors?.querySelectorAll('[data-stock-sector-theme]').forEach(btn=>btn.addEventListener('click',()=>{
+    activateStockTheme(btn.dataset.stockSectorTheme||'all');
   }));
   document.getElementById('stock-sector-more-btn')?.addEventListener('click', (e) => {
     els.stockDiscoverSectors?.querySelectorAll('.stock-sector-extra').forEach(x => x.hidden = false);
@@ -5948,6 +6019,23 @@
   document.getElementById('smartmoney-type-more-btn')?.addEventListener('click', (e) => {
     els.smartmoneyTypeFilters?.querySelectorAll('.smartmoney-type-extra').forEach(x => x.hidden = false);
     e.currentTarget.hidden = true;
+  });
+  if (els.stockThemeSearch && els.stockThemeSearchBox) {
+    els.stockThemeSearch.addEventListener('input', () => {
+      const matches = stockThemeSearch(els.stockThemeSearch.value);
+      if (!matches.length) { els.stockThemeSearchBox.hidden = true; els.stockThemeSearchBox.innerHTML = ''; return; }
+      els.stockThemeSearchBox.innerHTML = matches.slice(0,8).map(d => `<button type="button" data-theme-pick="${escapeHtml(d.key)}"><strong>${escapeHtml(d.label)}</strong></button>`).join('');
+      els.stockThemeSearchBox.hidden = false;
+      els.stockThemeSearchBox.querySelectorAll('[data-theme-pick]').forEach(btn => btn.addEventListener('click', () => {
+        activateStockTheme(btn.dataset.themePick);
+        els.stockThemeSearch.value = '';
+        els.stockThemeSearchBox.hidden = true; els.stockThemeSearchBox.innerHTML = '';
+      }));
+    });
+    els.stockThemeSearch.addEventListener('blur', () => setTimeout(() => { if (els.stockThemeSearchBox) els.stockThemeSearchBox.hidden = true; }, 150));
+  }
+  document.getElementById('stock-theme-active')?.addEventListener('click', (e) => {
+    if (e.target.id === 'stock-theme-clear') activateStockTheme('all');
   });
   document.getElementById('fund-theme-more-btn')?.addEventListener('click', (e) => {
     els.fundThemeFilters?.querySelectorAll('.fund-theme-extra').forEach(x => x.hidden = false);
@@ -6097,11 +6185,46 @@
 
   [els.fundsSearch].filter(Boolean).forEach(el => el.addEventListener("input", renderFunds));
   els.fundRankingChips?.addEventListener("click", (e)=>{ const b=e.target.closest("[data-fund-rank]"); if(!b) return; state.fundRank=b.dataset.fundRank; renderFunds(); });
-  els.fundThemeFilters?.querySelectorAll('[data-fund-theme]').forEach(btn => btn.addEventListener('click', () => {
-    state.fundTheme = btn.dataset.fundTheme;
-    els.fundThemeFilters.querySelectorAll('[data-fund-theme]').forEach(x => x.classList.toggle('is-active', x === btn));
+  function activateFundTheme(key) {
+    state.fundTheme = key || 'all';
+    const def = FUND_THEME_DEFS.find(d => d.key === state.fundTheme);
+    let matchedHiddenChip = false;
+    els.fundThemeFilters?.querySelectorAll('[data-fund-theme]').forEach(x => {
+      const match = x.dataset.fundTheme === state.fundTheme;
+      x.classList.toggle('is-active', match);
+      if (match && x.hidden) matchedHiddenChip = true;
+    });
+    if (matchedHiddenChip) {
+      els.fundThemeFilters?.querySelectorAll('.fund-theme-extra').forEach(x => x.hidden = false);
+      const moreBtn = document.getElementById('fund-theme-more-btn');
+      if (moreBtn) moreBtn.hidden = true;
+    }
+    if (els.fundThemeActive) {
+      if (def) { els.fundThemeActive.hidden = false; els.fundThemeActive.innerHTML = `<span>TEMA: <b>${escapeHtml(def.key)}</b></span><button type="button" id="fund-theme-clear">✕ limpar</button>`; }
+      else { els.fundThemeActive.hidden = true; els.fundThemeActive.innerHTML = ''; }
+    }
     renderFunds();
+  }
+  els.fundThemeFilters?.querySelectorAll('[data-fund-theme]').forEach(btn => btn.addEventListener('click', () => {
+    activateFundTheme(btn.dataset.fundTheme);
   }));
+  if (els.fundThemeSearch && els.fundThemeSearchBox) {
+    els.fundThemeSearch.addEventListener('input', () => {
+      const matches = fundThemeSearch(els.fundThemeSearch.value);
+      if (!matches.length) { els.fundThemeSearchBox.hidden = true; els.fundThemeSearchBox.innerHTML = ''; return; }
+      els.fundThemeSearchBox.innerHTML = matches.slice(0,8).map(d => `<button type="button" data-fund-theme-pick="${escapeHtml(d.key)}"><strong>${escapeHtml(d.key)}</strong></button>`).join('');
+      els.fundThemeSearchBox.hidden = false;
+      els.fundThemeSearchBox.querySelectorAll('[data-fund-theme-pick]').forEach(btn => btn.addEventListener('click', () => {
+        activateFundTheme(btn.dataset.fundThemePick);
+        els.fundThemeSearch.value = '';
+        els.fundThemeSearchBox.hidden = true; els.fundThemeSearchBox.innerHTML = '';
+      }));
+    });
+    els.fundThemeSearch.addEventListener('blur', () => setTimeout(() => { if (els.fundThemeSearchBox) els.fundThemeSearchBox.hidden = true; }, 150));
+  }
+  document.getElementById('fund-theme-active')?.addEventListener('click', (e) => {
+    if (e.target.id === 'fund-theme-clear') activateFundTheme('all');
+  });
   els.fundGeoFilters?.querySelectorAll('[data-fund-geo]').forEach(btn => btn.addEventListener('click', () => {
     state.fundGeo = btn.dataset.fundGeo;
     els.fundGeoFilters.querySelectorAll('[data-fund-geo]').forEach(x => x.classList.toggle('is-active', x === btn));

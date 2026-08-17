@@ -1679,6 +1679,10 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 .portfolio-search-suggestions span,.stock-autocomplete-box span{font-size:11px;color:var(--ink-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stock-autocomplete-box em{font-style:normal;font:800 10px var(--font-mono);color:var(--ink-muted)}
 .stock-search-row,.commandbar{position:relative}
+.theme-active-badge{display:flex;align-items:center;gap:8px;margin:10px 0;padding:8px 12px;border-radius:999px;background:var(--surface-sunken);border:1px solid var(--border);font-size:13px;color:var(--ink)}
+.theme-active-badge[hidden]{display:none!important}
+.theme-active-badge b{font-weight:800}
+.theme-active-badge button{border:0;background:transparent;color:var(--ink-muted);font-weight:800;padding:2px 6px;cursor:pointer}
 .stock-search-row .stock-autocomplete-box{left:30px;right:96px}
 .commandbar .stock-autocomplete-box{top:54px;left:0;right:auto;width:min(460px,100%)}
 .portfolio-search-suggestions button:active,.stock-autocomplete-box button:active{background:var(--surface-sunken)}
