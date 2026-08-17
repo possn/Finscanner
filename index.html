@@ -83,6 +83,7 @@
     <section id="view-home" class="view is-active">
       <section class="briefing-hero">
         <div class="briefing-hello"><img src="icons/icon-192.png" alt="" class="briefing-avatar"><div><span class="eyebrow">Finscanner Intelligence</span><p id="briefing-greeting">Bom dia</p><h2>Briefing</h2></div></div>
+        <p class="home-brief-empty" style="margin:-8px 0 14px">Ferramenta pessoal de pesquisa, não é aconselhamento financeiro. Score não validado/backtested.</p>
         <article class="briefing-card" id="briefing-card"><span class="briefing-signal">A calcular sinais…</span><h3>O mercado em contexto.</h3><p>Assim que os dados carregarem, o Finscanner resume as alterações mais relevantes do universo, da tua carteira e da watchlist.</p></article>
       </section>
 
@@ -225,18 +226,19 @@
             <button class="is-active" data-stock-sector-theme="all">Todos</button>
             <button data-stock-sector-theme="technology">Tecnologia</button>
             <button data-stock-sector-theme="healthcare">Healthcare</button>
-            <button data-stock-sector-theme="biotech">Biotech</button>
-            <button data-stock-sector-theme="water">Água</button>
-            <button data-stock-sector-theme="agriculture">Agricultura</button>
-            <button data-stock-sector-theme="energy">Energia</button>
             <button data-stock-sector-theme="financials">Financeiro</button>
-            <button data-stock-sector-theme="industrials">Industriais</button>
+            <button data-stock-sector-theme="energy">Energia</button>
             <button data-stock-sector-theme="consumer">Consumo</button>
-            <button data-stock-sector-theme="realestate">Imobiliário</button>
-            <button data-stock-sector-theme="utilities">Utilities</button>
-            <button data-stock-sector-theme="materials">Materiais</button>
-            <button data-stock-sector-theme="defense">Defesa</button>
-            <button data-stock-sector-theme="semiconductors">Semicondutores</button>
+            <button data-stock-sector-theme="biotech" class="stock-sector-extra" hidden>Biotech</button>
+            <button data-stock-sector-theme="water" class="stock-sector-extra" hidden>Água</button>
+            <button data-stock-sector-theme="agriculture" class="stock-sector-extra" hidden>Agricultura</button>
+            <button data-stock-sector-theme="industrials" class="stock-sector-extra" hidden>Industriais</button>
+            <button data-stock-sector-theme="realestate" class="stock-sector-extra" hidden>Imobiliário</button>
+            <button data-stock-sector-theme="utilities" class="stock-sector-extra" hidden>Utilities</button>
+            <button data-stock-sector-theme="materials" class="stock-sector-extra" hidden>Materiais</button>
+            <button data-stock-sector-theme="defense" class="stock-sector-extra" hidden>Defesa</button>
+            <button data-stock-sector-theme="semiconductors" class="stock-sector-extra" hidden>Semicondutores</button>
+            <button type="button" id="stock-sector-more-btn">+9 mais setores</button>
           </div>
         </div>
         <div id="stock-discover-body" class="stock-discover-body"><div class="sector-empty">A carregar oportunidades…</div></div>
@@ -603,10 +605,10 @@
 </div>
   <nav class="bottom-nav" id="bottom-nav" aria-label="Navegação principal">
     <button data-view="home" class="is-active"><span>▤</span><strong>Home</strong></button>
-    <button data-view="metals"><span>▱</span><strong>Metals</strong></button>
-    <button data-view="stocks"><span>▥</span><strong>Stocks</strong></button>
-    <button data-view="funds"><span>▰</span><strong>Funds</strong></button>
-    <button data-view="more"><span>•••</span><strong>More</strong></button>
+    <button data-view="stocks"><span>▥</span><strong>Ações</strong></button>
+    <button data-view="funds"><span>▰</span><strong>ETFs</strong></button>
+    <button data-view="metals"><span>▱</span><strong>Metais</strong></button>
+    <button data-view="more"><span>•••</span><strong>Mais</strong></button>
   </nav>
 
 <div id="detail" class="detail-overlay" hidden>
