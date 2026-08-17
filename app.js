@@ -23,7 +23,6 @@
     stockDiscoverCategories: document.getElementById("stock-discover-categories"),
     stockDiscoverSectors: document.getElementById("stock-discover-sectors"),
     stockThemeSearch: document.getElementById("stock-theme-search"),
-    stockThemeSearchBox: document.getElementById("stock-theme-search-box"),
     stockThemeActive: document.getElementById("stock-theme-active"),
     stockDiscoverExplainer: document.getElementById("stock-discover-explainer"),
     stockDiscoverBody: document.getElementById("stock-discover-body"),
@@ -89,7 +88,6 @@
     fundsRegionFilter: document.getElementById("funds-region-filter"),
     fundThemeFilters: document.getElementById("fund-theme-filters"),
     fundThemeSearch: document.getElementById("fund-theme-search"),
-    fundThemeSearchBox: document.getElementById("fund-theme-search-box"),
     fundThemeActive: document.getElementById("fund-theme-active"),
     fundGeoFilters: document.getElementById("fund-geo-filters"),
     fundStyleFilters: document.getElementById("fund-style-filters"),
@@ -6107,20 +6105,38 @@
     els.smartmoneyTypeFilters?.querySelectorAll('.smartmoney-type-extra').forEach(x => x.hidden = false);
     e.currentTarget.hidden = true;
   });
-  if (els.stockThemeSearch && els.stockThemeSearchBox) {
-    els.stockThemeSearch.addEventListener('input', () => {
-      const matches = stockThemeSearch(els.stockThemeSearch.value);
-      if (!matches.length) { els.stockThemeSearchBox.hidden = true; els.stockThemeSearchBox.innerHTML = ''; return; }
-      els.stockThemeSearchBox.innerHTML = matches.slice(0,8).map(d => `<button type="button" data-theme-pick="${escapeHtml(d.key)}"><strong>${escapeHtml(d.label)}</strong></button>`).join('');
-      els.stockThemeSearchBox.hidden = false;
-      els.stockThemeSearchBox.querySelectorAll('[data-theme-pick]').forEach(btn => btn.addEventListener('click', () => {
-        activateStockTheme(btn.dataset.themePick);
-        els.stockThemeSearch.value = '';
-        els.stockThemeSearchBox.hidden = true; els.stockThemeSearchBox.innerHTML = '';
+  // Mirrors bindStockAutocomplete's structure exactly (dynamic box creation
+  // via host.appendChild, not a pre-existing static element) — the search
+  // input worked correctly on a real device while the theme search (which
+  // used a statically pre-placed dropdown div) reportedly showed nothing
+  // when typing, despite passing every jsdom simulation. Rebuilding to
+  // match the known-working pattern byte-for-byte removes that variable.
+  function bindThemeSearch(input, searchFn, onPick) {
+    if (!input) return;
+    const host = input.closest('.commandbar, .theme-search-row') || input.parentElement;
+    if (!host) return;
+    host.style.position = 'relative';
+    let box = host.querySelector('.stock-autocomplete-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'stock-autocomplete-box stock-autocomplete-inline';
+      box.hidden = true;
+      host.appendChild(box);
+    }
+    input.addEventListener('input', () => {
+      const matches = searchFn(input.value);
+      if (!matches.length) { box.hidden = true; box.innerHTML = ''; return; }
+      box.innerHTML = matches.slice(0,8).map(d => `<button type="button" data-theme-pick="${escapeHtml(d.key ?? d.label)}"><strong>${escapeHtml(d.label ?? d.key)}</strong></button>`).join('');
+      box.hidden = false;
+      box.querySelectorAll('[data-theme-pick]').forEach(btn => btn.addEventListener('click', () => {
+        onPick(btn.dataset.themePick);
+        input.value = '';
+        box.hidden = true; box.innerHTML = '';
       }));
     });
-    els.stockThemeSearch.addEventListener('blur', () => setTimeout(() => { if (els.stockThemeSearchBox) els.stockThemeSearchBox.hidden = true; }, 150));
+    input.addEventListener('blur', () => setTimeout(() => { box.hidden = true; }, 150));
   }
+  bindThemeSearch(els.stockThemeSearch, stockThemeSearch, activateStockTheme);
   document.getElementById('stock-theme-active')?.addEventListener('click', (e) => {
     if (e.target.id === 'stock-theme-clear') activateStockTheme('all');
   });
@@ -6295,20 +6311,7 @@
   els.fundThemeFilters?.querySelectorAll('[data-fund-theme]').forEach(btn => btn.addEventListener('click', () => {
     activateFundTheme(btn.dataset.fundTheme);
   }));
-  if (els.fundThemeSearch && els.fundThemeSearchBox) {
-    els.fundThemeSearch.addEventListener('input', () => {
-      const matches = fundThemeSearch(els.fundThemeSearch.value);
-      if (!matches.length) { els.fundThemeSearchBox.hidden = true; els.fundThemeSearchBox.innerHTML = ''; return; }
-      els.fundThemeSearchBox.innerHTML = matches.slice(0,8).map(d => `<button type="button" data-fund-theme-pick="${escapeHtml(d.key)}"><strong>${escapeHtml(d.key)}</strong></button>`).join('');
-      els.fundThemeSearchBox.hidden = false;
-      els.fundThemeSearchBox.querySelectorAll('[data-fund-theme-pick]').forEach(btn => btn.addEventListener('click', () => {
-        activateFundTheme(btn.dataset.fundThemePick);
-        els.fundThemeSearch.value = '';
-        els.fundThemeSearchBox.hidden = true; els.fundThemeSearchBox.innerHTML = '';
-      }));
-    });
-    els.fundThemeSearch.addEventListener('blur', () => setTimeout(() => { if (els.fundThemeSearchBox) els.fundThemeSearchBox.hidden = true; }, 150));
-  }
+  bindThemeSearch(els.fundThemeSearch, fundThemeSearch, activateFundTheme);
   document.getElementById('fund-theme-active')?.addEventListener('click', (e) => {
     if (e.target.id === 'fund-theme-clear') activateFundTheme('all');
   });
