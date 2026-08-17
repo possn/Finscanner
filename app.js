@@ -5928,6 +5928,10 @@
     els.stockDiscoverSectors.querySelectorAll('[data-stock-sector-theme]').forEach(x=>x.classList.toggle('is-active',x===btn));
     renderStockDiscover((state.data?.stocks||[]).filter(r=>r.quote_type!=='ETF'&&!isAustralianScannerRow(r)));
   }));
+  document.getElementById('stock-sector-more-btn')?.addEventListener('click', (e) => {
+    els.stockDiscoverSectors?.querySelectorAll('.stock-sector-extra').forEach(x => x.hidden = false);
+    e.currentTarget.hidden = true;
+  });
 
   function bindStockAutocomplete(input, syncInput) {
     if (!input) return;
