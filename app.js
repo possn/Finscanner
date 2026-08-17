@@ -776,12 +776,24 @@
 
   function renderHomeOpportunities(rows, featuredTicker) {
     if (!els.homeOpportunityStrip) return;
-    const eligible = rows.filter(r => r.ticker !== featuredTicker && r.zombie !== "yes" && r.zombie !== true);
+    // Confidence gate applies before any threshold relaxation below: a
+    // ticker built on <50% fundamentals coverage should never surface as a
+    // "worth investigating" morning idea, however high its score looks.
+    const eligible = rows.filter(r => r.ticker !== featuredTicker && r.zombie !== "yes" && r.zombie !== true && Number(r.data_coverage_pct ?? 0) >= 50);
     const strict = eligible.filter(r => Number(r.score) >= 60 && Number(r.quality_pct ?? r.profitability_pct ?? 0) >= 60 && Number(r.value_pct ?? 0) >= 45);
-    const pool = strict.length >= 4 ? strict : (eligible.length ? eligible : rows.filter(r => r.ticker !== featuredTicker));
+    // Two-step relaxation instead of an all-or-nothing cliff: a middling
+    // bar before falling back to "any eligible ticker", so a quiet market
+    // day doesn't jump straight from strict quality picks to no bar at all.
+    const relaxed = eligible.filter(r => Number(r.score) >= 50 && Number(r.quality_pct ?? r.profitability_pct ?? 0) >= 50);
+    const pool = strict.length >= 4 ? strict : (relaxed.length >= 4 ? relaxed : (eligible.length ? eligible : rows.filter(r => r.ticker !== featuredTicker)));
     const ranked = pool.slice().sort((a,b) => {
-      const ax = Number(a.quality_value_score ?? 0) + (a.thesis_direction === "strengthening" ? 8 : 0) + Number(a.score ?? 0) * 0.12;
-      const bx = Number(b.quality_value_score ?? 0) + (b.thesis_direction === "strengthening" ? 8 : 0) + Number(b.score ?? 0) * 0.12;
+      // Thesis-strengthening bonus scales with how much the score actually
+      // moved (thesis_score_delta), floored at 4pp and capped at 12pp,
+      // instead of a flat +8 regardless of whether the move was marginal
+      // or a large improvement.
+      const bonus = r => r.thesis_direction === "strengthening" ? Math.min(12, Math.max(4, Number(r.thesis_score_delta ?? 4))) : 0;
+      const ax = Number(a.quality_value_score ?? 0) + bonus(a) + Number(a.score ?? 0) * 0.12;
+      const bx = Number(b.quality_value_score ?? 0) + bonus(b) + Number(b.score ?? 0) * 0.12;
       return bx - ax;
     }).slice(0, 8);
     if (!ranked.length) {
@@ -793,10 +805,11 @@
       const v = Math.round(Number(r.value_pct ?? 0));
       const g = Math.round(Number(r.growth_pct ?? 0));
       const direction = r.thesis_direction === "strengthening" ? "↗ tese a reforçar" : r.thesis_direction === "weakening" ? "↘ tese a enfraquecer" : "→ tese estável";
+      const confLabel = r.data_confidence === "high" ? null : r.data_confidence === "medium" ? "confiança média" : r.data_confidence === "low" ? "confiança baixa" : null;
       return `<a class="home-opportunity-card" href="${dossierHash(r.ticker)}" data-open-dossier="${escapeHtml(r.ticker)}">
         <span class="home-opportunity-card__meta"><b>${escapeHtml(r.ticker)}</b><em>${Math.round(Number(r.score ?? 0))}</em></span>
         <strong>${escapeHtml(r.name || r.ticker)}</strong>
-        <small>${escapeHtml(direction)}</small>
+        <small>${escapeHtml(direction)}${confLabel ? ` · ${confLabel}` : ""}</small>
         <span class="home-opportunity-card__axes"><i>Q ${q}</i><i>V ${v}</i><i>G ${g}</i></span>
         <span class="home-opportunity-card__open">Abrir dossier →</span>
       </a>`;
