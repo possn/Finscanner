@@ -1723,7 +1723,16 @@
   function stockSectorThemeMatch(r,key){
     if(!key||key==='all') return true;
     const hay=`${r.sector||''} ${r.industry||''} ${r.stock_theme||''} ${r.name||''} ${r.ticker||''}`.toLowerCase();
-    const any=(words)=>words.some(w=>hay.includes(w));
+    // Word-boundary at the START of each keyword only (not the end): this
+    // stops "technology" from matching inside "biotechnology", "bank"
+    // inside "softbank", "gas" inside "vegas"/"antofagasta", "water" inside
+    // "stillwater", and "it services" inside "credit services" — all
+    // confirmed false positives from plain .includes() substring matching
+    // (e.g. Visa/Mastercard/PayPal/Amex were showing up under "Tecnologia"
+    // via "Credit Services"). No trailing \b so plurals still match
+    // ("semiconductor" still matches "Semiconductors", "industrial" still
+    // matches "Industrials").
+    const any=(words)=>words.some(w=>new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}`).test(hay));
     if(key==='technology') return any(['technology','software','internet','information technology','it services','computer','electronic']);
     if(key==='healthcare') return any(['healthcare','health care','medical','pharma','pharmaceutical','diagnostic','hospital','health services','medical device','healthcare plans']);
     if(key==='biotech') return any(['biotech','biotechnology','biopharma','biopharmaceutical','genomic','gene therapy']);
