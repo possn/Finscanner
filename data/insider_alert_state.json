@@ -2,9 +2,9 @@
   "last_change": {
     "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 11,
+    "detail_failures": 12,
     "lookback_days": 10,
-    "new_filings": 12,
+    "new_filings": 13,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -1416,10 +1416,21 @@
       ]
     },
     "NBIS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-14",
+          "owner": "Boynton John Wilson IV",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1435146.92
+        }
+      ],
       "last_checked": "2026-08-15T22:36:21.191312+00:00",
       "seen_accessions": [
-        "0001513845-26-000088"
+        "0001513845-26-000088",
+        "0001513845-26-000090"
       ]
     },
     "NEE": {
@@ -2268,5 +2279,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-18T13:06:26.121186+00:00"
+  "updated_at": "2026-08-18T16:52:14.352118+00:00"
 }
