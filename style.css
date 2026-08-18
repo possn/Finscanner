@@ -1954,6 +1954,8 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 }
 .stock-score-hero>strong{font-size:clamp(58px,17vw,78px)!important}
 .stock-score-hero>small{color:var(--ink-muted)!important}
+.stock-score-hero.is-low-confidence>strong{color:var(--ink-faint,#9aa08e)!important;opacity:.55}
+.stock-score-hero.is-low-confidence:before{content:'⚠ cobertura de dados insuficiente para confiar neste número';display:block;font-size:12px;font-weight:700;color:var(--warn,#a15c2f);margin-bottom:8px}
 
 @media(max-width:700px){
   .detail-card{padding-left:16px!important;padding-right:16px!important}

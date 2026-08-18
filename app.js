@@ -639,9 +639,9 @@
         <div><b>${highInsider}</b><span>insider opp. ≥65</span></div>
       </div>
       <div class="attention-ranking">
-        ${lane('Best Companies','força absoluta multifator',bestHtml,'attention-lane--best')}
-        ${lane('Best Portfolio Fit','boas empresas que melhoram a carteira',fitHtml,'attention-lane--fit')}
-        ${lane('Risks to Review','posições que merecem revisão primeiro',riskHtml,'attention-lane--risk')}
+        ${lane('Melhores empresas','força absoluta multifator',bestHtml,'attention-lane--best')}
+        ${lane('Melhor encaixe na carteira','boas empresas que melhoram a carteira',fitHtml,'attention-lane--fit')}
+        ${lane('Riscos a rever','posições que merecem revisão primeiro',riskHtml,'attention-lane--risk')}
       </div>
       <p class="home-brief-note">${ownedCount ? `${ownedCount} posições do portfolio têm análise disponível neste briefing.` : 'Importa o portfolio para personalizar este resumo.'}</p>`;
     }
@@ -740,7 +740,7 @@
       const down=mm.filter(x=>x.m.score<=35 && Number.isFinite(x.m.s30) && x.m.s30<=-3).sort((a,b)=>a.m.score-b.m.score).slice(0,4);
       const rev=mm.filter(x=>x.m.score>=55 && Number.isFinite(x.m.sd) && x.m.sd>0 && Number.isFinite(x.m.s30) && x.m.s30<0).sort((a,b)=>b.m.score-a.m.score).slice(0,4);
       const grp=(title,list,tone)=>list.length?`<section class="momentum-brief-group"><h4>${title}</h4>${list.map(x=>briefRowHtml(x.r,`Momentum ${x.m.score}/100${Number.isFinite(x.m.s30)?` · 30d ${x.m.s30>0?'+':''}${x.m.s30.toFixed(1)}`:''}`,tone)).join('')}</section>`:'';
-      els.homeMomentumBrief.innerHTML = fast.length||down.length||rev.length ? `${grp('Improving Fast',fast,'good')}${grp('Persistent Deterioration',down,'bad')}${grp('Positive Reversal',rev,'good')}` : `<p class="home-brief-empty">Ainda não há padrões de momentum suficientemente persistentes.</p>`;
+      els.homeMomentumBrief.innerHTML = fast.length||down.length||rev.length ? `${grp('A melhorar depressa',fast,'good')}${grp('Deterioração persistente',down,'bad')}${grp('Reversão positiva',rev,'good')}` : `<p class="home-brief-empty">Ainda não há padrões de momentum suficientemente persistentes.</p>`;
     }
 
     if (els.homePortfolioBrief) {
@@ -932,6 +932,17 @@
     return `${sign}${suffix}${currency ? " " + currency : ""}`;
   }
 
+  // Yahoo/yfinance prices routinely arrive as raw floats with binary
+  // rounding noise (e.g. 81.30000305175781 instead of 81.3) — several
+  // spots in the dossier and metals cards were printing that value
+  // directly with no formatting at all. This is the single formatter for
+  // "a price, shown to a sensible number of decimals" — use it anywhere
+  // a raw price/quote number reaches the screen.
+  function fmtPrice(n, decimals = 2) {
+    if (n == null || !Number.isFinite(Number(n))) return "—";
+    return Number(n).toLocaleString("pt-PT", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+
   function fmtSignedPct(n) {
     if (n == null || !Number.isFinite(Number(n))) return "—";
     const x = Number(n);
@@ -1002,7 +1013,7 @@
     const m=thesisMomentumSnapshot(r);
     const d=v=>Number.isFinite(v)?`${v>0?'+':''}${v.toFixed(1)}`:'—';
     return `<section class="thesis-momentum-card ${m.cls}">
-      <div class="thesis-momentum-head"><div><span class="eyebrow">THESIS MOMENTUM</span><strong>${m.score}<i>/100</i></strong></div><span>${escapeHtml(m.label)}</span></div>
+      <div class="thesis-momentum-head"><div><span class="eyebrow">MOMENTUM DA TESE</span><strong>${m.score}<i>/100</i></strong></div><span>${escapeHtml(m.label)}</span></div>
       <div class="thesis-momentum-horizons"><div><span>Hoje</span><b>${d(m.sd)}</b></div><div><span>7 dias</span><b>${d(m.s7)}</b></div><div><span>30 dias</span><b>${d(m.s30)}</b></div><div><span>Confiança</span><b>${m.confidence}%</b></div></div>
       <p>${escapeHtml(m.reasons.slice(0,4).join(' · ') || 'Ainda sem histórico suficiente para identificar uma tendência persistente.')}</p>
       <small>Score de momentum temporal; não altera o Finscanner Score fundamental.</small>
@@ -1224,10 +1235,10 @@
 
   function metalsDailyBriefHtml() {
     const b = state.metalsBrief;
-    if (!b || b.status !== "ok") return `<section class="metals-daily-brief metals-section-block"><div class="section-heading compact"><div><span class="eyebrow">DAILY METALS BRIEF</span><h3>Resumo diário</h3></div></div><p class="method-note">O relatório diário será gerado automaticamente pelo workflow das 06:00 (Portugal) quando os dados estiverem disponíveis.</p></section>`;
+    if (!b || b.status !== "ok") return `<section class="metals-daily-brief metals-section-block"><div class="section-heading compact"><div><span class="eyebrow">RESUMO DIÁRIO DE METAIS</span><h3>Resumo diário</h3></div></div><p class="method-note">O relatório diário será gerado automaticamente pelo workflow das 06:00 (Portugal) quando os dados estiverem disponíveis.</p></section>`;
     const bullets = Array.isArray(b.bullets) ? b.bullets : [];
     return `<section class="metals-daily-brief metals-section-block">
-      <div class="daily-brief-header"><div><span class="eyebrow">FINSCANNER DAILY METALS BRIEF</span><h3>${escapeHtml(b.title || "Metals Brief")}</h3><small>${escapeHtml(b.edition || "")}</small></div><span class="daily-brief-score">${b.pressure_score == null ? "—" : Math.round(Number(b.pressure_score))}</span></div>
+      <div class="daily-brief-header"><div><span class="eyebrow">RESUMO DIÁRIO DE METAIS</span><h3>${escapeHtml(b.title || "Metals Brief")}</h3><small>${escapeHtml(b.edition || "")}</small></div><span class="daily-brief-score">${b.pressure_score == null ? "—" : Math.round(Number(b.pressure_score))}</span></div>
       <p class="daily-brief-lead">${escapeHtml(b.lead || "")}</p>
       ${bullets.length ? `<ul class="daily-brief-list">${bullets.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : ""}
       <p class="method-note">Relatório gerado deterministicamente a partir dos dados do pipeline; não é recomendação de investimento.</p>
@@ -1281,14 +1292,14 @@
         ${metalTabsHtml()}
         ${metalPriceCard(selectedMetal)}
         <section class="metals-section-block">
-          <div class="section-heading compact"><div><span class="eyebrow">THE THREE FORCES</span><h3>O que está a mover ${escapeHtml(selectedName.toLowerCase())}</h3></div></div>
+          <div class="section-heading compact"><div><span class="eyebrow">AS TRÊS FORÇAS</span><h3>O que está a mover ${escapeHtml(selectedName.toLowerCase())}</h3></div></div>
           <div class="force-grid">
             <article class="force-card"><span>TENDÊNCIA</span><strong>${sd.vs_200d_pct != null ? (sd.vs_200d_pct >= 0 ? "Acima" : "Abaixo") + " da média 200d" : "—"}</strong><small>${fmtSigned(sd.vs_200d_pct)} vs tendência longa</small></article>
             <article class="force-card"><span>VOLATILIDADE</span><strong>${sd.volatility_annualized_pct != null ? Number(sd.volatility_annualized_pct).toFixed(1) + "%" : "—"}</strong><small>volatilidade anualizada</small></article>
             <article class="force-card"><span>MERCADO FÍSICO</span><strong>${physicalStatus ? (Number(selectedComex.registered_oz||0)/1e6).toFixed(1)+" Moz" : "—"}</strong><small>${physicalStatus ? "COMEX registered inventory" : "sem fonte física integrada para este metal"}</small></article>
           </div>
         </section>
-        ${state.selectedMetal === "SI=F" ? `<section class="metals-section-block"><div class="section-heading compact"><div><span class="eyebrow">SILVER · COMEX</span><h3>Inventário e deliveries</h3></div></div><div class="physical-grid"><article class="physical-card"><span>REGISTERED</span><strong class="physical-big">${physicalStatus ? (Number(selectedComex.registered_oz||0)/1e6).toFixed(1)+" Moz" : "—"}</strong><small>${physicalStatus ? "CME warehouse stocks" : "indisponível"}</small></article><article class="physical-card"><span>DELIVERY NOTICES</span><strong class="physical-big">${selectedDelivery.status === "ok" ? Number(selectedDelivery.daily_notices||0).toLocaleString("pt-PT") : "—"}</strong><small>${selectedDelivery.status === "ok" ? "notices do dia · não equivalem a saída de vault" : "indisponível"}</small></article></div></section>` : `<section class="metals-section-block"><div class="section-heading compact"><div><span class="eyebrow">COPPER CONTEXT</span><h3>Preço, tendência e volatilidade</h3></div></div><p class="method-note">O cobre permanece, por agora, uma leitura de mercado via futuros. Inventários LME/COMEX e positioning serão integrados apenas quando a fonte oficial estiver estável no pipeline.</p></section>`}
+        ${state.selectedMetal === "SI=F" ? `<section class="metals-section-block"><div class="section-heading compact"><div><span class="eyebrow">SILVER · COMEX</span><h3>Inventário e deliveries</h3></div></div><div class="physical-grid"><article class="physical-card"><span>REGISTERED</span><strong class="physical-big">${physicalStatus ? (Number(selectedComex.registered_oz||0)/1e6).toFixed(1)+" Moz" : "—"}</strong><small>${physicalStatus ? "CME warehouse stocks" : "indisponível"}</small></article><article class="physical-card"><span>DELIVERY NOTICES</span><strong class="physical-big">${selectedDelivery.status === "ok" ? Number(selectedDelivery.daily_notices||0).toLocaleString("pt-PT") : "—"}</strong><small>${selectedDelivery.status === "ok" ? "notices do dia · não equivalem a saída de vault" : "indisponível"}</small></article></div></section>` : `<section class="metals-section-block"><div class="section-heading compact"><div><span class="eyebrow">CONTEXTO DO COBRE</span><h3>Preço, tendência e volatilidade</h3></div></div><p class="method-note">O cobre permanece, por agora, uma leitura de mercado via futuros. Inventários LME/COMEX e positioning serão integrados apenas quando a fonte oficial estiver estável no pipeline.</p></section>`}
       `;
       els.metalsDashboard?.querySelectorAll("[data-metal-tab]").forEach(btn => btn.addEventListener("click", () => { state.selectedMetal = btn.dataset.metalTab || "GC=F"; renderMetals(); document.getElementById("view-metals")?.scrollIntoView({behavior:"smooth", block:"start"}); }));
       els.metalsNote.textContent = state.metals.note || "";
@@ -1300,7 +1311,7 @@
       ${metalTabsHtml()}
       ${metalPriceCard(selectedMetal)}
       <section class="metals-section-block">
-        <div class="section-heading compact"><div><span class="eyebrow">THE THREE FORCES</span><h3>O que está a mover o metal</h3></div></div>
+        <div class="section-heading compact"><div><span class="eyebrow">AS TRÊS FORÇAS</span><h3>O que está a mover o metal</h3></div></div>
         <div class="force-grid">
           <article class="force-card"><span>TENDÊNCIA</span><strong>${gold?.data?.vs_200d_pct != null ? (gold.data.vs_200d_pct >= 0 ? "Acima" : "Abaixo") + " da média 200d" : "—"}</strong><small>${fmtSigned(gold?.data?.vs_200d_pct)} vs tendência longa</small></article>
           <article class="force-card"><span>VOLATILIDADE</span><strong>${gold?.data?.volatility_annualized_pct != null ? gold.data.volatility_annualized_pct.toFixed(1) + "%" : "—"}</strong><small>volatilidade anualizada</small></article>
@@ -1309,7 +1320,7 @@
       </section>
 
       <section class="metals-section-block pressure-index-block">
-        <div class="section-heading compact"><div><span class="eyebrow">GOLD PRESSURE INDEX</span><h3>Pressão física e de procura, explicada</h3></div></div>
+        <div class="section-heading compact"><div><span class="eyebrow">ÍNDICE DE PRESSÃO DO OURO</span><h3>Pressão física e de procura, explicada</h3></div></div>
         ${pressure.status === "ok" ? `<div class="pressure-hero">
           <div class="pressure-score-ring" style="--pressure:${Math.max(0,Math.min(100,Number(pressure.score)||0))}"><strong>${Math.round(Number(pressure.score))}</strong><span>/100</span></div>
           <div><strong class="pressure-label">${escapeHtml(pressure.label || "")}</strong><p>Cobertura atual: ${Math.round(Number(pressure.coverage_pct||0))}% das componentes previstas. Componentes em falta são removidas e os pesos disponíveis são renormalizados.</p></div>
@@ -1325,7 +1336,7 @@
       </section>
 
       <section class="metals-section-block physical-intelligence">
-        <div class="section-heading compact"><div><span class="eyebrow">PHYSICAL & POSITIONING</span><h3>O que o preço não mostra</h3></div></div>
+        <div class="section-heading compact"><div><span class="eyebrow">FÍSICO E POSICIONAMENTO</span><h3>O que o preço não mostra</h3></div></div>
         <div class="physical-grid">
           <article class="physical-card">
             <div class="physical-card-head"><span>CFTC · MANAGED MONEY</span><span class="source-state ${cotGold.status === "ok" ? "ok" : "off"}">${cotGold.status === "ok" ? "oficial" : "indisponível"}</span></div>
@@ -1359,7 +1370,7 @@
       </section>
 
       <section class="metals-section-block">
-        <div class="section-heading compact"><div><span class="eyebrow">KEY RATIOS</span><h3>Valor relativo</h3></div></div>
+        <div class="section-heading compact"><div><span class="eyebrow">RÁCIOS-CHAVE</span><h3>Valor relativo</h3></div></div>
         <div class="ratio-grid">
           <article><span>GOLD / SILVER</span><strong>${gsr ? gsr.toFixed(1)+":1" : "—"}</strong><small class="${gsrSig.cls}">${gsrSig.label}</small></article>
           <article><span>GOLD / PLATINUM</span><strong>${gpr ? gpr.toFixed(2)+":1" : "—"}</strong><small class="${gprSig.cls}">${gprSig.label}</small></article>
@@ -1369,7 +1380,7 @@
       </section>
 
       <section class="metals-section-block ways-card">
-        <div class="section-heading compact"><div><span class="eyebrow">WAYS TO PLAY</span><h3>Formas de obter exposição</h3></div></div>
+        <div class="section-heading compact"><div><span class="eyebrow">FORMAS DE INVESTIR NO TEMA</span><h3>Formas de obter exposição</h3></div></div>
         <div class="ways-row"><strong>Metal / ETFs</strong><div>${pills || "—"}</div></div>
         <div class="ways-row"><strong>Mineradoras</strong><div>${minerPills || "—"}</div></div>
         <div class="ways-row"><strong>Royalty & streaming</strong><div>${royaltyPills || "—"}</div></div>
@@ -1406,7 +1417,7 @@
     if (!d) return `<div class="metal-card"><div class="metal-head"><span class="metal-label">${inst.label}</span></div><p class="empty-state" style="padding:0.5rem 0;">sem dados</p></div>`;
     const changeClass = d.day_change_pct == null ? "" : d.day_change_pct >= 0 ? "up" : "down";
     return `<div class="metal-card" data-ticker="${escapeHtml(inst.ticker)}" tabindex="0" role="button">
-      <div class="metal-head"><span class="metal-label">${inst.label}</span><span><span class="metal-price">${d.price} <span class="metal-unit">${inst.unit}</span></span><span class="metal-change ${changeClass}">${fmtSigned(d.day_change_pct,2)}</span></span></div>
+      <div class="metal-head"><span class="metal-label">${inst.label}</span><span><span class="metal-price">${fmtPrice(d.price, 3)} <span class="metal-unit">${inst.unit}</span></span><span class="metal-change ${changeClass}">${fmtSigned(d.day_change_pct,2)}</span></span></div>
       <div class="metal-meta"><span>12m ${fmtSigned(d.change_1y_pct)}</span><span>vs 200d ${fmtSigned(d.vs_200d_pct)}</span><span>vol ${d.volatility_annualized_pct ?? "—"}%</span></div>
       ${inst.kind === "etf_proxy" ? `<span class="metal-proxy-tag">proxy ETF, não é preço spot</span>` : ""}<span class="metal-expand-hint">ver detalhe →</span>
     </div>`;
@@ -1418,7 +1429,7 @@
     const d = inst.data;
     const yChange = (v, label) => v != null ? `<div class="detail-row"><span>${label}</span><span>${fmtSigned(v)}</span></div>` : "";
     els.detailContent.innerHTML = `<h2 style="font-family:var(--font-display, inherit);margin:0 0 0.9rem;">${inst.label}</h2>
-      <div class="detail-row"><span>Preço</span><span>${d.price} ${inst.unit}</span></div><div class="detail-row"><span>Variação diária</span><span>${fmtSigned(d.day_change_pct,2)}</span></div>
+      <div class="detail-row"><span>Preço</span><span>${fmtPrice(d.price, 3)} ${inst.unit}</span></div><div class="detail-row"><span>Variação diária</span><span>${fmtSigned(d.day_change_pct,2)}</span></div>
       ${yChange(d.change_ytd_pct,"Variação no ano (YTD)")}${yChange(d.change_1y_pct,"Variação em 12 meses")}${yChange(d.vs_200d_pct,"Distância da média 200d")}
       <div class="detail-row"><span>Posição na faixa 52 semanas</span><span>${d.position_52w_pct != null ? Math.round(d.position_52w_pct)+"%" : "—"}</span></div>
       <div class="detail-row"><span>Intervalo 12 meses</span><span>${d.range_1y_low}–${d.range_1y_high}</span></div><div class="detail-row"><span>Volatilidade anualizada</span><span>${d.volatility_annualized_pct ?? "—"}%</span></div>
@@ -2660,7 +2671,7 @@
     if(Number.isFinite(inet) && inet!==0) items.push({tone:inet>0?'good':'warn',title:inet>0?'Insider accumulation':'Insider selling',text:`Fluxo líquido 30d ${fmtMoney(inet,r.currency||'USD')}`});
     if(r.thesis_direction==='strengthening') items.unshift({tone:'good',title:'Tese a reforçar',text:r.thesis_evolution_summary||r.thesis_summary||'Sinais recentes reforçam a tese.'});
     if(r.thesis_direction==='weakening') items.unshift({tone:'bad',title:'Tese a deteriorar',text:r.thesis_evolution_summary||r.thesis_summary||'Sinais recentes enfraquecem a tese.'});
-    return items.length ? `<section class="stock-change-panel"><div class="section-heading"><div><span class="eyebrow">WHAT CHANGED</span><h3>O que mudou recentemente</h3></div></div><div class="stock-change-strip">${items.slice(0,5).map(x=>`<article class="stock-change-card ${x.tone}"><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.text)}</p></article>`).join('')}</div></section>` : '';
+    return items.length ? `<section class="stock-change-panel"><div class="section-heading"><div><span class="eyebrow">O QUE MUDOU</span><h3>O que mudou recentemente</h3></div></div><div class="stock-change-strip">${items.slice(0,5).map(x=>`<article class="stock-change-card ${x.tone}"><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.text)}</p></article>`).join('')}</div></section>` : '';
   }
 
   function analystConsensusHtml(r){
@@ -2688,7 +2699,7 @@
     const label=!hasDate?'Data não disponível':d===0?'Hoje':d===1?'Amanhã':d<=7?`Em ${d} dias · esta semana`:`Em ${d} dias`;
     const posture=!hasDate?'Evento não calendarizado':d<=3?'Evento binário iminente':d<=7?'Catalisador próximo':d<=14?'Catalisador a aproximar-se':'Fora da janela crítica';
     const dots=hist.map(q=>{const sp=Number(q.surprise_pct); const cls=Number.isFinite(sp)?sp>0?'beat':sp<0?'miss':'flat':'na'; return `<div class="earnings-dot ${cls}" title="${escapeHtml(q.date||'')} · ${fmtRawPct(q.surprise_pct)}"><i></i><span>${escapeHtml((q.date||'').slice(0,7))}</span></div>`}).join('');
-    return `<section class="catalyst-intel"><div class="section-heading"><div><span class="eyebrow">CATALYST INTELLIGENCE</span><h3>Earnings event risk</h3><p>Calendário + comportamento recente de resultados. Não altera o score.</p></div><span class="catalyst-badge ${band}">${escapeHtml(posture)}</span></div><div class="catalyst-grid"><article class="catalyst-primary ${band}"><span>PRÓXIMOS RESULTADOS</span><strong>${escapeHtml(r.analyst_next_earnings_date||'—')}</strong><b>${escapeHtml(label)}</b><p>${d<=3?'Evita interpretar o score isoladamente: o próximo resultado pode dominar o preço no curto prazo.':d<=7?'A tese estrutural pode estar correta e ainda assim existir risco de gap no evento.':'Sem evento de earnings imediato dentro da janela crítica.'}</p></article><article class="catalyst-card"><span>4Q EARNINGS RECORD</span><strong>${Number.isFinite(beats)?beats:'—'} beats · ${Number.isFinite(misses)?misses:'—'} misses</strong><small>surpresa média ${fmtRawPct(avg)} · streak ${Number.isFinite(streak)?streak:'—'}Q</small><div class="earnings-dots">${dots||'<em>sem histórico</em>'}</div></article><article class="catalyst-card"><span>EXPECTATION MOMENTUM</span><strong>${fmtRawPct(r.analyst_eps_next_q_revision_30d_pct ?? r.analyst_eps_next_y_revision_30d_pct)}</strong><small>EPS revisions · 30d</small><p>${Number(r.analyst_eps_revisions_up_30d||0)} ↑ vs ${Number(r.analyst_eps_revisions_down_30d||0)} ↓</p></article></div><p class="detail-note">Uma data de resultados é um catalisador, não um sinal direcional. O Finscanner separa qualidade estrutural de risco de evento.</p></section>`;
+    return `<section class="catalyst-intel"><div class="section-heading"><div><span class="eyebrow">CATALISADORES</span><h3>Earnings event risk</h3><p>Calendário + comportamento recente de resultados. Não altera o score.</p></div><span class="catalyst-badge ${band}">${escapeHtml(posture)}</span></div><div class="catalyst-grid"><article class="catalyst-primary ${band}"><span>PRÓXIMOS RESULTADOS</span><strong>${escapeHtml(r.analyst_next_earnings_date||'—')}</strong><b>${escapeHtml(label)}</b><p>${d<=3?'Evita interpretar o score isoladamente: o próximo resultado pode dominar o preço no curto prazo.':d<=7?'A tese estrutural pode estar correta e ainda assim existir risco de gap no evento.':'Sem evento de earnings imediato dentro da janela crítica.'}</p></article><article class="catalyst-card"><span>4Q EARNINGS RECORD</span><strong>${Number.isFinite(beats)?beats:'—'} beats · ${Number.isFinite(misses)?misses:'—'} misses</strong><small>surpresa média ${fmtRawPct(avg)} · streak ${Number.isFinite(streak)?streak:'—'}Q</small><div class="earnings-dots">${dots||'<em>sem histórico</em>'}</div></article><article class="catalyst-card"><span>EXPECTATION MOMENTUM</span><strong>${fmtRawPct(r.analyst_eps_next_q_revision_30d_pct ?? r.analyst_eps_next_y_revision_30d_pct)}</strong><small>EPS revisions · 30d</small><p>${Number(r.analyst_eps_revisions_up_30d||0)} ↑ vs ${Number(r.analyst_eps_revisions_down_30d||0)} ↓</p></article></div><p class="detail-note">Uma data de resultados é um catalisador, não um sinal direcional. O Finscanner separa qualidade estrutural de risco de evento.</p></section>`;
   }
 
   function analystIntelligenceHtml(r){
@@ -2701,10 +2712,10 @@
     const up=Number(r.analyst_eps_revisions_up_30d||0), down=Number(r.analyst_eps_revisions_down_30d||0);
     const hasAny=coverage>0 || [r.analyst_eps_next_q,r.analyst_revenue_next_q,rev,surprise,r.analyst_price_target_mean].some(v=>v!=null);
     if(!hasAny){
-      return `<section class="analyst-intel"><div class="section-heading"><div><span class="eyebrow">EARNINGS & ESTIMATES</span><h3>Analyst Intelligence</h3></div><span class="section-count">sem cobertura</span></div><p class="detail-note">Yahoo não disponibilizou estimativas estruturadas para este título nesta execução. Ausência de dados não é sinal negativo.</p></section>`;
+      return `<section class="analyst-intel"><div class="section-heading"><div><span class="eyebrow">RESULTADOS E ESTIMATIVAS</span><h3>Analyst Intelligence</h3></div><span class="section-count">sem cobertura</span></div><p class="detail-note">Yahoo não disponibilizou estimativas estruturadas para este título nesta execução. Ausência de dados não é sinal negativo.</p></section>`;
     }
     return `<section class="analyst-intel">
-      <div class="section-heading"><div><span class="eyebrow">EARNINGS & ESTIMATES</span><h3>Analyst Intelligence</h3><p>Expectativas forward, revisões e surpresa — contexto, não componente do score.</p></div><span class="analyst-coverage ${status==='ok'?'good':status==='partial'?'mid':''}">${Math.round(coverage)}% cobertura</span></div>
+      <div class="section-heading"><div><span class="eyebrow">RESULTADOS E ESTIMATIVAS</span><h3>Analyst Intelligence</h3><p>Expectativas forward, revisões e surpresa — contexto, não componente do score.</p></div><span class="analyst-coverage ${status==='ok'?'good':status==='partial'?'mid':''}">${Math.round(coverage)}% cobertura</span></div>
       <div class="analyst-intel-grid">
         <article class="analyst-card"><span>NEXT QUARTER EPS</span><strong>${r.analyst_eps_next_q==null?'—':Number(r.analyst_eps_next_q).toFixed(2)}</strong><small>${r.analyst_eps_next_q_growth==null?'crescimento —':`growth ${fmtRawPct(r.analyst_eps_next_q_growth)}`} · ${r.analyst_eps_next_q_analysts??'—'} analistas</small><p>${r.analyst_eps_next_q_low==null||r.analyst_eps_next_q_high==null?'intervalo não disponível':`${Number(r.analyst_eps_next_q_low).toFixed(2)} – ${Number(r.analyst_eps_next_q_high).toFixed(2)}`}</p></article>
         <article class="analyst-card"><span>NEXT QUARTER REVENUE</span><strong>${fmtMoney(r.analyst_revenue_next_q,r.currency)}</strong><small>${r.analyst_revenue_next_q_growth==null?'crescimento —':`growth ${fmtRawPct(r.analyst_revenue_next_q_growth)}`} · ${r.analyst_revenue_next_q_analysts??'—'} analistas</small><p>${r.analyst_revenue_next_y_growth==null?'forward anual —':`próximo ano ${fmtRawPct(r.analyst_revenue_next_y_growth)}`}</p></article>
@@ -2910,10 +2921,10 @@
 
     els.detailContent.innerHTML = `
       <div class="detail-hero stock-detail-hero dossier-block" id="dossier-overview">
-        <div class="stock-detail-brand"><div class="company-mark detail-company-mark">${r.ticker.replace(/\..*/, '').slice(0,2)}</div><div><span class="eyebrow">STOCK DETAIL</span><h2>${r.name || r.ticker} <small>${r.ticker}</small></h2><p>${r.sector || "—"}${r.industry ? " · " + r.industry : ""}</p>${r.business_summary ? `<p class="detail-business-summary">${escapeHtml(r.business_summary)}</p>` : ''}</div></div>
+        <div class="stock-detail-brand"><div class="company-mark detail-company-mark">${r.ticker.replace(/\..*/, '').slice(0,2)}</div><div><span class="eyebrow">FICHA DA AÇÃO</span><h2>${r.name || r.ticker} <small>${r.ticker}</small></h2><p>${r.sector || "—"}${r.industry ? " · " + r.industry : ""}</p>${r.business_summary ? `<p class="detail-business-summary">${escapeHtml(r.business_summary)}</p>` : ''}</div></div>
         <button class="detail-watch star-btn ${starred ? 'is-active' : ''}" data-ticker="${r.ticker}" aria-label="Watchlist">${starred ? '★ Saved' : '☆ Save'}</button>
-        <div class="stock-facts"><div><span>PRICE</span><strong>${r.current_price ?? '—'} ${r.currency || ''}</strong></div><div><span>MARKET CAP</span><strong>${fmtCap(r.market_cap)}</strong></div><div><span>EXCHANGE</span><strong>${escapeHtml(r.exchange || r.full_exchange_name || marketOf(r.ticker) || '—')}</strong></div></div>
-        <div class="stock-score-hero"><span class="eyebrow">FINSCANNER SCORE</span><strong>${r.score ?? "—"}</strong>${scoreOrbs(r.score)}<p>${verdict.label}</p><small>${verdict.text}</small></div>
+        <div class="stock-facts"><div><span>PRICE</span><strong>${fmtPrice(r.current_price)} ${r.currency || ''}</strong></div><div><span>MARKET CAP</span><strong>${fmtCap(r.market_cap)}</strong></div><div><span>EXCHANGE</span><strong>${escapeHtml(r.exchange || r.full_exchange_name || marketOf(r.ticker) || '—')}</strong></div></div>
+        <div class="stock-score-hero${Number(r.data_coverage_pct) < 40 ? ' is-low-confidence' : ''}"><span class="eyebrow">FINSCANNER SCORE</span><strong>${r.score ?? "—"}</strong>${scoreOrbs(r.score)}<p>${verdict.label}</p><small>${verdict.text}</small></div>
         ${stockActionSuggestionHtml(r)}
       </div>
       ${dossierNavHtml()}
@@ -2964,7 +2975,7 @@
 
       <h3 class="dossier-title">Valuation Lens</h3>
       <div class="valuation-summary ${valuation.cls}">
-        <div><span class="eyebrow">RELATIVE VALUATION</span><strong>${valuation.label}</strong><p>${r.peer_count ?? 0} pares do mesmo setor usados como universo comparável.</p></div>
+        <div><span class="eyebrow">VALORIZAÇÃO RELATIVA</span><strong>${valuation.label}</strong><p>${r.peer_count ?? 0} pares do mesmo setor usados como universo comparável.</p></div>
         <div class="valuation-summary__number">${valuation.avg == null ? "—" : fmtSignedPct(valuation.avg)}<span>média simples dos múltiplos disponíveis vs mediana setorial</span></div>
       </div>
       <div class="comparison-grid">
@@ -2990,7 +3001,7 @@
       <section class="dossier-block dossier-thesis-final" id="dossier-thesis">
         <h3 class="dossier-title">Tese quantitativa</h3>
         ${thesisPanelHtml(r)}
-        ${hasHistory ? `<section class="score-history-card"><div><span class="eyebrow">SCORE HISTORY</span><h3>Trajetória do score</h3><p>${Object.keys(series).length} observações disponíveis</p></div><canvas id="sparkline" width="340" height="70" class="sparkline"></canvas></section>` : ""}
+        ${hasHistory ? `<section class="score-history-card"><div><span class="eyebrow">HISTÓRICO DO SCORE</span><h3>Trajetória do score</h3><p>${Object.keys(series).length} observações disponíveis</p></div><canvas id="sparkline" width="340" height="70" class="sparkline"></canvas></section>` : ""}
       </section>
 
       ${finalTakeHtml(r)}
@@ -3000,7 +3011,7 @@
         <div class="detail-row"><span>Zombie (cobertura de juros)</span><span>${zombieLabel}</span></div>
         <div class="detail-row"><span>Atividade insiders</span><span>${insider}</span></div>
         <div class="detail-row"><span>Market cap</span><span>${fmtCap(r.market_cap)}</span></div>
-        <div class="detail-row"><span>Preço atual</span><span>${r.current_price ?? "—"} ${r.currency || ""}</span></div>
+        <div class="detail-row"><span>Preço atual</span><span>${fmtPrice(r.current_price)} ${r.currency || ""}</span></div>
         ${r.quote_type === "ETF" ? `<div class="detail-row"><span>Expense ratio</span><span>${fmtExpenseRatio(r.expense_ratio)}</span></div><div class="detail-row"><span>Exposição AI</span><span>${r.ai_exposure_pct != null ? r.ai_exposure_pct + "%" : "—"}</span></div>` : ""}
         <p class="detail-note">O verdict é uma classificação quantitativa explicável e relativa ao universo analisado. Não constitui previsão de retorno nem aconselhamento financeiro.</p>
       </section>
@@ -3465,7 +3476,7 @@
   function stockPortfolioFitHtml(r) {
     const pf=portfolioFitSnapshot(r);
     if(!pf) return '';
-    return `<details class="stock-portfolio-fit-box" ${pf.held?'':'open'}><summary><div><span class="eyebrow">PORTFOLIO FIT</span><b>${pf.held?'Impacto desta posição na carteira':'Como encaixa na tua carteira'}</b><small>${escapeHtml(pf.label)}</small></div><strong>${Math.round(pf.fit)}<i>/100</i></strong></summary><div class="stock-portfolio-fit-body"><div class="portfolio-fit-metrics"><span>Setor atual<b>${pf.sectorPct.toFixed(1)}%</b></span><span>Via ETFs<b>${pf.hiddenPct.toFixed(1)}%</b></span><span>Diversificação<b>${Math.round(pf.diversification)}</b></span>${pf.held?`<span>Posição direta<b>${pf.directPct.toFixed(1)}%</b></span>`:''}</div><p>${escapeHtml(pf.reasons.slice(0,4).join(' · ') || 'Sem sinais fortes de concentração ou sobreposição nos dados observados.')}</p><small>Fit estrutural, não recomendação de compra. Não assume um montante de investimento novo.</small></div></details>`;
+    return `<details class="stock-portfolio-fit-box" ${pf.held?'':'open'}><summary><div><span class="eyebrow">ENCAIXE NO PORTFOLIO</span><b>${pf.held?'Impacto desta posição na carteira':'Como encaixa na tua carteira'}</b><small>${escapeHtml(pf.label)}</small></div><strong>${Math.round(pf.fit)}<i>/100</i></strong></summary><div class="stock-portfolio-fit-body"><div class="portfolio-fit-metrics"><span>Setor atual<b>${pf.sectorPct.toFixed(1)}%</b></span><span>Via ETFs<b>${pf.hiddenPct.toFixed(1)}%</b></span><span>Diversificação<b>${Math.round(pf.diversification)}</b></span>${pf.held?`<span>Posição direta<b>${pf.directPct.toFixed(1)}%</b></span>`:''}</div><p>${escapeHtml(pf.reasons.slice(0,4).join(' · ') || 'Sem sinais fortes de concentração ou sobreposição nos dados observados.')}</p><small>Fit estrutural, não recomendação de compra. Não assume um montante de investimento novo.</small></div></details>`;
   }
 
   // ---------- donut chart (plain <canvas>, no chart library) ----------
@@ -3660,7 +3671,7 @@
     </button>`).join('');
     els.portfolioPositionsTable.innerHTML=`
       <section class="portfolio-positions-ledger">
-        <div class="section-heading"><div><span class="eyebrow">POSITIONS LEDGER</span><h3>Posições, capital e rentabilidade</h3></div><span class="section-count">${items.length} posições</span></div>
+        <div class="section-heading"><div><span class="eyebrow">REGISTO DE POSIÇÕES</span><h3>Posições, capital e rentabilidade</h3></div><span class="section-count">${items.length} posições</span></div>
         <div class="portfolio-ledger-controls">
           <div class="portfolio-search-wrap"><input id="portfolio-table-query" type="search" placeholder="Pesquisar posição…" autocomplete="off" spellcheck="false" value="${escapeHtml(state.portfolioTableQuery||'')}"><div class="portfolio-search-suggestions" role="listbox" hidden></div></div>
           <select id="portfolio-table-sort">
@@ -3757,7 +3768,7 @@
 
     els.portfolioThesisMonitor.innerHTML = `
       <section class="portfolio-thesis-monitor__head">
-        <div><span class="eyebrow">PORTFOLIO THESIS MONITOR</span><h3>O que está a melhorar e a piorar</h3></div>
+        <div><span class="eyebrow">TESES DO PORTFOLIO</span><h3>O que está a melhorar e a piorar</h3></div>
         <button class="text-link-btn" data-open-theses>Ver todas as teses</button>
       </section>
       <div class="portfolio-thesis-stats">
@@ -3914,7 +3925,7 @@
     }).join('');
     const list=m.top.slice(0,10).map(x=>`<div class="risk-map-list-row"><span><b>${escapeHtml(x.a)}</b><em>×</em>${escapeHtml(x.b)}</span><strong>${x.pct.toFixed(1)}%</strong></div>`).join('');
     return `<section class="portfolio-risk-map">
-      <div class="risk-map-hero"><div><span class="eyebrow">PORTFOLIO RISK MAP</span><h4>Riscos que se cruzam</h4><p>Mostra concentrações simultâneas — por exemplo EUA × Tecnologia ou Tecnologia × AI — que podem ficar escondidas quando cada dimensão é analisada isoladamente.</p></div><div class="risk-map-score ${m.cls}"><strong>${m.score==null?'—':Math.round(m.score)}</strong><span>/100</span><small>${m.label}</small></div></div>
+      <div class="risk-map-hero"><div><span class="eyebrow">MAPA DE RISCO DO PORTFOLIO</span><h4>Riscos que se cruzam</h4><p>Mostra concentrações simultâneas — por exemplo EUA × Tecnologia ou Tecnologia × AI — que podem ficar escondidas quando cada dimensão é analisada isoladamente.</p></div><div class="risk-map-score ${m.cls}"><strong>${m.score==null?'—':Math.round(m.score)}</strong><span>/100</span><small>${m.label}</small></div></div>
       <div class="risk-map-scroll">${cards}</div>
       <details class="risk-map-details"><summary>Ver cruzamentos principais</summary>${list}</details>
       <p class="risk-map-method">Ações diretas usam setor/geografia observados. Nos ETFs, cruzamentos setoriais usam os pesos disponibilizados pela fonte e a região do fundo como proxy; não representam necessariamente a geografia de cada holding.</p>
@@ -3962,7 +3973,7 @@
     if (h.ageHours != null && h.ageHours > 36) problems.push(`stocks.json tem ${Math.floor(h.ageHours)} h`);
     const ok = problems.length === 0;
     els.portfolioDataHealth.innerHTML = `<section class="portfolio-health ${ok ? 'is-ready' : 'is-warning'}">
-      <div><span class="eyebrow">DATA READINESS</span><h3>${ok ? 'Portfolio Intelligence ativo' : 'Análise incompleta — dados ainda não acompanharam a interface'}</h3></div>
+      <div><span class="eyebrow">COBERTURA DE DADOS</span><h3>${ok ? 'Portfolio Intelligence ativo' : 'Análise incompleta — dados ainda não acompanharam a interface'}</h3></div>
       <strong>${h.matched}/${h.owned}</strong>
       <p>${ok ? `Cobertura de posições ${h.matchedPct.toFixed(0)}% · ${h.etfsWithHoldings}/${h.etfs} ETFs com holdings · ${h.fxCount} moedas FX.` : escapeHtml(problems.join(' · '))}</p>
       ${!ok ? '<small>As funções de overlap/consolidação não devem concluir “sem sobreposição” enquanto faltarem holdings. Corre o workflow v0.40.0 e confirma que o passo “Validate portfolio coverage” fica verde.</small>' : ''}
@@ -4015,10 +4026,10 @@
       const w=zombie.eur/total*100;
       actions.push({kind:'zombie',priority:w>=3?'high':'mid',title:`Zombie exposure: ${zombie.ticker}`,metric:`${w.toFixed(1)}% da carteira`,body:`O modelo assinala fragilidade de cobertura financeira. Confirma balanço, dívida e capacidade de financiamento antes de manter esta exposição como parte estrutural da carteira.`,ticker:zombie.ticker,label:'Abrir dossier'});
     }
-    if (!actions.length) return `<section class="portfolio-action-layer"><div class="section-heading"><div><span class="eyebrow">PORTFOLIO ACTION LAYER</span><h4>Prioridades de revisão</h4></div></div><p class="muted">Não encontrei uma prioridade estrutural forte nos dados atualmente observáveis.</p></section>`;
+    if (!actions.length) return `<section class="portfolio-action-layer"><div class="section-heading"><div><span class="eyebrow">AÇÕES SUGERIDAS</span><h4>Prioridades de revisão</h4></div></div><p class="muted">Não encontrei uma prioridade estrutural forte nos dados atualmente observáveis.</p></section>`;
     const rank={high:0,mid:1,low:2};
     actions.sort((a,b)=>rank[a.priority]-rank[b.priority]).splice(5);
-    return `<section class="portfolio-action-layer"><div class="action-layer-head"><div><span class="eyebrow">PORTFOLIO ACTION LAYER</span><h4>Onde uma revisão tem maior impacto</h4><p>Prioriza investigação por contribuição real para concentração, redundância ou deterioração. Não é uma lista automática de compras/vendas.</p></div><span class="action-layer-count">${actions.length} prioridades</span></div><div class="action-layer-grid">${actions.map((a,i)=>`<article class="action-card priority-${a.priority}"><div class="action-card-top"><span>${i+1}</span><em>${escapeHtml(a.metric)}</em></div><h5>${escapeHtml(a.title)}</h5><p>${escapeHtml(a.body)}</p><button ${a.ticker?`data-action-ticker="${escapeHtml(a.ticker)}"`:a.kind==='etf'?'data-action-etf-lab':''}>${escapeHtml(a.label)} →</button></article>`).join('')}</div></section>`;
+    return `<section class="portfolio-action-layer"><div class="action-layer-head"><div><span class="eyebrow">AÇÕES SUGERIDAS</span><h4>Onde uma revisão tem maior impacto</h4><p>Prioriza investigação por contribuição real para concentração, redundância ou deterioração. Não é uma lista automática de compras/vendas.</p></div><span class="action-layer-count">${actions.length} prioridades</span></div><div class="action-layer-grid">${actions.map((a,i)=>`<article class="action-card priority-${a.priority}"><div class="action-card-top"><span>${i+1}</span><em>${escapeHtml(a.metric)}</em></div><h5>${escapeHtml(a.title)}</h5><p>${escapeHtml(a.body)}</p><button ${a.ticker?`data-action-ticker="${escapeHtml(a.ticker)}"`:a.kind==='etf'?'data-action-etf-lab':''}>${escapeHtml(a.label)} →</button></article>`).join('')}</div></section>`;
   }
 
 
@@ -4071,7 +4082,7 @@
     } catch {}
 
     els.portfolioRebalancingLab.innerHTML=`<section class="rebalance-lab">
-      <div class="rebalance-head"><div><span class="eyebrow">PORTFOLIO REBALANCING LAB</span><h4>Constrói um cenário completo</h4><p>Adiciona várias alterações à mesma proposta — reduzir posições, eliminar ETFs redundantes, concentrar num núcleo ou reservar cash — e compara a carteira atual com a proposta antes de mexer em qualquer posição.</p></div><span class="rebalance-badge">what-if</span></div>
+      <div class="rebalance-head"><div><span class="eyebrow">REBALANCEAMENTO</span><h4>Constrói um cenário completo</h4><p>Adiciona várias alterações à mesma proposta — reduzir posições, eliminar ETFs redundantes, concentrar num núcleo ou reservar cash — e compara a carteira atual com a proposta antes de mexer em qualquer posição.</p></div><span class="rebalance-badge">what-if</span></div>
       <div class="rebalance-builder">
         <div class="rebalance-controls">
           <label><span>De</span><select data-rebalance-source>${optionHtml}</select></label>
@@ -4438,7 +4449,7 @@
 
     els.portfolioStructureIntel.innerHTML=`
       <section class="portfolio-structure-panel">
-        <div class="section-heading"><div><span class="eyebrow">PORTFOLIO STRUCTURE INTELLIGENCE</span><h3>O que possuis realmente</h3></div><span class="section-count">${valued.length} posições valorizadas</span></div>
+        <div class="section-heading"><div><span class="eyebrow">ESTRUTURA DO PORTFOLIO</span><h3>O que possuis realmente</h3></div><span class="section-count">${valued.length} posições valorizadas</span></div>
         <p class="fund-method-note">Combina ações diretas com o look-through observado dos ETFs. Holdings de ETF incompletas ficam fora do cálculo, por isso a concentração apresentada é conservadora sobre o total da carteira.</p>
         <div class="portfolio-structure-kpis">
           <div><span>Ações diretas</span><strong>${pct(directPct)}</strong><small>${money(directValue)}</small></div>
@@ -4450,7 +4461,7 @@
         </div>
         <div class="portfolio-structure-insight"><strong>${hiddenTopUpPct==null?'—':hiddenTopUpPct.toFixed(1)+'%'}</strong><span>da carteira é exposição ETF observada a empresas que também possuis diretamente.</span><p>${escapeHtml(interpretation)}</p></div>
         <section class="concentration-risk-panel">
-          <div class="risk-hero"><div><span class="eyebrow">CONCENTRATION & RISK INTELLIGENCE</span><h4>Onde a carteira está realmente concentrada</h4><p>Mede concentração estrutural, não volatilidade futura. ETF look-through só é usado quando a fonte fornece composição suficiente.</p></div><div class="risk-gauge ${overallRisk.cls}"><strong>${concentrationRiskScore==null?'—':Math.round(concentrationRiskScore)}</strong><span>/100</span><small>${overallRisk.label}</small></div></div>
+          <div class="risk-hero"><div><span class="eyebrow">CONCENTRAÇÃO E RISCO</span><h4>Onde a carteira está realmente concentrada</h4><p>Mede concentração estrutural, não volatilidade futura. ETF look-through só é usado quando a fonte fornece composição suficiente.</p></div><div class="risk-gauge ${overallRisk.cls}"><strong>${concentrationRiskScore==null?'—':Math.round(concentrationRiskScore)}</strong><span>/100</span><small>${overallRisk.label}</small></div></div>
           ${riskFlags.length ? `<div class="risk-alert"><b>Concentrações a rever</b><span>${escapeHtml(riskFlags.join(' · '))}</span></div>` : `<div class="risk-alert is-calm"><b>Sem concentração extrema detetada</b><span>nos componentes atualmente observáveis.</span></div>`}
           <div class="risk-dimensions-grid">
             ${concentrationListHtml('Setores','SECTOR RISK',sectorRiskRows,sectorObservedValue,[25,40],`Cobertura setorial observada: ${total?((sectorObservedValue/total)*100).toFixed(0):0}% da carteira.`)}
@@ -4469,8 +4480,8 @@
         </section>
         ${portfolioActionLayerHtml({valued,total,exposures,sectorRiskRows,sectorObservedValue,etfs,weightedPortfolio})}
         <div class="portfolio-structure-columns">
-          <article><span class="eyebrow">ECONOMIC EXPOSURE</span><h4>Maiores exposições reais observadas</h4><div class="structure-exposure-list">${exposureRows || '<p class="muted">Sem dados suficientes.</p>'}</div><div class="structure-legend"><span><i></i>Direta</span><span><em></em>Via ETFs</span></div></article>
-          <article><span class="eyebrow">HIDDEN OVERLAP</span><h4>Ação direta + ETFs</h4>${overlapRows || (etfs.length && etfsWithHoldings===0 ? '<p class="muted data-gap">Análise indisponível: nenhum ETF da carteira tem holdings carregadas no dataset atual.</p>' : '<p class="muted">Não detetei sobreposição direta/ETF nas holdings observadas.</p>')}<span class="eyebrow structure-subhead">REPETIDA ENTRE ETFs</span>${multiRows || (etfs.length && etfsWithHoldings===0 ? '<p class="muted data-gap">Aguardando holdings dos ETFs para medir repetições.</p>' : '<p class="muted">Sem holdings repetidas em dois ou mais ETFs observados.</p>')}</article>
+          <article><span class="eyebrow">EXPOSIÇÃO ECONÓMICA</span><h4>Maiores exposições reais observadas</h4><div class="structure-exposure-list">${exposureRows || '<p class="muted">Sem dados suficientes.</p>'}</div><div class="structure-legend"><span><i></i>Direta</span><span><em></em>Via ETFs</span></div></article>
+          <article><span class="eyebrow">SOBREPOSIÇÃO OCULTA</span><h4>Ação direta + ETFs</h4>${overlapRows || (etfs.length && etfsWithHoldings===0 ? '<p class="muted data-gap">Análise indisponível: nenhum ETF da carteira tem holdings carregadas no dataset atual.</p>' : '<p class="muted">Não detetei sobreposição direta/ETF nas holdings observadas.</p>')}<span class="eyebrow structure-subhead">REPETIDA ENTRE ETFs</span>${multiRows || (etfs.length && etfsWithHoldings===0 ? '<p class="muted data-gap">Aguardando holdings dos ETFs para medir repetições.</p>' : '<p class="muted">Sem holdings repetidas em dois ou mais ETFs observados.</p>')}</article>
         </div>
         ${etfs.length>=2 ? '<button class="portfolio-etf-consolidation-cta structure-lab-cta" data-structure-etf-lab><span><b>ETF Consolidation Lab</b><small>Ver quais fundos criam estas duplicações e qual o melhor candidato a núcleo.</small></span><strong>Abrir →</strong></button>' : ''}
       </section>`;
@@ -4554,7 +4565,7 @@
     }).join('');
 
     els.portfolioOpportunityEngine.innerHTML=`<section class="portfolio-opportunity-section">
-      <div class="section-heading"><div><span class="eyebrow">PORTFOLIO OPPORTUNITY ENGINE</span><h4>Boas empresas que também encaixam na tua carteira</h4><p>Combina qualidade, valor, crescimento e trajetória da tese com concentração setorial/geográfica e exposição que já tens através dos ETFs.</p></div><span class="opportunity-engine-count">${ranked.length}</span></div>
+      <div class="section-heading"><div><span class="eyebrow">OPORTUNIDADES PARA O PORTFOLIO</span><h4>Boas empresas que também encaixam na tua carteira</h4><p>Combina qualidade, valor, crescimento e trajetória da tese com concentração setorial/geográfica e exposição que já tens através dos ETFs.</p></div><span class="opportunity-engine-count">${ranked.length}</span></div>
       ${ranked.length?`<div class="portfolio-opportunity-strip">${cards}</div>`:'<p class="muted">Ainda não existem candidatos com dados suficientes e encaixe mínimo para esta análise.</p>'}
       <p class="detail-note">O Portfolio Fit não é uma recomendação de compra. Penaliza candidatos que aumentariam concentrações já elevadas ou que já possuis indiretamente através dos ETFs.</p>
     </section>`;
@@ -4589,7 +4600,7 @@
     const top=issues.slice(0,5);
     const headline = top.some(x=>x.tone==='bad') ? 'Há pontos que merecem revisão' : top.length ? 'Prioridades da carteira' : 'Sem prioridade estrutural forte';
     els.portfolioDecisionCenter.innerHTML=`<section class="portfolio-decision-panel">
-      <div class="portfolio-decision-head"><div><span class="eyebrow">PORTFOLIO DECISION CENTER</span><h3>${headline}</h3><p>Resume o que merece atenção primeiro. Abre os módulos abaixo apenas quando precisares do detalhe.</p></div><span class="decision-count">${top.length}</span></div>
+      <div class="portfolio-decision-head"><div><span class="eyebrow">DECISÕES DO PORTFOLIO</span><h3>${headline}</h3><p>Resume o que merece atenção primeiro. Abre os módulos abaixo apenas quando precisares do detalhe.</p></div><span class="decision-count">${top.length}</span></div>
       ${top.length?`<div class="portfolio-decision-grid">${top.map((x,i)=>`<button class="portfolio-decision-card ${x.tone}" data-decision-target="${x.funds?'funds':x.target}" ${x.filter?`data-decision-filter="${x.filter}"`:''}><span>${i+1}</span><div><b>${escapeHtml(x.title)}</b><p>${escapeHtml(x.body)}</p><em>${escapeHtml(x.label)} →</em></div></button>`).join('')}</div>`:`<p class="muted">Os dados atuais não mostram uma prioridade estrutural clara.</p>`}
     </section>`;
     els.portfolioDecisionCenter.querySelectorAll('[data-decision-target]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -4844,7 +4855,7 @@
     if (!hist.length) return `<div class="fund-price-empty"><strong>Histórico de preço ainda não disponível</strong><p>O workflow diário está a enriquecer este ETF. Os dados estruturais abaixo continuam válidos quando disponíveis.</p></div>`;
     const ret = Number(r.fund_return_1y_pct);
     const last = Number(hist[hist.length-1]?.close);
-    return `<section class="fund-market-card"><div class="fund-market-head"><div><span class="eyebrow">MARKET</span><h3>Preço · 12 meses</h3></div><div class="fund-market-stats"><span>Último<strong>${Number.isFinite(last)?last.toLocaleString('pt-PT',{maximumFractionDigits:2}):'—'}</strong></span><span>12m<strong class="${ret>0?'positive-text':ret<0?'negative-text':''}">${Number.isFinite(ret)?`${ret>=0?'+':''}${ret.toFixed(1)}%`:'—'}</strong></span></div></div><div class="fund-price-chart-wrap"><canvas id="fund-price-chart" height="180"></canvas></div></section>`;
+    return `<section class="fund-market-card"><div class="fund-market-head"><div><span class="eyebrow">MERCADO</span><h3>Preço · 12 meses</h3></div><div class="fund-market-stats"><span>Último<strong>${Number.isFinite(last)?last.toLocaleString('pt-PT',{maximumFractionDigits:2}):'—'}</strong></span><span>12m<strong class="${ret>0?'positive-text':ret<0?'negative-text':''}">${Number.isFinite(ret)?`${ret>=0?'+':''}${ret.toFixed(1)}%`:'—'}</strong></span></div></div><div class="fund-price-chart-wrap"><canvas id="fund-price-chart" height="180"></canvas></div></section>`;
   }
 
   function drawFundPriceChart(r) {
@@ -4873,7 +4884,7 @@
     const roleClass = String(fit.role).toLowerCase();
     els.detailContent.innerHTML = `
       <div class="fund-detail-hero">
-        <div><span class="eyebrow">FUND DOSSIER</span><h2>${escapeHtml(r.ticker)}</h2><p>${escapeHtml(r.name || 'ETF')}</p><small>${escapeHtml(r.fund_category || r.sector || 'ETF')} · ${escapeHtml(meta.geo)} · ${escapeHtml(meta.style)}</small></div>
+        <div><span class="eyebrow">DOSSIER DO FUNDO</span><h2>${escapeHtml(r.ticker)}</h2><p>${escapeHtml(r.name || 'ETF')}</p><small>${escapeHtml(r.fund_category || r.sector || 'ETF')} · ${escapeHtml(meta.geo)} · ${escapeHtml(meta.style)}</small></div>
         <div class="fund-detail-fee"><span>Expense ratio</span><strong>${fmtExpenseRatio(r.expense_ratio)}</strong><small>${r.fund_ucits==='confirmed'?'UCITS confirmado':r.fund_ucits?'UCITS: '+escapeHtml(r.fund_ucits):''}</small></div>
       </div>
       <div class="fund-detail-actions"><button class="fund-action" id="fund-watch">${starred?'★ Na watchlist':'☆ Watchlist'}</button><label class="fund-action fund-owned"><input id="fund-owned" type="checkbox" ${owned?'checked':''}> Na carteira</label></div>
@@ -4895,7 +4906,7 @@
       </section>
 
       <details class="fund-dossier-box" open>
-        <summary><div><span class="eyebrow">SNAPSHOT</span><h3>Estrutura do fundo</h3></div><span class="section-count">${escapeHtml(fit.role)}</span></summary>
+        <summary><div><span class="eyebrow">RESUMO</span><h3>Estrutura do fundo</h3></div><span class="section-count">${escapeHtml(fit.role)}</span></summary>
         <div class="fund-kpi-grid">
           <div><span>AUM</span><strong>${r.fund_total_assets == null ? '—' : fmtCap(r.fund_total_assets)}</strong></div>
           <div><span>Família</span><strong>${escapeHtml(r.fund_family || '—')}</strong></div>
@@ -4904,21 +4915,21 @@
           <div><span>Região</span><strong>${escapeHtml(meta.geo)}</strong></div>
           <div><span>Estilo</span><strong>${escapeHtml(meta.style)}</strong></div>
         </div>
-        ${r.fund_description ? `<div class="fund-editorial-card"><span class="eyebrow">WHAT IT OWNS</span><p>${escapeHtml(r.fund_description)}</p></div>` : ''}
+        ${r.fund_description ? `<div class="fund-editorial-card"><span class="eyebrow">O QUE O FUNDO POSSUI</span><p>${escapeHtml(r.fund_description)}</p></div>` : ''}
       </details>
 
       <details class="fund-dossier-box">
-        <summary><div><span class="eyebrow">COMPOSITION</span><h3>Principais posições</h3></div><span class="section-count">${holdings.length ? pctFundWeight(topCoverage) : '—'}</span></summary>
+        <summary><div><span class="eyebrow">COMPOSIÇÃO</span><h3>Principais posições</h3></div><span class="section-count">${holdings.length ? pctFundWeight(topCoverage) : '—'}</span></summary>
         ${holdings.length ? `<div class="fund-holdings-list">${holdings.map(h=>`<div><span><b>${escapeHtml(h.symbol)}</b><small>${escapeHtml(h.name)}</small></span><i><b style="width:${Math.min(100, Math.max(3, Number(h.weight)*500))}%"></b></i><strong>${pctFundWeight(h.weight)}</strong></div>`).join('')}</div><p class="fund-method-note">A percentagem no cabeçalho é apenas a cobertura das posições devolvidas pela fonte, não 100% do fundo.</p>` : '<p class="muted">A fonte não devolveu top holdings para esta cotação.</p>'}
       </details>
 
       <details class="fund-dossier-box">
-        <summary><div><span class="eyebrow">EXPOSURES</span><h3>Classes de ativos & setores</h3></div><span class="section-count">abrir</span></summary>
-        ${(r.fund_asset_classes&&Object.keys(r.fund_asset_classes).length)||(r.fund_sector_weightings&&Object.keys(r.fund_sector_weightings).length)?`<section class="fund-detail-two"><article><span class="eyebrow">ASSET MIX</span><h3>Classes de ativos</h3>${fundBars(r.fund_asset_classes)}</article><article><span class="eyebrow">SECTOR MIX</span><h3>Exposição setorial</h3>${fundBars(r.fund_sector_weightings)}</article></section>`:`<div class="fund-data-pending"><strong>Exposições detalhadas ainda a enriquecer</strong><p>Já sabemos a categoria, região e estilo deste ETF. Holdings e pesos setoriais são acrescentados quando a fonte os disponibiliza.</p></div>`}
+        <summary><div><span class="eyebrow">EXPOSIÇÕES</span><h3>Classes de ativos & setores</h3></div><span class="section-count">abrir</span></summary>
+        ${(r.fund_asset_classes&&Object.keys(r.fund_asset_classes).length)||(r.fund_sector_weightings&&Object.keys(r.fund_sector_weightings).length)?`<section class="fund-detail-two"><article><span class="eyebrow">COMPOSIÇÃO DE ATIVOS</span><h3>Classes de ativos</h3>${fundBars(r.fund_asset_classes)}</article><article><span class="eyebrow">COMPOSIÇÃO SETORIAL</span><h3>Exposição setorial</h3>${fundBars(r.fund_sector_weightings)}</article></section>`:`<div class="fund-data-pending"><strong>Exposições detalhadas ainda a enriquecer</strong><p>Já sabemos a categoria, região e estilo deste ETF. Holdings e pesos setoriais são acrescentados quando a fonte os disponibiliza.</p></div>`}
       </details>
 
       <details class="fund-dossier-box">
-        <summary><div><span class="eyebrow">PORTFOLIO ROLE</span><h3>O papel deste ETF na carteira</h3></div><span class="section-count">${overlapText}</span></summary>
+        <summary><div><span class="eyebrow">PAPEL NO PORTFOLIO</span><h3>O papel deste ETF na carteira</h3></div><span class="section-count">${overlapText}</span></summary>
         <div class="fund-role-detail">
           <div><span>Papel provável</span><strong>${escapeHtml(fit.role)}</strong><small>${escapeHtml(fit.roleReason)}</small></div>
           <div><span>Maior overlap observado</span><strong>${overlapText}</strong><small>${fit.overlaps.length ? `com ${escapeHtml(fit.overlaps[0].ticker)}` : 'sem outro ETF comparável na carteira'}</small></div>
@@ -4928,7 +4939,7 @@
       </details>
 
       <details class="fund-dossier-box">
-        <summary><div><span class="eyebrow">DATA INTEGRITY</span><h3>O que este dossier sabe</h3></div><span class="section-count">metodologia</span></summary>
+        <summary><div><span class="eyebrow">QUALIDADE DOS DADOS</span><h3>O que este dossier sabe</h3></div><span class="section-count">metodologia</span></summary>
         <div class="fund-editorial-card integrity"><p>Holdings, classes de ativos e pesos setoriais vêm do módulo FundsData quando Yahoo os disponibiliza. O overlap usa apenas as holdings observadas e deve ser lido como limite inferior. Cost, Size, Diversification, Concentration e Fund fit são heurísticas transparentes de triagem — não estimativas de retorno.</p></div>
       </details>
     `;
@@ -5167,7 +5178,7 @@
       return `<div class="fund-compare-row"><span>${escapeHtml(label)}</span><strong class="${winner==='a'?'is-best':''}">${okA?fmt(an):'—'}</strong><strong class="${winner==='b'?'is-best':''}">${okB?fmt(bn):'—'}</strong></div>`;
     };
 
-    const overlapHtml = overlap ? `<div class="fund-overlap"><span class="eyebrow">OBSERVED HOLDINGS OVERLAP</span><strong>${pctFundWeight(overlap.value)}</strong><p>Limite inferior calculado apenas nas holdings devolvidas pela fonte (${pctFundWeight(overlap.coverageA)} de ${escapeHtml(a.ticker)}; ${pctFundWeight(overlap.coverageB)} de ${escapeHtml(b.ticker)}).</p>${overlap.shared.length ? `<div class="shared-holdings">${overlap.shared.slice(0,8).map(h=>`<span>${escapeHtml(h.symbol)} ${pctFundWeight(h.weight)}</span>`).join('')}</div>`:''}</div>` : `<p class="fund-method-note">A fonte não devolveu holdings suficientes para calcular overlap observado.</p>`;
+    const overlapHtml = overlap ? `<div class="fund-overlap"><span class="eyebrow">SOBREPOSIÇÃO DE HOLDINGS</span><strong>${pctFundWeight(overlap.value)}</strong><p>Limite inferior calculado apenas nas holdings devolvidas pela fonte (${pctFundWeight(overlap.coverageA)} de ${escapeHtml(a.ticker)}; ${pctFundWeight(overlap.coverageB)} de ${escapeHtml(b.ticker)}).</p>${overlap.shared.length ? `<div class="shared-holdings">${overlap.shared.slice(0,8).map(h=>`<span>${escapeHtml(h.symbol)} ${pctFundWeight(h.weight)}</span>`).join('')}</div>`:''}</div>` : `<p class="fund-method-note">A fonte não devolveu holdings suficientes para calcular overlap observado.</p>`;
 
     const read = fundNarrativeRead([a, b]);
 
@@ -5178,7 +5189,7 @@
         <p>${escapeHtml(read.text)}</p>
       </section>` : ''}
       <section class="fund-decision-verdict">
-        <span class="eyebrow">DECISION VIEW</span>
+        <span class="eyebrow">COMPARAÇÃO</span>
         <h3>${escapeHtml(lead.ticker)} parece mais forte para a função atual</h3>
         <p>${escapeHtml(verdict)}</p>
         <small>${escapeHtml(roleSentence)}</small>
@@ -5277,8 +5288,8 @@
     const {clusters}=buildFundOverlapClusters(held, .30);
     if (!clusters.length) {
       const withHoldings = held.filter(x => (x.hmap instanceof Map ? x.hmap.size : fundHoldingsMap(x.row).size) > 0).length;
-      if (held.length >= 2 && withHoldings < 2) return `<article class="fund-consolidation-panel is-data-gap"><span class="eyebrow">CONSOLIDATION LAB</span><h4>Ainda não é possível medir redundância</h4><p class="fund-method-note">${withHoldings}/${held.length} ETFs têm holdings carregadas. O dataset precisa de ser atualizado antes de concluir que os fundos não se sobrepõem.</p></article>`;
-      return `<article class="fund-consolidation-panel"><span class="eyebrow">CONSOLIDATION LAB</span><h4>Sem redundâncias fortes detetadas</h4><p class="fund-method-note">Com as holdings observadas, nenhum grupo de ETFs da carteira ultrapassa 30% de overlap entre si. Isto não exclui redundância nas holdings que a fonte não devolve.</p></article>`;
+      if (held.length >= 2 && withHoldings < 2) return `<article class="fund-consolidation-panel is-data-gap"><span class="eyebrow">CONSOLIDAÇÃO</span><h4>Ainda não é possível medir redundância</h4><p class="fund-method-note">${withHoldings}/${held.length} ETFs têm holdings carregadas. O dataset precisa de ser atualizado antes de concluir que os fundos não se sobrepõem.</p></article>`;
+      return `<article class="fund-consolidation-panel"><span class="eyebrow">CONSOLIDAÇÃO</span><h4>Sem redundâncias fortes detetadas</h4><p class="fund-method-note">Com as holdings observadas, nenhum grupo de ETFs da carteira ultrapassa 30% de overlap entre si. Isto não exclui redundância nas holdings que a fonte não devolve.</p></article>`;
     }
 
     const cards=clusters.map((cluster,idx)=>{
@@ -5322,7 +5333,7 @@
       </details>`;
     }).join('');
 
-    return `<article class="fund-consolidation-panel"><div class="section-heading"><div><span class="eyebrow">CONSOLIDATION LAB</span><h4>Que ETFs se sobrepõem — e qual parece o núcleo mais eficiente</h4></div><span class="section-count">${clusters.length} grupo${clusters.length===1?'':'s'}</span></div><p class="fund-method-note">Cada grupo é expansível. O candidato a reter usa uma heurística transparente: 40% custo, 25% representatividade, 20% AUM e 15% cobertura de holdings, com pesos renormalizados quando faltam dados. Serve para priorizar revisão — não é uma ordem de venda.</p>${cards}</article>`;
+    return `<article class="fund-consolidation-panel"><div class="section-heading"><div><span class="eyebrow">CONSOLIDAÇÃO</span><h4>Que ETFs se sobrepõem — e qual parece o núcleo mais eficiente</h4></div><span class="section-count">${clusters.length} grupo${clusters.length===1?'':'s'}</span></div><p class="fund-method-note">Cada grupo é expansível. O candidato a reter usa uma heurística transparente: 40% custo, 25% representatividade, 20% AUM e 15% cobertura de holdings, com pesos renormalizados quando faltam dados. Serve para priorizar revisão — não é uma ordem de venda.</p>${cards}</article>`;
   }
 
 
@@ -5391,7 +5402,7 @@
     }
     candidates.sort((a,b)=>b.merit-a.merit);
     if (!candidates.length) {
-      return `<details class="fund-replacement-panel"><summary><div><span class="eyebrow">ETF REPLACEMENT INTELLIGENCE</span><h4>Alternativas potencialmente mais eficientes</h4></div><span class="section-count">0 <i>⌄</i></span></summary><div class="replacement-empty"><p>Não encontrei ainda substitutos com evidência suficiente de equivalência e melhoria de custo/estrutura no universo rastreado.</p><small>O motor só propõe revisão quando existe semelhança observável e pelo menos uma melhoria: TER, AUM, cobertura de holdings ou UCITS confirmado.</small></div></details>`;
+      return `<details class="fund-replacement-panel"><summary><div><span class="eyebrow">ALTERNATIVAS DE ETF</span><h4>Alternativas potencialmente mais eficientes</h4></div><span class="section-count">0 <i>⌄</i></span></summary><div class="replacement-empty"><p>Não encontrei ainda substitutos com evidência suficiente de equivalência e melhoria de custo/estrutura no universo rastreado.</p><small>O motor só propõe revisão quando existe semelhança observável e pelo menos uma melhoria: TER, AUM, cobertura de holdings ou UCITS confirmado.</small></div></details>`;
     }
     const cards=candidates.slice(0,8).map((x,i)=>{
       const feeSave=x.feeHeld!=null&&x.feeAlt!=null?Math.max(0,x.feeHeld-x.feeAlt):null;
@@ -5416,7 +5427,7 @@
         </div>
       </details>`;
     }).join('');
-    return `<details class="fund-replacement-panel" open><summary><div><span class="eyebrow">ETF REPLACEMENT INTELLIGENCE</span><h4>Onde pode existir um fundo equivalente mais eficiente</h4></div><span class="section-count">${candidates.length} <i>⌄</i></span></summary><p class="fund-method-note">Compara os ETFs que tens com todo o universo rastreado. Prioriza overlap/semelhança, menor TER, maior AUM e UCITS quando explicitamente confirmado pela fonte. “Cotação europeia” nunca é tratada automaticamente como UCITS.</p>${cards}</details>`;
+    return `<details class="fund-replacement-panel" open><summary><div><span class="eyebrow">ALTERNATIVAS DE ETF</span><h4>Onde pode existir um fundo equivalente mais eficiente</h4></div><span class="section-count">${candidates.length} <i>⌄</i></span></summary><p class="fund-method-note">Compara os ETFs que tens com todo o universo rastreado. Prioriza overlap/semelhança, menor TER, maior AUM e UCITS quando explicitamente confirmado pela fonte. “Cotação europeia” nunca é tratada automaticamente como UCITS.</p>${cards}</details>`;
   }
 
   function buildObservedLookthrough(items) {
@@ -5513,7 +5524,7 @@
     const similarity=m.similarity==null?'—':(m.similarity*100).toFixed(0)+'%';
     const saving=m.saving!=null&&m.saving>0?`≈ ${eur(m.saving)}/ano`:'—';
     return `<article class="portfolio-simplification-panel">
-      <div class="section-heading"><div><span class="eyebrow">PORTFOLIO SIMPLIFICATION</span><h4>Quantos ETFs acrescentam diversificação real?</h4></div><span class="simplification-score">${m.opportunity}<small>/100</small></span></div>
+      <div class="section-heading"><div><span class="eyebrow">SIMPLIFICAÇÃO DO PORTFOLIO</span><h4>Quantos ETFs acrescentam diversificação real?</h4></div><span class="simplification-score">${m.opportunity}<small>/100</small></span></div>
       <div class="simplification-meter"><i style="width:${m.opportunity}%"></i></div>
       <p class="simplification-summary">Oportunidade de simplificação <strong>${m.label}</strong>. Com as holdings observadas, ${delta?`há ${delta} ETF${delta===1?'':'s'} que parecem redundantes dentro de grupos semelhantes.`:'não há redução clara sugerida neste momento.'}</p>
       <div class="simplification-kpis">
@@ -5533,7 +5544,7 @@
   function renderSimpleEtfDecisionCenter(held, totalValue) {
     const clusters = buildFundOverlapClusters(held, 0.30);
     if (!clusters.length) {
-      return `<section class="etf-decision-center"><div class="section-heading"><div><span class="eyebrow">ETF REVIEW</span><h3>Sobreposição da tua carteira</h3></div></div><div class="etf-review-ok"><strong>Não encontrei pares com overlap observado suficiente.</strong><p>Isto não prova ausência de duplicação: alguns ETFs ainda têm holdings incompletas. Só mostro uma sugestão quando existe evidência observável.</p></div></section>`;
+      return `<section class="etf-decision-center"><div class="section-heading"><div><span class="eyebrow">REVISÃO DO ETF</span><h3>Sobreposição da tua carteira</h3></div></div><div class="etf-review-ok"><strong>Não encontrei pares com overlap observado suficiente.</strong><p>Isto não prova ausência de duplicação: alguns ETFs ainda têm holdings incompletas. Só mostro uma sugestão quando existe evidência observável.</p></div></section>`;
     }
     const cards = clusters.map((cluster, idx) => {
       const scoreCandidate = (x) => {
@@ -5566,7 +5577,7 @@
       }).join('');
       return `<details class="etf-review-group" ${idx===0?'open':''}><summary><div><span>Grupo ${idx+1} · ${cluster.length} ETFs</span><strong>${escapeHtml(keep.ticker)} parece o melhor candidato a manter</strong></div><b>${totalValue&&clusterValue?`${(clusterValue/totalValue*100).toFixed(1)}% da carteira`:''}</b></summary><div class="etf-keep-card"><span>MANTER / NÚCLEO</span><strong>${escapeHtml(keep.ticker)}</strong><p>${escapeHtml(reasonBits.join(' · ')||'melhor combinação observável de overlap, cobertura, dimensão e custo')}</p></div>${rows}<p class="fund-method-note">Sugestão para revisão, não ordem de venda. Confirma índice, UCITS, réplica, moeda, distribuição/acumulação, tracking difference e fiscalidade.</p></details>`;
     }).join('');
-    return `<section class="etf-decision-center"><div class="section-heading"><div><span class="eyebrow">ETF REVIEW</span><h3>Que ETFs se sobrepõem e qual faz mais sentido manter</h3></div><span class="section-count">${clusters.length} grupo${clusters.length===1?'':'s'}</span></div><p class="fund-method-note">A leitura é simples: identifico grupos com overlap observado ≥30%, escolho um candidato a núcleo com base em representatividade, holdings cobertas, custo válido e dimensão, e marco os restantes para revisão.</p>${cards}</section>`;
+    return `<section class="etf-decision-center"><div class="section-heading"><div><span class="eyebrow">REVISÃO DO ETF</span><h3>Que ETFs se sobrepõem e qual faz mais sentido manter</h3></div><span class="section-count">${clusters.length} grupo${clusters.length===1?'':'s'}</span></div><p class="fund-method-note">A leitura é simples: identifico grupos com overlap observado ≥30%, escolho um candidato a núcleo com base em representatividade, holdings cobertas, custo válido e dimensão, e marco os restantes para revisão.</p>${cards}</section>`;
   }
 
   function renderFundPortfolioIntel(allFunds) {
@@ -5637,7 +5648,7 @@
     const duplicateHtml = duplicates.length ? duplicates.slice(0,8).map(x=>`<div class="duplicate-holding"><span><b>${escapeHtml(x.symbol)}</b><small>${[...x.funds].slice(0,5).map(escapeHtml).join(' · ')}${x.funds.size>5?' · …':''}</small></span><strong>${totalValue ? (x.eur/totalValue*100).toFixed(1)+'%' : '—'}</strong></div>`).join('') : (held.length>=2 && withHoldings.length<2 ? '<p class="muted data-gap">Holdings insuficientes no dataset atual para testar duplicações entre ETFs.</p>' : '<p class="muted">Não detetei duplicações nas holdings observadas.</p>');
 
     els.fundPortfolioIntel.innerHTML = `
-      <div class="section-heading"><div><span class="eyebrow">ETF PORTFOLIO INTELLIGENCE</span><h3>O que possuis realmente por baixo dos fundos</h3></div><span class="section-count">${held.length} ETF${held.length===1?'':'s'}</span></div>
+      <div class="section-heading"><div><span class="eyebrow">ETFs NO PORTFOLIO</span><h3>O que possuis realmente por baixo dos fundos</h3></div><span class="section-count">${held.length} ETF${held.length===1?'':'s'}</span></div>
       <p class="fund-method-note">Look-through calculado apenas nas holdings que a fonte devolve. As percentagens abaixo são portanto <strong>limites inferiores observados</strong>, não uma decomposição integral do portfolio.</p>
       <div class="fund-portfolio-kpis">
         <div><span>Valor ETF considerado</span><strong>${totalValue ? new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(totalValue) : '—'}</strong></div>
@@ -5651,9 +5662,9 @@
       <details class="fund-advanced-details"><summary><b>Ver análise técnica detalhada</b><span>look-through, holdings repetidas e cenários</span></summary>
       <div class="fund-portfolio-columns">
         <article><span class="eyebrow">ECONOMIC LOOK-THROUGH</span><h4>Maiores exposições observadas</h4><div class="portfolio-lookthrough-list">${topUnderlyingHtml}</div></article>
-        <article><span class="eyebrow">OVERLAP HOTSPOTS</span><h4>ETFs mais semelhantes</h4><div class="fund-overlap-pairs">${pairHtml}</div></article>
+        <article><span class="eyebrow">PONTOS DE SOBREPOSIÇÃO</span><h4>ETFs mais semelhantes</h4><div class="fund-overlap-pairs">${pairHtml}</div></article>
       </div>
-      <article class="duplicate-holdings-panel"><span class="eyebrow">DUPLICATE HOLDINGS</span><h4>Empresas repetidas entre vários ETFs</h4>${duplicateHtml}</article>
+      <article class="duplicate-holdings-panel"><span class="eyebrow">POSIÇÕES DUPLICADAS</span><h4>Empresas repetidas entre vários ETFs</h4>${duplicateHtml}</article>
       </details>
     `;
 
@@ -5789,7 +5800,7 @@
     const q=(els.fundsSearch?.value||'').trim();
     if (q) bits.push(`“${q}”`);
     const label = bits.length ? bits.join(' · ') : 'Todos os ETFs';
-    return `<div class="fund-live-result-head"><div><span class="eyebrow">MATCHING ETFs</span><h3>${escapeHtml(label)}</h3><p>${rows.length} ETF${rows.length===1?'':'s'} encontrado${rows.length===1?'':'s'} em ${allFunds.length} no universo rastreado.</p></div>${bits.length?'<button type="button" data-fund-clear-filters>Limpar filtros</button>':''}</div>`;
+    return `<div class="fund-live-result-head"><div><span class="eyebrow">ETFs CORRESPONDENTES</span><h3>${escapeHtml(label)}</h3><p>${rows.length} ETF${rows.length===1?'':'s'} encontrado${rows.length===1?'':'s'} em ${allFunds.length} no universo rastreado.</p></div>${bits.length?'<button type="button" data-fund-clear-filters>Limpar filtros</button>':''}</div>`;
   }
 
   function renderFunds() {
@@ -5858,7 +5869,7 @@
       const pipelineCoverage = Number(quality.insider_sec_coverage_pct);
       const effectiveCoverage = Number.isFinite(pipelineCoverage) ? pipelineCoverage : coverage;
       const cls = effectiveCoverage >= 80 ? 'good' : effectiveCoverage >= 40 ? 'warn' : 'bad';
-      els.smartmoneyHealth.innerHTML = `<div class="data-health-head"><div><span class="eyebrow">SEC DATA READINESS</span><strong>${Math.round(effectiveCoverage)}% cobertura</strong></div><span class="data-health-status ${cls}">${effectiveCoverage >= 80 ? 'operacional' : effectiveCoverage >= 40 ? 'parcial' : 'insuficiente'}</span></div><div class="data-health-grid"><div><strong>${checkedRows.length}</strong><span>empresas verificadas</span></div><div><strong>${withFilings}</strong><span>com Form 4 · 30d</span></div><div><strong>${withPS}</strong><span>com compra/venda P/S</span></div><div><strong>${degraded}</strong><span>filings degradados</span></div></div>${effectiveCoverage < 40 ? '<p class="data-health-warning">A SEC não foi recolhida com cobertura suficiente neste run. A ausência de sinais abaixo não deve ser interpretada como ausência de atividade insider.</p>' : ''}`;
+      els.smartmoneyHealth.innerHTML = `<div class="data-health-head"><div><span class="eyebrow">COBERTURA DE DADOS DA SEC</span><strong>${Math.round(effectiveCoverage)}% cobertura</strong></div><span class="data-health-status ${cls}">${effectiveCoverage >= 80 ? 'operacional' : effectiveCoverage >= 40 ? 'parcial' : 'insuficiente'}</span></div><div class="data-health-grid"><div><strong>${checkedRows.length}</strong><span>empresas verificadas</span></div><div><strong>${withFilings}</strong><span>com Form 4 · 30d</span></div><div><strong>${withPS}</strong><span>com compra/venda P/S</span></div><div><strong>${degraded}</strong><span>filings degradados</span></div></div>${effectiveCoverage < 40 ? '<p class="data-health-warning">A SEC não foi recolhida com cobertura suficiente neste run. A ausência de sinais abaixo não deve ser interpretada como ausência de atividade insider.</p>' : ''}`;
     }
 
     if (els.smartmoneyScopeFilters) els.smartmoneyScopeFilters.querySelectorAll('[data-smartmoney-scope]').forEach(btn => btn.classList.toggle('is-active', btn.dataset.smartmoneyScope === state.smartMoneyScope));
@@ -5893,7 +5904,7 @@
       .filter(x => x.opp.score >= 50)
       .sort((a,b) => b.opp.score - a.opp.score)
       .slice(0,3);
-    const leadersHtml = opportunityLeaders.length ? `<section class="insider-opportunity-leaders"><div class="section-heading"><div><span class="eyebrow">INSIDER OPPORTUNITY RANKING</span><h3>Compras que merecem investigação</h3><p>Conviction insider + Quality + Value + Growth + contexto de preço. Não é recomendação de investimento.</p></div></div><div class="insider-opportunity-scroll">${opportunityLeaders.map(({r,opp},i)=>`<button class="insider-opportunity-card" data-ticker="${escapeHtml(r.ticker)}"><span>#${i+1} · ${escapeHtml(r.ticker)}</span><strong>${opp.score}<small>/100</small></strong><b>${escapeHtml(opp.label)}</b><p>${escapeHtml(opp.reasons.slice(0,3).join(' · '))}</p><div><em>Conv ${opp.components.conviction}</em><em>Q ${opp.components.quality}</em><em>V ${opp.components.value}</em></div></button>`).join('')}</div></section>` : '';
+    const leadersHtml = opportunityLeaders.length ? `<section class="insider-opportunity-leaders"><div class="section-heading"><div><span class="eyebrow">RANKING DE OPORTUNIDADES DE INSIDERS</span><h3>Compras que merecem investigação</h3><p>Conviction insider + Quality + Value + Growth + contexto de preço. Não é recomendação de investimento.</p></div></div><div class="insider-opportunity-scroll">${opportunityLeaders.map(({r,opp},i)=>`<button class="insider-opportunity-card" data-ticker="${escapeHtml(r.ticker)}"><span>#${i+1} · ${escapeHtml(r.ticker)}</span><strong>${opp.score}<small>/100</small></strong><b>${escapeHtml(opp.label)}</b><p>${escapeHtml(opp.reasons.slice(0,3).join(' · '))}</p><div><em>Conv ${opp.components.conviction}</em><em>Q ${opp.components.quality}</em><em>V ${opp.components.value}</em></div></button>`).join('')}</div></section>` : '';
 
     els.smartmoneyList.innerHTML = rows.length ? leadersHtml + rows.map(r => {
       const net = r.insider_net_value_30d;
@@ -5978,12 +5989,12 @@
         const rank={changed:3,weakening:2,strengthening:1};
         return (rank[b.thesis_direction]||0)-(rank[a.thesis_direction]||0) || Math.abs(b.thesis_score_delta||0)-Math.abs(a.thesis_score_delta||0);
       });
-    const radar = changing.length ? `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">THESIS CHANGE RADAR</span><h3>O que está a mudar</h3></div><span class="section-count">${changing.length}</span></div><div class="trajectory-cards">${changing.slice(0,12).map(r => `<button class="trajectory-card trajectory-card--${r.thesis_direction}" data-ticker="${r.ticker}"><div><strong>${escapeHtml(r.ticker)}</strong>${thesisDirectionBadge(r)}</div><small>${escapeHtml(r.name || "")}</small><p>${escapeHtml(r.thesis_evolution_summary || "")}</p>${r.thesis_score_delta == null ? "" : `<span>Δ score ${Number(r.thesis_score_delta)>=0?"+":""}${Number(r.thesis_score_delta).toFixed(1)}</span>`}</button>`).join("")}</div></section>` : `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">THESIS CHANGE RADAR</span><h3>O que está a mudar</h3></div></div><p class="empty-state">Ainda não há mudanças persistidas suficientes. O radar ganhará profundidade a cada execução diária.</p></section>`;
+    const radar = changing.length ? `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">RADAR DE MUDANÇA DE TESE</span><h3>O que está a mudar</h3></div><span class="section-count">${changing.length}</span></div><div class="trajectory-cards">${changing.slice(0,12).map(r => `<button class="trajectory-card trajectory-card--${r.thesis_direction}" data-ticker="${r.ticker}"><div><strong>${escapeHtml(r.ticker)}</strong>${thesisDirectionBadge(r)}</div><small>${escapeHtml(r.name || "")}</small><p>${escapeHtml(r.thesis_evolution_summary || "")}</p>${r.thesis_score_delta == null ? "" : `<span>Δ score ${Number(r.thesis_score_delta)>=0?"+":""}${Number(r.thesis_score_delta).toFixed(1)}</span>`}</button>`).join("")}</div></section>` : `<section class="change-radar"><div class="section-heading"><div><span class="eyebrow">RADAR DE MUDANÇA DE TESE</span><h3>O que está a mudar</h3></div></div><p class="empty-state">Ainda não há mudanças persistidas suficientes. O radar ganhará profundidade a cada execução diária.</p></section>`;
     const momentumRows = rows.map(r=>({r,m:thesisMomentumSnapshot(r)}));
     const improvingMomentum = momentumRows.filter(x=>x.m.score>=60).sort((a,b)=>b.m.score-a.m.score).slice(0,8);
     const weakeningMomentum = momentumRows.filter(x=>x.m.score<=40).sort((a,b)=>a.m.score-b.m.score).slice(0,8);
     const momentumCard=x=>`<button class="momentum-rank-card ${x.m.cls}" data-ticker="${escapeHtml(x.r.ticker)}"><span><b>${escapeHtml(x.r.ticker)}</b><small>${escapeHtml(x.r.name||'')}</small></span><strong>${x.m.score}<i>/100</i></strong><em>${escapeHtml(x.m.label)}</em><small>${escapeHtml(x.m.reasons.slice(0,3).join(' · ')||'histórico em formação')}</small></button>`;
-    const momentum = `<section class="thesis-momentum-radar"><div class="section-heading"><div><span class="eyebrow">THESIS MOMENTUM</span><h3>Persistência 7d / 30d</h3><p>Separa tendência persistente de uma oscilação diária. Não altera o score fundamental.</p></div></div>
+    const momentum = `<section class="thesis-momentum-radar"><div class="section-heading"><div><span class="eyebrow">MOMENTUM DA TESE</span><h3>Persistência 7d / 30d</h3><p>Separa tendência persistente de uma oscilação diária. Não altera o score fundamental.</p></div></div>
       <details class="momentum-dropbox" open><summary><span><b>Momentum positivo</b><small>${improvingMomentum.length} empresas</small></span></summary><div class="momentum-rank-strip">${improvingMomentum.length?improvingMomentum.map(momentumCard).join(''):'<p class="empty-state">Sem momentum positivo suficientemente persistente.</p>'}</div></details>
       <details class="momentum-dropbox"><summary><span><b>Momentum negativo</b><small>${weakeningMomentum.length} empresas</small></span></summary><div class="momentum-rank-strip">${weakeningMomentum.length?weakeningMomentum.map(momentumCard).join(''):'<p class="empty-state">Sem deterioração persistente relevante.</p>'}</div></details>
     </section>`;
@@ -6082,7 +6093,7 @@
     const best={};
     for(const [k] of metricDefs){ const vals=picks.map(r=>[r,k==='portfolioFit' ? portfolioFits[r.ticker]?.fit ?? null : stockCompareMetric(r,k)]).filter(([,v])=>v!=null); if(vals.length){const m=Math.max(...vals.map(x=>x[1]));best[k]=new Set(vals.filter(x=>x[1]===m).map(x=>x[0].ticker));} }
     const verdict=stockCompareVerdict(picks);
-    const decision = verdict ? `<section class="stock-compare-verdict ${verdict.tone}"><span class="eyebrow">DECISION VIEW</span><h3>${escapeHtml(verdict.title)}</h3><p>${escapeHtml(verdict.reason)} ${verdict.gap!=null?`Vantagem composta: ${verdict.gap.toFixed(1)} pts.`:''}</p><div class="stock-compare-leader"><strong>${escapeHtml(verdict.first.r.ticker)}</strong><span>${verdict.first.composite.toFixed(0)}/100 composite</span><button data-compare-open="${escapeHtml(verdict.first.r.ticker)}">Abrir dossier →</button></div></section>` : '';
+    const decision = verdict ? `<section class="stock-compare-verdict ${verdict.tone}"><span class="eyebrow">COMPARAÇÃO</span><h3>${escapeHtml(verdict.title)}</h3><p>${escapeHtml(verdict.reason)} ${verdict.gap!=null?`Vantagem composta: ${verdict.gap.toFixed(1)} pts.`:''}</p><div class="stock-compare-leader"><strong>${escapeHtml(verdict.first.r.ticker)}</strong><span>${verdict.first.composite.toFixed(0)}/100 composite</span><button data-compare-open="${escapeHtml(verdict.first.r.ticker)}">Abrir dossier →</button></div></section>` : '';
 
     const table = `<div class="stock-compare-table-wrap"><div class="stock-compare-table" style="--compare-cols:${picks.length}"><div class="stock-compare-head"><span>Métrica</span>${picks.map(r=>`<button data-compare-open="${escapeHtml(r.ticker)}"><b>${escapeHtml(r.ticker)}</b><small>${escapeHtml(r.name||'')}</small></button>`).join('')}</div>${metricDefs.map(([k,l])=>`<div class="stock-compare-row"><span>${escapeHtml(l)}</span>${picks.map(r=>{const v=k==='portfolioFit' ? portfolioFits[r.ticker]?.fit ?? null : stockCompareMetric(r,k); const win=best[k]?.has(r.ticker); return `<strong class="${win?'is-best':''}">${v==null?'—':Math.round(v)}${win?'<small>BEST</small>':''}</strong>`}).join('')}</div>`).join('')}</div></div>`;
 

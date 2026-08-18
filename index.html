@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3ecdf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=0.99.5">
+<link rel="stylesheet" href="style.css?v=0.99.6">
 </head>
 <body>
 
@@ -82,7 +82,7 @@
 
     <section id="view-home" class="view is-active">
       <section class="briefing-hero">
-        <div class="briefing-hello"><img src="icons/icon-192.png" alt="" class="briefing-avatar"><div><span class="eyebrow">Finscanner Intelligence</span><p id="briefing-greeting">Bom dia</p><h2>Briefing</h2></div></div>
+        <div class="briefing-hello"><img src="icons/icon-192.png" alt="" class="briefing-avatar"><div><span class="eyebrow">Finscanner</span><p id="briefing-greeting">Bom dia</p><h2>Briefing</h2></div></div>
         <p class="home-brief-empty" style="margin:-8px 0 14px">Ferramenta pessoal de pesquisa, não é aconselhamento financeiro. Score não validado/backtested.</p>
         <article class="briefing-card" id="briefing-card"><span class="briefing-signal">A calcular sinais…</span><h3>O mercado em contexto.</h3><p>Assim que os dados carregarem, o Finscanner resume as alterações mais relevantes do universo, da tua carteira e da watchlist.</p></article>
       </section>
@@ -104,15 +104,15 @@
 
       <section class="daily-briefing-stack" aria-label="Briefing diário detalhado">
         <details class="home-brief-detail" open>
-          <summary><span><b>Hoje merece atenção</b><small>Best Companies · Portfolio Fit · Risks to Review</small></span><i>⌄</i></summary>
+          <summary><span><b>Hoje merece atenção</b><small>Melhores empresas · Encaixe no portfolio · Riscos a rever</small></span><i>⌄</i></summary>
           <div id="home-attention-summary" class="home-brief-body"><p class="home-brief-empty">A preparar o resumo diário…</p></div>
         </details>
         <details class="home-brief-detail">
-          <summary><span><b>Change Intelligence</b><small>Estrutural · evento relevante · ruído filtrado</small></span><i>⌄</i></summary>
+          <summary><span><b>Mudanças relevantes</b><small>Estrutural · evento relevante · ruído filtrado</small></span><i>⌄</i></summary>
           <div id="home-change-brief" class="home-brief-body"></div>
         </details>
         <details class="home-brief-detail">
-          <summary><span><b>Thesis Momentum</b><small>Improving Fast · Persistent Deterioration · Positive Reversal</small></span><i>⌄</i></summary>
+          <summary><span><b>Momentum da tese</b><small>A melhorar depressa · Deterioração persistente · Reversão positiva</small></span><i>⌄</i></summary>
           <div id="home-momentum-brief" class="home-brief-body"></div>
         </details>
         <details class="home-brief-detail">
@@ -124,7 +124,7 @@
           <div id="home-portfolio-fit-brief" class="home-brief-body"></div>
         </details>
         <details class="home-brief-detail">
-          <summary><span><b>Insider opportunities</b><small>Compras com maior conviction e contexto</small></span><i>⌄</i></summary>
+          <summary><span><b>Oportunidades de insiders</b><small>Compras com maior conviction e contexto</small></span><i>⌄</i></summary>
           <div id="home-insider-brief" class="home-brief-body"></div>
         </details>
         <details class="home-brief-detail">
@@ -138,11 +138,11 @@
       </section>
 
       <section class="home-tools" aria-label="Acessos rápidos">
-        <div class="home-section-head"><div><span class="eyebrow">YOUR TOOLS</span><h3>Explorar</h3></div></div>
+        <div class="home-section-head"><div><span class="eyebrow">AS TUAS FERRAMENTAS</span><h3>Explorar</h3></div></div>
         <div class="home-tool-grid">
-          <button class="home-tool-card orientation-card" data-goto="stocks"><span>▥</span><strong>Stocks</strong><small>Radar, filtros e dossiers</small></button>
-          <button class="home-tool-card orientation-card" data-goto="metals"><span>◆</span><strong>Metals</strong><small>Preço, tendência e pressão física</small></button>
-          <button class="home-tool-card orientation-card" data-goto="funds"><span>▱</span><strong>Funds</strong><small>ETFs, temas e custos</small></button>
+          <button class="home-tool-card orientation-card" data-goto="stocks"><span>▥</span><strong>Ações</strong><small>Radar, filtros e dossiers</small></button>
+          <button class="home-tool-card orientation-card" data-goto="metals"><span>◆</span><strong>Metais</strong><small>Preço, tendência e pressão física</small></button>
+          <button class="home-tool-card orientation-card" data-goto="funds"><span>▱</span><strong>ETFs</strong><small>ETFs, temas e custos</small></button>
           <button class="home-tool-card orientation-card" data-goto="portfolio"><span>★</span><strong>Portfolio</strong><small>Posições, teses e exposição</small></button>
         </div>
       </section>
@@ -150,7 +150,7 @@
 
     <section id="view-stocks" class="view">
       <section class="stocks-hero-simple">
-        <span class="eyebrow">STOCK INTELLIGENCE</span>
+        <span class="eyebrow">AÇÕES</span>
         <h2>Descobre empresas globalmente. Depois vê o que faz sentido na tua carteira.</h2>
         <p>Primeiro pesquisa o universo de ações rastreado. Só depois usamos o teu portfolio para analisar o que já tens e encontrar empresas que acrescentam qualidade ou diversificação.</p>
         <div class="stock-simple-steps" aria-label="Atalhos de ações">
@@ -195,7 +195,7 @@
       </section>
 
       <section class="stock-radar-head" hidden>
-        <span class="eyebrow">STOCK RADAR</span>
+        <span class="eyebrow">RADAR DE AÇÕES</span>
         <h2>Encontra empresas que merecem investigação.</h2>
         <p>Score explicável, métricas fundamentais, valuation relativo e trajetória da tese.</p>
       </section>
@@ -261,7 +261,7 @@
       <details class="stock-dropbox stock-advanced-explorer">
         <summary><span><b>Exploração avançada</b><small>Filtros, Sector Intelligence, perspetivas e tabela completa</small></span><span class="stock-dropbox-chevron">⌄</span></summary>
         <div class="section-heading fs-screener-heading">
-        <div><span class="eyebrow">SCREENER</span><h3>Explorar empresas</h3></div>
+        <div><span class="eyebrow">FILTRO</span><h3>Explorar empresas</h3></div>
         <span class="section-count" id="result-count">—</span>
       </div>
 
@@ -302,7 +302,7 @@
         <summary><span><b>Sector Intelligence</b><small>Discover · Compare · Deep Dive por setor</small></span><span class="stock-dropbox-chevron">⌄</span></summary>
       <section id="sector-intelligence-lab" class="sector-intelligence-shell" aria-label="Sector Intelligence">
         <div class="sector-intelligence-head">
-          <div><span class="eyebrow">SECTOR INTELLIGENCE</span><h3>Discover · Compare · Deep Dive</h3><p>Escolhe um setor, encontra os líderes e compara empresas lado a lado.</p></div>
+          <div><span class="eyebrow">SETORES</span><h3>Discover · Compare · Deep Dive</h3><p>Escolhe um setor, encontra os líderes e compara empresas lado a lado.</p></div>
           <span id="sector-lab-selection" class="section-count">Seleciona um setor</span>
         </div>
         <div class="sector-intelligence-toolbar">
@@ -321,7 +321,7 @@
         <summary><span><b>Perspetivas e colunas</b><small>Escolhe que métricas queres comparar na tabela</small></span><span class="stock-dropbox-chevron">⌄</span></summary>
       <section class="stock-perspective-shell" aria-label="Perspetiva do screener">
         <div class="stock-perspective-head">
-          <div><span class="eyebrow">PERSPECTIVE</span><h3>Escolhe o que queres comparar</h3></div>
+          <div><span class="eyebrow">PERSPETIVA</span><h3>Escolhe o que queres comparar</h3></div>
           <button id="stock-columns-btn" class="stock-columns-btn" type="button">⚙ Colunas</button>
         </div>
         <div id="stock-perspectives" class="stock-perspectives">
@@ -345,7 +345,7 @@
 
     <section id="view-metals" class="view">
       <section class="metals-hero">
-        <span class="eyebrow">METALS INTELLIGENCE</span>
+        <span class="eyebrow">INTELIGÊNCIA DE METAIS</span>
         <h2>Preço é só o início.</h2>
         <p>Tendência, valor relativo, volatilidade e formas de obter exposição — sem inventar dados físicos que não estejam ligados a uma fonte fiável.</p>
       </section>
@@ -359,7 +359,7 @@
 
     <section id="view-funds" class="view">
       <section class="funds-hero funds-hero-simple">
-        <span class="eyebrow">ETF INTELLIGENCE</span>
+        <span class="eyebrow">INTELIGÊNCIA DE ETFs</span>
         <h2>Descobre ETFs globais. Depois vê o que faz sentido na tua carteira.</h2>
         <p>O universo de pesquisa é independente do teu portfolio. A tua carteira é usada apenas depois, para medir overlap e encontrar alternativas potencialmente melhores.</p>
         <div class="fund-simple-steps" aria-label="Atalhos de ETFs">
@@ -498,9 +498,9 @@
         </div>
       </div>
       <div id="smartmoney-health" class="data-health-card"></div>
-      <div id="insider-alert-panel" class="insider-alert-card"><div><span class="eyebrow">INSIDER ALERTS</span><h3>Alertas para portfolio + watchlist</h3><p id="insider-alert-status">Alertas locais desativados. O push em background via ntfy funciona separadamente através do GitHub Actions.</p></div><button id="insider-alert-toggle" class="import-btn">Ativar alertas</button></div>
+      <div id="insider-alert-panel" class="insider-alert-card"><div><span class="eyebrow">ALERTAS DE INSIDERS</span><h3>Alertas para portfolio + watchlist</h3><p id="insider-alert-status">Alertas locais desativados. O push em background via ntfy funciona separadamente através do GitHub Actions.</p></div><button id="insider-alert-toggle" class="import-btn">Ativar alertas</button></div>
       <div id="insider-intelligence-panel" class="insider-intelligence-card">
-        <div><span class="eyebrow">ALERT INTELLIGENCE</span><h3>Não tratar todas as operações como iguais</h3><p>O workflow em background passa a destacar compras fortes de gestores, cluster buying, reversões de comportamento e vendas muito grandes. Vendas pequenas são filtradas por defeito.</p></div>
+        <div><span class="eyebrow">ALERTAS</span><h3>Não tratar todas as operações como iguais</h3><p>O workflow em background passa a destacar compras fortes de gestores, cluster buying, reversões de comportamento e vendas muito grandes. Vendas pequenas são filtradas por defeito.</p></div>
         <div class="insider-signal-legend"><span class="sig strong">Strong Buy</span><span class="sig cluster">Cluster</span><span class="sig reversal">Reversal</span><span class="sig sale">Large Sale</span></div>
         <div class="insider-watch-bridge"><div><strong>Watchlist no push em background</strong><small>A watchlist vive no teu iPhone; o GitHub Actions não consegue ler esse armazenamento local. É preciso exportá-la quando adicionares/removeres empresas que queres monitorizar 24/7.</small></div><button id="export-alert-watchlist" class="import-btn import-btn--secondary">Exportar watchlist</button></div>
         <details class="insider-watch-guide">
@@ -516,7 +516,7 @@
       </div>
       <div id="smartmoney-list" class="dossier"></div>
     </section>
-    <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">INVESTMENT THESES</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section>
+    <section id="view-theses" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">TESES DE INVESTIMENTO</span><h2>O que cada empresa parece ser — e para onde está a evoluir.</h2><p>Arquétipos quantitativos explicáveis, trajetória da tese e radar de mudanças.</p></div></section>
       <div class="thesis-filter-panel">
         <div id="thesis-scope-filters" class="segmented-filter" aria-label="Âmbito das teses">
           <button class="is-active" data-thesis-scope="all">Universo</button>
@@ -531,7 +531,7 @@
         </div>
       </div>
       <div id="theses-list" class="dossier theses-view"></div></section>
-    <section id="view-compare" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">COMPARE</span><h2>Compara até 8 empresas lado a lado.</h2><p>Score, qualidade, crescimento, profitability, cash, estabilidade, valuation e smart money no mesmo quadro — com uma conclusão explícita.</p></div></section><div class="commandbar"><input id="compare-input" type="text" placeholder="AAPL, MSFT, ASML.AS, BMW.DE…" autocomplete="off" spellcheck="false"></div><div id="compare-list" class="compare-grid"></div></section>
+    <section id="view-compare" class="view"><section class="market-hero"><div class="market-hero__copy"><span class="eyebrow">COMPARAR</span><h2>Compara até 8 empresas lado a lado.</h2><p>Score, qualidade, crescimento, profitability, cash, estabilidade, valuation e smart money no mesmo quadro — com uma conclusão explícita.</p></div></section><div class="commandbar"><input id="compare-input" type="text" placeholder="AAPL, MSFT, ASML.AS, BMW.DE…" autocomplete="off" spellcheck="false"></div><div id="compare-list" class="compare-grid"></div></section>
 
     <section id="view-portfolio" class="view">
       <div class="import-bar">
@@ -625,6 +625,6 @@
   </div>
 </div>
 
-<script src="app.js?v=0.99.5"></script>
+<script src="app.js?v=0.99.6"></script>
 </body>
 </html>
