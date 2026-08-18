@@ -745,7 +745,11 @@
 
     if (els.homePortfolioBrief) {
       const list = [...strengthening.map(r=>({r,m:thesisMomentumSnapshot(r)})).sort((a,b)=>b.m.score-a.m.score).slice(0,3).map(x=>({r:x.r,meta:`Momentum ${x.m.score}/100${Number.isFinite(x.m.s30)?` · 30d ${x.m.s30>0?'+':''}${x.m.s30.toFixed(1)}`:''}`,tone:'good'})), ...weakening.map(r=>({r,m:thesisMomentumSnapshot(r)})).sort((a,b)=>a.m.score-b.m.score).slice(0,3).map(x=>({r:x.r,meta:`Momentum ${x.m.score}/100${Number.isFinite(x.m.s30)?` · 30d ${x.m.s30>0?'+':''}${x.m.s30.toFixed(1)}`:''}`,tone:'bad'}))];
-      els.homePortfolioBrief.innerHTML = list.length ? list.map(x=>briefRowHtml(x.r,x.meta,x.tone)).join('') : `<p class="home-brief-empty">Sem mudanças materiais de tese nas posições analisadas.</p>`;
+      // Honest empty state: "sem mudanças" implies we checked real positions
+      // and found nothing — misleading when there's no portfolio at all to
+      // check in the first place. Same distinction already made correctly
+      // in the "Melhor encaixe" and "Hoje merece atenção" sections.
+      els.homePortfolioBrief.innerHTML = list.length ? list.map(x=>briefRowHtml(x.r,x.meta,x.tone)).join('') : `<p class="home-brief-empty">${portfolioRows.length ? 'Sem mudanças materiais de tese nas posições analisadas.' : 'Importa o portfolio para acompanhares a evolução das teses das tuas posições.'}</p>`;
     }
 
     if (els.homePortfolioFitBrief) {
