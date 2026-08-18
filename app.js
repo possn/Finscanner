@@ -1733,6 +1733,24 @@
   const STOCK_THEME_TICKER_OVERRIDES = {
     drones: ['RCAT','ONDS','UMAC','KTOS'],
     space: ['RKLB','RDW'],
+    // Same class of gap as drones/space: Yahoo's sector/industry never
+    // says "quantum computing" (IONQ etc. are just "Computer Hardware")
+    // or "cryptocurrency" (miners/exchanges are "Capital Markets" /
+    // "Financial Data & Stock Exchanges" / "Software - Application") —
+    // confirmed by checking real data for each ticker below before
+    // adding it, not guessed.
+    quantum: ['IONQ','RGTI','QBTS','QUBT'],
+    crypto: ['MSTR','COIN','MARA','RIOT','CLSK'],
+    // TSLA's Yahoo industry is literally "Auto Manufacturers" — it does
+    // NOT contain the phrase "electric vehicle", so the keyword match
+    // misses the single most obvious EV ticker without this override.
+    lithium: ['ALB','TSLA'],
+    // Cannabis coverage is weak for a different reason (not a tagging
+    // gap): TLRY/CGC/CRON/LAC/PLL/RIVN aren't in the tracked universe at
+    // all yet, and ACB/BITF are in the universe but Yahoo returns no
+    // sector/industry for them at all. No override fixes a ticker that
+    // isn't tracked — this needs universe coverage first, not a keyword
+    // fix. Left as a known gap rather than forcing in a weak match.
   };
   const STOCK_THEME_DEFS = [
     {key:'technology', label:'Tecnologia', words:['technology','software','internet','information technology','it services','computer','electronic']},
