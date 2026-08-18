@@ -292,7 +292,7 @@
   }
 
   function insiderNearLow(r) {
-    const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : (Array.isArray(r.insider_price_history_1y) ? r.insider_price_history_1y : []);
+    const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : [];
     const vals = hist.map(x=>Number(x.close ?? x.price ?? x.value)).filter(Number.isFinite);
     if (vals.length < 8) return null;
     const low = Math.min(...vals), current = Number(r.current_price ?? vals[vals.length-1]);
@@ -478,11 +478,11 @@
 
   function renderActiveView() {
     const v = state.activeView;
-    if (v === "home") renderHome();
+    if (v === "home") { ensureNewsLoaded(); renderHome(); }
     else if (v === "stocks") { renderMarketOverview(); applyFilters(); }
     else if (v === "portfolio") renderPortfolio();
     else if (v === "funds") renderFunds();
-    else if (v === "news") renderNews();
+    else if (v === "news") { ensureNewsLoaded(); renderNews(); }
     else if (v === "smartmoney") renderSmartMoney();
     else if (v === "theses") renderTheses();
     else if (v === "compare") renderCompare();
@@ -1537,7 +1537,7 @@
     if (preset === "dividend") return Number(r.dividend_yield ?? 0) >= 2.0 && Number(r.payout_ratio ?? 0) < 0.9 && s >= 50;
     if (preset === "insider") return Number(r.insider_net_value_30d ?? 0) > 0 || Number(r.insider_buy_count_30d ?? 0) > 0;
     if (preset === "near-low") {
-      const px=Number(r.current_price), hist=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[];
+      const px=Number(r.current_price), hist=Array.isArray(r.price_history_1y)?r.price_history_1y:[];
       const vals=hist.map(x=>Number(x.close ?? x.price ?? x.value)).filter(Number.isFinite);
       if(!Number.isFinite(px)||!vals.length) return false; const lo=Math.min(...vals); return lo>0 && px <= lo*1.15 && s>=50 && r.zombie!=="yes";
     }
@@ -1876,7 +1876,7 @@
     if(preset==='growth') return Number(r.growth_pct??-1); if(preset==='value') return Number(r.value_pct??-1);
     if(preset==='dividend') return Number(r.dividend_yield??-1);
     if(preset==='insider') return Math.log10(Math.abs(Number(r.insider_net_value_30d||0))+1)*10+Number(r.insider_buy_count_30d||0)*4;
-    if(preset==='near-low'){const px=Number(r.current_price),h=Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[],v=h.map(x=>Number(x.close??x.price??x.value)).filter(Number.isFinite); if(!Number.isFinite(px)||!v.length)return -999; const lo=Math.min(...v); return lo>0?100-(px/lo-1)*100:-999;}
+    if(preset==='near-low'){const px=Number(r.current_price),h=Array.isArray(r.price_history_1y)?r.price_history_1y:[],v=h.map(x=>Number(x.close??x.price??x.value)).filter(Number.isFinite); if(!Number.isFinite(px)||!v.length)return -999; const lo=Math.min(...v); return lo>0?100-(px/lo-1)*100:-999;}
     if(preset==='improving') return Number(r.thesis_score_delta??0)*10+Number(r.score??0);
     if(preset==='improving-fast') { const m=thesisMomentumSnapshot(r); return m.score*2 + (Number.isFinite(m.s30)?m.s30:0); }
     if(preset==='persistent-down') { const m=thesisMomentumSnapshot(r); return (100-m.score)*2 + Math.abs(Number.isFinite(m.s30)?m.s30:0); }
@@ -2729,7 +2729,7 @@
     drawInsiderChart(r, document.querySelector('[data-insider-chart-filter].is-active')?.dataset.insiderChartFilter || 'all');
   }
   function drawCongressChart(r,trades=[]){
-    const canvas=document.getElementById('congress-price-chart'); if(!canvas)return; const history=Array.isArray(r.price_history_1y)?r.price_history_1y:(Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]); const tooltip=document.getElementById('congress-chart-tooltip');
+    const canvas=document.getElementById('congress-price-chart'); if(!canvas)return; const history=Array.isArray(r.price_history_1y)?r.price_history_1y:[]; const tooltip=document.getElementById('congress-chart-tooltip');
     const ratio=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||680),cssH=220;canvas.width=Math.round(cssW*ratio);canvas.height=Math.round(cssH*ratio);canvas.style.height=cssH+'px';const ctx=canvas.getContext('2d');ctx.scale(ratio,ratio);ctx.clearRect(0,0,cssW,cssH);
     if(history.length<2){ctx.fillStyle='#8a93a1';ctx.font='13px system-ui';ctx.fillText('Histórico de preço indisponível para este ticker.',18,40);return;}
     const pts=history.map(x=>({date:String(x.date),close:Number(x.close)})).filter(x=>Number.isFinite(x.close));if(pts.length<2)return;const parse=d=>new Date(d+'T00:00:00Z').getTime(),minT=parse(pts[0].date),maxT=parse(pts.at(-1).date);let minP=Math.min(...pts.map(x=>x.close)),maxP=Math.max(...pts.map(x=>x.close));if(maxP===minP){minP-=1;maxP+=1}const pad={l:46,r:18,t:18,b:30},w=cssW-pad.l-pad.r,h=cssH-pad.t-pad.b,xOf=d=>pad.l+((parse(d)-minT)/(maxT-minT))*w,yOf=v=>pad.t+h-((v-minP)/(maxP-minP))*h;
@@ -2784,7 +2784,7 @@
   function drawInsiderChart(r, filter='all') {
     const canvas=document.getElementById('insider-price-chart');
     if(!canvas) return;
-    const history=Array.isArray(r.price_history_1y)?r.price_history_1y:(Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]);
+    const history=Array.isArray(r.price_history_1y)?r.price_history_1y:[];
     const txs=(Array.isArray(r.insider_transactions_365d)?r.insider_transactions_365d:[]).filter(tx=>filter==='all'||tx.type===filter);
     const wrap=canvas.parentElement, tooltip=document.getElementById('insider-chart-tooltip');
     const ratio=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||680), cssH=220;
@@ -4822,7 +4822,7 @@
 
 
   function fundPriceChartHtml(r) {
-    const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : (Array.isArray(r.insider_price_history_1y) ? r.insider_price_history_1y : []);
+    const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : [];
     if (!hist.length) return `<div class="fund-price-empty"><strong>Histórico de preço ainda não disponível</strong><p>O workflow diário está a enriquecer este ETF. Os dados estruturais abaixo continuam válidos quando disponíveis.</p></div>`;
     const ret = Number(r.fund_return_1y_pct);
     const last = Number(hist[hist.length-1]?.close);
@@ -4831,7 +4831,7 @@
 
   function drawFundPriceChart(r) {
     const canvas=document.getElementById('fund-price-chart'); if(!canvas) return;
-    const hist=Array.isArray(r.price_history_1y)?r.price_history_1y:(Array.isArray(r.insider_price_history_1y)?r.insider_price_history_1y:[]);
+    const hist=Array.isArray(r.price_history_1y)?r.price_history_1y:[];
     const pts=hist.map(x=>({date:x.date,close:Number(x.close??x.price??x.value)})).filter(x=>Number.isFinite(x.close)); if(pts.length<2)return;
     const dpr=Math.max(1,window.devicePixelRatio||1), rect=canvas.getBoundingClientRect(), w=Math.max(280,rect.width||320), h=180; canvas.width=w*dpr; canvas.height=h*dpr;
     const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
@@ -5898,6 +5898,20 @@
     catch (e) { state.news = null; console.warn("news.json unavailable yet", e); }
   }
 
+  // Lazy-loaded: news.json is ~3.8MB, no reason to pay that download/parse
+  // cost on every app open when most sessions never visit Notícias or the
+  // Home preview. Fetched once, on first actual need, then cached in
+  // state.news like before.
+  let _newsLoadPromise = null;
+  function ensureNewsLoaded() {
+    if (!_newsLoadPromise) {
+      _newsLoadPromise = loadNews().then(() => {
+        if (state.activeView === "news" || state.activeView === "home") renderActiveView();
+      });
+    }
+    return _newsLoadPromise;
+  }
+
   function renderNews() {
     if (!state.data) return;
     const portfolio = lsGet(LS_PORTFOLIO);
@@ -6377,5 +6391,4 @@
   loadHistory();
   loadValuationHistory();
   loadThesisHistory();
-  loadNews();
 })();

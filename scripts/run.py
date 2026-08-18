@@ -218,7 +218,9 @@ def main():
         row["insider_transactions_365d"] = insider.get("transactions_365d", [])
         _hist = insider_price_map.get(s.ticker) or (previous_etfs.get(s.ticker, {}) if row.get("quote_type") == "ETF" else previous_equities.get(s.ticker, {})).get("price_history_1y") or []
         row["price_history_1y"] = _hist
-        row["insider_price_history_1y"] = _hist  # backwards-compatible chart alias
+        # Removed the "insider_price_history_1y" duplicate alias that used
+        # to sit here (identical data, ~4MB of pure waste across the whole
+        # file). All frontend call sites now read price_history_1y only.
         if row.get("current_price") is None and _hist:
             row["current_price"] = _hist[-1].get("close")
         if row.get("quote_type") == "ETF" and len(_hist) >= 2:
@@ -364,7 +366,7 @@ def main():
                 carried["fund_ucits"] = meta.get("ucits")
             _hist = insider_price_map.get(ticker) or carried.get("price_history_1y") or carried.get("insider_price_history_1y") or []
             carried["price_history_1y"] = _hist
-            carried["insider_price_history_1y"] = _hist
+            carried.pop("insider_price_history_1y", None)
             if carried.get("current_price") is None and _hist:
                 carried["current_price"] = _hist[-1].get("close")
             if len(_hist) >= 2:
@@ -397,7 +399,6 @@ def main():
             "fund_category": meta.get("sector"),
             "fund_ucits": meta.get("ucits"),
             "price_history_1y": insider_price_map.get(ticker, []),
-            "insider_price_history_1y": insider_price_map.get(ticker, []),
             "fund_return_1y_pct": (round((insider_price_map[ticker][-1]["close"] / insider_price_map[ticker][0]["close"] - 1) * 100, 2) if len(insider_price_map.get(ticker, [])) >= 2 and insider_price_map[ticker][0].get("close") else None),
             "current_price": (insider_price_map[ticker][-1].get("close") if insider_price_map.get(ticker) else None),
             "pipeline_status": "catalog_only",
@@ -457,7 +458,7 @@ def main():
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w") as f:
-        json.dump(_json_safe(payload), f, indent=2)
+        json.dump(_json_safe(payload), f, separators=(",", ":"))
 
     log.info("Wrote %d rows to %s", len(rows), OUT_PATH)
 
@@ -467,12 +468,12 @@ def main():
     metals_payload = metals_history_mod.enrich(metals_payload, metals_history)
     metals_history_mod.save(metals_history, METALS_HISTORY_PATH)
     with open(METALS_OUT_PATH, "w") as f:
-        json.dump(_json_safe(metals_payload), f, indent=2)
+        json.dump(_json_safe(metals_payload), f, separators=(",", ":"))
     log.info("Wrote metals data to %s", METALS_OUT_PATH)
 
     metals_brief = build_metals_brief(metals_payload)
     with open(METALS_BRIEF_PATH, "w") as f:
-        json.dump(_json_safe(metals_brief), f, indent=2)
+        json.dump(_json_safe(metals_brief), f, separators=(",", ":"))
     log.info("Wrote daily metals brief to %s", METALS_BRIEF_PATH)
 
     previous_fx = None
@@ -484,7 +485,7 @@ def main():
         previous_fx = None
     fx_payload = build_fx_payload(previous=previous_fx)
     with open(FX_OUT_PATH, "w") as f:
-        json.dump(_json_safe(fx_payload), f, indent=2)
+        json.dump(_json_safe(fx_payload), f, separators=(",", ":"))
 
     previous_fx_history = None
     try:
