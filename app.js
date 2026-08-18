@@ -4979,6 +4979,14 @@
     for (const held of withFee) {
       const heldFee = validFundFee(held);
       const peers = allFunds
+        // Bare tickers with no exchange suffix (SOXQ, XLC, FTEC...) are
+        // Yahoo's convention for US-listed instruments — same rule run.py
+        // already uses server-side to split US vs non-US tickers. Most EU
+        // retail brokers can't buy those directly (no PRIIPs KID), so a
+        // "cheaper alternative" that isn't actually purchasable isn't a
+        // real alternative. Only suggest tickers with a "." suffix
+        // (European exchange listing, e.g. .DE/.L/.AS/.PA/.MI/.SW).
+        .filter(r => r.ticker.includes('.'))
         .filter(r => r.ticker !== held.ticker && validFundFee(r) != null && validFundFee(r) < heldFee - .02)
         .map(alt => ({ alt, ev: fundPeerEvidence(held, alt), fee: validFundFee(alt) }))
         .filter(x => x.ev.confidence !== 'none')
@@ -5008,7 +5016,7 @@
       const annual10k = diff / 100 * 10000;
       const conf = evidence.confidence === 'high' ? 'alta' : evidence.confidence === 'medium' ? 'média' : 'baixa';
       return `<details class="fee-saver-item"><summary><span><strong>${escapeHtml(held.ticker)} → ${escapeHtml(alt.ticker)}</strong><small>${fmtExpenseRatio(heldFee)} → ${fmtExpenseRatio(altFee)}</small></span><b>≈ €${annual10k.toFixed(0)}/10k/ano</b></summary><div class="fee-saver-detail"><p><strong>Comparabilidade ${conf}:</strong> ${escapeHtml(evidence.reason)}.</p><div><button type="button" data-fund-open="${escapeHtml(alt.ticker)}">Abrir ${escapeHtml(alt.ticker)}</button><button type="button" data-fund-pair-a="${escapeHtml(held.ticker)}" data-fund-pair-b="${escapeHtml(alt.ticker)}">Comparar lado a lado</button></div></div></details>`;
-    }).join("") + `<p class="fund-method-note">Fee Saver avalia cada ETF reconhecido da tua carteira. Uma alternativa só aparece se for mais barata <em>e</em> houver evidência de comparabilidade por holdings/overlap ou por categoria + região + estilo. TER 0.00% sem confirmação é tratado como dado inválido. Confirma sempre índice, réplica, moeda, tracking difference, KID e fiscalidade.</p>`;
+    }).join("") + `<p class="fund-method-note">Fee Saver avalia cada ETF reconhecido da tua carteira. Uma alternativa só aparece se for mais barata <em>e</em> houver evidência de comparabilidade por holdings/overlap ou por categoria + região + estilo <em>e</em> tiver sufixo de bolsa europeia (ex: .DE, .L, .AS) — tickers americanos sem sufixo raramente têm KID e não costumam ser compráveis por retalho na UE. TER 0.00% sem confirmação é tratado como dado inválido. Confirma sempre índice, réplica, moeda, tracking difference, KID e fiscalidade.</p>`;
     els.fundFeeSaver.querySelectorAll('[data-fund-open]').forEach(x => x.addEventListener('click',()=>openDetail(x.dataset.fundOpen)));
     els.fundFeeSaver.querySelectorAll('[data-fund-pair-a]').forEach(btn=>btn.addEventListener('click',()=>{
       if (els.fundCompareA) els.fundCompareA.value=btn.dataset.fundPairA;
