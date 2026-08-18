@@ -107,6 +107,36 @@ def _fetch_one(ticker: str) -> tuple[str, list[dict]]:
 def fetch_congress_for_universe(us_tickers: list[str]) -> dict[str, list[dict]]:
     """us_tickers should already be filtered to US-listed (no exchange
     suffix) tickers — same convention as insiders.py."""
+    # Probe first: bargo.ai's free-apis path has, as of Aug 2026, been
+    # retired in favour of an invite-only paid MCP product (confirmed via
+    # their own site — the /free-apis/ endpoints now return 403 for every
+    # request, immediately, with no rate-limit pattern). If the very first
+    # few probes all fail with 403, don't burn ~1300 more requests and a
+    # slice of the pipeline's runtime finding that out one ticker at a
+    # time — bail out once, loudly, and let run.py/the frontend handle
+    # "no source available" as a real state rather than a wall of
+    # per-ticker 403s in the log.
+    probe = us_tickers[:5]
+    probe_403s = 0
+    for t in probe:
+        url = f"{API_BASE}/{t.split('.')[0]}?from={(datetime.date.today() - datetime.timedelta(days=LOOKBACK_DAYS)).isoformat()}&limit=100"
+        try:
+            requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT).raise_for_status()
+        except requests.HTTPError as e:
+            if e.response is not None and e.response.status_code == 403:
+                probe_403s += 1
+        except Exception:
+            pass
+    if probe_403s == len(probe):
+        log.warning(
+            "Congress data source (bargo.ai free-apis) returned 403 for all %d probe requests — "
+            "the free endpoint appears retired (see their site: now an invite-only paid MCP product). "
+            "Skipping the remaining %d tickers rather than burning pipeline time on a dead source. "
+            "See scripts/congress.py docstring for what a real free replacement would require.",
+            len(probe), len(us_tickers) - len(probe),
+        )
+        return {}
+
     results: dict[str, list[dict]] = {}
     done = 0
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
