@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 2,
     "baselined": 0,
     "detail_failures": 13,
     "lookback_days": 10,
-    "new_filings": 32,
+    "new_filings": 16,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -949,7 +949,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:36:09.102472+00:00",
       "seen_accessions": [
-        "0001048911-26-000110"
+        "0001048911-26-000110",
+        "0001048911-26-000112"
       ]
     },
     "FLNC": {
@@ -1048,10 +1049,31 @@
       ]
     },
     "GILD": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-17",
+          "owner": "Dickinson Andrew D",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 415080.00000000006
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-17",
+          "owner": "Mercier Johanna",
+          "role": "Chief Comm & Corp Aff Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3853908.341
+        }
+      ],
       "last_checked": "2026-08-15T22:36:10.839622+00:00",
       "seen_accessions": [
-        "0002110603-26-000010"
+        "0002110603-26-000010",
+        "0001310204-26-000024",
+        "0001782135-26-000028"
       ]
     },
     "GIS": {
@@ -2482,5 +2504,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-18T22:45:03.822437+00:00"
+  "updated_at": "2026-08-18T23:41:09.437193+00:00"
 }
