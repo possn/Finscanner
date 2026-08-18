@@ -77,6 +77,7 @@ class ScoredTicker:
     expense_ratio: float | None = None
     ai_exposure_pct: float | None = None
     current_price: float | None = None
+    business_summary: str | None = None
 
     # peer-relative valuation context
     peer_count: int | None = None
@@ -411,7 +412,7 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
 
         net_cash = net_cash_values[idx]
         out.append(ScoredTicker(
-            ticker=r.ticker, name=r.name, sector=r.sector, industry=r.industry,
+            ticker=r.ticker, name=r.name, business_summary=r.business_summary, sector=r.sector, industry=r.industry,
             market_cap=r.market_cap, currency=r.currency, quote_type=r.quote_type,
             score=round(composite, 1) if composite is not None else None,
             data_confidence=confidence, data_coverage_pct=round(metric_coverage, 1),
@@ -476,7 +477,7 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
 
     for r in cryptos:
         out.append(ScoredTicker(
-            ticker=r.ticker, name=r.name, sector="Crypto", industry="Digital Assets",
+            ticker=r.ticker, name=r.name, business_summary=r.business_summary, sector="Crypto", industry="Digital Assets",
             market_cap=r.market_cap, currency=r.currency, quote_type="CRYPTO",
             score=None, data_confidence="low", data_coverage_pct=0,
             zombie="unknown", interest_coverage=None,
@@ -518,7 +519,7 @@ def score_universe(raw: list[RawMetrics]) -> list[ScoredTicker]:
             if found_weight:
                 ai_pct = round(ai_weight * 100, 1)
         out.append(ScoredTicker(
-            ticker=r.ticker, name=r.name, sector=r.sector, industry=r.industry,
+            ticker=r.ticker, name=r.name, business_summary=r.business_summary, sector=r.sector, industry=r.industry,
             market_cap=r.market_cap, currency=r.currency, quote_type="ETF",
             score=None, data_confidence="low", data_coverage_pct=0,
             zombie="unknown", interest_coverage=None,

@@ -22,6 +22,7 @@ log = logging.getLogger("fundamentals")
 class RawMetrics:
     ticker: str
     name: str | None = None
+    business_summary: str | None = None
     sector: str | None = None
     industry: str | None = None
     market_cap: float | None = None
@@ -283,6 +284,18 @@ def fetch_one(ticker: str) -> RawMetrics:
         if info_error is not None and m.current_price is None:
             raise info_error
         m.name = m.name or ticker
+        raw_summary = info.get("longBusinessSummary")
+        if raw_summary:
+            # Card display needs a one-line blurb, not the full paragraph
+            # yfinance returns (often 500-1000+ chars). Cut at the first
+            # sentence if it's reasonably short; otherwise hard-truncate at
+            # a word boundary near 160 chars.
+            first_sentence = raw_summary.split(". ")[0].strip()
+            if first_sentence and len(first_sentence) <= 180:
+                m.business_summary = first_sentence + ("." if not first_sentence.endswith(".") else "")
+            else:
+                cut = raw_summary[:160].rsplit(" ", 1)[0]
+                m.business_summary = cut + "…"
 
         # quality / profitability
         m.roe = _as_float(info.get("returnOnEquity"))
