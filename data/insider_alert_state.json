@@ -1532,10 +1532,21 @@
       "seen_accessions": []
     },
     "NUE": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-14",
+          "owner": "Behr Allen C",
+          "role": "Executive Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2121577.6996
+        }
+      ],
       "last_checked": "2026-08-15T22:36:23.077409+00:00",
       "seen_accessions": [
-        "0000073309-26-000126"
+        "0000073309-26-000126",
+        "0000073309-26-000129"
       ]
     },
     "NVDA": {
@@ -2279,5 +2290,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-18T16:52:14.352118+00:00"
+  "updated_at": "2026-08-18T19:43:48.314506+00:00"
 }
