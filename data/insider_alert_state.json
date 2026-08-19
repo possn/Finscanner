@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 10,
     "baselined": 0,
     "detail_failures": 21,
     "lookback_days": 10,
-    "new_filings": 29,
+    "new_filings": 44,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -115,7 +115,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:35:55.375642+00:00",
       "seen_accessions": [
-        "0001225208-26-006954"
+        "0001225208-26-006954",
+        "0001225208-26-007205"
       ]
     },
     "ADP": {
@@ -327,12 +328,23 @@
       "seen_accessions": []
     },
     "AMZN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 73,
+          "date": "2026-08-17",
+          "owner": "Herrington Douglas J",
+          "role": "CEO Worldwide Amazon Stores",
+          "signal": "sell",
+          "type": "sell",
+          "value": 982993.4913999999
+        }
+      ],
       "last_checked": "2026-08-15T22:35:57.707382+00:00",
       "seen_accessions": [
         "0001018724-26-000028",
         "0001018724-26-000030",
-        "0001018724-26-000032"
+        "0001018724-26-000032",
+        "0001936006-26-000020"
       ]
     },
     "APH": {
@@ -726,6 +738,42 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 33401610.24
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-17",
+          "owner": "Goldberg Chen",
+          "role": "EVP, Product & Engineering",
+          "signal": "sell",
+          "type": "sell",
+          "value": 678790.8981999999
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-17",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 20580128.0831
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-17",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5887623.830999999
+        },
+        {
+          "conviction": 42,
+          "date": "2026-08-17",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 53048.172099999996
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -750,7 +798,11 @@
         "0001769628-26-000374",
         "0001769628-26-000376",
         "0001769628-26-000378",
-        "0001104659-26-098473"
+        "0001104659-26-098473",
+        "0001769628-26-000386",
+        "0001769628-26-000387",
+        "0001769628-26-000388",
+        "0001769628-26-000389"
       ]
     },
     "CSAI": {
@@ -847,6 +899,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 63566861.1711
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-17",
+          "owner": "Walz Andrew Benjamin",
+          "role": "President, DM&C",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3377833.1999999997
         }
       ],
       "last_checked": "2026-08-15T22:36:06.063980+00:00",
@@ -854,7 +915,9 @@
         "0000093410-26-000164",
         "0000093410-26-000169",
         "0000093410-26-000171",
-        "0000093410-26-000173"
+        "0000093410-26-000173",
+        "0000093410-26-000175",
+        "0000093410-26-000177"
       ]
     },
     "DG": {
@@ -1616,7 +1679,17 @@
       ]
     },
     "MCHP": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 61,
+          "date": "2026-08-17",
+          "owner": "Bjornholt James Eric",
+          "role": "SENIOR CORPORATE VP AND CFO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 67177.62000000001
+        }
+      ],
       "last_checked": "2026-08-15T22:36:19.250414+00:00",
       "seen_accessions": [
         "0001181928-26-000030",
@@ -1624,7 +1697,14 @@
         "0002035446-26-000022",
         "0002035754-26-000020",
         "0000933690-26-000006",
-        "0001695803-26-000002"
+        "0001695803-26-000002",
+        "0000827054-26-000049",
+        "0001181928-26-000032",
+        "0001181941-26-000004",
+        "0001181945-26-000024",
+        "0001182953-26-000002",
+        "0001452681-26-000033",
+        "0001707073-26-000006"
       ]
     },
     "MDLZ": {
@@ -1741,7 +1821,53 @@
       ]
     },
     "NET": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-17",
+          "owner": "SEIFERT THOMAS J",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3073175.8884
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-17",
+          "owner": "Riley Janel",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 517370.2405
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-18",
+          "owner": "Riley Janel",
+          "role": "Chief Accounting Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1062624.3671
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-17",
+          "owner": "Starzak Alissa Michelle",
+          "role": "Chief Legal Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1033736.3179
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-18",
+          "owner": "Starzak Alissa Michelle",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 773277.84
+        }
+      ],
       "last_checked": "2026-08-15T22:36:21.488693+00:00",
       "seen_accessions": [
         "0001366574-26-000020",
@@ -1755,7 +1881,10 @@
         "0001786925-26-000041",
         "0001786951-26-000016",
         "0001979391-26-000013",
-        "0002128025-26-000011"
+        "0002128025-26-000011",
+        "0001473289-26-000025",
+        "0001979391-26-000015",
+        "0002128025-26-000013"
       ]
     },
     "NFE": {
@@ -1827,7 +1956,12 @@
         "0001667422-26-000031",
         "0001781064-26-000018",
         "0002103469-26-000012",
-        "0002111929-26-000014"
+        "0002111929-26-000014",
+        "0001334944-26-000034",
+        "0001465391-26-000030",
+        "0001649609-26-000032",
+        "0001667422-26-000033",
+        "0002111929-26-000016"
       ]
     },
     "NSC": {
@@ -2725,5 +2859,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-19T20:49:15.159149+00:00"
+  "updated_at": "2026-08-19T21:44:44.937081+00:00"
 }
