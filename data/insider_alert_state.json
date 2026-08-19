@@ -1063,9 +1063,21 @@
       ]
     },
     "GAIN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-18",
+          "owner": "Ritchie Taylor",
+          "role": "Chief Financial Officer",
+          "signal": "buy",
+          "type": "buy",
+          "value": 24300.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:10.037088+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002045064-26-000004"
+      ]
     },
     "GCTS": {
       "event_history": [],
@@ -2588,5 +2600,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-19T14:01:38.331614+00:00"
+  "updated_at": "2026-08-19T14:55:57.778450+00:00"
 }
