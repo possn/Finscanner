@@ -1380,9 +1380,21 @@
       ]
     },
     "HIVE": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-19",
+          "owner": "Perrill Dave",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 271910.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:12.391525+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001062993-26-004525"
+      ]
     },
     "HLLY": {
       "event_history": [],
@@ -1707,9 +1719,31 @@
       ]
     },
     "MARA": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-17",
+          "owner": "Khan Salman Hassan",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 147360.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-17",
+          "owner": "Thiel Frederick G",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 253321.05000000002
+        }
+      ],
       "last_checked": "2026-08-15T22:36:18.589785+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001493152-26-039283",
+        "0001493152-26-039284"
+      ]
     },
     "MAS": {
       "event_history": [],
@@ -2320,10 +2354,21 @@
       ]
     },
     "PYPL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-18",
+          "owner": "Kereere Suzan",
+          "role": "President, Global Markets",
+          "signal": "sell",
+          "type": "sell",
+          "value": 253722.8806
+        }
+      ],
       "last_checked": "2026-08-15T22:36:28.160872+00:00",
       "seen_accessions": [
-        "0001896086-26-000010"
+        "0001896086-26-000010",
+        "0001896086-26-000012"
       ]
     },
     "Q": {
@@ -2517,7 +2562,10 @@
     "SOFI": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:32.334332+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002012135-26-000021",
+        "0002034857-26-000012"
+      ]
     },
     "SONY": {
       "event_history": [
@@ -2912,5 +2960,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-19T22:45:56.884261+00:00"
+  "updated_at": "2026-08-19T23:41:37.947228+00:00"
 }
