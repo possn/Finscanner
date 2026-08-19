@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 10,
+    "alerts_sent": 4,
     "baselined": 0,
     "detail_failures": 21,
     "lookback_days": 10,
-    "new_filings": 44,
+    "new_filings": 27,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -211,10 +211,41 @@
       "seen_accessions": []
     },
     "ALAB": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 74,
+          "date": "2026-08-17",
+          "owner": "Mohan Jitendra",
+          "role": "Director, Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 30846356.0696
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-17",
+          "owner": "Mazzara Philip",
+          "role": "General Counsel and Secretary",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2315753.8862
+        },
+        {
+          "conviction": 74,
+          "date": "2026-08-17",
+          "owner": "Gajendra Sanjay",
+          "role": "Director, President and COO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 30846356.0696
+        }
+      ],
       "last_checked": "2026-08-15T22:35:56.595808+00:00",
       "seen_accessions": [
-        "0001484394-26-000009"
+        "0001484394-26-000009",
+        "0001998053-26-000023",
+        "0001998163-26-000022",
+        "0001998179-26-000024"
       ]
     },
     "ALGM": {
@@ -1548,12 +1579,33 @@
       "seen_accessions": []
     },
     "KTOS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-17",
+          "owner": "Carrai Phillip D",
+          "role": "President, STC Division",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1676077.32
+        },
+        {
+          "conviction": 48,
+          "date": "2026-08-17",
+          "owner": "Mendoza Marie",
+          "role": "SVP & General Counsel",
+          "signal": "sell",
+          "type": "sell",
+          "value": 97391.81000000001
+        }
+      ],
       "last_checked": "2026-08-15T22:36:16.509612+00:00",
       "seen_accessions": [
         "0001082440-26-000005",
         "0001094718-26-000009",
-        "0001509412-26-000009"
+        "0001509412-26-000009",
+        "0001509409-26-000010",
+        "0001660112-26-000010"
       ]
     },
     "KULR": {
@@ -1782,7 +1834,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:36:21.126810+00:00",
       "seen_accessions": [
-        "0001225208-26-007049"
+        "0001225208-26-007049",
+        "0001225208-26-007207"
       ]
     },
     "NBIS": {
@@ -2859,5 +2912,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-19T21:44:44.937081+00:00"
+  "updated_at": "2026-08-19T22:45:56.884261+00:00"
 }
