@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 4,
     "baselined": 0,
     "detail_failures": 13,
     "lookback_days": 10,
-    "new_filings": 16,
+    "new_filings": 19,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -55,9 +55,51 @@
       ]
     },
     "ACHR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-17",
+          "owner": "Lyon Benjamin",
+          "role": "President, Aircraft OEM",
+          "signal": "sell",
+          "type": "sell",
+          "value": 321845.6064
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-17",
+          "owner": "Lentell Eric",
+          "role": "Chief Legal & Strategy Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 338352.1536
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-17",
+          "owner": "Gupta Priya",
+          "role": "Interim CFO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 64224.191999999995
+        },
+        {
+          "conviction": 48,
+          "date": "2026-08-17",
+          "owner": "Rungta Harsh",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 89009.664
+        }
+      ],
       "last_checked": "2026-08-15T22:35:54.877133+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001870608-26-000009",
+        "0002016416-26-000020",
+        "0002036956-26-000014",
+        "0002064297-26-000008"
+      ]
     },
     "ACXP": {
       "event_history": [],
@@ -642,7 +684,17 @@
       ]
     },
     "CRWV": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-14",
+          "owner": "Magnetar Financial LLC",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 33401610.24
+        }
+      ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
       "seen_accessions": [
         "0001104659-26-097429",
@@ -664,7 +716,8 @@
         "0001769628-26-000372",
         "0001769628-26-000374",
         "0001769628-26-000376",
-        "0001769628-26-000378"
+        "0001769628-26-000378",
+        "0001104659-26-098473"
       ]
     },
     "CSAI": {
@@ -1228,10 +1281,21 @@
       "seen_accessions": []
     },
     "INDI": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 48,
+          "date": "2026-08-14",
+          "owner": "Wittmann Michael",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 174199.48919999998
+        }
+      ],
       "last_checked": "2026-08-15T22:36:14.237763+00:00",
       "seen_accessions": [
-        "0001849122-26-000015"
+        "0001849122-26-000015",
+        "0002009989-26-000022"
       ]
     },
     "INFQ": {
@@ -2504,5 +2568,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-18T23:41:09.437193+00:00"
+  "updated_at": "2026-08-19T01:56:16.542914+00:00"
 }
