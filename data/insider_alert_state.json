@@ -4,7 +4,7 @@
     "baselined": 0,
     "detail_failures": 13,
     "lookback_days": 10,
-    "new_filings": 14,
+    "new_filings": 15,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -2233,13 +2233,25 @@
       "seen_accessions": []
     },
     "SONY": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-17",
+          "owner": "Tanaka Kenji",
+          "role": "See Remarks",
+          "signal": "sell",
+          "type": "sell",
+          "value": 476599.99999999994
+        }
+      ],
       "last_checked": "2026-08-15T22:36:32.498469+00:00",
       "seen_accessions": [
         "0001193125-26-334434",
         "0001193125-26-334518",
         "0001193125-26-337792",
-        "0001193125-26-353728"
+        "0001193125-26-353728",
+        "0001193125-26-356579",
+        "0001193125-26-356583"
       ]
     },
     "SOUN": {
@@ -2600,5 +2612,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-19T14:55:57.778450+00:00"
+  "updated_at": "2026-08-19T17:44:36.534277+00:00"
 }
