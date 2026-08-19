@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 13,
     "lookback_days": 10,
-    "new_filings": 15,
+    "new_filings": 16,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -1185,9 +1185,31 @@
       "seen_accessions": []
     },
     "HAL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-18",
+          "owner": "Miller Jeffrey Allen",
+          "role": "Director, Director, President & CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4356905.0
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-18",
+          "owner": "Slocum Jeffrey Shannon",
+          "role": "Director, Director, EVP and COO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 565573.043
+        }
+      ],
       "last_checked": "2026-08-15T22:36:11.951038+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001558667-26-000020",
+        "0001970357-26-000014"
+      ]
     },
     "HD": {
       "event_history": [],
@@ -1389,10 +1411,21 @@
       ]
     },
     "JCI": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-19",
+          "owner": "Cohade Pierre E",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 487707.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:15.577707+00:00",
       "seen_accessions": [
-        "0000833444-26-000093"
+        "0000833444-26-000093",
+        "0000833444-26-000095"
       ]
     },
     "KDP": {
@@ -2633,5 +2666,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-19T18:57:18.182717+00:00"
+  "updated_at": "2026-08-19T19:43:55.128117+00:00"
 }
