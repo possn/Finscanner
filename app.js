@@ -615,6 +615,28 @@
         .sort((a,b) => (b.pf.fit + Number(b.r.score||0)*0.18) - (a.pf.fit + Number(a.r.score||0)*0.18))
         .slice(0,3) : [];
 
+      // "Perto de mínimos, boa qualidade": same gate as the "near-low"
+      // discovery preset (score>=50, within 15% of the 52-week low, not a
+      // zombie) — that filter already existed as a chip buried in a
+      // horizontally-scrolling row and was easy to miss. Surfacing the
+      // top 3 here, on the first (open-by-default) Home section, is the
+      // same underlying logic just made visible without scrolling.
+      const nearLows = rows
+        .filter(r => r.zombie !== 'yes' && r.zombie !== true && Number(r.score ?? -1) >= 50)
+        .map(r => {
+          const px = Number(r.current_price);
+          const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : [];
+          const vals = hist.map(x => Number(x.close ?? x.price ?? x.value)).filter(Number.isFinite);
+          if (!Number.isFinite(px) || !vals.length) return null;
+          const lo = Math.min(...vals);
+          if (!(lo > 0) || px > lo * 1.15) return null;
+          const distPct = (px / lo - 1) * 100; // 0 = exactly at the low, 15 = at the 15% ceiling
+          return {r, distPct, rank: Number(r.score||0) * 0.6 + (15 - distPct) * 2.6};
+        })
+        .filter(Boolean)
+        .sort((a,b) => b.rank - a.rank)
+        .slice(0,3);
+
       const risks = portfolioRows
         .map(r => {
           let risk = 0; const reasons = [];
@@ -630,6 +652,7 @@
       const lane = (title, sub, body, tone='') => `<section class="attention-lane ${tone}"><header><span><b>${title}</b><small>${sub}</small></span></header><div>${body}</div></section>`;
       const bestHtml = bestCompanies.length ? bestCompanies.map(x=>briefRowHtml(x.r, `Score ${Math.round(Number(x.r.score||0))} · Q ${Math.round(Number(x.r.quality_pct ?? x.r.profitability_pct ?? 0))}`, 'good')).join('') : `<p class="home-brief-empty">Sem candidatos com dados suficientes.</p>`;
       const fitHtml = bestFit.length ? bestFit.map(x=>briefRowHtml(x.r, `Fit ${Math.round(x.pf.fit)}/100 · Score ${Math.round(Number(x.r.score||0))}`, x.pf.fit>=75?'good':'neutral')).join('') : `<p class="home-brief-empty">${hasPortfolio?'Sem candidatos com encaixe suficiente neste momento.':'Importa o portfolio para ativar este ranking.'}</p>`;
+      const nearLowHtml = nearLows.length ? nearLows.map(x=>briefRowHtml(x.r, `${x.distPct<=0.5?'no mínimo 52s':'+'+x.distPct.toFixed(1)+'% do mínimo'} · Score ${Math.round(Number(x.r.score||0))}`, 'neutral')).join('') : `<p class="home-brief-empty">Sem candidatos de qualidade perto de mínimos neste momento.</p>`;
       const riskHtml = risks.length ? risks.map(x=>briefRowHtml(x.r, x.reasons.join(' · '), 'bad')).join('') : `<p class="home-brief-empty">Sem riscos prioritários detetados nas posições analisadas.</p>`;
 
       els.homeAttentionSummary.innerHTML = `<div class="home-brief-kpis">
@@ -640,6 +663,7 @@
       </div>
       <div class="attention-ranking">
         ${lane('Melhores empresas','força absoluta multifator',bestHtml,'attention-lane--best')}
+        ${lane('Perto de mínimos, boa qualidade','score ≥50 e a ≤15% do mínimo de 52 semanas',nearLowHtml,'attention-lane--nearlow')}
         ${lane('Melhor encaixe na carteira','boas empresas que melhoram a carteira',fitHtml,'attention-lane--fit')}
         ${lane('Riscos a rever','posições que merecem revisão primeiro',riskHtml,'attention-lane--risk')}
       </div>
