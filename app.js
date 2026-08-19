@@ -6431,7 +6431,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js?v=0.98.0").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
+      navigator.serviceWorker.register("sw.js?v=0.99.9").then(reg => reg.update()).catch(err => console.warn("SW registration failed", err));
     });
   }
 
