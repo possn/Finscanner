@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 13,
+    "detail_failures": 21,
     "lookback_days": 10,
-    "new_filings": 16,
+    "new_filings": 29,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -302,12 +302,23 @@
       ]
     },
     "AMKR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-08-17",
+          "owner": "ROGERS MARK N",
+          "role": "EVP & General Counsel",
+          "signal": "sell",
+          "type": "sell",
+          "value": 298900.0
+        }
+      ],
       "last_checked": "2026-08-15T22:35:57.479870+00:00",
       "seen_accessions": [
         "0001628280-26-054882",
         "0001628280-26-055750",
-        "0001628280-26-056790"
+        "0001628280-26-056790",
+        "0001628280-26-057994"
       ]
     },
     "AMPY": {
@@ -347,9 +358,21 @@
       "seen_accessions": []
     },
     "ARE": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-17",
+          "owner": "MARCUS JOEL S",
+          "role": "Director, Executive Chairman",
+          "signal": "buy",
+          "type": "buy",
+          "value": 231400.0
+        }
+      ],
       "last_checked": "2026-08-15T22:35:58.322327+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001216955-26-000019"
+      ]
     },
     "ARM": {
       "event_history": [],
@@ -1599,7 +1622,9 @@
         "0001181928-26-000030",
         "0001452681-26-000031",
         "0002035446-26-000022",
-        "0002035754-26-000020"
+        "0002035754-26-000020",
+        "0000933690-26-000006",
+        "0001695803-26-000002"
       ]
     },
     "MDLZ": {
@@ -1924,6 +1949,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 24509.8
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-18",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 24990.225000000002
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -1931,7 +1965,8 @@
         "0000905148-26-003613",
         "0000905148-26-003647",
         "0000905148-26-003768",
-        "0000905148-26-003803"
+        "0000905148-26-003803",
+        "0000905148-26-003815"
       ]
     },
     "ORCL": {
@@ -2140,11 +2175,22 @@
       "seen_accessions": []
     },
     "RCAT": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-17",
+          "owner": "Thompson Jeffrey M",
+          "role": "Director, Chairman of the Board, CEO, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1567500.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:29.026744+00:00",
       "seen_accessions": [
         "0001493152-26-037863",
-        "0001493152-26-037893"
+        "0001493152-26-037893",
+        "0001628280-26-057937"
       ]
     },
     "RDW": {
@@ -2264,10 +2310,21 @@
       "seen_accessions": []
     },
     "SMR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 47,
+          "date": "2026-08-17",
+          "owner": "Hamady Robert Ramsey",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 0.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:32.099499+00:00",
       "seen_accessions": [
-        "0001983680-26-000001"
+        "0001983680-26-000001",
+        "0001922054-26-000001"
       ]
     },
     "SOFI": {
@@ -2596,7 +2653,9 @@
     "WHR": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:38.156086+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001348568-26-000008"
+      ]
     },
     "WULF": {
       "event_history": [
@@ -2666,5 +2725,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-19T19:43:55.128117+00:00"
+  "updated_at": "2026-08-19T20:49:15.159149+00:00"
 }
