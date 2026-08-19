@@ -1159,6 +1159,23 @@
     catch (e) { state.thesisHistory = {}; console.warn("thesis_history.json unavailable yet", e); }
   }
 
+  // Lazy-loaded, same reasoning as ensureNewsLoaded: thesis_history.json is
+  // ~3.5MB and, per a real usage-site audit, is only ever read from inside
+  // the ticker detail dossier (thesisPanelHtml's observation count) — never
+  // from any card list. No reason to pay that download on every app open
+  // when most sessions might not open a single dossier. Re-renders the open
+  // dossier once loaded so the real observation count appears instead of
+  // staying on "histórico a iniciar".
+  let _thesisHistoryLoadPromise = null;
+  function ensureThesisHistoryLoaded(forTicker) {
+    if (!_thesisHistoryLoadPromise) {
+      _thesisHistoryLoadPromise = loadThesisHistory().then(() => {
+        if (state.openDetailTicker && state.openDetailTicker === forTicker) openDetail(forTicker);
+      });
+    }
+    return _thesisHistoryLoadPromise;
+  }
+
   function fmtSigned(v, digits=1) {
     if (v == null || !Number.isFinite(Number(v))) return "—";
     const n = Number(v);
@@ -2890,6 +2907,8 @@
     const r = state.data.stocks.find(s => s.ticker === ticker);
     if (!r) return;
     if (r.quote_type === "ETF") { openFundDetail(r); return; }
+    state.openDetailTicker = ticker;
+    ensureThesisHistoryLoaded(ticker);
 
     const zombieLabel = { yes: "SIM — cobertura de juros < 1×", no: "não", unknown: "desconhecido" }[r.zombie];
     const insider = typeof r.insider_form4_count_30d === "number"
@@ -6295,8 +6314,8 @@
     applyFilters();
   });
 
-  on(els.detailClose, "click", () => { if (els.detail) els.detail.hidden = true; });
-  on(els.detail, "click", (e) => { if (e.target === els.detail) els.detail.hidden = true; });
+  on(els.detailClose, "click", () => { if (els.detail) els.detail.hidden = true; state.openDetailTicker = null; });
+  on(els.detail, "click", (e) => { if (e.target === els.detail) { els.detail.hidden = true; state.openDetailTicker = null; } });
 
   if (els.thesisScopeFilters) els.thesisScopeFilters.querySelectorAll("[data-thesis-scope]").forEach(btn => btn.addEventListener("click", () => {
     state.thesisScope = btn.dataset.thesisScope;
@@ -6423,5 +6442,4 @@
   loadFxHistory();
   loadHistory();
   loadValuationHistory();
-  loadThesisHistory();
 })();
