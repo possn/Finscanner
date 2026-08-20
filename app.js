@@ -597,7 +597,7 @@
       const hasPortfolio = portfolio && Object.keys(portfolio).length > 0;
 
       const bestCompanies = rows
-        .filter(r => r.zombie !== 'yes' && r.zombie !== true && Number(r.score) >= 55)
+        .filter(r => r.zombie !== 'yes' && r.zombie !== true && r.thesis_direction !== 'weakening' && Number(r.score) >= 55)
         .map(r => {
           const q = Number(r.quality_pct ?? r.profitability_pct ?? 0);
           const v = Number(r.value_pct ?? 0);
@@ -622,7 +622,7 @@
       // top 3 here, on the first (open-by-default) Home section, is the
       // same underlying logic just made visible without scrolling.
       const nearLows = rows
-        .filter(r => r.zombie !== 'yes' && r.zombie !== true && Number(r.score ?? -1) >= 50)
+        .filter(r => r.zombie !== 'yes' && r.zombie !== true && r.thesis_direction !== 'weakening' && Number(r.score ?? -1) >= 50)
         .map(r => {
           const px = Number(r.current_price);
           const hist = Array.isArray(r.price_history_1y) ? r.price_history_1y : [];
@@ -812,12 +812,26 @@
     // ticker built on <50% fundamentals coverage should never surface as a
     // "worth investigating" morning idea, however high its score looks.
     const eligible = rows.filter(r => r.ticker !== featuredTicker && r.zombie !== "yes" && r.zombie !== true && Number(r.data_coverage_pct ?? 0) >= 50);
-    const strict = eligible.filter(r => Number(r.score) >= 60 && Number(r.quality_pct ?? r.profitability_pct ?? 0) >= 60 && Number(r.value_pct ?? 0) >= 45);
+    // Exclude weakening theses from the quality pools, not just from
+    // ranking bonus: a ticker whose fundamentals are actively
+    // deteriorating shouldn't be labelled a "worth investigating"
+    // opportunity at all, even if its score hasn't caught up yet —
+    // that's the classic value-trap pattern, the opposite of what this
+    // carousel is supposed to surface.
+    const strict = eligible.filter(r => r.thesis_direction !== "weakening" && Number(r.score) >= 60 && Number(r.quality_pct ?? r.profitability_pct ?? 0) >= 60 && Number(r.value_pct ?? 0) >= 45);
     // Two-step relaxation instead of an all-or-nothing cliff: a middling
     // bar before falling back to "any eligible ticker", so a quiet market
     // day doesn't jump straight from strict quality picks to no bar at all.
-    const relaxed = eligible.filter(r => Number(r.score) >= 50 && Number(r.quality_pct ?? r.profitability_pct ?? 0) >= 50);
-    const pool = strict.length >= 4 ? strict : (relaxed.length >= 4 ? relaxed : (eligible.length ? eligible : rows.filter(r => r.ticker !== featuredTicker)));
+    const relaxed = eligible.filter(r => r.thesis_direction !== "weakening" && Number(r.score) >= 50 && Number(r.quality_pct ?? r.profitability_pct ?? 0) >= 50);
+    // Floor is always `eligible` (not-zombie + coverage>=50) — that gate
+    // must never relax away, however few candidates remain. The previous
+    // version fell back to `rows` (the entire universe, zero filters at
+    // all) when `eligible` was empty, which meant on a bad enough data day
+    // this carousel could present a zombie/low-coverage/garbage-score
+    // ticker with the exact same "worth investigating" styling as a real
+    // pick — a plausible source of "recommended as an opportunity, then
+    // the dossier says sell" reports.
+    const pool = strict.length >= 4 ? strict : (relaxed.length >= 4 ? relaxed : eligible);
     const ranked = pool.slice().sort((a,b) => {
       // Thesis-strengthening bonus scales with how much the score actually
       // moved (thesis_score_delta), floored at 4pp and capped at 12pp,
