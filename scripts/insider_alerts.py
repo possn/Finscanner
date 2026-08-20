@@ -99,6 +99,80 @@ def _current_price_map() -> dict[str, float]:
     return out
 
 
+def _near_low_candidates() -> dict[str, dict]:
+    """Full rows (not just price) for the near-52-week-low check — same
+    quality gate as the Home 'Perto de mínimos, boa qualidade' lane and
+    the 'near-low' discovery preset (score>=50, within 15% of the 52-week
+    low, not a zombie, thesis not weakening) so an alert and the in-app
+    ranking never disagree about what counts as a real opportunity vs a
+    falling knife."""
+    raw = _load_json(STOCKS_PATH, {})
+    rows = raw.get("stocks") if isinstance(raw, dict) else []
+    out = {}
+    for r in rows or []:
+        ticker = str(r.get("ticker") or "").upper()
+        if not ticker:
+            continue
+        try:
+            score = float(r.get("score"))
+            px = float(r.get("current_price"))
+        except Exception:
+            continue
+        if not (score >= 50) or not (px > 0):
+            continue
+        if r.get("zombie") == "yes" or r.get("thesis_direction") == "weakening":
+            continue
+        hist = r.get("price_history_1y") or []
+        vals = [v for v in (
+            (h.get("close") if isinstance(h, dict) else None) for h in hist
+        ) if isinstance(v, (int, float))]
+        if not vals:
+            continue
+        lo = min(vals)
+        if lo <= 0:
+            continue
+        dist_pct = (px / lo - 1) * 100
+        out[ticker] = {
+            "in_zone": dist_pct <= 15,
+            "dist_pct": round(dist_pct, 1),
+            "score": round(score, 1),
+            "price": px,
+            "name": r.get("name") or ticker,
+        }
+    return out
+
+
+def _check_price_alerts(watchlist: list[str], state: dict) -> tuple[int, bool]:
+    """Alert once per 'episode' of a watchlist/portfolio ticker entering
+    the near-52-week-low quality zone — not on every hourly run while it
+    stays there. An episode ends (and can re-alert later) once the ticker
+    leaves the zone, e.g. the price recovers or the thesis turns."""
+    if not watchlist:
+        return 0, False
+    candidates = _near_low_candidates()
+    price_state = state["price_alerts"]
+    sent = 0
+    changed = False
+    for ticker in watchlist:
+        info = candidates.get(ticker)
+        was_in_zone = bool(price_state.get(ticker, {}).get("in_zone"))
+        now_in_zone = bool(info and info["in_zone"])
+        if now_in_zone and not was_in_zone:
+            _post_ntfy(
+                f"{ticker} perto do mínimo de 52 semanas",
+                f"{info['name']} está a {info['dist_pct']:.1f}% do mínimo anual, com score {info['score']:.0f}/100 e tese estável ou a reforçar. "
+                f"Preço atual: {info['price']:.2f}.",
+                priority=3,
+                tags="chart_with_downwards_trend,mag",
+                click=f"https://possn.github.io/Finscanner/#ticker={ticker}",
+            )
+            sent += 1
+        if now_in_zone != was_in_zone:
+            price_state[ticker] = {"in_zone": now_in_zone}
+            changed = True
+    return sent, changed
+
+
 def _conviction_score(group: dict, history: list[dict], cfg: dict, current_price: float | None = None) -> tuple[int, list[str]]:
     value = float(group.get("value") or 0) if group.get("known_value") else 0.0
     role = str(group.get("role") or "")
@@ -234,6 +308,8 @@ def _load_state() -> dict:
         state = {}
     if not isinstance(state.get("tickers"), dict):
         state["tickers"] = {}
+    if not isinstance(state.get("price_alerts"), dict):
+        state["price_alerts"] = {}
     state.setdefault("schema_version", 1)
     return state
 
@@ -382,6 +458,14 @@ def run() -> int:
     per_ticker = state["tickers"]
     state_changed = False
 
+    # Near-52-week-low alerts: separate concern from the Form 4 monitoring
+    # above (doesn't need a CIK, so it runs against ALL requested tickers,
+    # not just SEC-matched US issuers) but shares this same hourly job,
+    # state file, and ntfy topic rather than a whole second workflow.
+    price_alerts_sent, price_state_changed = _check_price_alerts(all_requested, state)
+    if price_state_changed:
+        state_changed = True
+
     log.info("alert universe: %d requested · %d SEC/US issuers", len(all_requested), len(us_tickers))
     new_filings = alerts_sent = detail_failures = 0
     baselined = 0
@@ -468,18 +552,19 @@ def run() -> int:
             "alerts_sent": alerts_sent,
             "detail_failures": detail_failures,
             "lookback_days": LOOKBACK_DAYS,
+            "price_alerts_sent": price_alerts_sent,
         }
         _save_state(state)
     else:
         log.info("no alert-state changes; repository will not be committed")
     log.info(
-        "done: baseline %d · new filings %d · alerts %d · detail retries %d",
-        baselined, new_filings, alerts_sent, detail_failures,
+        "done: baseline %d · new filings %d · alerts %d · detail retries %d · price alerts %d",
+        baselined, new_filings, alerts_sent, detail_failures, price_alerts_sent,
     )
     if SEND_HEARTBEAT:
         _post_ntfy(
             "Finscanner · monitor insider ativo",
-            f"Verificação automática concluída. {len(us_tickers)} emissores SEC verificados · {new_filings} novos Form 4 · {alerts_sent} alertas enviados.",
+            f"Verificação automática concluída. {len(us_tickers)} emissores SEC verificados · {new_filings} novos Form 4 · {alerts_sent} alertas insider · {price_alerts_sent} alertas de mínimos 52s.",
             priority=2,
             tags="white_check_mark,clock1",
         )
