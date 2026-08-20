@@ -1,12 +1,117 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 21,
     "lookback_days": 10,
-    "new_filings": 39,
+    "new_filings": 21,
+    "price_alerts_sent": 34,
     "requested": 479,
     "sec_issuers": 302
+  },
+  "price_alerts": {
+    "AES": {
+      "in_zone": true
+    },
+    "AFL": {
+      "in_zone": true
+    },
+    "ALGIL.PA": {
+      "in_zone": true
+    },
+    "BWXT": {
+      "in_zone": true
+    },
+    "COR.LS": {
+      "in_zone": true
+    },
+    "DG.PA": {
+      "in_zone": true
+    },
+    "EBRO.MC": {
+      "in_zone": true
+    },
+    "EQS.PA": {
+      "in_zone": true
+    },
+    "GEST.MC": {
+      "in_zone": true
+    },
+    "HEI.DE": {
+      "in_zone": true
+    },
+    "IMB.L": {
+      "in_zone": true
+    },
+    "MBG.DE": {
+      "in_zone": true
+    },
+    "MCD": {
+      "in_zone": true
+    },
+    "MNDO": {
+      "in_zone": true
+    },
+    "MWA": {
+      "in_zone": true
+    },
+    "NFC.DE": {
+      "in_zone": true
+    },
+    "NFG": {
+      "in_zone": true
+    },
+    "NKE": {
+      "in_zone": true
+    },
+    "O": {
+      "in_zone": true
+    },
+    "OPFI": {
+      "in_zone": true
+    },
+    "OTIS": {
+      "in_zone": true
+    },
+    "PEP": {
+      "in_zone": true
+    },
+    "PG": {
+      "in_zone": true
+    },
+    "PNR": {
+      "in_zone": true
+    },
+    "RAM.LS": {
+      "in_zone": true
+    },
+    "RED.MC": {
+      "in_zone": true
+    },
+    "SES": {
+      "in_zone": true
+    },
+    "SPGI": {
+      "in_zone": true
+    },
+    "STAG": {
+      "in_zone": true
+    },
+    "SWP.PA": {
+      "in_zone": true
+    },
+    "TEL": {
+      "in_zone": true
+    },
+    "UNA.AS": {
+      "in_zone": true
+    },
+    "VICI": {
+      "in_zone": true
+    },
+    "ZTS": {
+      "in_zone": true
+    }
   },
   "schema_version": 1,
   "tickers": {
@@ -3009,5 +3114,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T01:55:16.469876+00:00"
+  "updated_at": "2026-08-20T07:10:24.130549+00:00"
 }
