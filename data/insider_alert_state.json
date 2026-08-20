@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 5,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 22,
     "lookback_days": 10,
-    "new_filings": 28,
+    "new_filings": 25,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -133,10 +133,21 @@
       ]
     },
     "AAPL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-18",
+          "owner": "Newstead Jennifer",
+          "role": "SVP, GC and Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 442478.11
+        }
+      ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
       "seen_accessions": [
-        "0001140361-26-032884"
+        "0001140361-26-032884",
+        "0001140361-26-033928"
       ]
     },
     "ABEV": {
@@ -760,7 +771,10 @@
     "BTBT": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:02.431562+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001213900-26-092229",
+        "0001213900-26-092232"
+      ]
     },
     "BTCS": {
       "event_history": [],
@@ -3449,5 +3463,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T21:47:24.339644+00:00"
+  "updated_at": "2026-08-20T22:48:44.938890+00:00"
 }
