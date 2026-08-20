@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 10,
+    "alerts_sent": 5,
     "baselined": 0,
     "detail_failures": 22,
     "lookback_days": 10,
-    "new_filings": 42,
+    "new_filings": 28,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1129,6 +1129,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 799928.1109999999
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-19",
+          "owner": "Subaiya Thimaya K.",
+          "role": "EVP, Operations",
+          "signal": "sell",
+          "type": "sell",
+          "value": 650073.8181
         }
       ],
       "last_checked": "2026-08-15T22:36:05.562279+00:00",
@@ -1144,7 +1153,8 @@
         "0000858877-26-000125",
         "0000858877-26-000126",
         "0000858877-26-000127",
-        "0000858877-26-000128"
+        "0000858877-26-000128",
+        "0002015287-26-000017"
       ]
     },
     "CTRE": {
@@ -1181,6 +1191,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 3377833.1999999997
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-18",
+          "owner": "Pate R. Hewitt",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 506618.73600000003
         }
       ],
       "last_checked": "2026-08-15T22:36:06.063980+00:00",
@@ -1190,7 +1209,8 @@
         "0000093410-26-000171",
         "0000093410-26-000173",
         "0000093410-26-000175",
-        "0000093410-26-000177"
+        "0000093410-26-000177",
+        "0000093410-26-000179"
       ]
     },
     "DG": {
@@ -1225,11 +1245,21 @@
           "signal": "sell",
           "type": "sell",
           "value": 762233.78
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-19",
+          "owner": "Roeder Paul M",
+          "role": "Sr EVP and Chief Comm Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 382326.72
         }
       ],
       "last_checked": "2026-08-15T22:36:06.484410+00:00",
       "seen_accessions": [
-        "0001628280-26-057481"
+        "0001628280-26-057481",
+        "0001628280-26-058293"
       ]
     },
     "DNN": {
@@ -1584,12 +1614,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 565573.043
+        },
+        {
+          "conviction": 77,
+          "date": "2026-08-19",
+          "owner": "Slocum Jeffrey Shannon",
+          "role": "Director, Director, EVP and COO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1844751.4800000002
         }
       ],
       "last_checked": "2026-08-15T22:36:11.951038+00:00",
       "seen_accessions": [
         "0001558667-26-000020",
-        "0001970357-26-000014"
+        "0001970357-26-000014",
+        "0001970357-26-000016"
       ]
     },
     "HD": {
@@ -2141,9 +2181,21 @@
       "seen_accessions": []
     },
     "MPT": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 41,
+          "date": "2026-08-20",
+          "owner": "Hanna James Kevin",
+          "role": "Senior VP, Controller & CAO",
+          "signal": "buy",
+          "type": "buy",
+          "value": 9545.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:20.658720+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001193125-26-359423"
+      ]
     },
     "MRK": {
       "event_history": [],
@@ -2453,14 +2505,25 @@
       ]
     },
     "ONDS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 61,
+          "date": "2026-08-18",
+          "owner": "COHEN RICHARD M",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 67176.75
+        }
+      ],
       "last_checked": "2026-08-15T22:36:24.004079+00:00",
       "seen_accessions": [
         "0001213900-26-090405",
         "0001213900-26-090418",
         "0001213900-26-090420",
         "0001213900-26-090422",
-        "0001213900-26-090424"
+        "0001213900-26-090424",
+        "0001213900-26-092185"
       ]
     },
     "OPFI": {
@@ -3386,5 +3449,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T20:50:09.790926+00:00"
+  "updated_at": "2026-08-20T21:47:24.339644+00:00"
 }
