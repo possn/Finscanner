@@ -600,12 +600,32 @@
       "seen_accessions": []
     },
     "BAC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 31,
+          "date": "2026-08-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 745.0
+        },
+        {
+          "conviction": 40,
+          "date": "2026-08-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 735.5
+        }
+      ],
       "last_checked": "2026-08-15T22:35:59.858874+00:00",
       "seen_accessions": [
         "0000070858-26-000411",
         "0000070858-26-000439",
-        "0000070858-26-000449"
+        "0000070858-26-000449",
+        "0000070858-26-000451"
       ]
     },
     "BAM": {
@@ -3216,5 +3236,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T16:55:18.278887+00:00"
+  "updated_at": "2026-08-20T17:49:36.260352+00:00"
 }
