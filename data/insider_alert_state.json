@@ -1149,9 +1149,21 @@
       "seen_accessions": []
     },
     "DGXX": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 61,
+          "date": "2026-08-19",
+          "owner": "Amar Michel",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 72000.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:06.456620+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001213900-26-091969"
+      ]
     },
     "DIS": {
       "event_history": [
@@ -3194,5 +3206,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T13:15:06.484126+00:00"
+  "updated_at": "2026-08-20T15:52:13.394648+00:00"
 }
