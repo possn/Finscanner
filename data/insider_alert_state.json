@@ -1,11 +1,11 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 7,
     "baselined": 0,
     "detail_failures": 21,
     "lookback_days": 10,
-    "new_filings": 21,
-    "price_alerts_sent": 34,
+    "new_filings": 27,
+    "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -730,7 +730,71 @@
       ]
     },
     "CAH": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-18",
+          "owner": "Hollar Jason M.",
+          "role": "Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 18858855.39
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-19",
+          "owner": "Hollar Jason M.",
+          "role": "Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 10516660.200000001
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-18",
+          "owner": "Alt Aaron E",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9926140.39
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-18",
+          "owner": "Mayer Jessica L",
+          "role": "Chief Legal/Compliance Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 6952485.18
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-18",
+          "owner": "Mason Stephen M",
+          "role": "CEO, GMPD Segment",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 8274117.44
+        },
+        {
+          "conviction": 77,
+          "date": "2026-08-18",
+          "owner": "WEITZMAN DEBORAH",
+          "role": "CEO, PSS Segment",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1731523.8599999999
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-18",
+          "owner": "Greene Michelle D.",
+          "role": "Chief Information Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2746186.58
+        }
+      ],
       "last_checked": "2026-08-15T22:36:02.988150+00:00",
       "seen_accessions": [
         "0000721371-26-000027",
@@ -748,7 +812,13 @@
         "0001942639-26-000002",
         "0001945228-26-000004",
         "0001945352-26-000002",
-        "0002102673-26-000006"
+        "0002102673-26-000006",
+        "0001687858-26-000003",
+        "0001741576-26-000006",
+        "0001771383-26-000003",
+        "0001786065-26-000003",
+        "0001942639-26-000003",
+        "0001945228-26-000005"
       ]
     },
     "CARR": {
@@ -3114,5 +3184,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T07:10:24.130549+00:00"
+  "updated_at": "2026-08-20T11:47:16.133259+00:00"
 }
