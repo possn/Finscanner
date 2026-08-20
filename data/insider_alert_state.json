@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 10,
     "baselined": 0,
-    "detail_failures": 21,
+    "detail_failures": 22,
     "lookback_days": 10,
-    "new_filings": 22,
+    "new_filings": 42,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -424,6 +424,24 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 7723649.999999999
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-18",
+          "owner": "Hahn Ava",
+          "role": "SVP, GC & Corporate Secretary",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1462649.17
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-18",
+          "owner": "Su Lisa T",
+          "role": "Director, Chair, President & CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 7214067.340000001
         }
       ],
       "last_checked": "2026-08-15T22:35:57.292474+00:00",
@@ -445,7 +463,9 @@
         "0000002488-26-000155",
         "0000002488-26-000157",
         "0000002488-26-000159",
-        "0000002488-26-000161"
+        "0000002488-26-000161",
+        "0000002488-26-000165",
+        "0000002488-26-000167"
       ]
     },
     "AMKR": {
@@ -823,6 +843,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 2746186.58
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-19",
+          "owner": "Scherer Mary C.",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 546472.78
         }
       ],
       "last_checked": "2026-08-15T22:36:02.988150+00:00",
@@ -848,7 +877,8 @@
         "0001771383-26-000003",
         "0001786065-26-000003",
         "0001942639-26-000003",
-        "0001945228-26-000005"
+        "0001945228-26-000005",
+        "0001945352-26-000003"
       ]
     },
     "CARR": {
@@ -1586,6 +1616,33 @@
           "signal": "sell",
           "type": "sell",
           "value": 261802.2172
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-19",
+          "owner": "Boughton Soleil",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 691808.05
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-18",
+          "owner": "Autor Deborah M.",
+          "role": "Director, Chief Policy Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 467128.05000000005
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-19",
+          "owner": "Okupe Oluyemi",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 148111.3596
         }
       ],
       "last_checked": "2026-08-15T22:36:12.271900+00:00",
@@ -1610,7 +1667,10 @@
         "0001773751-26-000215",
         "0001773751-26-000205",
         "0001773751-26-000206",
-        "0001773751-26-000207"
+        "0001773751-26-000207",
+        "0001837817-26-000011",
+        "0001884671-26-000004",
+        "0001907056-26-000022"
       ]
     },
     "HIVE": {
@@ -2422,6 +2482,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 24990.225000000002
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-19",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25053.350000000002
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -2430,7 +2499,8 @@
         "0000905148-26-003647",
         "0000905148-26-003768",
         "0000905148-26-003803",
-        "0000905148-26-003815"
+        "0000905148-26-003815",
+        "0000905148-26-003842"
       ]
     },
     "ORCL": {
@@ -2509,7 +2579,17 @@
       ]
     },
     "PG": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 64,
+          "date": "2026-08-18",
+          "owner": "Whaley Susan Street",
+          "role": "Chief Legal Officer & Secy",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1244736.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
       "seen_accessions": [
         "0000080424-26-000105",
@@ -2524,7 +2604,15 @@
         "0000080424-26-000114",
         "0000080424-26-000115",
         "0000080424-26-000116",
-        "0000080424-26-000119"
+        "0000080424-26-000119",
+        "0000080424-26-000133",
+        "0000080424-26-000134",
+        "0000080424-26-000135",
+        "0000080424-26-000136",
+        "0000080424-26-000137",
+        "0000080424-26-000138",
+        "0000080424-26-000139",
+        "0000080424-26-000140"
       ]
     },
     "PGNY": {
@@ -2728,9 +2816,41 @@
       "seen_accessions": []
     },
     "RGTI": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 48,
+          "date": "2026-08-20",
+          "owner": "Bestwick Andrew Joseph",
+          "role": "CHIEF TECHNOLOGY OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 97319.4923
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Rivas David",
+          "role": "CHIEF OPERATING OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 151734.463
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-20",
+          "owner": "Bertelsen Jeffrey A.",
+          "role": "CHIEF FINANCIAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 65186.522
+        }
+      ],
       "last_checked": "2026-08-15T22:36:29.901748+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001123292-26-001151",
+        "0001123292-26-001152",
+        "0001123292-26-001153"
+      ]
     },
     "RIO": {
       "event_history": [],
@@ -2827,12 +2947,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 0.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-18",
+          "owner": "Fujino Shinji",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 177160.0
         }
       ],
       "last_checked": "2026-08-15T22:36:32.099499+00:00",
       "seen_accessions": [
         "0001983680-26-000001",
-        "0001922054-26-000001"
+        "0001922054-26-000001",
+        "0001957490-26-000004"
       ]
     },
     "SOFI": {
@@ -2937,12 +3067,32 @@
       "seen_accessions": []
     },
     "TENB": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-18",
+          "owner": "Zecher Linda Kay",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 24822.0
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-19",
+          "owner": "Zecher Linda Kay",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 24674.399999999998
+        }
+      ],
       "last_checked": "2026-08-15T22:36:34.540956+00:00",
       "seen_accessions": [
         "0001345943-26-000010",
         "0001585799-26-000004",
-        "0001878127-26-000006"
+        "0001878127-26-000006",
+        "0001585799-26-000006"
       ]
     },
     "TGT": {
@@ -3236,5 +3386,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T17:49:36.260352+00:00"
+  "updated_at": "2026-08-20T20:50:09.790926+00:00"
 }
