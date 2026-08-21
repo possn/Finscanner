@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 5,
+    "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 28,
+    "detail_failures": 29,
     "lookback_days": 10,
-    "new_filings": 31,
+    "new_filings": 30,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -483,6 +483,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 7214067.340000001
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Papermaster Mark D",
+          "role": "Chief Technology Officer & EVP",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 13595067.399999999
         }
       ],
       "last_checked": "2026-08-15T22:35:57.292474+00:00",
@@ -506,7 +515,8 @@
         "0000002488-26-000159",
         "0000002488-26-000161",
         "0000002488-26-000165",
-        "0000002488-26-000167"
+        "0000002488-26-000167",
+        "0000002488-26-000174"
       ]
     },
     "AMKR": {
@@ -3699,5 +3709,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-21T21:43:39.856339+00:00"
+  "updated_at": "2026-08-21T22:45:56.102043+00:00"
 }
