@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 9,
     "baselined": 0,
     "detail_failures": 23,
     "lookback_days": 10,
-    "new_filings": 27,
+    "new_filings": 36,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -231,7 +231,9 @@
     "ADC": {
       "event_history": [],
       "last_checked": "2026-08-15T22:35:55.178412+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001879562-26-000004"
+      ]
     },
     "ADM": {
       "event_history": [],
@@ -325,9 +327,21 @@
       ]
     },
     "AGNC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-19",
+          "owner": "Bell Bernice",
+          "role": "EVP, CFO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 166000.0
+        }
+      ],
       "last_checked": "2026-08-15T22:35:55.913433+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001423689-26-000130"
+      ]
     },
     "AGRO": {
       "event_history": [],
@@ -1683,9 +1697,23 @@
       ]
     },
     "HD": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-19",
+          "owner": "McPhail Richard V",
+          "role": "EVP & CFO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2086567.5999999999
+        }
+      ],
       "last_checked": "2026-08-15T22:36:12.049331+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000354950-26-000152",
+        "0000354950-26-000153",
+        "0000354950-26-000154"
+      ]
     },
     "HIMS": {
       "event_history": [
@@ -1926,6 +1954,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 80113.94
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-19",
+          "owner": "SANTI ERNEST SCOTT",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 11894421.23
         }
       ],
       "last_checked": "2026-08-15T22:36:15.337287+00:00",
@@ -1934,7 +1971,8 @@
         "0000049826-26-000052",
         "0000049826-26-000053",
         "0001426641-26-000010",
-        "0002140217-26-000002"
+        "0002140217-26-000002",
+        "0001307581-26-000016"
       ]
     },
     "JCI": {
@@ -2218,9 +2256,21 @@
       ]
     },
     "MDLZ": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-19",
+          "owner": "Van de Put Dirk",
+          "role": "Director, Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 8559806.4
+        }
+      ],
       "last_checked": "2026-08-15T22:36:19.529475+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001628280-26-058409"
+      ]
     },
     "MDT": {
       "event_history": [],
@@ -2635,6 +2685,24 @@
           "signal": "buy",
           "type": "buy",
           "value": 25053.350000000002
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-19",
+          "owner": "Vennettilli David",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 203966.8425
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 24597.12
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -2644,7 +2712,9 @@
         "0000905148-26-003768",
         "0000905148-26-003803",
         "0000905148-26-003815",
-        "0000905148-26-003842"
+        "0000905148-26-003842",
+        "0000905148-26-003868",
+        "0000905148-26-003869"
       ]
     },
     "ORCL": {
@@ -2916,7 +2986,9 @@
     "QUBT": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:28.952603+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001213900-26-092621"
+      ]
     },
     "RCAT": {
       "event_history": [
@@ -3295,9 +3367,41 @@
       "seen_accessions": []
     },
     "UMAC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 60,
+          "date": "2026-08-20",
+          "owner": "Wright Stacy Rochelle",
+          "role": "Chief Revenue Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 714958.75
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Camden Andrew Ross",
+          "role": "President",
+          "signal": "sell",
+          "type": "sell",
+          "value": 250333.73750000002
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Hoff Brian Joseph",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 296819.0323
+        }
+      ],
       "last_checked": "2026-08-15T22:36:35.906655+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001683168-26-006651",
+        "0001683168-26-006652",
+        "0001683168-26-006653"
+      ]
     },
     "UP": {
       "event_history": [],
@@ -3545,5 +3649,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-21T19:00:23.866232+00:00"
+  "updated_at": "2026-08-21T20:44:08.423632+00:00"
 }
