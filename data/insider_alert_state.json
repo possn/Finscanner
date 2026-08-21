@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 9,
+    "alerts_sent": 5,
     "baselined": 0,
-    "detail_failures": 23,
+    "detail_failures": 28,
     "lookback_days": 10,
-    "new_filings": 36,
+    "new_filings": 31,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1024,13 +1024,24 @@
       "seen_accessions": []
     },
     "CRCL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "BURNS M MICHELE",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 283653.16
+        }
+      ],
       "last_checked": "2026-08-15T22:36:04.822314+00:00",
       "seen_accessions": [
         "0001876042-26-000250",
         "0001876042-26-000251",
         "0001876042-26-000253",
-        "0001876042-26-000254"
+        "0001876042-26-000254",
+        "0001876042-26-000256"
       ]
     },
     "CRML": {
@@ -2439,6 +2450,33 @@
           "signal": "sell",
           "type": "sell",
           "value": 773277.84
+        },
+        {
+          "conviction": 77,
+          "date": "2026-08-19",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, President and Board Co-Chair",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9723613.3566
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-20",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, President and Board Co-Chair",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9407946.988000002
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-21",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, President and Board Co-Chair",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9156123.4169
         }
       ],
       "last_checked": "2026-08-15T22:36:21.488693+00:00",
@@ -2457,7 +2495,8 @@
         "0002128025-26-000011",
         "0001473289-26-000025",
         "0001979391-26-000015",
-        "0002128025-26-000013"
+        "0002128025-26-000013",
+        "0001786951-26-000018"
       ]
     },
     "NFE": {
@@ -2970,10 +3009,21 @@
       ]
     },
     "QCOM": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-21",
+          "owner": "Grech Patricia Y",
+          "role": "SVP, Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 101781.25
+        }
+      ],
       "last_checked": "2026-08-15T22:36:28.605134+00:00",
       "seen_accessions": [
-        "0000804328-26-000091"
+        "0000804328-26-000091",
+        "0000804328-26-000092"
       ]
     },
     "QSR": {
@@ -3649,5 +3699,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-21T20:44:08.423632+00:00"
+  "updated_at": "2026-08-21T21:43:39.856339+00:00"
 }
