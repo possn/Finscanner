@@ -1,11 +1,11 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 22,
     "lookback_days": 10,
-    "new_filings": 25,
-    "price_alerts_sent": 0,
+    "new_filings": 22,
+    "price_alerts_sent": 2,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -17,6 +17,9 @@
       "in_zone": true
     },
     "ALGIL.PA": {
+      "in_zone": true
+    },
+    "BSX": {
       "in_zone": true
     },
     "BWXT": {
@@ -77,7 +80,7 @@
       "in_zone": true
     },
     "PG": {
-      "in_zone": true
+      "in_zone": false
     },
     "PNR": {
       "in_zone": true
@@ -89,6 +92,9 @@
       "in_zone": true
     },
     "SES": {
+      "in_zone": true
+    },
+    "SGSN.SW": {
       "in_zone": true
     },
     "SPGI": {
@@ -3493,5 +3499,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-20T23:44:21.151443+00:00"
+  "updated_at": "2026-08-21T07:11:30.641196+00:00"
 }
