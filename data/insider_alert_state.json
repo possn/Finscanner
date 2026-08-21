@@ -1268,11 +1268,21 @@
           "signal": "buy",
           "type": "buy",
           "value": 72000.0
+        },
+        {
+          "conviction": 72,
+          "date": "2026-08-20",
+          "owner": "Amar Alec",
+          "role": "Director, President",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 38600.0
         }
       ],
       "last_checked": "2026-08-15T22:36:06.456620+00:00",
       "seen_accessions": [
-        "0001213900-26-091969"
+        "0001213900-26-091969",
+        "0001213900-26-092493"
       ]
     },
     "DIS": {
@@ -3531,5 +3541,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-21T16:55:45.683440+00:00"
+  "updated_at": "2026-08-21T17:49:50.839977+00:00"
 }
