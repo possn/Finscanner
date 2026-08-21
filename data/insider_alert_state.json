@@ -4,7 +4,7 @@
     "baselined": 0,
     "detail_failures": 22,
     "lookback_days": 10,
-    "new_filings": 24,
+    "new_filings": 23,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1961,11 +1961,22 @@
       "seen_accessions": []
     },
     "KO": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-19",
+          "owner": "QUAN NANCY",
+          "role": "Executive Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4519260.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:16.086389+00:00",
       "seen_accessions": [
         "0000021344-26-000161",
-        "0000021344-26-000163"
+        "0000021344-26-000163",
+        "0000021344-26-000165"
       ]
     },
     "KOS": {
@@ -3520,5 +3531,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-21T14:02:38.175007+00:00"
+  "updated_at": "2026-08-21T16:55:45.683440+00:00"
 }
