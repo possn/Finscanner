@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 12,
     "baselined": 0,
-    "detail_failures": 29,
+    "detail_failures": 27,
     "lookback_days": 10,
-    "new_filings": 32,
+    "new_filings": 40,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -213,6 +213,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 89009.664
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-20",
+          "owner": "Lentell Eric",
+          "role": "Chief Strategy Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 631000.0
         }
       ],
       "last_checked": "2026-08-15T22:35:54.877133+00:00",
@@ -220,7 +229,8 @@
         "0001870608-26-000009",
         "0002016416-26-000020",
         "0002036956-26-000014",
-        "0002064297-26-000008"
+        "0002064297-26-000008",
+        "0002016416-26-000022"
       ]
     },
     "ACXP": {
@@ -1121,6 +1131,78 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 29450776.553600002
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-20",
+          "owner": "Agrawal Nitin",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 924496.5599999999
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Baker Jeff",
+          "role": "Principal Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 115401.28
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-20",
+          "owner": "Goldberg Chen",
+          "role": "EVP, Product & Engineering",
+          "signal": "sell",
+          "type": "sell",
+          "value": 792740.64
+        },
+        {
+          "conviction": 77,
+          "date": "2026-08-20",
+          "owner": "Intrator Michael N",
+          "role": "Director, CEO and President, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1206292.52
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-20",
+          "owner": "Jain Sachin",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 582427.32
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 331686.8
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "McVeety Kristen J",
+          "role": "GC and Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 365682.39999999997
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-20",
+          "owner": "Venturo Brian M",
+          "role": "Director, Chief Strategy Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 542000.12
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -1150,7 +1232,15 @@
         "0001769628-26-000387",
         "0001769628-26-000388",
         "0001769628-26-000389",
-        "0001769628-26-000390"
+        "0001769628-26-000390",
+        "0001769628-26-000392",
+        "0001769628-26-000394",
+        "0001769628-26-000396",
+        "0001769628-26-000398",
+        "0001769628-26-000400",
+        "0001769628-26-000402",
+        "0001769628-26-000404",
+        "0001769628-26-000406"
       ]
     },
     "CSAI": {
@@ -1935,10 +2025,30 @@
       ]
     },
     "INFQ": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-19",
+          "owner": "MAVERICK CAPITAL LTD",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 421657.95300000004
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-21",
+          "owner": "MAVERICK CAPITAL LTD",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2146008.48
+        }
+      ],
       "last_checked": "2026-08-15T22:36:14.296361+00:00",
       "seen_accessions": [
-        "0001012975-26-000796"
+        "0001012975-26-000796",
+        "0001012975-26-000818"
       ]
     },
     "INTC": {
@@ -2859,9 +2969,41 @@
       "seen_accessions": []
     },
     "PDYN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-21",
+          "owner": "GARAGIC DENIS",
+          "role": "CHIEF TECHNOLOGY OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 106271.8195
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-21",
+          "owner": "SONNE STEPHEN",
+          "role": "CHIEF LEGAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 32894.6849
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-21",
+          "owner": "THATCHER TREVOR",
+          "role": "CHIEF FINANCIAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 28552.6604
+        }
+      ],
       "last_checked": "2026-08-15T22:36:25.709082+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001920634-26-000020",
+        "0001998996-26-000020",
+        "0002014215-26-000020"
+      ]
     },
     "PEP": {
       "event_history": [],
@@ -3739,5 +3881,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-21T23:43:05.437684+00:00"
+  "updated_at": "2026-08-22T01:54:37.679383+00:00"
 }
