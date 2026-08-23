@@ -5,13 +5,13 @@
     "detail_failures": 29,
     "lookback_days": 10,
     "new_filings": 29,
-    "price_alerts_sent": 2,
+    "price_alerts_sent": 1,
     "requested": 479,
     "sec_issuers": 302
   },
   "price_alerts": {
     "ACXP": {
-      "in_zone": true
+      "in_zone": false
     },
     "AES": {
       "in_zone": true
@@ -74,7 +74,7 @@
       "in_zone": true
     },
     "OPFI": {
-      "in_zone": false
+      "in_zone": true
     },
     "OTIS": {
       "in_zone": true
@@ -3884,5 +3884,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-22T07:03:29.713814+00:00"
+  "updated_at": "2026-08-23T07:05:43.816362+00:00"
 }
