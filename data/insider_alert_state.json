@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 29,
     "lookback_days": 10,
-    "new_filings": 30,
+    "new_filings": 32,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -2216,13 +2216,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 4519260.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Pietracci Bruno",
+          "role": "Other",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 10126452.8595
         }
       ],
       "last_checked": "2026-08-15T22:36:16.086389+00:00",
       "seen_accessions": [
         "0000021344-26-000161",
         "0000021344-26-000163",
-        "0000021344-26-000165"
+        "0000021344-26-000165",
+        "0000021344-26-000167"
       ]
     },
     "KOS": {
@@ -3070,6 +3080,24 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1244736.0
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-20",
+          "owner": "Pritchard Marc S.",
+          "role": "Chief Brand Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 579473.7
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Whaley Susan Street",
+          "role": "Chief Legal Officer & Secy",
+          "signal": "sell",
+          "type": "sell",
+          "value": 321802.01999999996
         }
       ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
@@ -3098,7 +3126,9 @@
         "0000080424-26-000141",
         "0000080424-26-000142",
         "0000080424-26-000143",
-        "0000080424-26-000144"
+        "0000080424-26-000144",
+        "0000080424-26-000146",
+        "0000080424-26-000147"
       ]
     },
     "PGNY": {
@@ -3928,5 +3958,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T15:59:15.646433+00:00"
+  "updated_at": "2026-08-24T16:58:37.221245+00:00"
 }
