@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 7,
     "baselined": 0,
     "detail_failures": 37,
     "lookback_days": 10,
-    "new_filings": 39,
+    "new_filings": 45,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -3110,6 +3110,69 @@
           "signal": "sell",
           "type": "sell",
           "value": 321802.01999999996
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Gama Paul",
+          "role": "CEO- Health Care",
+          "signal": "sell",
+          "type": "sell",
+          "value": 488310.83999999997
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-20",
+          "owner": "Jejurikar Shailesh",
+          "role": "Director, Chairman, President and CEO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 888047.0399999999
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Purushothaman Balaji",
+          "role": "Chief Human Resources Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 290312.01
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Bharucha Freddy P.",
+          "role": "CEO - Beauty",
+          "signal": "sell",
+          "type": "sell",
+          "value": 35372.34
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-20",
+          "owner": "Schulten Andre",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 776753.58
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-20",
+          "owner": "Janzaruk Matthew W.",
+          "role": "SVP - Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 22431.239999999998
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Santos de Azevedo Juliana Monteiro",
+          "role": "CEO - Grooming",
+          "signal": "sell",
+          "type": "sell",
+          "value": 340494.72
         }
       ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
@@ -3140,7 +3203,14 @@
         "0000080424-26-000143",
         "0000080424-26-000144",
         "0000080424-26-000146",
-        "0000080424-26-000147"
+        "0000080424-26-000147",
+        "0000080424-26-000148",
+        "0000080424-26-000149",
+        "0000080424-26-000150",
+        "0000080424-26-000151",
+        "0000080424-26-000153",
+        "0000080424-26-000154",
+        "0000080424-26-000155"
       ]
     },
     "PGNY": {
@@ -3575,9 +3645,30 @@
       ]
     },
     "SRTS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 58,
+          "date": "2026-08-20",
+          "owner": "Sachetta Eric",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 75072.0
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-21",
+          "owner": "Sachetta Eric",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 22778.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:33.105504+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002097345-26-000010"
+      ]
     },
     "STAG": {
       "event_history": [],
@@ -3981,5 +4072,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T19:04:30.981497+00:00"
+  "updated_at": "2026-08-24T19:48:49.331269+00:00"
 }
