@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 8,
+    "alerts_sent": 3,
     "baselined": 0,
-    "detail_failures": 37,
+    "detail_failures": 44,
     "lookback_days": 10,
-    "new_filings": 48,
+    "new_filings": 59,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1123,6 +1123,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 283653.16
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-21",
+          "owner": "Fox-Geen Jeremy",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4050000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:04.822314+00:00",
@@ -1131,7 +1140,8 @@
         "0001876042-26-000251",
         "0001876042-26-000253",
         "0001876042-26-000254",
-        "0001876042-26-000256"
+        "0001876042-26-000256",
+        "0001876042-26-000257"
       ]
     },
     "CRML": {
@@ -1525,7 +1535,15 @@
     "DT": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:07.129084+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001221302-26-000002",
+        "0001257774-26-000002",
+        "0001443483-26-000002",
+        "0001639368-26-000002",
+        "0001664367-26-000002",
+        "0001775679-26-000011",
+        "0001991569-26-000006"
+      ]
     },
     "DVN": {
       "event_history": [],
@@ -2537,7 +2555,9 @@
     "MDT": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:19.591222+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001984186-26-000008"
+      ]
     },
     "MET": {
       "event_history": [],
@@ -3722,10 +3742,61 @@
       "seen_accessions": []
     },
     "SPIR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 61,
+          "date": "2026-08-20",
+          "owner": "ENGEL ALISON K",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 60389.74
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-20",
+          "owner": "Platzer Peter",
+          "role": "Director, Executive Chairman",
+          "signal": "sell",
+          "type": "sell",
+          "value": 71859.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Condor Theresa",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 317053.18
+        },
+        {
+          "conviction": 48,
+          "date": "2026-08-20",
+          "owner": "Pelez Perez Celia",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 63179.56
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-20",
+          "owner": "Oehme Johann Gabriel",
+          "role": "Chief Technology Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 42115.01
+        }
+      ],
       "last_checked": "2026-08-15T22:36:32.943743+00:00",
       "seen_accessions": [
-        "0002147807-26-000005"
+        "0002147807-26-000005",
+        "0001417341-26-000002",
+        "0001856366-26-000002",
+        "0001856513-26-000004",
+        "0002051460-26-000002",
+        "0002122771-26-000003"
       ]
     },
     "SRTS": {
@@ -3843,9 +3914,21 @@
       ]
     },
     "TGT": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-21",
+          "owner": "LIEGEL MATTHEW A",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 151410.25999999998
+        }
+      ],
       "last_checked": "2026-08-15T22:36:34.638151+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001921955-26-000014"
+      ]
     },
     "TMC": {
       "event_history": [],
@@ -4178,5 +4261,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T20:52:26.214147+00:00"
+  "updated_at": "2026-08-24T21:47:53.176054+00:00"
 }
