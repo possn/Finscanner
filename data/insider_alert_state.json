@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 2,
     "baselined": 0,
     "detail_failures": 29,
     "lookback_days": 10,
-    "new_filings": 30,
+    "new_filings": 31,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -688,11 +688,21 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 4984000.0
+        },
+        {
+          "conviction": 88,
+          "date": "2026-08-24",
+          "owner": "Tsai Joseph C",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 10288800.0
         }
       ],
       "last_checked": "2026-08-15T22:35:59.696789+00:00",
       "seen_accessions": [
-        "0001193125-26-361711"
+        "0001193125-26-361711",
+        "0001193125-26-361902"
       ]
     },
     "BAC": {
@@ -847,9 +857,21 @@
       "seen_accessions": []
     },
     "BULL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-21",
+          "owner": "James Benjamin Worthy",
+          "role": "Director, General Counsel",
+          "signal": "sell",
+          "type": "sell",
+          "value": 453276.44989999995
+        }
+      ],
       "last_checked": "2026-08-15T22:36:02.682402+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002092820-26-000002"
+      ]
     },
     "BWXT": {
       "event_history": [],
@@ -3896,5 +3918,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T10:07:33.769711+00:00"
+  "updated_at": "2026-08-24T13:17:57.491835+00:00"
 }
