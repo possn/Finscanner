@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 0,
     "baselined": 0,
-    "detail_failures": 29,
+    "detail_failures": 37,
     "lookback_days": 10,
-    "new_filings": 32,
+    "new_filings": 39,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1747,13 +1747,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 345571.2
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-20",
+          "owner": "Azar Samak L",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 16207.300000000001
         }
       ],
       "last_checked": "2026-08-15T22:36:10.671900+00:00",
       "seen_accessions": [
         "0001628280-26-055095",
         "0001628280-26-057360",
-        "0001628280-26-058190"
+        "0001628280-26-058190",
+        "0001709048-26-000221"
       ]
     },
     "GILD": {
@@ -3338,6 +3348,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 54329.799999999996
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Halverson Kenneth",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 26204.4
         }
       ],
       "last_checked": "2026-08-15T22:36:29.701964+00:00",
@@ -3347,7 +3366,8 @@
         "0001193125-26-336946",
         "0001193125-26-338284",
         "0001193125-26-338299",
-        "0001193125-26-360101"
+        "0001193125-26-360101",
+        "0001193125-26-362746"
       ]
     },
     "REXR": {
@@ -3958,5 +3978,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T16:58:37.221245+00:00"
+  "updated_at": "2026-08-24T17:50:27.297155+00:00"
 }
