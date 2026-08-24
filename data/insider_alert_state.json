@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 7,
+    "alerts_sent": 8,
     "baselined": 0,
     "detail_failures": 37,
     "lookback_days": 10,
-    "new_filings": 45,
+    "new_filings": 48,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -257,7 +257,26 @@
       ]
     },
     "ADP": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Kwon David",
+          "role": "Corp VP",
+          "signal": "sell",
+          "type": "sell",
+          "value": 223440.0
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-21",
+          "owner": "Michaud Brian L.",
+          "role": "Executive VP",
+          "signal": "sell",
+          "type": "sell",
+          "value": 33564.0
+        }
+      ],
       "last_checked": "2026-08-15T22:35:55.388519+00:00",
       "seen_accessions": [
         "0001225208-26-007005",
@@ -272,7 +291,9 @@
         "0001225208-26-007014",
         "0001225208-26-007015",
         "0001225208-26-007016",
-        "0001225208-26-007018"
+        "0001225208-26-007018",
+        "0001225208-26-007306",
+        "0001225208-26-007307"
       ]
     },
     "AES": {
@@ -2380,7 +2401,17 @@
       "seen_accessions": []
     },
     "MAIN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-21",
+          "owner": "Morris Jesse E",
+          "role": "EVP AND  COO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2049250.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:18.512937+00:00",
       "seen_accessions": [
         "0001007549-26-000008",
@@ -2392,7 +2423,8 @@
         "0001437113-26-000015",
         "0001448240-26-000017",
         "0001525628-26-000008",
-        "0001667260-26-000009"
+        "0001667260-26-000009",
+        "0001596070-26-000005"
       ]
     },
     "MARA": {
@@ -2961,6 +2993,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 24597.12
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-21",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25103.825
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -2972,7 +3013,8 @@
         "0000905148-26-003815",
         "0000905148-26-003842",
         "0000905148-26-003868",
-        "0000905148-26-003869"
+        "0000905148-26-003869",
+        "0000905148-26-003882"
       ]
     },
     "ORCL": {
@@ -3007,7 +3049,9 @@
     "PANW": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:25.149530+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001882285-26-000017"
+      ]
     },
     "PATH": {
       "event_history": [
@@ -3173,6 +3217,42 @@
           "signal": "sell",
           "type": "sell",
           "value": 340494.72
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-21",
+          "owner": "Raman Sundar G.",
+          "role": "CEO-Fabric Home & Habitat Care",
+          "signal": "sell",
+          "type": "sell",
+          "value": 491273.7
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-20",
+          "owner": "Abd El Hak Hesham",
+          "role": "CEO-Baby and Feminine Care",
+          "signal": "sell",
+          "type": "sell",
+          "value": 278377.44
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-19",
+          "owner": "Aguilar Moses Victor Javier",
+          "role": "Chf Rsch, Dev & Innov Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 438990.87
+        },
+        {
+          "conviction": 48,
+          "date": "2026-08-24",
+          "owner": "Janzaruk Matthew W.",
+          "role": "SVP - Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 52141.16
         }
       ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
@@ -3210,7 +3290,11 @@
         "0000080424-26-000151",
         "0000080424-26-000153",
         "0000080424-26-000154",
-        "0000080424-26-000155"
+        "0000080424-26-000155",
+        "0000080424-26-000156",
+        "0000080424-26-000157",
+        "0000080424-26-000158",
+        "0000080424-26-000159"
       ]
     },
     "PGNY": {
@@ -3663,11 +3747,21 @@
           "signal": "buy",
           "type": "buy",
           "value": 22778.0
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-20",
+          "owner": "Sardano Joseph C",
+          "role": "Director, CHIEF EXECUTIVE OFFICER",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 60486.00000000001
         }
       ],
       "last_checked": "2026-08-15T22:36:33.105504+00:00",
       "seen_accessions": [
-        "0002097345-26-000010"
+        "0002097345-26-000010",
+        "0001300111-26-000002"
       ]
     },
     "STAG": {
@@ -3860,9 +3954,21 @@
       ]
     },
     "VERI": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-21",
+          "owner": "Steelberg Ryan",
+          "role": "Director, PRESIDENT AND CEO",
+          "signal": "buy",
+          "type": "buy",
+          "value": 126637.31
+        }
+      ],
       "last_checked": "2026-08-15T22:36:36.785492+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001705446-26-000012"
+      ]
     },
     "VFC": {
       "event_history": [
@@ -4072,5 +4178,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T19:48:49.331269+00:00"
+  "updated_at": "2026-08-24T20:52:26.214147+00:00"
 }
