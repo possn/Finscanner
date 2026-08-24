@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 44,
     "lookback_days": 10,
-    "new_filings": 59,
+    "new_filings": 46,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -684,7 +684,8 @@
         "0001493152-26-039316",
         "0001493152-26-039317",
         "0001493152-26-039319",
-        "0001493152-26-039321"
+        "0001493152-26-039321",
+        "0001493152-26-039925"
       ]
     },
     "ATAI": {
@@ -3702,11 +3703,22 @@
       ]
     },
     "SOFI": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-08-20",
+          "owner": "Keough Kelli",
+          "role": "EVP, GBUL, SIPS",
+          "signal": "sell",
+          "type": "sell",
+          "value": 203184.1152
+        }
+      ],
       "last_checked": "2026-08-15T22:36:32.334332+00:00",
       "seen_accessions": [
         "0002012135-26-000021",
-        "0002034857-26-000012"
+        "0002034857-26-000012",
+        "0002032458-26-000024"
       ]
     },
     "SONY": {
@@ -4261,5 +4273,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T21:47:53.176054+00:00"
+  "updated_at": "2026-08-24T22:47:46.712184+00:00"
 }
