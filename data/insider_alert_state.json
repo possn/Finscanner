@@ -1,11 +1,11 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 29,
     "lookback_days": 10,
-    "new_filings": 29,
-    "price_alerts_sent": 1,
+    "new_filings": 30,
+    "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -679,9 +679,21 @@
       "seen_accessions": []
     },
     "BABA": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 70,
+          "date": "2026-08-24",
+          "owner": "Wu Yongming",
+          "role": "Director, Chief Executive Officer",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 4984000.0
+        }
+      ],
       "last_checked": "2026-08-15T22:35:59.696789+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001193125-26-361711"
+      ]
     },
     "BAC": {
       "event_history": [
@@ -3884,5 +3896,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-23T07:05:43.816362+00:00"
+  "updated_at": "2026-08-24T10:07:33.769711+00:00"
 }
