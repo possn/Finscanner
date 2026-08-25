@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 3,
     "baselined": 0,
-    "detail_failures": 44,
+    "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 46,
+    "new_filings": 48,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -3353,6 +3353,33 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 2788462.8317
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Buckley Jeffrey",
+          "role": "See Remarks",
+          "signal": "sell",
+          "type": "sell",
+          "value": 359270.99669999996
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-21",
+          "owner": "Buckley Jeffrey",
+          "role": "See Remarks",
+          "signal": "sell",
+          "type": "sell",
+          "value": 217862.5
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-20",
+          "owner": "Karp Alexander C.",
+          "role": "Director, See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 86057473.25469998
         }
       ],
       "last_checked": "2026-08-15T22:36:26.743842+00:00",
@@ -3360,7 +3387,9 @@
         "0001824159-26-000011",
         "0001824159-26-000013",
         "0001840244-26-000015",
-        "0001823952-26-000020"
+        "0001823952-26-000020",
+        "0001705189-26-000015",
+        "0001823951-26-000009"
       ]
     },
     "PNR": {
@@ -3483,7 +3512,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:36:28.952603+00:00",
       "seen_accessions": [
-        "0001213900-26-092621"
+        "0001213900-26-092621",
+        "0001213900-26-093204"
       ]
     },
     "RCAT": {
@@ -4273,5 +4303,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-24T22:47:46.712184+00:00"
+  "updated_at": "2026-08-25T01:56:12.486275+00:00"
 }
