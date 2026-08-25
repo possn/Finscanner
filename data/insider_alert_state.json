@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 8,
+    "alerts_sent": 5,
     "baselined": 0,
     "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 66,
+    "new_filings": 50,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -650,6 +650,33 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1606633.32
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-21",
+          "owner": "Jassy Andrew R",
+          "role": "Director, President and CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5180213.031
+        },
+        {
+          "conviction": 77,
+          "date": "2026-08-21",
+          "owner": "Herrington Douglas J",
+          "role": "CEO Worldwide Amazon Stores",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1647809.9237000002
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-21",
+          "owner": "Garman Matthew S",
+          "role": "CEO Amazon Web Services",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3766920.3407000005
         }
       ],
       "last_checked": "2026-08-15T22:35:57.707382+00:00",
@@ -660,7 +687,10 @@
         "0001936006-26-000020",
         "0001397333-26-000006",
         "0001557979-26-000008",
-        "0001639902-26-000008"
+        "0001639902-26-000008",
+        "0001374545-26-000010",
+        "0001936006-26-000022",
+        "0002024813-26-000010"
       ]
     },
     "APH": {
@@ -1676,9 +1706,21 @@
       ]
     },
     "EOG": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-24",
+          "owner": "Yacob Ezra Y",
+          "role": "Director, Chairman & CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5466670.374000001
+        }
+      ],
       "last_checked": "2026-08-15T22:36:07.913022+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000821189-26-000169"
+      ]
     },
     "EOSE": {
       "event_history": [],
@@ -3139,6 +3181,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 25103.825
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-24",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 24830.6125
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -3151,7 +3202,8 @@
         "0000905148-26-003842",
         "0000905148-26-003868",
         "0000905148-26-003869",
-        "0000905148-26-003882"
+        "0000905148-26-003882",
+        "0000905148-26-003911"
       ]
     },
     "ORCL": {
@@ -4483,5 +4535,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-25T20:50:15.105703+00:00"
+  "updated_at": "2026-08-25T21:47:34.722458+00:00"
 }
