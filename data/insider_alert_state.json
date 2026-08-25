@@ -1,11 +1,11 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 45,
-    "price_alerts_sent": 2,
+    "new_filings": 46,
+    "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -735,12 +735,22 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 10288800.0
+        },
+        {
+          "conviction": 88,
+          "date": "2026-08-25",
+          "owner": "Tsai Joseph C",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 10418400.0
         }
       ],
       "last_checked": "2026-08-15T22:35:59.696789+00:00",
       "seen_accessions": [
         "0001193125-26-361711",
-        "0001193125-26-361902"
+        "0001193125-26-361902",
+        "0001193125-26-364044"
       ]
     },
     "BAC": {
@@ -4309,5 +4319,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-25T07:12:47.740173+00:00"
+  "updated_at": "2026-08-25T10:53:26.344371+00:00"
 }
