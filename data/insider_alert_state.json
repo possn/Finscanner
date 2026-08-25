@@ -1,11 +1,11 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 48,
-    "price_alerts_sent": 0,
+    "new_filings": 45,
+    "price_alerts_sent": 2,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -49,6 +49,9 @@
     "IMB.L": {
       "in_zone": true
     },
+    "KRMN": {
+      "in_zone": true
+    },
     "MBG.DE": {
       "in_zone": true
     },
@@ -83,9 +86,12 @@
       "in_zone": true
     },
     "PG": {
-      "in_zone": true
+      "in_zone": false
     },
     "PNR": {
+      "in_zone": true
+    },
+    "PROP": {
       "in_zone": true
     },
     "RAM.LS": {
@@ -98,7 +104,7 @@
       "in_zone": true
     },
     "SGSN.SW": {
-      "in_zone": true
+      "in_zone": false
     },
     "SPGI": {
       "in_zone": true
@@ -113,7 +119,7 @@
       "in_zone": true
     },
     "UNA.AS": {
-      "in_zone": true
+      "in_zone": false
     },
     "VICI": {
       "in_zone": true
@@ -4303,5 +4309,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-25T01:56:12.486275+00:00"
+  "updated_at": "2026-08-25T07:12:47.740173+00:00"
 }
