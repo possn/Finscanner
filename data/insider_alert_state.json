@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 8,
     "baselined": 0,
     "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 46,
+    "new_filings": 66,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -614,6 +614,42 @@
           "signal": "sell",
           "type": "sell",
           "value": 982993.4913999999
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-21",
+          "owner": "Reynolds Shelley",
+          "role": "Vice President",
+          "signal": "sell",
+          "type": "sell",
+          "value": 606853.8936000001
+        },
+        {
+          "conviction": 77,
+          "date": "2026-08-21",
+          "owner": "Zapolsky David",
+          "role": "Senior Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1599394.2661000004
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-24",
+          "owner": "Zapolsky David",
+          "role": "Senior Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2404950.6599999997
+        },
+        {
+          "conviction": 77,
+          "date": "2026-08-21",
+          "owner": "Olsavsky Brian T",
+          "role": "Senior Vice President and CFO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1606633.32
         }
       ],
       "last_checked": "2026-08-15T22:35:57.707382+00:00",
@@ -621,7 +657,10 @@
         "0001018724-26-000028",
         "0001018724-26-000030",
         "0001018724-26-000032",
-        "0001936006-26-000020"
+        "0001936006-26-000020",
+        "0001397333-26-000006",
+        "0001557979-26-000008",
+        "0001639902-26-000008"
       ]
     },
     "APH": {
@@ -2970,7 +3009,44 @@
       ]
     },
     "OKLO": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-24",
+          "owner": "Goodwin William Carroll Murphy",
+          "role": "Chief Legal & Strategy Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 461013.84
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-24",
+          "owner": "Narayanadas Vivek",
+          "role": "General Counsel & Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 129809.28000000001
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-24",
+          "owner": "Hanson John",
+          "role": "Chief of Staff",
+          "signal": "sell",
+          "type": "sell",
+          "value": 21436.030000000002
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-24",
+          "owner": "Renner Alexandra",
+          "role": "Chief Product Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 22151.890000000003
+        }
+      ],
       "last_checked": "2026-08-15T22:36:23.907050+00:00",
       "seen_accessions": [
         "0001855623-26-000017",
@@ -2979,7 +3055,11 @@
         "0002080717-26-000009",
         "0002146790-26-000002",
         "0001849056-26-000051",
-        "0002146828-26-000002"
+        "0002146828-26-000002",
+        "0002080717-26-000011",
+        "0002146790-26-000004",
+        "0002146828-26-000004",
+        "0002147680-26-000002"
       ]
     },
     "ONDS": {
@@ -3082,7 +3162,9 @@
     "OTIS": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:24.804322+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001781335-26-000117"
+      ]
     },
     "OUST": {
       "event_history": [
@@ -3538,10 +3620,21 @@
       ]
     },
     "QSR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-21",
+          "owner": "CURTIS THOMAS BENJAMIN",
+          "role": "Pres., BK US & CA",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5166048.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:28.790349+00:00",
       "seen_accessions": [
-        "0000950142-26-002325"
+        "0000950142-26-002325",
+        "0001804729-26-000020"
       ]
     },
     "QUBT": {
@@ -3956,7 +4049,26 @@
       "seen_accessions": []
     },
     "SYY": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 60,
+          "date": "2026-08-21",
+          "owner": "Phillips Ronald L",
+          "role": "EVP and CHRO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 614533.5
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-24",
+          "owner": "Phillips Ronald L",
+          "role": "EVP and CHRO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 42549.54
+        }
+      ],
       "last_checked": "2026-08-15T22:36:33.893142+00:00",
       "seen_accessions": [
         "0001741853-26-000005",
@@ -3964,7 +4076,15 @@
         "0001861524-26-000007",
         "0002095080-26-000005",
         "0002119429-26-000007",
-        "0002120465-26-000010"
+        "0002120465-26-000010",
+        "0001741853-26-000007",
+        "0001768282-26-000007",
+        "0001861524-26-000009",
+        "0001876104-26-000005",
+        "0001885927-26-000005",
+        "0002095080-26-000007",
+        "0002119429-26-000009",
+        "0002120465-26-000012"
       ]
     },
     "T": {
@@ -4008,7 +4128,11 @@
         "0001345943-26-000010",
         "0001585799-26-000004",
         "0001878127-26-000006",
-        "0001585799-26-000006"
+        "0001585799-26-000006",
+        "0001309403-26-000011",
+        "0001345943-26-000012",
+        "0001651579-26-000008",
+        "0001766979-26-000010"
       ]
     },
     "TGT": {
@@ -4359,5 +4483,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-25T15:09:44.072875+00:00"
+  "updated_at": "2026-08-25T20:50:15.105703+00:00"
 }
