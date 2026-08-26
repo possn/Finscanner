@@ -1,6 +1,6 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 45,
     "lookback_days": 10,
@@ -903,9 +903,21 @@
       "seen_accessions": []
     },
     "BHP": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 44,
+          "date": "2026-08-21",
+          "owner": "Stone Emma Kate",
+          "role": "Group Financial Controller",
+          "signal": "sell",
+          "type": "sell",
+          "value": 315465.18
+        }
+      ],
       "last_checked": "2026-08-15T22:36:01.072092+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001193125-26-365617"
+      ]
     },
     "BKH": {
       "event_history": [],
@@ -4556,5 +4568,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-25T23:42:18.460604+00:00"
+  "updated_at": "2026-08-26T02:02:10.576078+00:00"
 }
