@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 10,
     "baselined": 0,
-    "detail_failures": 54,
+    "detail_failures": 56,
     "lookback_days": 10,
-    "new_filings": 58,
+    "new_filings": 88,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -562,6 +562,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 13595067.399999999
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-24",
+          "owner": "Norrod Forrest Eugene",
+          "role": "EVP & GM DSG",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 7939158.590000001
         }
       ],
       "last_checked": "2026-08-15T22:35:57.292474+00:00",
@@ -586,7 +595,8 @@
         "0000002488-26-000161",
         "0000002488-26-000165",
         "0000002488-26-000167",
-        "0000002488-26-000174"
+        "0000002488-26-000174",
+        "0000002488-26-000176"
       ]
     },
     "AMKR": {
@@ -868,7 +878,9 @@
         "0000070858-26-000411",
         "0000070858-26-000439",
         "0000070858-26-000449",
-        "0000070858-26-000451"
+        "0000070858-26-000451",
+        "0000070858-26-000457",
+        "0000070858-26-000458"
       ]
     },
     "BAM": {
@@ -945,9 +957,21 @@
       "seen_accessions": []
     },
     "BMY": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 41,
+          "date": "2026-08-25",
+          "owner": "Holzer Phil M",
+          "role": "SVP and Controller",
+          "signal": "sell",
+          "type": "sell",
+          "value": 33750.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:01.655442+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002012588-26-000004"
+      ]
     },
     "BN": {
       "event_history": [],
@@ -994,14 +1018,25 @@
       ]
     },
     "BSX": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-25",
+          "owner": "Morano Susan E",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 100407.78
+        }
+      ],
       "last_checked": "2026-08-15T22:36:02.279419+00:00",
       "seen_accessions": [
         "0001225208-26-006950",
         "0001225208-26-006951",
         "0001225208-26-007031",
         "0001225208-26-007062",
-        "0001225208-26-007084"
+        "0001225208-26-007084",
+        "0001225208-26-007337"
       ]
     },
     "BTBT": {
@@ -1199,11 +1234,22 @@
       ]
     },
     "CL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 60,
+          "date": "2026-08-24",
+          "owner": "Tsourapas Panagiotis",
+          "role": "COO, CD, EMEA, APac, Skin",
+          "signal": "sell",
+          "type": "sell",
+          "value": 920477.0000000001
+        }
+      ],
       "last_checked": "2026-08-15T22:36:03.662634+00:00",
       "seen_accessions": [
         "0001225208-26-007020",
-        "0001225208-26-007035"
+        "0001225208-26-007035",
+        "0001225208-26-007329"
       ]
     },
     "CLSK": {
@@ -1421,6 +1467,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 542000.12
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-24",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 21335902.8258
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-24",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 42755.8543
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -1458,7 +1522,9 @@
         "0001769628-26-000400",
         "0001769628-26-000402",
         "0001769628-26-000404",
-        "0001769628-26-000406"
+        "0001769628-26-000406",
+        "0001769628-26-000409",
+        "0001769628-26-000410"
       ]
     },
     "CSAI": {
@@ -2333,7 +2399,8 @@
       "seen_accessions": [
         "0001683168-26-006613",
         "0001683168-26-006614",
-        "0001683168-26-006615"
+        "0001683168-26-006615",
+        "0001683168-26-006734"
       ]
     },
     "INVZ": {
@@ -2351,7 +2418,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:36:14.876962+00:00",
       "seen_accessions": [
-        "0001588852-26-000014"
+        "0001588852-26-000014",
+        "0001914275-26-000012"
       ]
     },
     "IP": {
@@ -2497,6 +2565,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 634961.0
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-24",
+          "owner": "Fendley Steven S.",
+          "role": "President, US Division",
+          "signal": "sell",
+          "type": "sell",
+          "value": 393120.0
         }
       ],
       "last_checked": "2026-08-15T22:36:16.509612+00:00",
@@ -2506,7 +2583,8 @@
         "0001509412-26-000009",
         "0001509409-26-000010",
         "0001660112-26-000010",
-        "0001014803-26-000009"
+        "0001014803-26-000009",
+        "0001695434-26-000011"
       ]
     },
     "KULR": {
@@ -2705,6 +2783,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 67177.62000000001
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-25",
+          "owner": "Bjornholt James Eric",
+          "role": "SENIOR CORPORATE VP AND CFO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 309715.83999999997
         }
       ],
       "last_checked": "2026-08-15T22:36:19.250414+00:00",
@@ -2726,7 +2813,11 @@
         "0001181945-26-000026",
         "0001452681-26-000035",
         "0002035446-26-000024",
-        "0002035754-26-000022"
+        "0002035754-26-000022",
+        "0001181928-26-000036",
+        "0001452681-26-000037",
+        "0001452681-26-000039",
+        "0001452681-26-000041"
       ]
     },
     "MDLZ": {
@@ -2827,11 +2918,22 @@
       ]
     },
     "MWA": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 48,
+          "date": "2026-08-26",
+          "owner": "Feyerherm Richelle R.",
+          "role": "VP, CAO and Corp. Controller",
+          "signal": "sell",
+          "type": "sell",
+          "value": 75000.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:21.126810+00:00",
       "seen_accessions": [
         "0001225208-26-007049",
-        "0001225208-26-007207"
+        "0001225208-26-007207",
+        "0001225208-26-007334"
       ]
     },
     "NBIS": {
@@ -3051,7 +3153,12 @@
     "NTNX": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:22.782427+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001193125-26-369034",
+        "0001193125-26-369035",
+        "0001193125-26-369037",
+        "0001193125-26-369039"
+      ]
     },
     "NTR": {
       "event_history": [],
@@ -3097,7 +3204,16 @@
     "NVTS": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:23.357575+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001104659-26-101499",
+        "0001104659-26-101502",
+        "0001104659-26-101504",
+        "0001104659-26-101506",
+        "0001104659-26-101508",
+        "0001104659-26-101511",
+        "0001104659-26-101514",
+        "0001104659-26-101516"
+      ]
     },
     "NXE": {
       "event_history": [],
@@ -3969,9 +4085,21 @@
       "seen_accessions": []
     },
     "SLB": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-26",
+          "owner": "Le Peuch Olivier",
+          "role": "Director, Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1313750.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:31.912627+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000087347-26-000116"
+      ]
     },
     "SMR": {
       "event_history": [
@@ -4177,10 +4305,30 @@
       "seen_accessions": []
     },
     "STRC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 57,
+          "date": "2026-08-24",
+          "owner": "Patten Jarrod M",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 113164.5
+        },
+        {
+          "conviction": 57,
+          "date": "2026-08-25",
+          "owner": "Patten Jarrod M",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 347800.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:33.475366+00:00",
       "seen_accessions": [
-        "0001193125-26-342315"
+        "0001193125-26-342315",
+        "0001193125-26-368879"
       ]
     },
     "SWKS": {
@@ -4285,11 +4433,21 @@
           "signal": "sell",
           "type": "sell",
           "value": 151410.25999999998
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-24",
+          "owner": "Kremer Melissa K",
+          "role": "Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2634318.0
         }
       ],
       "last_checked": "2026-08-15T22:36:34.638151+00:00",
       "seen_accessions": [
-        "0001921955-26-000014"
+        "0001921955-26-000014",
+        "0001764843-26-000007"
       ]
     },
     "TMC": {
@@ -4633,9 +4791,21 @@
       ]
     },
     "ZS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 61,
+          "date": "2026-08-25",
+          "owner": "RUBIN KEVIN",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 87210.49450000002
+        }
+      ],
       "last_checked": "2026-08-15T22:36:39.173337+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001713683-26-000132"
+      ]
     },
     "ZTS": {
       "event_history": [],
@@ -4645,5 +4815,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-26T20:08:47.138920+00:00"
+  "updated_at": "2026-08-26T23:42:11.770490+00:00"
 }
