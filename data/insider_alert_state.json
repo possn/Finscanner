@@ -1,11 +1,11 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 45,
-    "price_alerts_sent": 1,
+    "new_filings": 46,
+    "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -1017,11 +1017,21 @@
           "signal": "sell",
           "type": "sell",
           "value": 453276.44989999995
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-25",
+          "owner": "Denier Anthony Michael",
+          "role": "Director, President",
+          "signal": "sell",
+          "type": "sell",
+          "value": 475607.07519999996
         }
       ],
       "last_checked": "2026-08-15T22:36:02.682402+00:00",
       "seen_accessions": [
-        "0002092820-26-000002"
+        "0002092820-26-000002",
+        "0002093121-26-000004"
       ]
     },
     "BWXT": {
@@ -4568,5 +4578,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-26T07:12:40.236480+00:00"
+  "updated_at": "2026-08-26T10:54:24.231991+00:00"
 }
