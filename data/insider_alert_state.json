@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 3,
     "baselined": 0,
-    "detail_failures": 51,
+    "detail_failures": 54,
     "lookback_days": 10,
-    "new_filings": 53,
+    "new_filings": 58,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1771,9 +1771,30 @@
       ]
     },
     "ES": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-24",
+          "owner": "Conner Penelope M",
+          "role": "EVP-Cust Exp & Energy Strategy",
+          "signal": "sell",
+          "type": "sell",
+          "value": 106649.99999999999
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-25",
+          "owner": "Conner Penelope M",
+          "role": "EVP-Cust Exp & Energy Strategy",
+          "signal": "sell",
+          "type": "sell",
+          "value": 107250.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:08.264502+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000072741-26-000093"
+      ]
     },
     "ETN": {
       "event_history": [],
@@ -2329,7 +2350,9 @@
     "IONQ": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:14.876962+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001588852-26-000014"
+      ]
     },
     "IP": {
       "event_history": [],
@@ -2971,7 +2994,9 @@
     "NNE": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:22.089539+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001493152-26-040231"
+      ]
     },
     "NONOF": {
       "event_history": [],
@@ -3243,6 +3268,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 24830.6125
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-25",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25204.5225
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -3256,7 +3290,8 @@
         "0000905148-26-003868",
         "0000905148-26-003869",
         "0000905148-26-003882",
-        "0000905148-26-003911"
+        "0000905148-26-003911",
+        "0000905148-26-003934"
       ]
     },
     "ORCL": {
@@ -4610,5 +4645,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-26T18:06:57.811368+00:00"
+  "updated_at": "2026-08-26T20:08:47.138920+00:00"
 }
