@@ -4253,9 +4253,21 @@
       "seen_accessions": []
     },
     "TROW": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-25",
+          "owner": "Nelson Joshua B",
+          "role": "Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1118203.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:34.884446+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001902145-26-000003"
+      ]
     },
     "TROX": {
       "event_history": [],
@@ -4578,5 +4590,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-26T10:54:24.231991+00:00"
+  "updated_at": "2026-08-26T15:55:52.563082+00:00"
 }
