@@ -1,11 +1,11 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 46,
-    "price_alerts_sent": 0,
+    "new_filings": 45,
+    "price_alerts_sent": 1,
     "requested": 479,
     "sec_issuers": 302
   },
@@ -65,7 +65,7 @@
       "in_zone": true
     },
     "NFC.DE": {
-      "in_zone": true
+      "in_zone": false
     },
     "NFG": {
       "in_zone": true
@@ -86,13 +86,13 @@
       "in_zone": true
     },
     "PG": {
-      "in_zone": false
+      "in_zone": true
     },
     "PNR": {
       "in_zone": true
     },
     "PROP": {
-      "in_zone": true
+      "in_zone": false
     },
     "RAM.LS": {
       "in_zone": true
@@ -4568,5 +4568,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-26T02:02:10.576078+00:00"
+  "updated_at": "2026-08-26T07:12:40.236480+00:00"
 }
