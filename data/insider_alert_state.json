@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 56,
     "lookback_days": 10,
-    "new_filings": 57,
+    "new_filings": 62,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -720,7 +720,8 @@
         "0001639902-26-000008",
         "0001374545-26-000010",
         "0001936006-26-000022",
-        "0002024813-26-000010"
+        "0002024813-26-000010",
+        "0001043298-26-000002"
       ]
     },
     "APH": {
@@ -1957,7 +1958,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:36:09.802016+00:00",
       "seen_accessions": [
-        "0001213900-26-091318"
+        "0001213900-26-091318",
+        "0001213900-26-094388"
       ]
     },
     "FTNT": {
@@ -3403,6 +3405,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 25204.5225
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-26",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25162.55
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -3417,7 +3428,8 @@
         "0000905148-26-003869",
         "0000905148-26-003882",
         "0000905148-26-003911",
-        "0000905148-26-003934"
+        "0000905148-26-003934",
+        "0000905148-26-003965"
       ]
     },
     "ORCL": {
@@ -3452,10 +3464,21 @@
       ]
     },
     "PANW": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-25",
+          "owner": "Paul Josh D.",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 318393.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:25.149530+00:00",
       "seen_accessions": [
-        "0001882285-26-000017"
+        "0001882285-26-000017",
+        "0001882285-26-000020"
       ]
     },
     "PATH": {
@@ -3658,6 +3681,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 52141.16
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-20",
+          "owner": "Aguilar Moses Victor Javier",
+          "role": "Chf Rsch, Dev & Innov Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 438990.87
         }
       ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
@@ -3699,7 +3731,8 @@
         "0000080424-26-000156",
         "0000080424-26-000157",
         "0000080424-26-000158",
-        "0000080424-26-000159"
+        "0000080424-26-000159",
+        "0000080424-26-000160"
       ]
     },
     "PGNY": {
@@ -4075,7 +4108,9 @@
     "SANA": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:31.432552+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002115339-26-000004"
+      ]
     },
     "SATL": {
       "event_history": [],
@@ -4825,5 +4860,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-27T18:20:08.071696+00:00"
+  "updated_at": "2026-08-27T20:35:11.839023+00:00"
 }
