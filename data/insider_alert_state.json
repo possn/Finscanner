@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 11,
     "baselined": 0,
-    "detail_failures": 56,
+    "detail_failures": 54,
     "lookback_days": 10,
-    "new_filings": 62,
+    "new_filings": 73,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -157,12 +157,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 442478.11
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-25",
+          "owner": "Newstead Jennifer",
+          "role": "SVP, GC and Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 447457.05
         }
       ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
       "seen_accessions": [
         "0001140361-26-032884",
-        "0001140361-26-033928"
+        "0001140361-26-033928",
+        "0001140361-26-034741"
       ]
     },
     "ABEV": {
@@ -179,10 +189,21 @@
       ]
     },
     "ABT": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-25",
+          "owner": "Ford Robert B",
+          "role": "Director, CHAIRMAN AND CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 46204798.379999995
+        }
+      ],
       "last_checked": "2026-08-15T22:35:54.756129+00:00",
       "seen_accessions": [
-        "0001867666-26-000013"
+        "0001867666-26-000013",
+        "0001612571-26-000011"
       ]
     },
     "ACHR": {
@@ -517,9 +538,21 @@
       ]
     },
     "AMAT": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-25",
+          "owner": "Hill Brice",
+          "role": "SVP, CFO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3594375.75
+        }
+      ],
       "last_checked": "2026-08-15T22:35:57.051131+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001628280-26-059277"
+      ]
     },
     "AMCR": {
       "event_history": [],
@@ -581,6 +614,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 7939158.590000001
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-25",
+          "owner": "Hu Jean X.",
+          "role": "EVP, CFO and Treasurer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 7111160.31
         }
       ],
       "last_checked": "2026-08-15T22:35:57.292474+00:00",
@@ -606,7 +648,8 @@
         "0000002488-26-000165",
         "0000002488-26-000167",
         "0000002488-26-000174",
-        "0000002488-26-000176"
+        "0000002488-26-000176",
+        "0001452385-26-000008"
       ]
     },
     "AMKR": {
@@ -1496,6 +1539,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 42755.8543
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-25",
+          "owner": "Agrawal Nitin",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 488313.439
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-25",
+          "owner": "Intrator Michael N",
+          "role": "Director, CEO and President, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 27262966.1451
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -1535,7 +1596,9 @@
         "0001769628-26-000404",
         "0001769628-26-000406",
         "0001769628-26-000409",
-        "0001769628-26-000410"
+        "0001769628-26-000410",
+        "0001769628-26-000411",
+        "0001769628-26-000412"
       ]
     },
     "CSAI": {
@@ -2084,6 +2147,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 725077.6751
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-26",
+          "owner": "WELTERS ANTHONY",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2675219.5174000002
         }
       ],
       "last_checked": "2026-08-15T22:36:10.839622+00:00",
@@ -2091,7 +2163,8 @@
         "0002110603-26-000010",
         "0001310204-26-000024",
         "0001782135-26-000028",
-        "0001771814-26-000005"
+        "0001771814-26-000005",
+        "0001213307-26-000005"
       ]
     },
     "GIS": {
@@ -2114,7 +2187,13 @@
       "last_checked": "2026-08-15T22:36:11.407605+00:00",
       "seen_accessions": [
         "0001193125-26-338824",
-        "0001193125-26-345383"
+        "0001193125-26-345383",
+        "0001193125-26-371778",
+        "0001193125-26-371785",
+        "0001193125-26-371788",
+        "0001193125-26-371794",
+        "0001193125-26-371797",
+        "0001193125-26-371799"
       ]
     },
     "GORO": {
@@ -2174,13 +2253,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 2086567.5999999999
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-26",
+          "owner": "Rowe Michael F.",
+          "role": "EVP, Pro",
+          "signal": "sell",
+          "type": "sell",
+          "value": 239099.6
         }
       ],
       "last_checked": "2026-08-15T22:36:12.049331+00:00",
       "seen_accessions": [
         "0000354950-26-000152",
         "0000354950-26-000153",
-        "0000354950-26-000154"
+        "0000354950-26-000154",
+        "0000354950-26-000156"
       ]
     },
     "HIMS": {
@@ -2256,7 +2345,8 @@
         "0001773751-26-000207",
         "0001837817-26-000011",
         "0001884671-26-000004",
-        "0001907056-26-000022"
+        "0001907056-26-000022",
+        "0001773751-26-000217"
       ]
     },
     "HIVE": {
@@ -2496,9 +2586,21 @@
       ]
     },
     "KDP": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-25",
+          "owner": "Alt Aaron E",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 250247.46
+        }
+      ],
       "last_checked": "2026-08-15T22:36:15.590125+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001741576-26-000008"
+      ]
     },
     "KHC": {
       "event_history": [],
@@ -3293,6 +3395,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 22151.890000000003
+        },
+        {
+          "conviction": 38,
+          "date": "2026-08-25",
+          "owner": "Narayanadas Vivek",
+          "role": "General Counsel & Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 9098.4
         }
       ],
       "last_checked": "2026-08-15T22:36:23.907050+00:00",
@@ -3307,7 +3418,8 @@
         "0002080717-26-000011",
         "0002146790-26-000004",
         "0002146828-26-000004",
-        "0002147680-26-000002"
+        "0002147680-26-000002",
+        "0002146790-26-000006"
       ]
     },
     "ONDS": {
@@ -4139,11 +4251,21 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1313750.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-27",
+          "owner": "Le Peuch Olivier",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 275000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:31.912627+00:00",
       "seen_accessions": [
-        "0000087347-26-000116"
+        "0000087347-26-000116",
+        "0000087347-26-000118"
       ]
     },
     "SMR": {
@@ -4487,12 +4609,22 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 2634318.0
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-25",
+          "owner": "Cornell Brian C",
+          "role": "Director, Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 8177780.0
         }
       ],
       "last_checked": "2026-08-15T22:36:34.638151+00:00",
       "seen_accessions": [
         "0001921955-26-000014",
-        "0001764843-26-000007"
+        "0001764843-26-000007",
+        "0001288709-26-000013"
       ]
     },
     "TMC": {
@@ -4860,5 +4992,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-27T20:35:11.839023+00:00"
+  "updated_at": "2026-08-28T05:28:22.778092+00:00"
 }
