@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 11,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 54,
     "lookback_days": 10,
-    "new_filings": 73,
+    "new_filings": 56,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -410,6 +410,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1479377.62
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-26",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1549020.0
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -424,7 +433,8 @@
         "0001104659-26-100190",
         "0001104659-26-100610",
         "0001104659-26-101232",
-        "0001104659-26-102170"
+        "0001104659-26-102170",
+        "0001104659-26-102824"
       ]
     },
     "AGNC": {
@@ -4452,13 +4462,32 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 112904.038
+        },
+        {
+          "conviction": 72,
+          "date": "2026-08-26",
+          "owner": "Sachetta Eric",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 31929.612
+        },
+        {
+          "conviction": 69,
+          "date": "2026-08-27",
+          "owner": "Sachetta Eric",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 34752.425
         }
       ],
       "last_checked": "2026-08-15T22:36:33.105504+00:00",
       "seen_accessions": [
         "0002097345-26-000010",
         "0001300111-26-000002",
-        "0002097345-26-000012"
+        "0002097345-26-000012",
+        "0002097345-26-000014"
       ]
     },
     "STAG": {
@@ -4992,5 +5021,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-28T05:28:22.778092+00:00"
+  "updated_at": "2026-08-28T18:48:26.398621+00:00"
 }
