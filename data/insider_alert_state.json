@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 7,
     "baselined": 0,
     "detail_failures": 54,
     "lookback_days": 10,
-    "new_filings": 56,
+    "new_filings": 76,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -140,11 +140,21 @@
           "signal": "sell",
           "type": "sell",
           "value": 305412.0
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-27",
+          "owner": "Jones Tammi A",
+          "role": "EVP & CHRO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 790733.0416
         }
       ],
       "last_checked": "2026-08-15T22:35:54.196400+00:00",
       "seen_accessions": [
-        "0001193125-26-355504"
+        "0001193125-26-355504",
+        "0001193125-26-374379"
       ]
     },
     "AAPL": {
@@ -567,7 +577,13 @@
     "AMCR": {
       "event_history": [],
       "last_checked": "2026-08-15T22:35:57.191945+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001353649-26-000004",
+        "0001413007-26-000004",
+        "0001691234-26-000007",
+        "0001775837-26-000004",
+        "0001822033-26-000002"
+      ]
     },
     "AMD": {
       "event_history": [
@@ -1567,6 +1583,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 27262966.1451
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-26",
+          "owner": "McVeety Kristen J",
+          "role": "GC and Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 184854.51280000003
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -1608,7 +1633,8 @@
         "0001769628-26-000409",
         "0001769628-26-000410",
         "0001769628-26-000411",
-        "0001769628-26-000412"
+        "0001769628-26-000412",
+        "0001769628-26-000414"
       ]
     },
     "CSAI": {
@@ -2119,6 +2145,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 16207.300000000001
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-27",
+          "owner": "Azar Samak L",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 15661.25
         }
       ],
       "last_checked": "2026-08-15T22:36:10.671900+00:00",
@@ -2126,7 +2161,8 @@
         "0001628280-26-055095",
         "0001628280-26-057360",
         "0001628280-26-058190",
-        "0001709048-26-000221"
+        "0001709048-26-000221",
+        "0001709048-26-000227"
       ]
     },
     "GILD": {
@@ -2429,9 +2465,21 @@
       "seen_accessions": []
     },
     "IBM": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-26",
+          "owner": "Thomas Robert David",
+          "role": "Senior Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5758087.5
+        }
+      ],
       "last_checked": "2026-08-15T22:36:13.664822+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002005007-26-000005"
+      ]
     },
     "IE": {
       "event_history": [],
@@ -3536,6 +3584,24 @@
           "signal": "buy",
           "type": "buy",
           "value": 25162.55
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-26",
+          "owner": "McKay Christopher J.",
+          "role": "Chief Risk & Analytics Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 558799.515
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-27",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25311.5
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -3551,7 +3617,9 @@
         "0000905148-26-003882",
         "0000905148-26-003911",
         "0000905148-26-003934",
-        "0000905148-26-003965"
+        "0000905148-26-003965",
+        "0000905148-26-003989",
+        "0000905148-26-003991"
       ]
     },
     "ORCL": {
@@ -3582,7 +3650,8 @@
       "seen_accessions": [
         "0001193125-26-336102",
         "0001193125-26-340618",
-        "0001193125-26-357357"
+        "0001193125-26-357357",
+        "0001193125-26-374910"
       ]
     },
     "PANW": {
@@ -4297,13 +4366,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 177160.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-27",
+          "owner": "Hamady Robert Ramsey",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 280632.95999999996
         }
       ],
       "last_checked": "2026-08-15T22:36:32.099499+00:00",
       "seen_accessions": [
         "0001983680-26-000001",
         "0001922054-26-000001",
-        "0001957490-26-000004"
+        "0001957490-26-000004",
+        "0001922054-26-000003"
       ]
     },
     "SOFI": {
@@ -4744,7 +4823,15 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:36:36.079926+00:00",
       "seen_accessions": [
-        "0001104659-26-095172"
+        "0001104659-26-095172",
+        "0001104659-26-103395",
+        "0001104659-26-103396",
+        "0001104659-26-103397",
+        "0001104659-26-103398",
+        "0001104659-26-103399",
+        "0001104659-26-103400",
+        "0001104659-26-103401",
+        "0001104659-26-103402"
       ]
     },
     "UROY": {
@@ -4960,12 +5047,22 @@
           "signal": "buy",
           "type": "buy",
           "value": 49964.2
+        },
+        {
+          "conviction": 80,
+          "date": "2026-08-27",
+          "owner": "Prager Paul B.",
+          "role": "Director, Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2345653.75
         }
       ],
       "last_checked": "2026-08-15T22:36:38.408784+00:00",
       "seen_accessions": [
         "0001083301-26-000169",
-        "0001083301-26-000170"
+        "0001083301-26-000170",
+        "0001083301-26-000172"
       ]
     },
     "WYFI": {
@@ -5021,5 +5118,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-28T18:48:26.398621+00:00"
+  "updated_at": "2026-08-29T02:16:32.066178+00:00"
 }
