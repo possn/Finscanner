@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 7,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 54,
+    "detail_failures": 45,
     "lookback_days": 10,
-    "new_filings": 76,
+    "new_filings": 46,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -279,10 +279,30 @@
       "seen_accessions": []
     },
     "ADC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-27",
+          "owner": "RAKOLTA JOHN JR",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 1464600.0
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-28",
+          "owner": "RAKOLTA JOHN JR",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 9998.72
+        }
+      ],
       "last_checked": "2026-08-15T22:35:55.178412+00:00",
       "seen_accessions": [
-        "0001879562-26-000004"
+        "0001879562-26-000004",
+        "0001528153-26-000011"
       ]
     },
     "ADM": {
@@ -5118,5 +5138,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-29T02:16:32.066178+00:00"
+  "updated_at": "2026-08-31T14:01:02.904419+00:00"
 }
