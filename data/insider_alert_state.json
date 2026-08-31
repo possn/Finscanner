@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 45,
+    "detail_failures": 54,
     "lookback_days": 10,
-    "new_filings": 46,
+    "new_filings": 60,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -449,6 +449,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1549020.0
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-27",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1481719.0
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -464,7 +473,8 @@
         "0001104659-26-100610",
         "0001104659-26-101232",
         "0001104659-26-102170",
-        "0001104659-26-102824"
+        "0001104659-26-102824",
+        "0001104659-26-103760"
       ]
     },
     "AGNC": {
@@ -2236,7 +2246,11 @@
     "GIS": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:10.947785+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001628280-26-059544",
+        "0001628280-26-059545",
+        "0001628280-26-059546"
+      ]
     },
     "GLDG": {
       "event_history": [],
@@ -3622,6 +3636,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 25311.5
+        },
+        {
+          "conviction": 54,
+          "date": "2026-08-28",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25017.65
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -3639,7 +3662,8 @@
         "0000905148-26-003934",
         "0000905148-26-003965",
         "0000905148-26-003989",
-        "0000905148-26-003991"
+        "0000905148-26-003991",
+        "0000905148-26-004037"
       ]
     },
     "ORCL": {
@@ -4579,6 +4603,24 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 34752.425
+        },
+        {
+          "conviction": 85,
+          "date": "2026-08-28",
+          "owner": "Sachetta Eric",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 129014.669
+        },
+        {
+          "conviction": 76,
+          "date": "2026-08-31",
+          "owner": "Sachetta Eric",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 96601.552
         }
       ],
       "last_checked": "2026-08-15T22:36:33.105504+00:00",
@@ -4586,7 +4628,8 @@
         "0002097345-26-000010",
         "0001300111-26-000002",
         "0002097345-26-000012",
-        "0002097345-26-000014"
+        "0002097345-26-000014",
+        "0002097345-26-000016"
       ]
     },
     "STAG": {
@@ -5138,5 +5181,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-31T14:01:02.904419+00:00"
+  "updated_at": "2026-08-31T20:10:52.371686+00:00"
 }
