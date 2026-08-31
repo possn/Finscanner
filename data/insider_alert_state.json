@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 8,
     "baselined": 0,
-    "detail_failures": 54,
+    "detail_failures": 61,
     "lookback_days": 10,
-    "new_filings": 60,
+    "new_filings": 82,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -601,7 +601,8 @@
       ],
       "last_checked": "2026-08-15T22:35:57.051131+00:00",
       "seen_accessions": [
-        "0001628280-26-059277"
+        "0001628280-26-059277",
+        "0001628280-26-059643"
       ]
     },
     "AMCR": {
@@ -863,11 +864,22 @@
       ]
     },
     "ARM": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-27",
+          "owner": "Child Jason",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2655432.0
+        }
+      ],
       "last_checked": "2026-08-15T22:35:58.450728+00:00",
       "seen_accessions": [
         "0001973239-26-000119",
-        "0001973239-26-000121"
+        "0001973239-26-000121",
+        "0001973239-26-000122"
       ]
     },
     "ARQQ": {
@@ -912,7 +924,15 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:35:59.345971+00:00",
       "seen_accessions": [
-        "0001769052-26-000008"
+        "0001769052-26-000008",
+        "0001713397-26-000009",
+        "0001757393-26-000007",
+        "0001769052-26-000009",
+        "0001777650-26-000005",
+        "0001825727-26-000007",
+        "0001845216-26-000007",
+        "0002034019-26-000005",
+        "0002035295-26-000006"
       ]
     },
     "AUTL": {
@@ -2054,7 +2074,8 @@
       "last_checked": "2026-08-15T22:36:09.102472+00:00",
       "seen_accessions": [
         "0001048911-26-000110",
-        "0001048911-26-000112"
+        "0001048911-26-000112",
+        "0001048911-26-000114"
       ]
     },
     "FLNC": {
@@ -2263,7 +2284,17 @@
       "seen_accessions": []
     },
     "GOOG": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-28",
+          "owner": "ARNOLD FRANCES",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 27692.219999999998
+        }
+      ],
       "last_checked": "2026-08-15T22:36:11.407605+00:00",
       "seen_accessions": [
         "0001193125-26-338824",
@@ -2273,7 +2304,8 @@
         "0001193125-26-371788",
         "0001193125-26-371794",
         "0001193125-26-371797",
-        "0001193125-26-371799"
+        "0001193125-26-371799",
+        "0001193125-26-377149"
       ]
     },
     "GORO": {
@@ -2342,6 +2374,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 239099.6
+        },
+        {
+          "conviction": 60,
+          "date": "2026-08-28",
+          "owner": "Roseborough Teresa Wynn",
+          "role": "EVP, Gen. Counsel & Corp. Sec.",
+          "signal": "sell",
+          "type": "sell",
+          "value": 807130.35
         }
       ],
       "last_checked": "2026-08-15T22:36:12.049331+00:00",
@@ -2349,7 +2390,8 @@
         "0000354950-26-000152",
         "0000354950-26-000153",
         "0000354950-26-000154",
-        "0000354950-26-000156"
+        "0000354950-26-000156",
+        "0000354950-26-000158"
       ]
     },
     "HIMS": {
@@ -3133,13 +3175,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 75000.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-08-31",
+          "owner": "Ortiz Christine",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 291866.4144
         }
       ],
       "last_checked": "2026-08-15T22:36:21.126810+00:00",
       "seen_accessions": [
         "0001225208-26-007049",
         "0001225208-26-007207",
-        "0001225208-26-007334"
+        "0001225208-26-007334",
+        "0001225208-26-007405"
       ]
     },
     "NBIS": {
@@ -3326,6 +3378,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 188400.0
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-27",
+          "owner": "Chamberlain Paul Edward",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 365851.08
         }
       ],
       "last_checked": "2026-08-15T22:36:22.522512+00:00",
@@ -3348,7 +3409,8 @@
         "0001465391-26-000030",
         "0001649609-26-000032",
         "0001667422-26-000033",
-        "0002111929-26-000016"
+        "0002111929-26-000016",
+        "0001659774-26-000012"
       ]
     },
     "NSC": {
@@ -4145,12 +4207,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 101781.25
+        },
+        {
+          "conviction": 38,
+          "date": "2026-08-31",
+          "owner": "Grech Patricia Y",
+          "role": "SVP, Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 35360.0
         }
       ],
       "last_checked": "2026-08-15T22:36:28.605134+00:00",
       "seen_accessions": [
         "0000804328-26-000091",
-        "0000804328-26-000092"
+        "0000804328-26-000092",
+        "0000804328-26-000093"
       ]
     },
     "QSR": {
@@ -4383,12 +4455,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 275000.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-31",
+          "owner": "Le Peuch Olivier",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 300000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:31.912627+00:00",
       "seen_accessions": [
         "0000087347-26-000116",
-        "0000087347-26-000118"
+        "0000087347-26-000118",
+        "0000087347-26-000120"
       ]
     },
     "SMR": {
@@ -4471,9 +4553,21 @@
       ]
     },
     "SOUN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-27",
+          "owner": "SROKA DIANA",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 9602.45
+        }
+      ],
       "last_checked": "2026-08-15T22:36:32.557151+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001920484-26-000010"
+      ]
     },
     "SPGI": {
       "event_history": [],
@@ -4661,12 +4755,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 347800.0
+        },
+        {
+          "conviction": 57,
+          "date": "2026-08-27",
+          "owner": "Patten Jarrod M",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 240500.0
         }
       ],
       "last_checked": "2026-08-15T22:36:33.475366+00:00",
       "seen_accessions": [
         "0001193125-26-342315",
-        "0001193125-26-368879"
+        "0001193125-26-368879",
+        "0001193125-26-376987"
       ]
     },
     "SWKS": {
@@ -4908,9 +5012,21 @@
       "seen_accessions": []
     },
     "USB": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-08-28",
+          "owner": "Kedia Gunjan",
+          "role": "Director, President & CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1700670.057
+        }
+      ],
       "last_checked": "2026-08-15T22:36:36.422140+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001225208-26-007397"
+      ]
     },
     "UUUU": {
       "event_history": [],
@@ -5046,7 +5162,17 @@
       "seen_accessions": []
     },
     "WBD": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-08-27",
+          "owner": "Perrette Jean-Briac",
+          "role": "Pres.&CEO, Global Streaming",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3669434.72
+        }
+      ],
       "last_checked": "2026-08-15T22:36:37.809727+00:00",
       "seen_accessions": [
         "0001186933-26-000004",
@@ -5056,7 +5182,8 @@
         "0001437107-26-000077",
         "0001478420-26-000006",
         "0001605503-26-000012",
-        "0001694392-26-000010"
+        "0001694392-26-000010",
+        "0001600595-26-000010"
       ]
     },
     "WEN": {
@@ -5181,5 +5308,5 @@
       ]
     }
   },
-  "updated_at": "2026-08-31T20:10:52.371686+00:00"
+  "updated_at": "2026-08-31T23:54:59.665698+00:00"
 }
