@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 9,
     "baselined": 0,
-    "detail_failures": 61,
+    "detail_failures": 63,
     "lookback_days": 10,
-    "new_filings": 63,
+    "new_filings": 76,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -149,12 +149,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 790733.0416
+        },
+        {
+          "conviction": 41,
+          "date": "2026-08-31",
+          "owner": "Bacchi Renato",
+          "role": "EVP & Chief Commercial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 35713.51
         }
       ],
       "last_checked": "2026-08-15T22:35:54.196400+00:00",
       "seen_accessions": [
         "0001193125-26-355504",
-        "0001193125-26-374379"
+        "0001193125-26-374379",
+        "0001193125-26-378443"
       ]
     },
     "AAPL": {
@@ -191,11 +201,22 @@
       "seen_accessions": []
     },
     "ABR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-31",
+          "owner": "Green William C",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 131591.05000000002
+        }
+      ],
       "last_checked": "2026-08-15T22:35:54.548734+00:00",
       "seen_accessions": [
         "0001104659-26-091114",
-        "0001104659-26-091119"
+        "0001104659-26-091119",
+        "0001104659-26-104321"
       ]
     },
     "ABT": {
@@ -908,7 +929,17 @@
       "seen_accessions": []
     },
     "ASTS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 70,
+          "date": "2026-08-31",
+          "owner": "Cisneros Adriana",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 619200.26
+        }
+      ],
       "last_checked": "2026-08-15T22:35:58.986971+00:00",
       "seen_accessions": [
         "0001493152-26-039053",
@@ -922,7 +953,8 @@
         "0001493152-26-039317",
         "0001493152-26-039319",
         "0001493152-26-039321",
-        "0001493152-26-039925"
+        "0001493152-26-039925",
+        "0001104659-26-104326"
       ]
     },
     "ATAI": {
@@ -2377,13 +2409,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1844751.4800000002
+        },
+        {
+          "conviction": 70,
+          "date": "2026-08-31",
+          "owner": "Carre Eric",
+          "role": "EVP & Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 929137.5
         }
       ],
       "last_checked": "2026-08-15T22:36:11.951038+00:00",
       "seen_accessions": [
         "0001558667-26-000020",
         "0001970357-26-000014",
-        "0001970357-26-000016"
+        "0001970357-26-000016",
+        "0001673421-26-000014"
       ]
     },
     "HD": {
@@ -2594,9 +2636,21 @@
       "seen_accessions": []
     },
     "IIPR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-08-31",
+          "owner": "Ives Bruce Alan",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 29937.600000000002
+        }
+      ],
       "last_checked": "2026-08-15T22:36:14.043572+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002132853-26-000007"
+      ]
     },
     "INDI": {
       "event_history": [
@@ -3215,6 +3269,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 291866.4144
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-01",
+          "owner": "Ortiz Christine",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 13161.5
         }
       ],
       "last_checked": "2026-08-15T22:36:21.126810+00:00",
@@ -3222,7 +3285,8 @@
         "0001225208-26-007049",
         "0001225208-26-007207",
         "0001225208-26-007334",
-        "0001225208-26-007405"
+        "0001225208-26-007405",
+        "0001225208-26-007496"
       ]
     },
     "NBIS": {
@@ -3525,7 +3589,17 @@
       "seen_accessions": []
     },
     "OC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-08-28",
+          "owner": "Marcon Rachel Barthelemy",
+          "role": "President,  Doors",
+          "signal": "sell",
+          "type": "sell",
+          "value": 129663.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:23.768292+00:00",
       "seen_accessions": [
         "0001370946-26-000187",
@@ -3540,7 +3614,8 @@
         "0001370946-26-000202",
         "0001370946-26-000203",
         "0001370946-26-000204",
-        "0001370946-26-000205"
+        "0001370946-26-000205",
+        "0001370946-26-000207"
       ]
     },
     "OKLO": {
@@ -3604,7 +3679,8 @@
         "0002146790-26-000004",
         "0002146828-26-000004",
         "0002147680-26-000002",
-        "0002146790-26-000006"
+        "0002146790-26-000006",
+        "0002147680-26-000004"
       ]
     },
     "ONDS": {
@@ -3738,6 +3814,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 25017.65
+        },
+        {
+          "conviction": 51,
+          "date": "2026-08-31",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 24610.73
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -3756,7 +3841,8 @@
         "0000905148-26-003965",
         "0000905148-26-003989",
         "0000905148-26-003991",
-        "0000905148-26-004037"
+        "0000905148-26-004037",
+        "0000905148-26-004056"
       ]
     },
     "ORCL": {
@@ -4066,7 +4152,9 @@
     "PGNY": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:26.124804+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001551306-26-000142"
+      ]
     },
     "PK": {
       "event_history": [],
@@ -4292,13 +4380,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1567500.0
+        },
+        {
+          "conviction": 70,
+          "date": "2026-08-28",
+          "owner": "Liuzza Nicholas Reyland JR",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 552500.0
         }
       ],
       "last_checked": "2026-08-15T22:36:29.026744+00:00",
       "seen_accessions": [
         "0001493152-26-037863",
         "0001493152-26-037893",
-        "0001628280-26-057937"
+        "0001628280-26-057937",
+        "0001493152-26-041010"
       ]
     },
     "RDW": {
@@ -4495,13 +4593,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 300000.0
+        },
+        {
+          "conviction": 74,
+          "date": "2026-09-01",
+          "owner": "Le Peuch Olivier",
+          "role": "Director, Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2100000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:31.912627+00:00",
       "seen_accessions": [
         "0000087347-26-000116",
         "0000087347-26-000118",
-        "0000087347-26-000120"
+        "0000087347-26-000120",
+        "0000087347-26-000122"
       ]
     },
     "SMR": {
@@ -5277,13 +5385,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 2345653.75
+        },
+        {
+          "conviction": 74,
+          "date": "2026-08-31",
+          "owner": "Carter Walter E.",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1977808.266
         }
       ],
       "last_checked": "2026-08-15T22:36:38.408784+00:00",
       "seen_accessions": [
         "0001083301-26-000169",
         "0001083301-26-000170",
-        "0001083301-26-000172"
+        "0001083301-26-000172",
+        "0001628280-26-059897"
       ]
     },
     "WYFI": {
@@ -5339,5 +5457,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-01T18:36:40.483234+00:00"
+  "updated_at": "2026-09-01T21:51:00.238150+00:00"
 }
