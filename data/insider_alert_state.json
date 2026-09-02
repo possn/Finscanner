@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 9,
+    "alerts_sent": 5,
     "baselined": 0,
-    "detail_failures": 63,
+    "detail_failures": 66,
     "lookback_days": 10,
-    "new_filings": 76,
+    "new_filings": 82,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -2671,13 +2671,53 @@
           "signal": "sell",
           "type": "sell",
           "value": 244162.968
+        },
+        {
+          "conviction": 58,
+          "date": "2026-08-31",
+          "owner": "Wu Naixi",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 86183.132
+        },
+        {
+          "conviction": 51,
+          "date": "2026-08-31",
+          "owner": "schiller Thomas",
+          "role": "Director, Other",
+          "signal": "sell",
+          "type": "sell",
+          "value": 11672.1048
+        },
+        {
+          "conviction": 64,
+          "date": "2026-08-31",
+          "owner": "McClymont Donald",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 174553.3888
+        },
+        {
+          "conviction": 45,
+          "date": "2026-08-31",
+          "owner": "Wittmann Michael",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 63400.581999999995
         }
       ],
       "last_checked": "2026-08-15T22:36:14.237763+00:00",
       "seen_accessions": [
         "0001849122-26-000015",
         "0002009989-26-000022",
-        "0001849122-26-000017"
+        "0001849122-26-000017",
+        "0001193125-26-378775",
+        "0001865418-26-000010",
+        "0001866018-26-000020",
+        "0002009989-26-000025"
       ]
     },
     "INFQ": {
@@ -2963,11 +3003,21 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 8024700.8100000005
+        },
+        {
+          "conviction": 73,
+          "date": "2026-08-28",
+          "owner": "Gossman William",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 665400.0
         }
       ],
       "last_checked": "2026-08-15T22:36:17.408784+00:00",
       "seen_accessions": [
-        "0001628280-26-058970"
+        "0001628280-26-058970",
+        "0001628280-26-059941"
       ]
     },
     "LMT": {
@@ -3247,7 +3297,14 @@
       "seen_accessions": [
         "0000789019-26-000141",
         "0000789019-26-000143",
-        "0000789019-26-000145"
+        "0000789019-26-000145",
+        "0000789019-26-000153",
+        "0000789019-26-000154",
+        "0000789019-26-000155",
+        "0000789019-26-000156",
+        "0000789019-26-000157",
+        "0000789019-26-000158",
+        "0000789019-26-000159"
       ]
     },
     "MWA": {
@@ -3482,6 +3539,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 365851.08
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-28",
+          "owner": "Canney Jacqueline P",
+          "role": "Chief People & AI Enblmt. Off.",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1082886.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-08-31",
+          "owner": "Fipps Paul",
+          "role": "President, Global Customer Ops",
+          "signal": "sell",
+          "type": "sell",
+          "value": 300777.1398
         }
       ],
       "last_checked": "2026-08-15T22:36:22.522512+00:00",
@@ -3505,7 +3580,9 @@
         "0001649609-26-000032",
         "0001667422-26-000033",
         "0002111929-26-000016",
-        "0001659774-26-000012"
+        "0001659774-26-000012",
+        "0001649609-26-000035",
+        "0001667422-26-000036"
       ]
     },
     "NSC": {
@@ -5126,7 +5203,17 @@
       ]
     },
     "UP": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 38,
+          "date": "2026-08-31",
+          "owner": "CK Wheels LLC",
+          "role": "10% owner",
+          "signal": "sell",
+          "type": "sell",
+          "value": 43163.43
+        }
+      ],
       "last_checked": "2026-08-15T22:36:36.079926+00:00",
       "seen_accessions": [
         "0001104659-26-095172",
@@ -5137,7 +5224,8 @@
         "0001104659-26-103399",
         "0001104659-26-103400",
         "0001104659-26-103401",
-        "0001104659-26-103402"
+        "0001104659-26-103402",
+        "0000945621-26-001114"
       ]
     },
     "UROY": {
@@ -5405,9 +5493,21 @@
       ]
     },
     "WYFI": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 42,
+          "date": "2026-05-29",
+          "owner": "Shih Ichi",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 212617.08000000002
+        }
+      ],
       "last_checked": "2026-08-15T22:36:38.532246+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001213900-26-096352"
+      ]
     },
     "XE": {
       "event_history": [],
@@ -5457,5 +5557,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-01T21:51:00.238150+00:00"
+  "updated_at": "2026-09-02T00:19:37.662291+00:00"
 }
