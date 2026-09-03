@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 18,
     "baselined": 0,
-    "detail_failures": 70,
+    "detail_failures": 80,
     "lookback_days": 10,
-    "new_filings": 74,
+    "new_filings": 132,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -186,13 +186,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 447457.05
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-01",
+          "owner": "Newstead Jennifer",
+          "role": "SVP, GC and Government Affairs",
+          "signal": "sell",
+          "type": "sell",
+          "value": 456177.39
         }
       ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
       "seen_accessions": [
         "0001140361-26-032884",
         "0001140361-26-033928",
-        "0001140361-26-034741"
+        "0001140361-26-034741",
+        "0001140361-26-035636"
       ]
     },
     "ABEV": {
@@ -229,12 +239,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 46204798.379999995
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-02",
+          "owner": "MCCOY JOHN A. JR.",
+          "role": "VICE PRESIDENT AND CONTROLLER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 2957.5800000000004
         }
       ],
       "last_checked": "2026-08-15T22:35:54.756129+00:00",
       "seen_accessions": [
         "0001867666-26-000013",
-        "0001612571-26-000011"
+        "0001612571-26-000011",
+        "0001644207-26-000012",
+        "0001805099-26-000008"
       ]
     },
     "ACHR": {
@@ -381,7 +402,15 @@
         "0001225208-26-007016",
         "0001225208-26-007018",
         "0001225208-26-007306",
-        "0001225208-26-007307"
+        "0001225208-26-007307",
+        "0001225208-26-007607",
+        "0001225208-26-007608",
+        "0001225208-26-007609",
+        "0001225208-26-007610",
+        "0001225208-26-007611",
+        "0001225208-26-007612",
+        "0001225208-26-007613",
+        "0001225208-26-007614"
       ]
     },
     "AES": {
@@ -606,6 +635,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 30846356.0696
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-01",
+          "owner": "ALBA MANUEL",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 51263695.30500001
         }
       ],
       "last_checked": "2026-08-15T22:35:56.595808+00:00",
@@ -613,7 +651,8 @@
         "0001484394-26-000009",
         "0001998053-26-000023",
         "0001998163-26-000022",
-        "0001998179-26-000024"
+        "0001998179-26-000024",
+        "0001134727-26-000013"
       ]
     },
     "ALGM": {
@@ -868,6 +907,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 3766920.3407000005
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-01",
+          "owner": "Herrington Douglas J",
+          "role": "CEO Worldwide Amazon Stores",
+          "signal": "sell",
+          "type": "sell",
+          "value": 254770.0
         }
       ],
       "last_checked": "2026-08-15T22:35:57.707382+00:00",
@@ -882,7 +930,8 @@
         "0001374545-26-000010",
         "0001936006-26-000022",
         "0002024813-26-000010",
-        "0001043298-26-000002"
+        "0001043298-26-000002",
+        "0001936006-26-000024"
       ]
     },
     "APH": {
@@ -903,9 +952,30 @@
       ]
     },
     "ARBE": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-09-02",
+          "owner": "Arkind Noam",
+          "role": "Director, Chief Technology Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 20297.51
+        },
+        {
+          "conviction": 48,
+          "date": "2026-09-03",
+          "owner": "Arkind Noam",
+          "role": "Director, Chief Technology Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 19706.7
+        }
+      ],
       "last_checked": "2026-08-15T22:35:58.126109+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001213900-26-097271"
+      ]
     },
     "ARE": {
       "event_history": [
@@ -1027,9 +1097,21 @@
       ]
     },
     "AUTL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 41,
+          "date": "2026-09-02",
+          "owner": "Piccina Cintia",
+          "role": "U.S. CCO & Country Gen Manager",
+          "signal": "sell",
+          "type": "sell",
+          "value": 15681.568
+        }
+      ],
       "last_checked": "2026-08-15T22:35:59.425093+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001730463-26-000131"
+      ]
     },
     "AVGO": {
       "event_history": [],
@@ -1113,7 +1195,11 @@
     "BAX": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:00.164548+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001628280-26-060469",
+        "0001628280-26-060476",
+        "0001628280-26-060479"
+      ]
     },
     "BBAI": {
       "event_history": [],
@@ -1200,7 +1286,8 @@
       ],
       "last_checked": "2026-08-15T22:36:01.655442+00:00",
       "seen_accessions": [
-        "0002012588-26-000004"
+        "0002012588-26-000004",
+        "0002070839-26-000007"
       ]
     },
     "BN": {
@@ -1286,7 +1373,8 @@
         "0001225208-26-007031",
         "0001225208-26-007062",
         "0001225208-26-007084",
-        "0001225208-26-007337"
+        "0001225208-26-007337",
+        "0001225208-26-007620"
       ]
     },
     "BTBT": {
@@ -1525,7 +1613,8 @@
       "last_checked": "2026-08-15T22:36:04.037460+00:00",
       "seen_accessions": [
         "0001225208-26-007023",
-        "0001225208-26-007163"
+        "0001225208-26-007163",
+        "0001225208-26-007615"
       ]
     },
     "CMP": {
@@ -1569,6 +1658,51 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 4050000.0
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-01",
+          "owner": "Neville Patrick Sean",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4604500.0
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-02",
+          "owner": "Schulz Tamara L",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 104916.78
+        },
+        {
+          "conviction": 60,
+          "date": "2026-09-02",
+          "owner": "Razzaghi Hossein",
+          "role": "Chief Commercial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 655334.4600000001
+        },
+        {
+          "conviction": 77,
+          "date": "2026-09-01",
+          "owner": "Fox-Geen Jeremy",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1383000.0
+        },
+        {
+          "conviction": 73,
+          "date": "2026-09-02",
+          "owner": "Fox-Geen Jeremy",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 713504.4
         }
       ],
       "last_checked": "2026-08-15T22:36:04.822314+00:00",
@@ -1578,7 +1712,14 @@
         "0001876042-26-000253",
         "0001876042-26-000254",
         "0001876042-26-000256",
-        "0001876042-26-000257"
+        "0001876042-26-000257",
+        "0001539940-26-000002",
+        "0001876042-26-000258",
+        "0001876042-26-000259",
+        "0001876042-26-000260",
+        "0001876042-26-000261",
+        "0001876042-26-000262",
+        "0001876042-26-000263"
       ]
     },
     "CRML": {
@@ -1946,9 +2087,21 @@
       ]
     },
     "DG": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 57,
+          "date": "2026-09-03",
+          "owner": "REARDON KATHLEEN A",
+          "role": "EVP & Chief People Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 732554.8354
+        }
+      ],
       "last_checked": "2026-08-15T22:36:06.250501+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000029534-26-000076"
+      ]
     },
     "DGXX": {
       "event_history": [
@@ -1996,12 +2149,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 382326.72
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-01",
+          "owner": "WOODFORD BRENT",
+          "role": "EVP, Control, Fin Plan & Tax",
+          "signal": "sell",
+          "type": "sell",
+          "value": 387596.33999999997
         }
       ],
       "last_checked": "2026-08-15T22:36:06.484410+00:00",
       "seen_accessions": [
         "0001628280-26-057481",
-        "0001628280-26-058293"
+        "0001628280-26-058293",
+        "0001628280-26-060488"
       ]
     },
     "DNN": {
@@ -2597,6 +2760,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 148111.3596
+        },
+        {
+          "conviction": 42,
+          "date": "2026-09-02",
+          "owner": "Boughton Soleil",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 97965.14
         }
       ],
       "last_checked": "2026-08-15T22:36:12.271900+00:00",
@@ -2625,7 +2797,8 @@
         "0001837817-26-000011",
         "0001884671-26-000004",
         "0001907056-26-000022",
-        "0001773751-26-000217"
+        "0001773751-26-000217",
+        "0001837817-26-000013"
       ]
     },
     "HIVE": {
@@ -3062,10 +3235,21 @@
       "seen_accessions": []
     },
     "LAES": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-09-03",
+          "owner": "Enguent Jean-Pierre",
+          "role": "Vice President, R&DSS",
+          "signal": "sell",
+          "type": "sell",
+          "value": 36030.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:16.947437+00:00",
       "seen_accessions": [
-        "0002114888-26-000013"
+        "0002114888-26-000013",
+        "0002114888-26-000015"
       ]
     },
     "LAND": {
@@ -3186,7 +3370,8 @@
         "0001448240-26-000017",
         "0001525628-26-000008",
         "0001667260-26-000009",
-        "0001596070-26-000005"
+        "0001596070-26-000005",
+        "0001437113-26-000017"
       ]
     },
     "MARA": {
@@ -3443,6 +3628,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 13161.5
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-01",
+          "owner": "Helms Todd P",
+          "role": "Other",
+          "signal": "sell",
+          "type": "sell",
+          "value": 236593.0008
         }
       ],
       "last_checked": "2026-08-15T22:36:21.126810+00:00",
@@ -3451,7 +3645,8 @@
         "0001225208-26-007207",
         "0001225208-26-007334",
         "0001225208-26-007405",
-        "0001225208-26-007496"
+        "0001225208-26-007496",
+        "0001225208-26-007666"
       ]
     },
     "NBIS": {
@@ -3630,10 +3825,50 @@
       ]
     },
     "NNE": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 61,
+          "date": "2026-09-01",
+          "owner": "Walker James John",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 436064.99999999994
+        },
+        {
+          "conviction": 74,
+          "date": "2026-09-01",
+          "owner": "Yu Jiang",
+          "role": "Director, President and Chairman, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5801799.2326
+        },
+        {
+          "conviction": 74,
+          "date": "2026-09-02",
+          "owner": "Yu Jiang",
+          "role": "Director, President and Chairman, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2481649.3419
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-03",
+          "owner": "Walker James John",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 444167.5
+        }
+      ],
       "last_checked": "2026-08-15T22:36:22.089539+00:00",
       "seen_accessions": [
-        "0001493152-26-040231"
+        "0001493152-26-040231",
+        "0001493152-26-041359",
+        "0001493152-26-041362",
+        "0001493152-26-041402"
       ]
     },
     "NONOF": {
@@ -3924,6 +4159,24 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 4631254.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-01",
+          "owner": "Bealmear Richard Craig",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 636826.7999999999
+        },
+        {
+          "conviction": 42,
+          "date": "2026-09-01",
+          "owner": "Renner Alexandra",
+          "role": "Chief Product Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 74112.0
         }
       ],
       "last_checked": "2026-08-15T22:36:23.907050+00:00",
@@ -3942,7 +4195,9 @@
         "0002146790-26-000006",
         "0002147680-26-000004",
         "0002021433-26-000019",
-        "0002021786-26-000019"
+        "0002021786-26-000019",
+        "0001855623-26-000019",
+        "0002147680-26-000006"
       ]
     },
     "ONDS": {
@@ -4094,6 +4349,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 24542.215
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-02",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25377.175
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -4114,7 +4378,8 @@
         "0000905148-26-003991",
         "0000905148-26-004037",
         "0000905148-26-004056",
-        "0000905148-26-004066"
+        "0000905148-26-004066",
+        "0000905148-26-004076"
       ]
     },
     "ORCL": {
@@ -4159,12 +4424,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 318393.0
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-01",
+          "owner": "Paul Josh D.",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 336312.0
         }
       ],
       "last_checked": "2026-08-15T22:36:25.149530+00:00",
       "seen_accessions": [
         "0001882285-26-000017",
-        "0001882285-26-000020"
+        "0001882285-26-000020",
+        "0001882285-26-000022",
+        "0002055370-26-000007"
       ]
     },
     "PATH": {
@@ -4787,7 +5063,8 @@
       "seen_accessions": [
         "0001952898-26-000004",
         "0000897069-26-001694",
-        "0000897069-26-001696"
+        "0000897069-26-001696",
+        "0002089525-26-000002"
       ]
     },
     "RXRX": {
@@ -4849,7 +5126,9 @@
     "SES": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:31.834686+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0002039201-26-000008"
+      ]
     },
     "SLB": {
       "event_history": [
@@ -5239,7 +5518,15 @@
         "0001885927-26-000005",
         "0002095080-26-000007",
         "0002119429-26-000009",
-        "0002120465-26-000012"
+        "0002120465-26-000012",
+        "0001741853-26-000009",
+        "0001768282-26-000009",
+        "0001861524-26-000011",
+        "0001876104-26-000007",
+        "0001885927-26-000007",
+        "0002095080-26-000009",
+        "0002119429-26-000011",
+        "0002120465-26-000014"
       ]
     },
     "T": {
@@ -5791,5 +6078,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-03T19:55:02.235844+00:00"
+  "updated_at": "2026-09-03T22:39:15.271759+00:00"
 }
