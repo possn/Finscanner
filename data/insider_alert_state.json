@@ -1,6 +1,6 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 66,
     "lookback_days": 10,
@@ -3180,7 +3180,17 @@
       ]
     },
     "INTZ": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 44,
+          "date": "2026-09-04",
+          "owner": "Hinchcliffe Dion",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 11769.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:14.590077+00:00",
       "seen_accessions": [
         "0001683168-26-006613",
@@ -3190,7 +3200,8 @@
         "0001683168-26-006910",
         "0001683168-26-006911",
         "0001683168-26-006912",
-        "0001683168-26-006913"
+        "0001683168-26-006913",
+        "0001683168-26-006953"
       ]
     },
     "INVZ": {
@@ -6305,5 +6316,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-04T16:27:36.071143+00:00"
+  "updated_at": "2026-09-04T19:40:50.379641+00:00"
 }
