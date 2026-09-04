@@ -1,8 +1,8 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 66,
+    "detail_failures": 65,
     "lookback_days": 10,
     "new_filings": 68,
     "price_alerts_sent": 0,
@@ -1402,6 +1402,33 @@
           "signal": "sell",
           "type": "sell",
           "value": 75052.25
+        },
+        {
+          "conviction": 58,
+          "date": "2026-09-03",
+          "owner": "Vaaler Magnus",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 94245.1375
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-03",
+          "owner": "Snowling Harvey Edward",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 124269.11709999999
+        },
+        {
+          "conviction": 45,
+          "date": "2026-09-03",
+          "owner": "Mawjee Jehan",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 52359.476899999994
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -1414,7 +1441,10 @@
         "0001628280-26-057216",
         "0001628280-26-058766",
         "0001628280-26-060294",
-        "0001628280-26-060295"
+        "0001628280-26-060295",
+        "0001628280-26-060606",
+        "0001628280-26-060608",
+        "0001628280-26-060610"
       ]
     },
     "BSX": {
@@ -6265,5 +6295,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-04T05:59:25.731499+00:00"
+  "updated_at": "2026-09-04T11:26:10.395546+00:00"
 }
