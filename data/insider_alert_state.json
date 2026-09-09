@@ -2,9 +2,9 @@
   "last_change": {
     "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 59,
+    "detail_failures": 61,
     "lookback_days": 10,
-    "new_filings": 65,
+    "new_filings": 64,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1539,12 +1539,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 475607.07519999996
+        },
+        {
+          "conviction": 70,
+          "date": "2026-09-08",
+          "owner": "Denier Anthony Michael",
+          "role": "Director, President",
+          "signal": "sell",
+          "type": "sell",
+          "value": 515704.68040000007
         }
       ],
       "last_checked": "2026-08-15T22:36:02.682402+00:00",
       "seen_accessions": [
         "0002092820-26-000002",
-        "0002093121-26-000004"
+        "0002093121-26-000004",
+        "0002093121-26-000005"
       ]
     },
     "BWXT": {
@@ -3863,7 +3873,8 @@
         "0000789019-26-000159",
         "0000789019-26-000161",
         "0000789019-26-000184",
-        "0000789019-26-000185"
+        "0000789019-26-000185",
+        "0000789019-26-000178"
       ]
     },
     "MWA": {
@@ -4041,6 +4052,33 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 9156123.4169
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-03",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, PRESIDENT & BOARD CO-CHAIR",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9205158.930000002
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-04",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, PRESIDENT & BOARD CO-CHAIR",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9295857.82
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-08",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, PRESIDENT & BOARD CO-CHAIR",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9156072.05
         }
       ],
       "last_checked": "2026-08-15T22:36:21.488693+00:00",
@@ -4060,7 +4098,8 @@
         "0001473289-26-000025",
         "0001979391-26-000015",
         "0002128025-26-000013",
-        "0001786951-26-000018"
+        "0001786951-26-000018",
+        "0001786951-26-000023"
       ]
     },
     "NFE": {
@@ -6542,5 +6581,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-09T00:20:04.202285+00:00"
+  "updated_at": "2026-09-09T06:03:28.966255+00:00"
 }
