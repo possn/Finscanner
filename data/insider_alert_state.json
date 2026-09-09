@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 6,
     "baselined": 0,
-    "detail_failures": 62,
+    "detail_failures": 64,
     "lookback_days": 10,
-    "new_filings": 63,
+    "new_filings": 75,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1851,6 +1851,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 713504.4
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-08",
+          "owner": "Chandhok Nikhil",
+          "role": "Chief Product & Tech. Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2677266.4000000004
         }
       ],
       "last_checked": "2026-08-15T22:36:04.822314+00:00",
@@ -1867,7 +1876,8 @@
         "0001876042-26-000260",
         "0001876042-26-000261",
         "0001876042-26-000262",
-        "0001876042-26-000263"
+        "0001876042-26-000263",
+        "0001876042-26-000269"
       ]
     },
     "CRML": {
@@ -2179,6 +2189,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 650073.8181
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-08",
+          "owner": "Fink Nichlas A",
+          "role": "SVP, Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 248684.63999999998
         }
       ],
       "last_checked": "2026-08-15T22:36:05.562279+00:00",
@@ -2195,7 +2214,8 @@
         "0000858877-26-000126",
         "0000858877-26-000127",
         "0000858877-26-000128",
-        "0002015287-26-000017"
+        "0002015287-26-000017",
+        "0000858877-26-000134"
       ]
     },
     "CTRE": {
@@ -2438,7 +2458,17 @@
       ]
     },
     "EOSE": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 48,
+          "date": "2026-09-09",
+          "owner": "Puri Sumeet",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 141109.71
+        }
+      ],
       "last_checked": "2026-08-15T22:36:08.202776+00:00",
       "seen_accessions": [
         "0001011438-26-000471",
@@ -2450,7 +2480,8 @@
         "0001628280-26-053904",
         "0001628280-26-053907",
         "0001628280-26-053910",
-        "0001628280-26-053916"
+        "0001628280-26-053916",
+        "0001628280-26-061188"
       ]
     },
     "ES": {
@@ -3006,7 +3037,8 @@
       "last_checked": "2026-08-15T22:36:12.391525+00:00",
       "seen_accessions": [
         "0001062993-26-004525",
-        "0001062993-26-004538"
+        "0001062993-26-004538",
+        "0001062993-26-004871"
       ]
     },
     "HLLY": {
@@ -4530,6 +4562,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 21455.440000000002
+        },
+        {
+          "conviction": 38,
+          "date": "2026-09-08",
+          "owner": "Narayanadas Vivek",
+          "role": "General Counsel & Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 10010.28
         }
       ],
       "last_checked": "2026-08-15T22:36:23.907050+00:00",
@@ -4551,7 +4592,8 @@
         "0002021786-26-000019",
         "0001855623-26-000019",
         "0002147680-26-000006",
-        "0002146790-26-000008"
+        "0002146790-26-000008",
+        "0002146790-26-000010"
       ]
     },
     "ONDS": {
@@ -4730,6 +4772,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 25741.45
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-08",
+          "owner": "Schwartz Todd G.",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25736.545000000002
         }
       ],
       "last_checked": "2026-08-15T22:36:24.331195+00:00",
@@ -4753,7 +4804,8 @@
         "0000905148-26-004066",
         "0000905148-26-004076",
         "0000905148-26-004082",
-        "0000905148-26-004102"
+        "0000905148-26-004102",
+        "0000905148-26-004125"
       ]
     },
     "ORCL": {
@@ -5225,9 +5277,21 @@
       "seen_accessions": []
     },
     "PSEC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-09-04",
+          "owner": "Barry John F",
+          "role": "Director, CHIEF EXECUTIVE OFFICER, 10% owner",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 2726315.2
+        }
+      ],
       "last_checked": "2026-08-15T22:36:28.004659+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001294357-26-000015"
+      ]
     },
     "PSKY": {
       "event_history": [],
@@ -5302,11 +5366,22 @@
       ]
     },
     "QBTS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-09-08",
+          "owner": "DiLullo John D",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 19800.55
+        }
+      ],
       "last_checked": "2026-08-15T22:36:28.515594+00:00",
       "seen_accessions": [
         "0001974777-26-000016",
-        "0002129321-26-000013"
+        "0002129321-26-000013",
+        "0001346345-26-000008"
       ]
     },
     "QCOM": {
@@ -5347,12 +5422,22 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 5166048.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-04",
+          "owner": "Schwan Axel",
+          "role": "Pres., Tim Hortons US & Canada",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4671715.5671999995
         }
       ],
       "last_checked": "2026-08-15T22:36:28.790349+00:00",
       "seen_accessions": [
         "0000950142-26-002325",
-        "0001804729-26-000020"
+        "0001804729-26-000020",
+        "0001594977-26-000020"
       ]
     },
     "QUBT": {
@@ -5722,7 +5807,8 @@
       ],
       "last_checked": "2026-08-15T22:36:32.557151+00:00",
       "seen_accessions": [
-        "0001920484-26-000010"
+        "0001920484-26-000010",
+        "0001806386-26-000024"
       ]
     },
     "SPGI": {
@@ -5942,7 +6028,9 @@
     "SWKS": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:33.722790+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001976916-26-000003"
+      ]
     },
     "SYY": {
       "event_history": [
@@ -6601,5 +6689,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-09T19:50:24.418985+00:00"
+  "updated_at": "2026-09-09T22:37:05.024108+00:00"
 }
