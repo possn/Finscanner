@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 53,
+    "detail_failures": 59,
     "lookback_days": 10,
-    "new_filings": 67,
+    "new_filings": 65,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -3509,12 +3509,51 @@
           "signal": "sell",
           "type": "sell",
           "value": 665400.0
+        },
+        {
+          "conviction": 38,
+          "date": "2026-09-03",
+          "owner": "Nias James",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 41707.25
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-03",
+          "owner": "Keeney Scott H",
+          "role": "Director, President and CEO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 396849.56999999995
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-03",
+          "owner": "Corso Joseph John",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 170531.78999999998
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-04",
+          "owner": "Corso Joseph John",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 146210.76
         }
       ],
       "last_checked": "2026-08-15T22:36:17.408784+00:00",
       "seen_accessions": [
         "0001628280-26-058970",
-        "0001628280-26-059941"
+        "0001628280-26-059941",
+        "0001628280-26-060958",
+        "0001628280-26-060959",
+        "0001628280-26-060960"
       ]
     },
     "LMT": {
@@ -3822,7 +3861,9 @@
         "0000789019-26-000157",
         "0000789019-26-000158",
         "0000789019-26-000159",
-        "0000789019-26-000161"
+        "0000789019-26-000161",
+        "0000789019-26-000184",
+        "0000789019-26-000185"
       ]
     },
     "MWA": {
@@ -4790,13 +4831,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 28552.6604
+        },
+        {
+          "conviction": 61,
+          "date": "2026-09-08",
+          "owner": "Wolff Benjamin G",
+          "role": "Director, PRESIDENT & CEO",
+          "signal": "buy",
+          "type": "buy",
+          "value": 99128.8779
         }
       ],
       "last_checked": "2026-08-15T22:36:25.709082+00:00",
       "seen_accessions": [
         "0001920634-26-000020",
         "0001998996-26-000020",
-        "0002014215-26-000020"
+        "0002014215-26-000020",
+        "0001368618-26-000015"
       ]
     },
     "PEP": {
@@ -6491,5 +6542,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-08T21:55:07.479533+00:00"
+  "updated_at": "2026-09-09T00:20:04.202285+00:00"
 }
