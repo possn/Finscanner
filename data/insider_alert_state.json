@@ -4,7 +4,7 @@
     "baselined": 0,
     "detail_failures": 64,
     "lookback_days": 10,
-    "new_filings": 75,
+    "new_filings": 80,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -2371,7 +2371,17 @@
       "seen_accessions": []
     },
     "DT": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 41,
+          "date": "2026-09-05",
+          "owner": "Greifeneder Bernd",
+          "role": "EVP, Chief Technology Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 5138.1
+        }
+      ],
       "last_checked": "2026-08-15T22:36:07.129084+00:00",
       "seen_accessions": [
         "0001221302-26-000002",
@@ -2382,7 +2392,13 @@
         "0001775679-26-000011",
         "0001991569-26-000006",
         "0001991569-26-000010",
-        "0001775679-26-000016"
+        "0001775679-26-000016",
+        "0001239165-26-000008",
+        "0001542567-26-000012",
+        "0001783507-26-000011",
+        "0001983112-26-000010",
+        "0001989382-26-000016",
+        "0002068884-26-000007"
       ]
     },
     "DVN": {
@@ -4891,7 +4907,8 @@
         "0001855764-26-000010",
         "0001855778-26-000006",
         "0002127293-26-000006",
-        "0002143377-26-000003"
+        "0002143377-26-000003",
+        "0001855767-26-000018"
       ]
     },
     "PBA": {
@@ -5485,7 +5502,9 @@
     "REKR": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:29.504806+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001697851-26-000015"
+      ]
     },
     "RELL": {
       "event_history": [
@@ -5631,14 +5650,55 @@
       "seen_accessions": []
     },
     "S": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-09-08",
+          "owner": "Conder Keenan Michael",
+          "role": "Chief Legal Officer & Sec'y",
+          "signal": "sell",
+          "type": "sell",
+          "value": 164494.47999999998
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-08",
+          "owner": "TOMASELLO ROBIN",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 421761.00899999996
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-08",
+          "owner": "Parekh Sonalee Elizabeth",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 421189.3216
+        },
+        {
+          "conviction": 73,
+          "date": "2026-09-08",
+          "owner": "Weingarten Tomer",
+          "role": "Director, President, CEO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 767040.61
+        }
+      ],
       "last_checked": "2026-08-15T22:36:31.280876+00:00",
       "seen_accessions": [
         "0001333280-26-000016",
         "0001511194-26-000012",
         "0001608511-26-000015",
         "0001689411-26-000015",
-        "0001866222-26-000037"
+        "0001866222-26-000037",
+        "0001333280-26-000017",
+        "0001608511-26-000017",
+        "0001849122-26-000019",
+        "0001866222-26-000039"
       ]
     },
     "SANA": {
@@ -5654,10 +5714,21 @@
       "seen_accessions": []
     },
     "SBUX": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-09-04",
+          "owner": "BREWER BRADY",
+          "role": "ceo, International",
+          "signal": "sell",
+          "type": "sell",
+          "value": 235382.4
+        }
+      ],
       "last_checked": "2026-08-15T22:36:31.675608+00:00",
       "seen_accessions": [
-        "0000829224-26-000133"
+        "0000829224-26-000133",
+        "0000829224-26-000135"
       ]
     },
     "SES": {
@@ -6197,9 +6268,21 @@
       "seen_accessions": []
     },
     "TSLA": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 73,
+          "date": "2026-09-08",
+          "owner": "Taneja Vaibhav",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 938419.1705
+        }
+      ],
       "last_checked": "2026-08-15T22:36:35.164740+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001104659-26-106432"
+      ]
     },
     "TSSI": {
       "event_history": [],
@@ -6263,6 +6346,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 43163.43
+        },
+        {
+          "conviction": 35,
+          "date": "2026-09-08",
+          "owner": "Wells Meaghan Danielle",
+          "role": "Chief Growth Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 4051.97
         }
       ],
       "last_checked": "2026-08-15T22:36:36.079926+00:00",
@@ -6276,7 +6368,9 @@
         "0001104659-26-103400",
         "0001104659-26-103401",
         "0001104659-26-103402",
-        "0000945621-26-001114"
+        "0000945621-26-001114",
+        "0001104659-26-106441",
+        "0001104659-26-106442"
       ]
     },
     "UROY": {
@@ -6689,5 +6783,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-09T22:37:05.024108+00:00"
+  "updated_at": "2026-09-10T01:09:26.105843+00:00"
 }
