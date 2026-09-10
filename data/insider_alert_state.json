@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 2,
     "baselined": 0,
     "detail_failures": 64,
     "lookback_days": 10,
-    "new_filings": 80,
+    "new_filings": 70,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1742,13 +1742,37 @@
       ]
     },
     "CLSK": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-09-08",
+          "owner": "Monnig Taylor",
+          "role": "CTO, COO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 336748.4379
+        },
+        {
+          "conviction": 48,
+          "date": "2026-09-04",
+          "owner": "Monnig Taylor",
+          "role": "CTO, COO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 56903.9657
+        }
+      ],
       "last_checked": "2026-08-15T22:36:03.801910+00:00",
       "seen_accessions": [
         "0001193125-26-352919",
         "0001193125-26-352927",
         "0001193125-26-352931",
-        "0001193125-26-352934"
+        "0001193125-26-352934",
+        "0001193125-26-386873",
+        "0001193125-26-386874",
+        "0001193125-26-386877",
+        "0001193125-26-386878",
+        "0001193125-26-386880"
       ]
     },
     "CLX": {
@@ -6677,6 +6701,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1977808.266
+        },
+        {
+          "conviction": 70,
+          "date": "2026-09-08",
+          "owner": "Motz Catherine J.",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 997943.3012999999
         }
       ],
       "last_checked": "2026-08-15T22:36:38.408784+00:00",
@@ -6684,7 +6717,8 @@
         "0001083301-26-000169",
         "0001083301-26-000170",
         "0001083301-26-000172",
-        "0001628280-26-059897"
+        "0001628280-26-059897",
+        "0001628280-26-061206"
       ]
     },
     "WYFI": {
@@ -6783,5 +6817,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-10T01:09:26.105843+00:00"
+  "updated_at": "2026-09-10T06:03:18.845544+00:00"
 }
