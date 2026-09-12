@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 0,
     "baselined": 0,
-    "detail_failures": 66,
+    "detail_failures": 67,
     "lookback_days": 10,
-    "new_filings": 73,
+    "new_filings": 69,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 302
@@ -1264,7 +1264,8 @@
         "0001140361-26-036389",
         "0001140361-26-036390",
         "0001140361-26-036381",
-        "0001140361-26-036382"
+        "0001140361-26-036382",
+        "0001140361-26-036377"
       ]
     },
     "ATKR": {
@@ -3526,11 +3527,22 @@
       ]
     },
     "IONQ": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 55,
+          "date": "2026-09-10",
+          "owner": "Raymond John w",
+          "role": "Director, Other",
+          "signal": "sell",
+          "type": "sell",
+          "value": 89564.47
+        }
+      ],
       "last_checked": "2026-08-15T22:36:14.876962+00:00",
       "seen_accessions": [
         "0001588852-26-000014",
-        "0001914275-26-000012"
+        "0001914275-26-000012",
+        "0001193125-26-389607"
       ]
     },
     "IP": {
@@ -7219,5 +7231,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-12T01:12:20.327468+00:00"
+  "updated_at": "2026-09-12T05:54:44.734982+00:00"
 }
