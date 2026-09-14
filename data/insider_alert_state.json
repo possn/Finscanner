@@ -1,13 +1,13 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 6,
     "baselined": 0,
-    "detail_failures": 46,
+    "detail_failures": 56,
     "lookback_days": 10,
-    "new_filings": 48,
+    "new_filings": 68,
     "price_alerts_sent": 0,
     "requested": 479,
-    "sec_issuers": 302
+    "sec_issuers": 301
   },
   "price_alerts": {
     "ACXP": {
@@ -937,6 +937,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 7111160.31
+        },
+        {
+          "conviction": 77,
+          "date": "2026-09-10",
+          "owner": "Su Lisa T",
+          "role": "Director, Chair, President & CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 48145666.13999999
         }
       ],
       "last_checked": "2026-08-15T22:35:57.292474+00:00",
@@ -963,7 +972,8 @@
         "0000002488-26-000167",
         "0000002488-26-000174",
         "0000002488-26-000176",
-        "0001452385-26-000008"
+        "0001452385-26-000008",
+        "0000002488-26-000178"
       ]
     },
     "AMKR": {
@@ -1115,7 +1125,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:35:57.993334+00:00",
       "seen_accessions": [
-        "0001628280-26-054432"
+        "0001628280-26-054432",
+        "0001900445-26-000004"
       ]
     },
     "ARBE": {
@@ -2644,12 +2655,22 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 5466670.374000001
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-11",
+          "owner": "Donaldson Michael P",
+          "role": "EVP & Chief Legal Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1085728.0
         }
       ],
       "last_checked": "2026-08-15T22:36:07.913022+00:00",
       "seen_accessions": [
         "0000821189-26-000169",
-        "0000821189-26-000171"
+        "0000821189-26-000171",
+        "0000821189-26-000174"
       ]
     },
     "EOSE": {
@@ -2840,7 +2861,12 @@
     "GCTS": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:10.328968+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000929638-26-003523",
+        "0000929638-26-003524",
+        "0000929638-26-003525",
+        "0000929638-26-003526"
+      ]
     },
     "GD": {
       "event_history": [],
@@ -4021,7 +4047,8 @@
       "event_history": [],
       "last_checked": "2026-08-15T22:36:18.874104+00:00",
       "seen_accessions": [
-        "0000950103-26-012124"
+        "0000950103-26-012124",
+        "0000950103-26-013910"
       ]
     },
     "MCD": {
@@ -5261,6 +5288,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 22539362.3922
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-11",
+          "owner": "Gupta Ashim",
+          "role": "COO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1625602.7721
         }
       ],
       "last_checked": "2026-08-15T22:36:25.224938+00:00",
@@ -5272,7 +5308,8 @@
         "0001855778-26-000006",
         "0002127293-26-000006",
         "0002143377-26-000003",
-        "0001855767-26-000018"
+        "0001855767-26-000018",
+        "0001855778-26-000007"
       ]
     },
     "PBA": {
@@ -5528,14 +5565,25 @@
       ]
     },
     "PGNY": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 64,
+          "date": "2026-09-10",
+          "owner": "GORDON KEVIN K",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 321358.3
+        }
+      ],
       "last_checked": "2026-08-15T22:36:26.124804+00:00",
       "seen_accessions": [
         "0001551306-26-000142",
         "0001551306-26-000144",
         "0001551306-26-000146",
         "0001551306-26-000148",
-        "0001551306-26-000150"
+        "0001551306-26-000150",
+        "0001551306-26-000152"
       ]
     },
     "PK": {
@@ -5638,9 +5686,21 @@
       "seen_accessions": []
     },
     "PPG": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 38,
+          "date": "2026-09-11",
+          "owner": "Hefel Juliane M.",
+          "role": "Sr. VP, Ind Coatings & Sp Prod",
+          "signal": "buy",
+          "type": "buy",
+          "value": 1409.2793259999999
+        }
+      ],
       "last_checked": "2026-08-15T22:36:27.203551+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0000079879-26-000290"
+      ]
     },
     "PROP": {
       "event_history": [],
@@ -7038,6 +7098,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 5646000.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-11",
+          "owner": "FISHER RICHARD W",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 188002.0
         }
       ],
       "last_checked": "2026-08-15T22:36:37.809727+00:00",
@@ -7054,7 +7123,8 @@
         "0001186933-26-000006",
         "0001396681-26-000004",
         "0002060469-26-000004",
-        "0001437107-26-000079"
+        "0001437107-26-000079",
+        "0001287510-26-000009"
       ]
     },
     "WEN": {
@@ -7242,5 +7312,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-14T14:12:22.036747+00:00"
+  "updated_at": "2026-09-14T23:11:59.647758+00:00"
 }
