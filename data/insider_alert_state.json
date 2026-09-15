@@ -4,7 +4,7 @@
     "baselined": 0,
     "detail_failures": 56,
     "lookback_days": 10,
-    "new_filings": 61,
+    "new_filings": 58,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -663,6 +663,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1520451.25
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-11",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1611919.83
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -688,7 +697,8 @@
         "0001104659-26-106155",
         "0001104659-26-106570",
         "0001104659-26-107065",
-        "0001104659-26-107303"
+        "0001104659-26-107303",
+        "0001104659-26-107732"
       ]
     },
     "AGNC": {
@@ -2735,6 +2745,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 141109.71
+        },
+        {
+          "conviction": 48,
+          "date": "2026-09-11",
+          "owner": "Song Haiyan",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 39500.0
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-14",
+          "owner": "Song Haiyan",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 19200.0
         }
       ],
       "last_checked": "2026-08-15T22:36:08.202776+00:00",
@@ -2749,7 +2777,8 @@
         "0001628280-26-053907",
         "0001628280-26-053910",
         "0001628280-26-053916",
-        "0001628280-26-061188"
+        "0001628280-26-061188",
+        "0001628280-26-061975"
       ]
     },
     "ES": {
@@ -7364,5 +7393,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-15T01:33:08.969589+00:00"
+  "updated_at": "2026-09-15T13:39:02.659231+00:00"
 }
