@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 56,
     "lookback_days": 10,
-    "new_filings": 68,
+    "new_filings": 61,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -2388,6 +2388,33 @@
           "signal": "sell",
           "type": "sell",
           "value": 248684.63999999998
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-11",
+          "owner": "Patterson Mark",
+          "role": "EVP and CFO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 195421.65
+        },
+        {
+          "conviction": 48,
+          "date": "2026-09-14",
+          "owner": "Tuszik Oliver",
+          "role": "EVP, Global Sales",
+          "signal": "sell",
+          "type": "sell",
+          "value": 74922.40000000001
+        },
+        {
+          "conviction": 41,
+          "date": "2026-09-14",
+          "owner": "Subaiya Thimaya K.",
+          "role": "EVP, Operations",
+          "signal": "sell",
+          "type": "sell",
+          "value": 34376.16
         }
       ],
       "last_checked": "2026-08-15T22:36:05.562279+00:00",
@@ -2405,7 +2432,10 @@
         "0000858877-26-000127",
         "0000858877-26-000128",
         "0002015287-26-000017",
-        "0000858877-26-000134"
+        "0000858877-26-000134",
+        "0000858877-26-000137",
+        "0000858877-26-000138",
+        "0002015287-26-000020"
       ]
     },
     "CTRE": {
@@ -2592,9 +2622,31 @@
       ]
     },
     "DVN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-09-14",
+          "owner": "Lowe Robert Ferrall III",
+          "role": "EVP EXPLORATION & PRODUCTION",
+          "signal": "sell",
+          "type": "sell",
+          "value": 344218.2
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-14",
+          "owner": "Gaspar Clay M",
+          "role": "Director, PRESIDENT AND CEO",
+          "signal": "buy",
+          "type": "buy",
+          "value": 199876.03999999998
+        }
+      ],
       "last_checked": "2026-08-15T22:36:07.301913+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001090012-26-000123",
+        "0001090012-26-000124"
+      ]
     },
     "E": {
       "event_history": [],
@@ -7312,5 +7364,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-14T23:11:59.647758+00:00"
+  "updated_at": "2026-09-15T01:33:08.969589+00:00"
 }
