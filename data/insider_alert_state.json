@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 2,
     "baselined": 0,
     "detail_failures": 59,
     "lookback_days": 10,
-    "new_filings": 63,
+    "new_filings": 61,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -1722,13 +1722,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 515704.68040000007
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-14",
+          "owner": "Wang Haichen",
+          "role": "Director, Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 493746.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.682402+00:00",
       "seen_accessions": [
         "0002092820-26-000002",
         "0002093121-26-000004",
-        "0002093121-26-000005"
+        "0002093121-26-000005",
+        "0002093135-26-000004"
       ]
     },
     "BWXT": {
@@ -7390,6 +7400,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 188002.0
+        },
+        {
+          "conviction": 60,
+          "date": "2026-09-14",
+          "owner": "Locke Lori C.",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 819004.95
         }
       ],
       "last_checked": "2026-08-15T22:36:37.809727+00:00",
@@ -7407,7 +7426,8 @@
         "0001396681-26-000004",
         "0002060469-26-000004",
         "0001437107-26-000079",
-        "0001287510-26-000009"
+        "0001287510-26-000009",
+        "0001646563-26-000007"
       ]
     },
     "WEN": {
@@ -7600,5 +7620,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-16T06:07:22.857271+00:00"
+  "updated_at": "2026-09-16T11:45:18.343909+00:00"
 }
