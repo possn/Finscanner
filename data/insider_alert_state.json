@@ -1,6 +1,6 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 59,
     "lookback_days": 10,
@@ -7333,6 +7333,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 54978.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-09-15",
+          "owner": "Malady Kyle",
+          "role": "EVP and Group CEO-VZ Business",
+          "signal": "sell",
+          "type": "sell",
+          "value": 56309.0
         }
       ],
       "last_checked": "2026-08-15T22:36:37.521542+00:00",
@@ -7347,7 +7356,8 @@
         "0001760581-26-000044",
         "0001760581-26-000046",
         "0001760581-26-000050",
-        "0001760581-26-000052"
+        "0001760581-26-000052",
+        "0001760581-26-000056"
       ]
     },
     "VZLA": {
@@ -7630,5 +7640,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-16T17:05:54.557288+00:00"
+  "updated_at": "2026-09-16T20:13:00.670836+00:00"
 }
