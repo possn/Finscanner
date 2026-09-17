@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 2,
     "baselined": 0,
     "detail_failures": 64,
     "lookback_days": 10,
-    "new_filings": 73,
+    "new_filings": 69,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -358,13 +358,33 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 724200.0
+        },
+        {
+          "conviction": 70,
+          "date": "2026-09-16",
+          "owner": "Agree Joey",
+          "role": "Director, PRESIDENT & CEO",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 500921.60000000003
+        },
+        {
+          "conviction": 92,
+          "date": "2026-09-16",
+          "owner": "RAKOLTA JOHN JR",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 1375600.0
         }
       ],
       "last_checked": "2026-08-15T22:35:55.178412+00:00",
       "seen_accessions": [
         "0001879562-26-000004",
         "0001528153-26-000011",
-        "0001528153-26-000013"
+        "0001528153-26-000013",
+        "0001348490-26-000006",
+        "0001528153-26-000015"
       ]
     },
     "ADM": {
@@ -3334,7 +3354,10 @@
         "0001193125-26-393511",
         "0001193125-26-393513",
         "0001193125-26-393515",
-        "0001193125-26-393517"
+        "0001193125-26-393517",
+        "0001193125-26-393491",
+        "0001193125-26-393494",
+        "0001193125-26-393497"
       ]
     },
     "GORO": {
@@ -7882,5 +7905,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-17T07:46:39.640108+00:00"
+  "updated_at": "2026-09-17T12:38:32.613287+00:00"
 }
