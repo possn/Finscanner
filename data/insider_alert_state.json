@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 6,
     "baselined": 0,
     "detail_failures": 78,
     "lookback_days": 10,
-    "new_filings": 80,
+    "new_filings": 84,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -722,6 +722,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1595826.51
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-16",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1621408.78
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -751,7 +760,8 @@
         "0001104659-26-107732",
         "0001104659-26-108107",
         "0001104659-26-108452",
-        "0000004977-26-000102"
+        "0000004977-26-000102",
+        "0001104659-26-108798"
       ]
     },
     "AGNC": {
@@ -1790,6 +1800,15 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 4299500.0
+        },
+        {
+          "conviction": 73,
+          "date": "2026-09-17",
+          "owner": "Troim Tor Olav",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 656925.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -1806,7 +1825,8 @@
         "0001628280-26-060606",
         "0001628280-26-060608",
         "0001628280-26-060610",
-        "0001628280-26-062396"
+        "0001628280-26-062396",
+        "0001628280-26-062623"
       ]
     },
     "BSX": {
@@ -4224,10 +4244,41 @@
       "seen_accessions": []
     },
     "KRMN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 44,
+          "date": "2026-09-16",
+          "owner": "Twitty Stephen",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 10117.25
+        },
+        {
+          "conviction": 62,
+          "date": "2026-09-16",
+          "owner": "Petryszyn Mary D",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 18719.95
+        },
+        {
+          "conviction": 85,
+          "date": "2026-09-16",
+          "owner": "Stinnett David",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 1007648.1000000001
+        }
+      ],
       "last_checked": "2026-08-15T22:36:16.365019+00:00",
       "seen_accessions": [
-        "0001193125-26-392168"
+        "0001193125-26-392168",
+        "0001193125-26-395095",
+        "0001193125-26-395097",
+        "0001193125-26-395098"
       ]
     },
     "KTOS": {
@@ -7189,6 +7240,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 476599.99999999994
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-16",
+          "owner": "Ito Yasuhiro",
+          "role": "Chief People Officer (CPO)",
+          "signal": "sell",
+          "type": "sell",
+          "value": 218610.0
         }
       ],
       "last_checked": "2026-08-15T22:36:32.498469+00:00",
@@ -7199,7 +7259,8 @@
         "0001193125-26-353728",
         "0001193125-26-356579",
         "0001193125-26-356583",
-        "0001193125-26-391724"
+        "0001193125-26-391724",
+        "0001193125-26-395188"
       ]
     },
     "SOUN": {
@@ -8337,5 +8398,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-18T06:00:41.337006+00:00"
+  "updated_at": "2026-09-18T16:30:50.769594+00:00"
 }
