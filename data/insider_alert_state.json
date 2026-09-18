@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 15,
+    "alerts_sent": 14,
     "baselined": 0,
-    "detail_failures": 73,
+    "detail_failures": 78,
     "lookback_days": 10,
-    "new_filings": 132,
+    "new_filings": 109,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -205,6 +205,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 456176.74000000005
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-15",
+          "owner": "Newstead Jennifer",
+          "role": "SVP, GC and Government Affairs",
+          "signal": "sell",
+          "type": "sell",
+          "value": 474813.22
         }
       ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
@@ -213,7 +222,8 @@
         "0001140361-26-033928",
         "0001140361-26-034741",
         "0001140361-26-035636",
-        "0001140361-26-036226"
+        "0001140361-26-036226",
+        "0001140361-26-037020"
       ]
     },
     "ABEV": {
@@ -790,6 +800,33 @@
           "signal": "sell",
           "type": "sell",
           "value": 240556.80000000002
+        },
+        {
+          "conviction": 74,
+          "date": "2026-09-15",
+          "owner": "SIEBEL THOMAS M",
+          "role": "Director, CEO and Chairman of the Board, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3073810.9
+        },
+        {
+          "conviction": 74,
+          "date": "2026-09-16",
+          "owner": "SIEBEL THOMAS M",
+          "role": "Director, CEO and Chairman of the Board, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1710083.38
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-16",
+          "owner": "Lath Hitesh",
+          "role": "CHIEF FINANCIAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 220886.96000000002
         }
       ],
       "last_checked": "2026-08-15T22:35:56.396033+00:00",
@@ -797,7 +834,10 @@
         "0001577526-26-000096",
         "0001577526-26-000098",
         "0001577526-26-000121",
-        "0001577526-26-000128"
+        "0001577526-26-000128",
+        "0001577526-26-000130",
+        "0001577526-26-000132",
+        "0001577526-26-000134"
       ]
     },
     "AKZOF": {
@@ -2453,6 +2493,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 5572344.96
+        },
+        {
+          "conviction": 77,
+          "date": "2026-09-15",
+          "owner": "Intrator Michael N",
+          "role": "Director, CEO and President, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 25204097.7128
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -2502,7 +2551,8 @@
         "0001769628-26-000418",
         "0001769628-26-000419",
         "0001769628-26-000426",
-        "0001769628-26-000427"
+        "0001769628-26-000427",
+        "0001769628-26-000430"
       ]
     },
     "CSAI": {
@@ -4217,6 +4267,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 393120.0
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-15",
+          "owner": "Carrai Phillip D",
+          "role": "President, STC Division",
+          "signal": "sell",
+          "type": "sell",
+          "value": 310900.56799999997
+        },
+        {
+          "conviction": 38,
+          "date": "2026-09-15",
+          "owner": "Mendoza Marie",
+          "role": "SVP & General Counsel",
+          "signal": "sell",
+          "type": "sell",
+          "value": 48500.0
         }
       ],
       "last_checked": "2026-08-15T22:36:16.509612+00:00",
@@ -4227,7 +4295,9 @@
         "0001509409-26-000010",
         "0001660112-26-000010",
         "0001014803-26-000009",
-        "0001695434-26-000011"
+        "0001695434-26-000011",
+        "0001509409-26-000011",
+        "0001660112-26-000011"
       ]
     },
     "KULR": {
@@ -5012,7 +5082,11 @@
         "0001495829-26-000002",
         "0002055888-26-000002",
         "0002060195-26-000002",
-        "0002074423-26-000002"
+        "0002074423-26-000002",
+        "0001781298-26-000002",
+        "0001781310-26-000002",
+        "0001858812-26-000002",
+        "0001972630-26-000002"
       ]
     },
     "NKE": {
@@ -5224,13 +5298,27 @@
       ]
     },
     "NTNX": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-09-17",
+          "owner": "Sivaraman Rukmini",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2669806.278
+        }
+      ],
       "last_checked": "2026-08-15T22:36:22.782427+00:00",
       "seen_accessions": [
         "0001193125-26-369034",
         "0001193125-26-369035",
         "0001193125-26-369037",
-        "0001193125-26-369039"
+        "0001193125-26-369039",
+        "0001193125-26-394659",
+        "0001193125-26-394660",
+        "0001193125-26-394661",
+        "0001193125-26-394771"
       ]
     },
     "NTR": {
@@ -5813,9 +5901,26 @@
       ]
     },
     "ORCL": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-09-16",
+          "owner": "Sicilia Michael D.",
+          "role": "Chief Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1522827.08
+        }
+      ],
       "last_checked": "2026-08-15T22:36:24.345949+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001341439-26-000079",
+        "0001341439-26-000080",
+        "0001341439-26-000081",
+        "0001341439-26-000082",
+        "0001341439-26-000083",
+        "0001341439-26-000084"
+      ]
     },
     "OTIS": {
       "event_history": [],
@@ -6922,7 +7027,8 @@
       "seen_accessions": [
         "0000829224-26-000133",
         "0000829224-26-000135",
-        "0000829224-26-000137"
+        "0000829224-26-000137",
+        "0000829224-26-000139"
       ]
     },
     "SES": {
@@ -7135,7 +7241,10 @@
         "0001920481-26-000017",
         "0001920484-26-000012",
         "0001921640-26-000017",
-        "0001921640-26-000018"
+        "0001921640-26-000018",
+        "0001248294-26-000008",
+        "0001588852-26-000016",
+        "0001917995-26-000017"
       ]
     },
     "SPGI": {
@@ -8124,11 +8233,80 @@
           "signal": "sell",
           "type": "sell",
           "value": 87210.49450000002
+        },
+        {
+          "conviction": 48,
+          "date": "2026-09-17",
+          "owner": "BEER JAMES A",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 33985.77
+        },
+        {
+          "conviction": 48,
+          "date": "2026-09-16",
+          "owner": "Schlossman Robert",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 448173.51
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-16",
+          "owner": "Rich Michael J.",
+          "role": "CRO and President of WW Sales",
+          "signal": "sell",
+          "type": "sell",
+          "value": 791869.5824
+        },
+        {
+          "conviction": 58,
+          "date": "2026-09-16",
+          "owner": "Geller Adam",
+          "role": "Chief Product Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1075230.8984
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-17",
+          "owner": "Geller Adam",
+          "role": "Chief Product Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 880173.84
+        },
+        {
+          "conviction": 71,
+          "date": "2026-09-16",
+          "owner": "RUBIN KEVIN",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1148287.9996
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-16",
+          "owner": "Chaudhry Jagtar Singh",
+          "role": "Director, CEO & Chairman, 10% owner",
+          "signal": "sell",
+          "type": "sell",
+          "value": 549759.5056
         }
       ],
       "last_checked": "2026-08-15T22:36:39.173337+00:00",
       "seen_accessions": [
-        "0001713683-26-000132"
+        "0001713683-26-000132",
+        "0001713683-26-000170",
+        "0001713683-26-000172",
+        "0001713683-26-000174",
+        "0001713683-26-000176",
+        "0001713683-26-000178",
+        "0001713683-26-000180"
       ]
     },
     "ZTS": {
@@ -8139,5 +8317,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-17T22:15:24.184370+00:00"
+  "updated_at": "2026-09-18T00:28:21.994362+00:00"
 }
