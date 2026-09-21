@@ -1,8 +1,8 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 3,
     "baselined": 0,
-    "detail_failures": 72,
+    "detail_failures": 70,
     "lookback_days": 10,
     "new_filings": 73,
     "price_alerts_sent": 0,
@@ -740,6 +740,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1557893.93
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-17",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1503862.6500000001
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -771,7 +780,8 @@
         "0001104659-26-108452",
         "0000004977-26-000102",
         "0001104659-26-108798",
-        "0000004977-26-000104"
+        "0000004977-26-000104",
+        "0001104659-26-109135"
       ]
     },
     "AGNC": {
@@ -1819,6 +1829,15 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 656925.0
+        },
+        {
+          "conviction": 85,
+          "date": "2026-09-18",
+          "owner": "Morand De Oliveira Bruno",
+          "role": "Chief Executive Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 200200.00000000003
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -1836,7 +1855,8 @@
         "0001628280-26-060608",
         "0001628280-26-060610",
         "0001628280-26-062396",
-        "0001628280-26-062623"
+        "0001628280-26-062623",
+        "0001628280-26-062804"
       ]
     },
     "BSX": {
@@ -3136,11 +3156,21 @@
           "signal": "buy",
           "type": "buy",
           "value": 44500.0
+        },
+        {
+          "conviction": 57,
+          "date": "2026-09-18",
+          "owner": "SHERIFF WILLIAM M",
+          "role": "Director, Executive Chairman",
+          "signal": "buy",
+          "type": "buy",
+          "value": 101250.0
         }
       ],
       "last_checked": "2026-08-15T22:36:08.574804+00:00",
       "seen_accessions": [
-        "0001193125-26-393086"
+        "0001193125-26-393086",
+        "0001193125-26-396060"
       ]
     },
     "EVTL": {
@@ -8508,5 +8538,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-19T06:01:04.071828+00:00"
+  "updated_at": "2026-09-21T14:18:11.047640+00:00"
 }
