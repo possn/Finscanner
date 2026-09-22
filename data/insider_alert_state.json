@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 7,
     "baselined": 0,
     "detail_failures": 44,
     "lookback_days": 10,
-    "new_filings": 45,
+    "new_filings": 61,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -749,6 +749,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1503862.6500000001
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-18",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1487615.9999999998
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -781,7 +790,8 @@
         "0000004977-26-000102",
         "0001104659-26-108798",
         "0000004977-26-000104",
-        "0001104659-26-109135"
+        "0001104659-26-109135",
+        "0001104659-26-109651"
       ]
     },
     "AGNC": {
@@ -1669,9 +1679,31 @@
       "seen_accessions": []
     },
     "BFRG": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-09-22",
+          "owner": "Singh Vininder",
+          "role": "Director, Chief Executive Officer, 10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 44917.5
+        },
+        {
+          "conviction": 69,
+          "date": "2026-09-22",
+          "owner": "Blacher Joshua",
+          "role": "Chief Financial Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 26425.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:00.926104+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001628280-26-063054",
+        "0001628280-26-063056"
+      ]
     },
     "BHP": {
       "event_history": [
@@ -3249,9 +3281,31 @@
       ]
     },
     "FLNC": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 51,
+          "date": "2026-09-21",
+          "owner": "von Heynitz Harald",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 51520.0
+        },
+        {
+          "conviction": 69,
+          "date": "2026-09-21",
+          "owner": "BULLS HERMAN E",
+          "role": "Director",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 73600.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:09.246734+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001868941-26-000048",
+        "0001868941-26-000050"
+      ]
     },
     "FLR": {
       "event_history": [],
@@ -3723,7 +3777,13 @@
         "0000354950-26-000154",
         "0000354950-26-000156",
         "0000354950-26-000158",
-        "0000354950-26-000165"
+        "0000354950-26-000165",
+        "0000354950-26-000172",
+        "0000354950-26-000173",
+        "0000354950-26-000174",
+        "0000354950-26-000175",
+        "0000354950-26-000176",
+        "0000354950-26-000177"
       ]
     },
     "HIMS": {
@@ -5646,6 +5706,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 7648632.4508
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-18",
+          "owner": "STEVENS MARK A",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 300147095.40000004
         }
       ],
       "last_checked": "2026-08-15T22:36:23.162648+00:00",
@@ -5661,7 +5730,8 @@
         "0001243821-26-000007",
         "0001283854-26-000010",
         "0001588670-26-000014",
-        "0001696841-26-000012"
+        "0001696841-26-000012",
+        "0001199039-26-000016"
       ]
     },
     "NVTS": {
@@ -6319,7 +6389,8 @@
         "0002055370-26-000007",
         "0001193125-26-393132",
         "0001772458-26-000005",
-        "0001219231-26-000008"
+        "0001219231-26-000008",
+        "0001882285-26-000024"
       ]
     },
     "PATH": {
@@ -7305,7 +7376,11 @@
     "SATL": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:31.615731+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001897580-26-000016",
+        "0002130394-26-000022",
+        "0002152526-26-000007"
+      ]
     },
     "SBUX": {
       "event_history": [
@@ -7767,6 +7842,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 14707.5
+        },
+        {
+          "conviction": 57,
+          "date": "2026-09-21",
+          "owner": "Patten Jarrod M",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 238442.40000000002
         }
       ],
       "last_checked": "2026-08-15T22:36:33.475366+00:00",
@@ -7774,7 +7858,8 @@
         "0001193125-26-342315",
         "0001193125-26-368879",
         "0001193125-26-376987",
-        "0001193125-26-385183"
+        "0001193125-26-385183",
+        "0001193125-26-398168"
       ]
     },
     "SWKS": {
@@ -8653,5 +8738,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-22T12:40:43.980274+00:00"
+  "updated_at": "2026-09-22T22:16:24.668806+00:00"
 }
