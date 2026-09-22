@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 9,
+    "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 70,
+    "detail_failures": 44,
     "lookback_days": 10,
-    "new_filings": 83,
+    "new_filings": 45,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -3187,12 +3187,22 @@
           "signal": "buy",
           "type": "buy",
           "value": 101250.0
+        },
+        {
+          "conviction": 62,
+          "date": "2026-09-21",
+          "owner": "Little Richard H",
+          "role": "Director, Chief Executive Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 10600.0
         }
       ],
       "last_checked": "2026-08-15T22:36:08.574804+00:00",
       "seen_accessions": [
         "0001193125-26-393086",
-        "0001193125-26-396060"
+        "0001193125-26-396060",
+        "0001193125-26-397218"
       ]
     },
     "EVTL": {
@@ -8643,5 +8653,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-21T23:21:55.306931+00:00"
+  "updated_at": "2026-09-22T12:40:43.980274+00:00"
 }
