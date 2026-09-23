@@ -2,9 +2,9 @@
   "last_change": {
     "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 45,
+    "detail_failures": 46,
     "lookback_days": 10,
-    "new_filings": 46,
+    "new_filings": 47,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -768,6 +768,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1487615.9999999998
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-21",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1408963.22
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -801,7 +810,8 @@
         "0001104659-26-108798",
         "0000004977-26-000104",
         "0001104659-26-109135",
-        "0001104659-26-109651"
+        "0001104659-26-109651",
+        "0001104659-26-109827"
       ]
     },
     "AGNC": {
@@ -8769,5 +8779,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-23T11:46:48.503958+00:00"
+  "updated_at": "2026-09-23T17:10:55.763314+00:00"
 }
