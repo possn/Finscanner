@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 46,
     "lookback_days": 10,
-    "new_filings": 59,
+    "new_filings": 49,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -326,6 +326,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 631000.0
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-21",
+          "owner": "Lyon Benjamin",
+          "role": "President, Aircraft OEM",
+          "signal": "sell",
+          "type": "sell",
+          "value": 246299.37
         }
       ],
       "last_checked": "2026-08-15T22:35:54.877133+00:00",
@@ -334,7 +343,8 @@
         "0002016416-26-000020",
         "0002036956-26-000014",
         "0002064297-26-000008",
-        "0002016416-26-000022"
+        "0002016416-26-000022",
+        "0001870608-26-000012"
       ]
     },
     "ACXP": {
@@ -7646,6 +7656,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 203184.1152
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-21",
+          "owner": "Rishel Jeremy",
+          "role": "Chief Technology Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 325920.0
+        },
+        {
+          "conviction": 48,
+          "date": "2026-09-21",
+          "owner": "Keough Kelli",
+          "role": "EVP, GBUL, SIPS",
+          "signal": "sell",
+          "type": "sell",
+          "value": 173310.1986
         }
       ],
       "last_checked": "2026-08-15T22:36:32.334332+00:00",
@@ -7659,7 +7687,9 @@
         "0001934200-26-000009",
         "0002012135-26-000023",
         "0002032458-26-000026",
-        "0002034857-26-000014"
+        "0002034857-26-000014",
+        "0001934200-26-000011",
+        "0002032458-26-000028"
       ]
     },
     "SONY": {
@@ -8890,5 +8920,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-23T23:46:22.299793+00:00"
+  "updated_at": "2026-09-24T05:00:04.912013+00:00"
 }
