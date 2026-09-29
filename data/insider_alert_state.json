@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 20,
+    "detail_failures": 25,
     "lookback_days": 10,
-    "new_filings": 24,
+    "new_filings": 31,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -825,6 +825,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1387176.51
+        },
+        {
+          "conviction": 64,
+          "date": "2026-09-25",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1374068.0
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -862,7 +871,8 @@
         "0001104659-26-109827",
         "0001104659-26-110391",
         "0001104659-26-110660",
-        "0001104659-26-111344"
+        "0001104659-26-111344",
+        "0001104659-26-111922"
       ]
     },
     "AGNC": {
@@ -3742,6 +3752,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 15316.199999999999
+        },
+        {
+          "conviction": 51,
+          "date": "2026-09-28",
+          "owner": "Raman Pradheepa",
+          "role": "Chief People Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 104740.34999999999
         }
       ],
       "last_checked": "2026-08-15T22:36:10.671900+00:00",
@@ -3755,7 +3774,8 @@
         "0001628280-26-061371",
         "0001709048-26-000236",
         "0001628280-26-062750",
-        "0001709048-26-000243"
+        "0001709048-26-000243",
+        "0001628280-26-063835"
       ]
     },
     "GILD": {
@@ -4812,7 +4832,9 @@
     "KVUE": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:16.884168+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001944048-26-000146"
+      ]
     },
     "LAES": {
       "event_history": [
@@ -6220,6 +6242,33 @@
           "signal": "sell",
           "type": "sell",
           "value": 233001.18000000002
+        },
+        {
+          "conviction": 42,
+          "date": "2026-09-28",
+          "owner": "Goodwin William Carroll Murphy",
+          "role": "Chief Strategy Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 66367.25
+        },
+        {
+          "conviction": 35,
+          "date": "2026-09-28",
+          "owner": "Hanson John",
+          "role": "Chief of Staff",
+          "signal": "sell",
+          "type": "sell",
+          "value": 41129.0
+        },
+        {
+          "conviction": 35,
+          "date": "2026-09-28",
+          "owner": "Renner Alexandra",
+          "role": "Chief Product Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 41129.0
         }
       ],
       "last_checked": "2026-08-15T22:36:23.907050+00:00",
@@ -6248,7 +6297,10 @@
         "0002146790-26-000014",
         "0002146828-26-000006",
         "0002147680-26-000008",
-        "0002147680-26-000010"
+        "0002147680-26-000010",
+        "0002080717-26-000013",
+        "0002146828-26-000008",
+        "0002147680-26-000012"
       ]
     },
     "ONDS": {
@@ -9190,5 +9242,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-29T14:08:18.510143+00:00"
+  "updated_at": "2026-09-29T21:26:55.590055+00:00"
 }
