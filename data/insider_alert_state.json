@@ -4,7 +4,7 @@
     "baselined": 0,
     "detail_failures": 20,
     "lookback_days": 10,
-    "new_filings": 21,
+    "new_filings": 24,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -1688,6 +1688,33 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 10418400.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-25",
+          "owner": "Xu Hong",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1409669.28
+        },
+        {
+          "conviction": 38,
+          "date": "2026-09-25",
+          "owner": "Jiang Fang",
+          "role": "Chief People Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 66343.73
+        },
+        {
+          "conviction": 38,
+          "date": "2026-09-25",
+          "owner": "Yu Siying",
+          "role": "General Counsel",
+          "signal": "sell",
+          "type": "sell",
+          "value": 91855.12
         }
       ],
       "last_checked": "2026-08-15T22:35:59.696789+00:00",
@@ -1702,7 +1729,11 @@
         "0001193125-26-401505",
         "0001193125-26-401507",
         "0001193125-26-401512",
-        "0001193125-26-401514"
+        "0001193125-26-401514",
+        "0001193125-26-405899",
+        "0001193125-26-405904",
+        "0001193125-26-405907",
+        "0001193125-26-405912"
       ]
     },
     "BAC": {
@@ -9159,5 +9190,5 @@
       ]
     }
   },
-  "updated_at": "2026-09-29T02:36:29.371488+00:00"
+  "updated_at": "2026-09-29T14:08:18.510143+00:00"
 }
