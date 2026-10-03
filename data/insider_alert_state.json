@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 96,
     "lookback_days": 10,
-    "new_filings": 162,
+    "new_filings": 105,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -2915,6 +2915,78 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 26661770.156599995
+        },
+        {
+          "conviction": 54,
+          "date": "2026-09-30",
+          "owner": "Agrawal Nitin",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 438.45
+        },
+        {
+          "conviction": 41,
+          "date": "2026-09-30",
+          "owner": "Baker Jeff",
+          "role": "Principal Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 438.45
+        },
+        {
+          "conviction": 41,
+          "date": "2026-09-30",
+          "owner": "Goldberg Chen",
+          "role": "EVP, Product & Engineering",
+          "signal": "sell",
+          "type": "sell",
+          "value": 438.45
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-30",
+          "owner": "Intrator Michael N",
+          "role": "Director, CEO and President, 10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 6888224.88
+        },
+        {
+          "conviction": 41,
+          "date": "2026-09-30",
+          "owner": "Jain Sachin",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 350.76
+        },
+        {
+          "conviction": 67,
+          "date": "2026-09-30",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4957203.39
+        },
+        {
+          "conviction": 41,
+          "date": "2026-09-30",
+          "owner": "McVeety Kristen J",
+          "role": "GC and Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 438.45
+        },
+        {
+          "conviction": 80,
+          "date": "2026-09-30",
+          "owner": "Venturo Brian M",
+          "role": "Director, Chief Strategy Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5753867.04
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -2969,7 +3041,15 @@
         "0001769628-26-000433",
         "0001769628-26-000434",
         "0001769628-26-000435",
-        "0001769628-26-000437"
+        "0001769628-26-000437",
+        "0001769628-26-000438",
+        "0001769628-26-000439",
+        "0001769628-26-000440",
+        "0001769628-26-000441",
+        "0001769628-26-000442",
+        "0001769628-26-000443",
+        "0001769628-26-000444",
+        "0001769628-26-000445"
       ]
     },
     "CSAI": {
@@ -3667,7 +3747,8 @@
         "0001193125-26-395865",
         "0001193125-26-395871",
         "0001193125-26-395877",
-        "0001193125-26-399629"
+        "0001193125-26-399629",
+        "0001193125-26-412788"
       ]
     },
     "FMC": {
@@ -9586,5 +9667,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-02T23:51:05.965394+00:00"
+  "updated_at": "2026-10-03T05:25:37.062558+00:00"
 }
