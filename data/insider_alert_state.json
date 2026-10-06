@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 118,
+    "detail_failures": 120,
     "lookback_days": 10,
-    "new_filings": 125,
+    "new_filings": 122,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -902,6 +902,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1323098.0
+        },
+        {
+          "conviction": 64,
+          "date": "2026-10-02",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1469094.56
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -943,7 +952,8 @@
         "0001104659-26-111922",
         "0001104659-26-112133",
         "0001104659-26-112614",
-        "0001104659-26-113693"
+        "0001104659-26-113693",
+        "0001104659-26-113911"
       ]
     },
     "AGNC": {
@@ -2171,6 +2181,15 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 200200.00000000003
+        },
+        {
+          "conviction": 77,
+          "date": "2026-10-05",
+          "owner": "Troim Tor Olav",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 6197100.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -2189,7 +2208,8 @@
         "0001628280-26-060610",
         "0001628280-26-062396",
         "0001628280-26-062623",
-        "0001628280-26-062804"
+        "0001628280-26-062804",
+        "0001628280-26-065174"
       ]
     },
     "BSX": {
@@ -10035,5 +10055,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-06T07:38:30.882208+00:00"
+  "updated_at": "2026-10-06T14:16:54.861490+00:00"
 }
