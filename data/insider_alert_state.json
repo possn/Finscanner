@@ -1,13 +1,13 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 131,
     "lookback_days": 10,
-    "new_filings": 155,
+    "new_filings": 132,
     "price_alerts_sent": 0,
     "requested": 479,
-    "sec_issuers": 301
+    "sec_issuers": 300
   },
   "price_alerts": {
     "ACXP": {
@@ -2354,6 +2354,15 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 6364200.0
+        },
+        {
+          "conviction": 80,
+          "date": "2026-10-07",
+          "owner": "Troim Tor Olav",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 5390250.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -2374,7 +2383,8 @@
         "0001628280-26-062623",
         "0001628280-26-062804",
         "0001628280-26-065174",
-        "0001628280-26-065290"
+        "0001628280-26-065290",
+        "0001628280-26-065416"
       ]
     },
     "BSX": {
@@ -10500,5 +10510,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-08T02:02:24.187455+00:00"
+  "updated_at": "2026-10-08T16:35:46.160878+00:00"
 }
