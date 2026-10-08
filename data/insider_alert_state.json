@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 6,
     "baselined": 0,
-    "detail_failures": 126,
+    "detail_failures": 131,
     "lookback_days": 10,
-    "new_filings": 141,
+    "new_filings": 155,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -1718,6 +1718,60 @@
           "signal": "sell",
           "type": "sell",
           "value": 13632.185099999999
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-05",
+          "owner": "Willcocks Patrick",
+          "role": "General Counsel",
+          "signal": "sell",
+          "type": "sell",
+          "value": 13985.4036
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-05",
+          "owner": "Wilder Ben Simon",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 5541.8351
+        },
+        {
+          "conviction": 48,
+          "date": "2026-10-05",
+          "owner": "Ritchie Garth",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 3020.6569
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-05",
+          "owner": "Nilan Nicholas William",
+          "role": "General Manager-US",
+          "signal": "sell",
+          "type": "sell",
+          "value": 12415.6134
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-05",
+          "owner": "Feenan Paul",
+          "role": "Chief Revenue Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 12677.2451
+        },
+        {
+          "conviction": 55,
+          "date": "2026-10-05",
+          "owner": "Leaver Andrew",
+          "role": "Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 60294.2145
         }
       ],
       "last_checked": "2026-08-15T22:35:58.546395+00:00",
@@ -1738,7 +1792,15 @@
         "0001859690-26-000174",
         "0001859690-26-000175",
         "0001859690-26-000176",
-        "0001859690-26-000177"
+        "0001859690-26-000177",
+        "0001859690-26-000178",
+        "0001859690-26-000179",
+        "0001859690-26-000180",
+        "0001859690-26-000181",
+        "0001859690-26-000182",
+        "0001859690-26-000183",
+        "0001859690-26-000184",
+        "0001859690-26-000185"
       ]
     },
     "ARRY": {
@@ -5814,7 +5876,8 @@
         "0001493152-26-043433",
         "0001493152-26-045634",
         "0001493152-26-045635",
-        "0001493152-26-045636"
+        "0001493152-26-045636",
+        "0001493152-26-046185"
       ]
     },
     "MAS": {
@@ -5999,7 +6062,13 @@
       ],
       "last_checked": "2026-08-15T22:36:20.658720+00:00",
       "seen_accessions": [
-        "0001193125-26-359423"
+        "0001193125-26-359423",
+        "0001193125-26-417140",
+        "0001193125-26-417141",
+        "0001193125-26-417142",
+        "0001193125-26-417143",
+        "0001193125-26-417144",
+        "0001193125-26-417145"
       ]
     },
     "MRK": {
@@ -6381,6 +6450,33 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1765750.5
+        },
+        {
+          "conviction": 70,
+          "date": "2026-10-05",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, President and Board Co-Chair",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 11636906.517099999
+        },
+        {
+          "conviction": 70,
+          "date": "2026-10-06",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, President and Board Co-Chair",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 12104181.0065
+        },
+        {
+          "conviction": 70,
+          "date": "2026-10-07",
+          "owner": "Zatlyn Michelle",
+          "role": "Director, President and Board Co-Chair",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 11494571.533200001
         }
       ],
       "last_checked": "2026-08-15T22:36:21.488693+00:00",
@@ -6405,7 +6501,8 @@
         "0001366574-26-000022",
         "0001473289-26-000027",
         "0001473289-26-000029",
-        "0001366574-26-000024"
+        "0001366574-26-000024",
+        "0001786951-26-000025"
       ]
     },
     "NFE": {
@@ -8250,7 +8347,8 @@
       "seen_accessions": [
         "0001225208-26-007066",
         "0001225208-26-007067",
-        "0001225208-26-007687"
+        "0001225208-26-007687",
+        "0001193125-26-417092"
       ]
     },
     "PYPL": {
@@ -8661,6 +8759,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 78822.3808
+        },
+        {
+          "conviction": 57,
+          "date": "2026-10-06",
+          "owner": "HERSHBERG ROBERT",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 125000.0
+        },
+        {
+          "conviction": 57,
+          "date": "2026-10-06",
+          "owner": "Borgeson Blake",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 242000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:30.986659+00:00",
@@ -8673,7 +8789,9 @@
         "0001601830-26-000105",
         "0001601830-26-000110",
         "0001601830-26-000115",
-        "0001601830-26-000116"
+        "0001601830-26-000116",
+        "0001601830-26-000119",
+        "0001601830-26-000120"
       ]
     },
     "RY": {
@@ -8820,6 +8938,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 235382.4
+        },
+        {
+          "conviction": 61,
+          "date": "2026-10-05",
+          "owner": "BREWER BRADY",
+          "role": "ceo, International",
+          "signal": "sell",
+          "type": "sell",
+          "value": 155501.16
         }
       ],
       "last_checked": "2026-08-15T22:36:31.675608+00:00",
@@ -8827,14 +8954,16 @@
         "0000829224-26-000133",
         "0000829224-26-000135",
         "0000829224-26-000137",
-        "0000829224-26-000139"
+        "0000829224-26-000139",
+        "0000829224-26-000147"
       ]
     },
     "SES": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:31.834686+00:00",
       "seen_accessions": [
-        "0002039201-26-000008"
+        "0002039201-26-000008",
+        "0002150165-26-000004"
       ]
     },
     "SLB": {
@@ -9350,7 +9479,10 @@
       "last_checked": "2026-08-15T22:36:33.722790+00:00",
       "seen_accessions": [
         "0001976916-26-000003",
-        "0001193125-26-416984"
+        "0001193125-26-416984",
+        "0001193125-26-417218",
+        "0001193125-26-417219",
+        "0001193125-26-417222"
       ]
     },
     "SYY": {
@@ -10368,5 +10500,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-07T21:22:02.363541+00:00"
+  "updated_at": "2026-10-08T02:02:24.187455+00:00"
 }
