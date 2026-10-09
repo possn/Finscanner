@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 131,
+    "detail_failures": 124,
     "lookback_days": 10,
-    "new_filings": 147,
+    "new_filings": 132,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 300
@@ -259,6 +259,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 63845841.04
+        },
+        {
+          "conviction": 57,
+          "date": "2026-10-06",
+          "owner": "Newstead Jennifer",
+          "role": "SVP, GC and Government Affairs",
+          "signal": "sell",
+          "type": "sell",
+          "value": 796491.99
         }
       ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
@@ -274,7 +283,8 @@
         "0001140361-26-038667",
         "0001140361-26-038669",
         "0001140361-26-038672",
-        "0001140361-26-038674"
+        "0001140361-26-038674",
+        "0001140361-26-039158"
       ]
     },
     "ABEV": {
@@ -932,6 +942,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1459250.0
+        },
+        {
+          "conviction": 64,
+          "date": "2026-10-06",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1481026.6600000001
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -975,7 +994,8 @@
         "0001104659-26-112614",
         "0001104659-26-113693",
         "0001104659-26-113911",
-        "0001104659-26-114221"
+        "0001104659-26-114221",
+        "0001104659-26-114788"
       ]
     },
     "AGNC": {
@@ -1785,6 +1805,60 @@
           "signal": "sell",
           "type": "sell",
           "value": 60294.2145
+        },
+        {
+          "conviction": 55,
+          "date": "2026-10-06",
+          "owner": "Leaver Andrew",
+          "role": "Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 58011.217000000004
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-06",
+          "owner": "Feenan Paul",
+          "role": "Chief Revenue Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 12192.516000000001
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-06",
+          "owner": "Willcocks Patrick",
+          "role": "General Counsel",
+          "signal": "sell",
+          "type": "sell",
+          "value": 13426.282500000001
+        },
+        {
+          "conviction": 48,
+          "date": "2026-10-06",
+          "owner": "Ritchie Garth",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 2854.597
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-06",
+          "owner": "Nilan Nicholas William",
+          "role": "General Manager-US",
+          "signal": "sell",
+          "type": "sell",
+          "value": 11926.4095
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-06",
+          "owner": "Wilder Ben Simon",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 5273.747
         }
       ],
       "last_checked": "2026-08-15T22:35:58.546395+00:00",
@@ -1813,7 +1887,13 @@
         "0001859690-26-000182",
         "0001859690-26-000183",
         "0001859690-26-000184",
-        "0001859690-26-000185"
+        "0001859690-26-000185",
+        "0001859690-26-000186",
+        "0001859690-26-000187",
+        "0001859690-26-000188",
+        "0001859690-26-000189",
+        "0001859690-26-000190",
+        "0001859690-26-000191"
       ]
     },
     "ARRY": {
@@ -10591,5 +10671,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-08T22:10:54.286882+00:00"
+  "updated_at": "2026-10-09T02:16:02.100919+00:00"
 }
