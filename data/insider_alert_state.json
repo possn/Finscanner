@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 3,
     "baselined": 0,
-    "detail_failures": 123,
+    "detail_failures": 58,
     "lookback_days": 10,
-    "new_filings": 126,
+    "new_filings": 61,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -960,6 +960,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1353631.2
+        },
+        {
+          "conviction": 64,
+          "date": "2026-10-08",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1487868.3
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -1005,7 +1014,8 @@
         "0001104659-26-113911",
         "0001104659-26-114221",
         "0001104659-26-114788",
-        "0001104659-26-115038"
+        "0001104659-26-115038",
+        "0001104659-26-115303"
       ]
     },
     "AGNC": {
@@ -2478,6 +2488,15 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 5390250.0
+        },
+        {
+          "conviction": 77,
+          "date": "2026-10-09",
+          "owner": "Troim Tor Olav",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 11843500.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -2499,7 +2518,8 @@
         "0001628280-26-062804",
         "0001628280-26-065174",
         "0001628280-26-065290",
-        "0001628280-26-065416"
+        "0001628280-26-065416",
+        "0001628280-26-065603"
       ]
     },
     "BSX": {
@@ -5196,12 +5216,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 34435.96
+        },
+        {
+          "conviction": 67,
+          "date": "2026-10-08",
+          "owner": "Gold Alan D",
+          "role": "Director, EXECUTIVE CHAIRMAN",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 1000000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:14.043572+00:00",
       "seen_accessions": [
         "0002132853-26-000007",
-        "0001689305-26-000006"
+        "0001689305-26-000006",
+        "0000897069-26-001838"
       ]
     },
     "INDI": {
@@ -10790,5 +10820,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-10T13:50:20.456625+00:00"
+  "updated_at": "2026-10-13T15:07:58.296602+00:00"
 }
