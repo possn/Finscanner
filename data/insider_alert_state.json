@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 3,
+    "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 64,
+    "detail_failures": 69,
     "lookback_days": 10,
-    "new_filings": 78,
+    "new_filings": 75,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -3556,6 +3556,33 @@
           "signal": "sell",
           "type": "sell",
           "value": 265.79999999999995
+        },
+        {
+          "conviction": 61,
+          "date": "2026-10-12",
+          "owner": "Jones Jonathan",
+          "role": "Chief Revenue Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1270651.015
+        },
+        {
+          "conviction": 58,
+          "date": "2026-10-13",
+          "owner": "Jones Jonathan",
+          "role": "Chief Revenue Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1669867.7226999998
+        },
+        {
+          "conviction": 74,
+          "date": "2026-10-12",
+          "owner": "Agrawal Nitin",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1809260.1463000001
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -3620,7 +3647,9 @@
         "0001769628-26-000444",
         "0001769628-26-000445",
         "0001769628-26-000446",
-        "0001769628-26-000447"
+        "0001769628-26-000447",
+        "0001769628-26-000448",
+        "0001769628-26-000449"
       ]
     },
     "CSAI": {
@@ -8550,7 +8579,10 @@
         "0000080424-26-000222",
         "0000080424-26-000223",
         "0000080424-26-000224",
-        "0000080424-26-000225"
+        "0000080424-26-000225",
+        "0000080424-26-000215",
+        "0000080424-26-000216",
+        "0000080424-26-000217"
       ]
     },
     "PGNY": {
@@ -8711,6 +8743,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1000174.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-10-09",
+          "owner": "Woersching Eric H.",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 205000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:26.743842+00:00",
@@ -8727,7 +8768,8 @@
         "0001823940-26-000010",
         "0001840244-26-000018",
         "0001823923-26-000013",
-        "0001840244-26-000020"
+        "0001840244-26-000020",
+        "0001930526-26-000013"
       ]
     },
     "PNR": {
@@ -11050,5 +11092,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-14T22:21:35.668553+00:00"
+  "updated_at": "2026-10-15T01:33:07.218047+00:00"
 }
