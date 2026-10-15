@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 0,
     "baselined": 0,
-    "detail_failures": 69,
+    "detail_failures": 70,
     "lookback_days": 10,
-    "new_filings": 75,
+    "new_filings": 72,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -10545,10 +10545,40 @@
       ]
     },
     "VLN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 50,
+          "date": "2026-10-01",
+          "owner": "Yaacobi Tal",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 2646.0
+        },
+        {
+          "conviction": 48,
+          "date": "2026-10-13",
+          "owner": "Yaacobi Tal",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 6150.0
+        },
+        {
+          "conviction": 48,
+          "date": "2026-10-13",
+          "owner": "LICHTMAN MOSHE",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 6150.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:37.493875+00:00",
       "seen_accessions": [
-        "0001976408-26-000713"
+        "0001976408-26-000713",
+        "0001976408-26-000891",
+        "0001976408-26-000892"
       ]
     },
     "VZ": {
@@ -11092,5 +11122,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-15T01:33:07.218047+00:00"
+  "updated_at": "2026-10-15T12:42:57.204233+00:00"
 }
