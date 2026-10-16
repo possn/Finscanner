@@ -4,7 +4,7 @@
     "baselined": 0,
     "detail_failures": 36,
     "lookback_days": 10,
-    "new_filings": 38,
+    "new_filings": 37,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -2636,6 +2636,15 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 3542550.0
+        },
+        {
+          "conviction": 80,
+          "date": "2026-10-15",
+          "owner": "Troim Tor Olav",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 2299150.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -2660,7 +2669,8 @@
         "0001628280-26-065416",
         "0001628280-26-065603",
         "0001628280-26-065849",
-        "0001628280-26-065947"
+        "0001628280-26-065947",
+        "0001628280-26-066045"
       ]
     },
     "BSX": {
@@ -11266,5 +11276,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-16T01:27:23.809027+00:00"
+  "updated_at": "2026-10-16T12:31:03.966433+00:00"
 }
