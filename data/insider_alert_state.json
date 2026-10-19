@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 31,
+    "detail_failures": 27,
     "lookback_days": 10,
-    "new_filings": 39,
+    "new_filings": 32,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -1015,6 +1015,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 6478470.140000001
+        },
+        {
+          "conviction": 67,
+          "date": "2026-10-15",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 13465866.47
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -1065,7 +1074,8 @@
         "0001104659-26-115763",
         "0001104659-26-115764",
         "0001104659-26-116015",
-        "0001104659-26-116445"
+        "0001104659-26-116445",
+        "0001104659-26-116752"
       ]
     },
     "AGNC": {
@@ -1646,6 +1656,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 682500.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-10-16",
+          "owner": "Cummins Wes",
+          "role": "Director, CEO; Chairman",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 1006686.12
+        },
+        {
+          "conviction": 88,
+          "date": "2026-10-16",
+          "owner": "Zhang Jason Gechen",
+          "role": "President",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 5658000.0
         }
       ],
       "last_checked": "2026-08-15T22:35:57.993334+00:00",
@@ -1654,7 +1682,9 @@
         "0001900445-26-000004",
         "0001628280-26-065122",
         "0001391935-26-000007",
-        "0001166816-26-000007"
+        "0001166816-26-000007",
+        "0001391935-26-000009",
+        "0001900445-26-000006"
       ]
     },
     "ARBE": {
@@ -6977,6 +7007,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 25158.52
+        },
+        {
+          "conviction": 67,
+          "date": "2026-10-15",
+          "owner": "Boynton John Wilson IV",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1289586.0
         }
       ],
       "last_checked": "2026-08-15T22:36:21.191312+00:00",
@@ -7002,7 +7041,8 @@
         "0001513845-26-000124",
         "0001513845-26-000126",
         "0001513845-26-000128",
-        "0001513845-26-000130"
+        "0001513845-26-000130",
+        "0001513845-26-000132"
       ]
     },
     "NEE": {
@@ -8597,9 +8637,21 @@
       "seen_accessions": []
     },
     "PBR": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 35,
+          "date": "2026-09-14",
+          "owner": "Pogliese Marcelo Weick",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 2608.74
+        }
+      ],
       "last_checked": "2026-08-15T22:36:25.450056+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001292814-26-004950"
+      ]
     },
     "PDYN": {
       "event_history": [
@@ -11517,5 +11569,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-17T05:39:42.885479+00:00"
+  "updated_at": "2026-10-19T14:45:21.500866+00:00"
 }
