@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 5,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 30,
     "lookback_days": 10,
-    "new_filings": 36,
+    "new_filings": 31,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -7086,6 +7086,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1289586.0
+        },
+        {
+          "conviction": 44,
+          "date": "2026-10-19",
+          "owner": "Grimme Arne",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 25158.52
         }
       ],
       "last_checked": "2026-08-15T22:36:21.191312+00:00",
@@ -7112,7 +7121,8 @@
         "0001513845-26-000126",
         "0001513845-26-000128",
         "0001513845-26-000130",
-        "0001513845-26-000132"
+        "0001513845-26-000132",
+        "0001513845-26-000134"
       ]
     },
     "NEE": {
@@ -11699,5 +11709,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-20T01:53:48.597383+00:00"
+  "updated_at": "2026-10-20T12:47:28.673909+00:00"
 }
