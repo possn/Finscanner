@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 5,
     "baselined": 0,
-    "detail_failures": 27,
+    "detail_failures": 30,
     "lookback_days": 10,
-    "new_filings": 52,
+    "new_filings": 36,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -277,6 +277,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 827655.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-10-16",
+          "owner": "Parekh Kevan",
+          "role": "Senior Vice President,  CFO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 480315.36000000004
+        },
+        {
+          "conviction": 48,
+          "date": "2026-10-16",
+          "owner": "Borders Ben",
+          "role": "Principal Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 442107.54
         }
       ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
@@ -294,7 +312,9 @@
         "0001140361-26-038672",
         "0001140361-26-038674",
         "0001140361-26-039158",
-        "0001140361-26-039785"
+        "0001140361-26-039785",
+        "0001140361-26-040126",
+        "0001140361-26-040127"
       ]
     },
     "ABEV": {
@@ -2152,7 +2172,8 @@
         "0001104659-26-104326",
         "0001493152-26-043182",
         "0001493152-26-043183",
-        "0001493152-26-045389"
+        "0001493152-26-045389",
+        "0001493152-26-047657"
       ]
     },
     "ATAI": {
@@ -7257,6 +7278,24 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 11494571.533200001
+        },
+        {
+          "conviction": 74,
+          "date": "2026-10-19",
+          "owner": "Ledbetter Carl",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1521993.8166
+        },
+        {
+          "conviction": 77,
+          "date": "2026-10-19",
+          "owner": "SEIFERT THOMAS J",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3744827.2224
         }
       ],
       "last_checked": "2026-08-15T22:36:21.488693+00:00",
@@ -7282,7 +7321,9 @@
         "0001473289-26-000027",
         "0001473289-26-000029",
         "0001366574-26-000024",
-        "0001786951-26-000025"
+        "0001786951-26-000025",
+        "0001366574-26-000026",
+        "0001473289-26-000031"
       ]
     },
     "NFE": {
@@ -9210,6 +9251,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 205000.0
+        },
+        {
+          "conviction": 74,
+          "date": "2026-10-15",
+          "owner": "Moore Alexander D.",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3167866.71
         }
       ],
       "last_checked": "2026-08-15T22:36:26.743842+00:00",
@@ -9227,7 +9277,8 @@
         "0001840244-26-000018",
         "0001823923-26-000013",
         "0001840244-26-000020",
-        "0001930526-26-000013"
+        "0001930526-26-000013",
+        "0001823952-26-000024"
       ]
     },
     "PNR": {
@@ -11648,5 +11699,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-19T22:26:18.141916+00:00"
+  "updated_at": "2026-10-20T01:53:48.597383+00:00"
 }
