@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 31,
     "lookback_days": 10,
-    "new_filings": 39,
+    "new_filings": 32,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 301
@@ -11201,13 +11201,23 @@
           "signal": "sell",
           "type": "sell",
           "value": 6150.0
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-19",
+          "owner": "Rozenberg Haine Yael",
+          "role": "VP Finance",
+          "signal": "sell",
+          "type": "sell",
+          "value": 2363.7096
         }
       ],
       "last_checked": "2026-08-15T22:36:37.493875+00:00",
       "seen_accessions": [
         "0001976408-26-000713",
         "0001976408-26-000891",
-        "0001976408-26-000892"
+        "0001976408-26-000892",
+        "0001976408-26-000898"
       ]
     },
     "VZ": {
@@ -11757,5 +11767,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-21T01:40:23.537638+00:00"
+  "updated_at": "2026-10-21T12:59:55.426405+00:00"
 }
