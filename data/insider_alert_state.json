@@ -1,13 +1,13 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 8,
     "baselined": 0,
     "detail_failures": 38,
     "lookback_days": 10,
-    "new_filings": 39,
+    "new_filings": 52,
     "price_alerts_sent": 0,
     "requested": 479,
-    "sec_issuers": 301
+    "sec_issuers": 299
   },
   "price_alerts": {
     "ACXP": {
@@ -1309,13 +1309,28 @@
       ]
     },
     "ALLY": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 48,
+          "date": "2026-10-21",
+          "owner": "Patterson Kathleen L.",
+          "role": "Chief HR & Corp Citizenship",
+          "signal": "sell",
+          "type": "sell",
+          "value": 495883.5063
+        }
+      ],
       "last_checked": "2026-08-15T22:35:56.991556+00:00",
       "seen_accessions": [
         "0002045848-26-000007",
         "0001209479-26-000011",
         "0001868765-26-000011",
-        "0001927606-26-000009"
+        "0001927606-26-000009",
+        "0001738255-26-000006",
+        "0001983992-26-000009",
+        "0002045848-26-000009",
+        "0002047749-26-000006",
+        "0002100241-26-000005"
       ]
     },
     "AMAT": {
@@ -2411,6 +2426,114 @@
           "signal": "sell_reversal",
           "type": "sell",
           "value": 15423.3
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 1058.9106
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 1061.2489
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 1039.3161
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 1045.295
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 845.4707999999999
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 852.4259999999999
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 974.259
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 972.8945999999999
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 1024.3863999999999
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 1020.78
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 843.15
+        },
+        {
+          "conviction": 40,
+          "date": "2026-10-20",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 860.475
         }
       ],
       "last_checked": "2026-08-15T22:35:59.858874+00:00",
@@ -2428,7 +2551,13 @@
         "0000070858-26-000478",
         "0000070858-26-000485",
         "0000070858-26-000486",
-        "0000070858-26-000488"
+        "0000070858-26-000488",
+        "0000070858-26-000495",
+        "0000070858-26-000496",
+        "0000070858-26-000497",
+        "0000070858-26-000498",
+        "0000070858-26-000499",
+        "0000070858-26-000500"
       ]
     },
     "BAM": {
@@ -3946,11 +4075,21 @@
           "signal": "sell",
           "type": "sell",
           "value": 3330.0000000000005
+        },
+        {
+          "conviction": 31,
+          "date": "2026-10-21",
+          "owner": "Bentley Sheldon Richard",
+          "role": "Other",
+          "signal": "sell",
+          "type": "sell",
+          "value": 3285.0
         }
       ],
       "last_checked": "2026-08-15T22:36:05.491199+00:00",
       "seen_accessions": [
-        "0001683168-26-007921"
+        "0001683168-26-007921",
+        "0001683168-26-008022"
       ]
     },
     "CSCO": {
@@ -4785,13 +4924,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 4089293.2800000003
+        },
+        {
+          "conviction": 54,
+          "date": "2026-10-20",
+          "owner": "NEUGEBAUER TOBY R",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1277225.6644000001
         }
       ],
       "last_checked": "2026-08-15T22:36:09.802016+00:00",
       "seen_accessions": [
         "0001213900-26-091318",
         "0001213900-26-094388",
-        "0000905148-26-004482"
+        "0000905148-26-004482",
+        "0000905148-26-004542"
       ]
     },
     "FTNT": {
@@ -8190,6 +8339,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 65179.17
+        },
+        {
+          "conviction": 31,
+          "date": "2026-10-20",
+          "owner": "Narayanadas Vivek",
+          "role": "General Counsel & Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 27056.5
         }
       ],
       "last_checked": "2026-08-15T22:36:23.907050+00:00",
@@ -8230,7 +8388,8 @@
         "0002146790-26-000019",
         "0002146828-26-000010",
         "0002147680-26-000014",
-        "0002146790-26-000021"
+        "0002146790-26-000021",
+        "0002146790-26-000023"
       ]
     },
     "ONDS": {
@@ -11864,5 +12023,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-22T18:36:36.965699+00:00"
+  "updated_at": "2026-10-22T22:25:16.346161+00:00"
 }
