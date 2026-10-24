@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 0,
     "baselined": 0,
-    "detail_failures": 46,
+    "detail_failures": 35,
     "lookback_days": 10,
-    "new_filings": 55,
+    "new_filings": 41,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 299
@@ -2734,7 +2734,14 @@
     "BMNR": {
       "event_history": [],
       "last_checked": "2026-08-15T22:36:01.594439+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001493152-26-048310",
+        "0001493152-26-048311",
+        "0001493152-26-048312",
+        "0001493152-26-048313",
+        "0001493152-26-048314",
+        "0001493152-26-048315"
+      ]
     },
     "BMY": {
       "event_history": [
@@ -12118,5 +12125,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-23T22:17:55.959867+00:00"
+  "updated_at": "2026-10-24T00:50:42.452995+00:00"
 }
