@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 3,
     "baselined": 0,
-    "detail_failures": 34,
+    "detail_failures": 38,
     "lookback_days": 10,
-    "new_filings": 36,
+    "new_filings": 41,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 299
@@ -9079,6 +9079,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 16264015.879999999
+        },
+        {
+          "conviction": 48,
+          "date": "2026-10-22",
+          "owner": "Malpani Raghavendra",
+          "role": "CPO & CTO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 413963.217
         }
       ],
       "last_checked": "2026-08-15T22:36:25.224938+00:00",
@@ -9100,7 +9109,8 @@
         "0002127293-26-000011",
         "0001543401-26-000008",
         "0002127293-26-000012",
-        "0001855767-26-000019"
+        "0001855767-26-000019",
+        "0002127293-26-000013"
       ]
     },
     "PBA": {
@@ -9385,6 +9395,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 698460.37
+        },
+        {
+          "conviction": 57,
+          "date": "2026-10-23",
+          "owner": "Purushothaman Balaji",
+          "role": "Chief Human Resources Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 671928.51
+        },
+        {
+          "conviction": 74,
+          "date": "2026-10-23",
+          "owner": "Jejurikar Shailesh",
+          "role": "Director, Chairman, President and CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5708048.5
         }
       ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
@@ -9454,7 +9482,9 @@
         "0000080424-26-000215",
         "0000080424-26-000216",
         "0000080424-26-000217",
-        "0000080424-26-000260"
+        "0000080424-26-000260",
+        "0000080424-26-000261",
+        "0000080424-26-000263"
       ]
     },
     "PGNY": {
@@ -12154,5 +12184,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-26T14:22:52.616358+00:00"
+  "updated_at": "2026-10-26T20:37:06.590730+00:00"
 }
