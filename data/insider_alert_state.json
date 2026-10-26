@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 35,
+    "detail_failures": 34,
     "lookback_days": 10,
-    "new_filings": 41,
+    "new_filings": 36,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 299
@@ -9376,6 +9376,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 568860.76
+        },
+        {
+          "conviction": 70,
+          "date": "2026-10-23",
+          "owner": "Gama Paul",
+          "role": "CEO- Health Care",
+          "signal": "sell",
+          "type": "sell",
+          "value": 698460.37
         }
       ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
@@ -9444,7 +9453,8 @@
         "0000080424-26-000225",
         "0000080424-26-000215",
         "0000080424-26-000216",
-        "0000080424-26-000217"
+        "0000080424-26-000217",
+        "0000080424-26-000260"
       ]
     },
     "PGNY": {
@@ -11558,6 +11568,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 2363.7096
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-22",
+          "owner": "Rozenberg Haine Yael",
+          "role": "VP Finance",
+          "signal": "sell",
+          "type": "sell",
+          "value": 4803.4375
+        },
+        {
+          "conviction": 35,
+          "date": "2026-10-23",
+          "owner": "Rozenberg Haine Yael",
+          "role": "VP Finance",
+          "signal": "sell",
+          "type": "sell",
+          "value": 4178.075
         }
       ],
       "last_checked": "2026-08-15T22:36:37.493875+00:00",
@@ -11565,7 +11593,8 @@
         "0001976408-26-000713",
         "0001976408-26-000891",
         "0001976408-26-000892",
-        "0001976408-26-000898"
+        "0001976408-26-000898",
+        "0001976408-26-000900"
       ]
     },
     "VZ": {
@@ -12125,5 +12154,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-24T00:50:42.452995+00:00"
+  "updated_at": "2026-10-26T14:22:52.616358+00:00"
 }
