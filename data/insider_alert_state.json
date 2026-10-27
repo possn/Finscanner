@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 4,
     "baselined": 0,
     "detail_failures": 30,
     "lookback_days": 10,
-    "new_filings": 31,
+    "new_filings": 32,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 299
@@ -1120,11 +1120,39 @@
           "signal": "sell",
           "type": "sell",
           "value": 166000.0
+        },
+        {
+          "conviction": 63,
+          "date": "2026-10-23",
+          "owner": "Federico Peter J",
+          "role": "Director, Director, President, CEO, CIO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 602688.66
+        },
+        {
+          "conviction": 63,
+          "date": "2026-10-26",
+          "owner": "Federico Peter J",
+          "role": "Director, Director, President, CEO, CIO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 601332.7799999999
+        },
+        {
+          "conviction": 63,
+          "date": "2026-10-27",
+          "owner": "Federico Peter J",
+          "role": "Director, Director, President, CEO, CIO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 594553.38
         }
       ],
       "last_checked": "2026-08-15T22:35:55.913433+00:00",
       "seen_accessions": [
-        "0001423689-26-000130"
+        "0001423689-26-000130",
+        "0001423689-26-000146"
       ]
     },
     "AGRO": {
@@ -10238,13 +10266,24 @@
       ]
     },
     "ROP": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 77,
+          "date": "2026-10-23",
+          "owner": "Conley Jason",
+          "role": "EVP, Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5226353.699999999
+        }
+      ],
       "last_checked": "2026-08-15T22:36:30.391045+00:00",
       "seen_accessions": [
         "0001193125-26-394307",
         "0001193125-26-394340",
         "0001193125-26-394353",
-        "0001193125-26-414111"
+        "0001193125-26-414111",
+        "0001193125-26-434200"
       ]
     },
     "RR": {
@@ -12217,5 +12256,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-27T06:23:21.319555+00:00"
+  "updated_at": "2026-10-27T20:08:11.880891+00:00"
 }
