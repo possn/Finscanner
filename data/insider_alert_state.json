@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 4,
     "baselined": 0,
     "detail_failures": 40,
     "lookback_days": 10,
-    "new_filings": 41,
+    "new_filings": 45,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 299
@@ -2601,6 +2601,24 @@
           "signal": "sell_reversal",
           "type": "sell",
           "value": 30384.42
+        },
+        {
+          "conviction": 47,
+          "date": "2026-10-27",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 70548.6
+        },
+        {
+          "conviction": 47,
+          "date": "2026-10-27",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 76192.4246
         }
       ],
       "last_checked": "2026-08-15T22:35:59.858874+00:00",
@@ -2626,7 +2644,8 @@
         "0000070858-26-000499",
         "0000070858-26-000500",
         "0000070858-26-000506",
-        "0000070858-26-000508"
+        "0000070858-26-000508",
+        "0000070858-26-000543"
       ]
     },
     "BAM": {
@@ -4760,6 +4779,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 171500.0
+        },
+        {
+          "conviction": 44,
+          "date": "2026-10-29",
+          "owner": "Buczkowski Michelle",
+          "role": "Chief Commercial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 100000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:08.202776+00:00",
@@ -4777,7 +4805,8 @@
         "0001628280-26-061188",
         "0001628280-26-061975",
         "0001628280-26-062270",
-        "0001628280-26-062273"
+        "0001628280-26-062273",
+        "0001628280-26-068288"
       ]
     },
     "ES": {
@@ -5773,6 +5802,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 100576.65999999999
+        },
+        {
+          "conviction": 42,
+          "date": "2026-10-28",
+          "owner": "Boughton Soleil",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 95551.20000000001
         }
       ],
       "last_checked": "2026-08-15T22:36:12.271900+00:00",
@@ -5810,7 +5848,8 @@
         "0001907056-26-000026",
         "0001837817-26-000017",
         "0001907056-26-000028",
-        "0001773751-26-000227"
+        "0001773751-26-000227",
+        "0001837817-26-000021"
       ]
     },
     "HIVE": {
@@ -6321,12 +6360,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 487707.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-10-28",
+          "owner": "Tinggren Juergen",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 636760.0
         }
       ],
       "last_checked": "2026-08-15T22:36:15.577707+00:00",
       "seen_accessions": [
         "0000833444-26-000093",
-        "0000833444-26-000095"
+        "0000833444-26-000095",
+        "0000833444-26-000103"
       ]
     },
     "KDP": {
@@ -10697,6 +10746,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1329250.0
+        },
+        {
+          "conviction": 60,
+          "date": "2026-10-29",
+          "owner": "Guild Howard",
+          "role": "Chief Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 539021.5499999999
         }
       ],
       "last_checked": "2026-08-15T22:36:31.912627+00:00",
@@ -10705,7 +10763,8 @@
         "0000087347-26-000118",
         "0000087347-26-000120",
         "0000087347-26-000122",
-        "0000087347-26-000126"
+        "0000087347-26-000126",
+        "0000087347-26-000128"
       ]
     },
     "SMR": {
@@ -12370,5 +12429,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-29T16:58:50.349570+00:00"
+  "updated_at": "2026-10-29T21:51:47.558849+00:00"
 }
