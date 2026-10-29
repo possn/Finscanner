@@ -1,6 +1,6 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 0,
     "baselined": 0,
     "detail_failures": 40,
     "lookback_days": 10,
@@ -4173,12 +4173,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 3285.0
+        },
+        {
+          "conviction": 31,
+          "date": "2026-10-28",
+          "owner": "Bentley Sheldon Richard",
+          "role": "Other",
+          "signal": "sell",
+          "type": "sell",
+          "value": 3405.0
         }
       ],
       "last_checked": "2026-08-15T22:36:05.491199+00:00",
       "seen_accessions": [
         "0001683168-26-007921",
-        "0001683168-26-008022"
+        "0001683168-26-008022",
+        "0001683168-26-008149"
       ]
     },
     "CSCO": {
@@ -12360,5 +12370,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-29T14:27:33.190041+00:00"
+  "updated_at": "2026-10-29T16:58:50.349570+00:00"
 }
