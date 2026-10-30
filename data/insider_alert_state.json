@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 40,
+    "detail_failures": 30,
     "lookback_days": 10,
-    "new_filings": 45,
+    "new_filings": 32,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 299
@@ -304,6 +304,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 814748.38
+        },
+        {
+          "conviction": 57,
+          "date": "2026-10-27",
+          "owner": "Newstead Jennifer",
+          "role": "SVP, GC and Government Affairs",
+          "signal": "sell",
+          "type": "sell",
+          "value": 823720.64
         }
       ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
@@ -324,7 +333,8 @@
         "0001140361-26-039785",
         "0001140361-26-040126",
         "0001140361-26-040127",
-        "0001140361-26-040540"
+        "0001140361-26-040540",
+        "0001140361-26-041201"
       ]
     },
     "ABEV": {
@@ -5980,6 +5990,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1014092.6399999999
+        },
+        {
+          "conviction": 57,
+          "date": "2026-10-29",
+          "owner": "Olson Anneliese",
+          "role": "Pres Imaging Prtng & Solutions",
+          "signal": "sell",
+          "type": "sell",
+          "value": 618542.3200000001
         }
       ],
       "last_checked": "2026-08-15T22:36:13.222667+00:00",
@@ -5989,7 +6008,8 @@
         "0001951912-26-000007",
         "0001747222-26-000003",
         "0001951912-26-000008",
-        "0002093489-26-000006"
+        "0002093489-26-000006",
+        "0002043764-26-000008"
       ]
     },
     "HRL": {
@@ -12429,5 +12449,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-29T21:51:47.558849+00:00"
+  "updated_at": "2026-10-30T02:00:35.131975+00:00"
 }
