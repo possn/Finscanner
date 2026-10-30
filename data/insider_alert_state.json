@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 4,
     "baselined": 0,
     "detail_failures": 30,
     "lookback_days": 10,
-    "new_filings": 32,
+    "new_filings": 35,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 299
@@ -4957,13 +4957,24 @@
       ]
     },
     "FDX": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 64,
+          "date": "2026-10-30",
+          "owner": "Brightman Tracy B",
+          "role": "EVP - Chief People Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 8427274.5803
+        }
+      ],
       "last_checked": "2026-08-15T22:36:09.102472+00:00",
       "seen_accessions": [
         "0001048911-26-000110",
         "0001048911-26-000112",
         "0001048911-26-000114",
-        "0001048911-26-000116"
+        "0001048911-26-000116",
+        "0001048911-26-000133"
       ]
     },
     "FLNC": {
@@ -5322,6 +5333,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 15497.099999999999
+        },
+        {
+          "conviction": 41,
+          "date": "2026-10-29",
+          "owner": "Azar Samak L",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 15198.949999999999
         }
       ],
       "last_checked": "2026-08-15T22:36:10.671900+00:00",
@@ -5341,7 +5361,8 @@
         "0001709048-26-000245",
         "0001628280-26-065555",
         "0001628280-26-066161",
-        "0001628280-26-067060"
+        "0001628280-26-067060",
+        "0001628280-26-068581"
       ]
     },
     "GILD": {
@@ -8210,13 +8231,23 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 6981546.743999999
+        },
+        {
+          "conviction": 74,
+          "date": "2026-10-29",
+          "owner": "Hanners Noah C",
+          "role": "Executive Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1427406.219
         }
       ],
       "last_checked": "2026-08-15T22:36:23.077409+00:00",
       "seen_accessions": [
         "0000073309-26-000126",
         "0000073309-26-000129",
-        "0000073309-26-000131"
+        "0000073309-26-000131",
+        "0000073309-26-000133"
       ]
     },
     "NVDA": {
@@ -9956,12 +9987,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 956576.52
+        },
+        {
+          "conviction": 57,
+          "date": "2026-10-28",
+          "owner": "PRUDENTIAL INSURANCE CO OF AMERICA",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 9267665.9562
         }
       ],
       "last_checked": "2026-08-15T22:36:27.620222+00:00",
       "seen_accessions": [
         "0001137774-26-000192",
-        "0001137774-26-000193"
+        "0001137774-26-000193",
+        "0001104659-26-120602"
       ]
     },
     "PRZO": {
@@ -10319,6 +10360,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 26204.4
+        },
+        {
+          "conviction": 61,
+          "date": "2026-10-28",
+          "owner": "Ben Robert J",
+          "role": "CFO, CAO, Corporate Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 105050.00000000001
         }
       ],
       "last_checked": "2026-08-15T22:36:29.701964+00:00",
@@ -10329,7 +10379,8 @@
         "0001193125-26-338284",
         "0001193125-26-338299",
         "0001193125-26-360101",
-        "0001193125-26-362746"
+        "0001193125-26-362746",
+        "0001193125-26-440960"
       ]
     },
     "REXR": {
@@ -12449,5 +12500,5 @@
       ]
     }
   },
-  "updated_at": "2026-10-30T02:00:35.131975+00:00"
+  "updated_at": "2026-10-30T20:52:19.242659+00:00"
 }
