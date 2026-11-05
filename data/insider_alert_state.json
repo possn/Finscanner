@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 0,
     "baselined": 0,
-    "detail_failures": 49,
+    "detail_failures": 53,
     "lookback_days": 10,
-    "new_filings": 61,
+    "new_filings": 54,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 298
@@ -6950,7 +6950,8 @@
         "0000950157-26-001210",
         "0000950157-26-001211",
         "0000950157-26-001212",
-        "0000950157-26-001213"
+        "0000950157-26-001213",
+        "0000950157-26-001204"
       ]
     },
     "LAES": {
@@ -13157,5 +13158,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-05T03:32:31.162795+00:00"
+  "updated_at": "2026-11-05T12:28:36.419346+00:00"
 }
