@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 53,
+    "detail_failures": 54,
     "lookback_days": 10,
-    "new_filings": 54,
+    "new_filings": 56,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 298
@@ -3225,6 +3225,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 328040.6012
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-04",
+          "owner": "Denier Anthony Michael",
+          "role": "Director, President",
+          "signal": "sell",
+          "type": "sell",
+          "value": 290192.2478
         }
       ],
       "last_checked": "2026-08-15T22:36:02.682402+00:00",
@@ -3236,7 +3245,8 @@
         "0002093121-26-000006",
         "0002061858-26-000007",
         "0002093121-26-000007",
-        "0002093121-26-000008"
+        "0002093121-26-000008",
+        "0002093121-26-000009"
       ]
     },
     "BWXT": {
@@ -10146,6 +10156,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1545077.0
+        },
+        {
+          "conviction": 74,
+          "date": "2026-11-04",
+          "owner": "Schulten Andre",
+          "role": "Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5547960.0
         }
       ],
       "last_checked": "2026-08-15T22:36:25.909921+00:00",
@@ -10221,7 +10240,8 @@
         "0000080424-26-000267",
         "0000080424-26-000268",
         "0000080424-26-000269",
-        "0000080424-26-000270"
+        "0000080424-26-000270",
+        "0000080424-26-000271"
       ]
     },
     "PGNY": {
@@ -13158,5 +13178,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-05T12:28:36.419346+00:00"
+  "updated_at": "2026-11-05T15:35:19.920743+00:00"
 }
