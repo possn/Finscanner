@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 13,
+    "alerts_sent": 4,
     "baselined": 0,
     "detail_failures": 47,
     "lookback_days": 10,
-    "new_filings": 86,
+    "new_filings": 53,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 298
@@ -7732,7 +7732,9 @@
         "0001437113-26-000021",
         "0001448240-26-000022",
         "0001525628-26-000011",
-        "0001667260-26-000012"
+        "0001667260-26-000012",
+        "0001007549-26-000011",
+        "0001069725-26-000013"
       ]
     },
     "MARA": {
@@ -9316,7 +9318,9 @@
         "0001370946-26-000242",
         "0001370946-26-000243",
         "0001370946-26-000244",
-        "0001370946-26-000245"
+        "0001370946-26-000245",
+        "0001370946-26-000236",
+        "0001370946-26-000237"
       ]
     },
     "OKLO": {
@@ -10827,6 +10831,42 @@
           "signal": "sell",
           "type": "sell",
           "value": 64170.0
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-05",
+          "owner": "Schlanger David J",
+          "role": "Director, Executive Chairman",
+          "signal": "sell",
+          "type": "sell",
+          "value": 119751.06
+        },
+        {
+          "conviction": 70,
+          "date": "2026-11-09",
+          "owner": "Schlanger David J",
+          "role": "Director, Executive Chairman",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5759365.3704
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-05",
+          "owner": "Anevski Peter",
+          "role": "Director, CHIEF EXECUTIVE OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 419412.4734
+        },
+        {
+          "conviction": 70,
+          "date": "2026-11-09",
+          "owner": "Anevski Peter",
+          "role": "Director, CHIEF EXECUTIVE OFFICER",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5762841.215600001
         }
       ],
       "last_checked": "2026-08-15T22:36:26.124804+00:00",
@@ -10842,7 +10882,9 @@
         "0001551306-26-000158",
         "0001551306-26-000160",
         "0001551306-26-000165",
-        "0001551306-26-000172"
+        "0001551306-26-000172",
+        "0001551306-26-000174",
+        "0001551306-26-000176"
       ]
     },
     "PK": {
@@ -13874,5 +13916,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-10T02:13:29.549306+00:00"
+  "updated_at": "2026-11-10T09:58:54.496713+00:00"
 }
