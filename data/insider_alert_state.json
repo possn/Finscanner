@@ -2,9 +2,9 @@
   "last_change": {
     "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 52,
+    "detail_failures": 53,
     "lookback_days": 10,
-    "new_filings": 56,
+    "new_filings": 57,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 298
@@ -2901,6 +2901,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 4999999.99916
+        },
+        {
+          "conviction": 80,
+          "date": "2026-11-11",
+          "owner": "Nicholls Matthew",
+          "role": "Co-President, CFO & COO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5792000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:00.592089+00:00",
@@ -2920,7 +2929,8 @@
         "0000038777-26-000266",
         "0000038777-26-000267",
         "0000038777-26-000268",
-        "0000038777-26-000270"
+        "0000038777-26-000270",
+        "0000038777-26-000290"
       ]
     },
     "BEPC": {
@@ -7980,10 +7990,21 @@
       ]
     },
     "MCD": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 54,
+          "date": "2026-11-11",
+          "owner": "Banner Jonathan",
+          "role": "EVP - Chief Impact Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 209250.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:19.190309+00:00",
       "seen_accessions": [
-        "0001739473-26-000003"
+        "0001739473-26-000003",
+        "0001943551-26-000005"
       ]
     },
     "MCHP": {
@@ -11300,7 +11321,8 @@
       "last_checked": "2026-08-15T22:36:27.203551+00:00",
       "seen_accessions": [
         "0000079879-26-000290",
-        "0000079879-26-000326"
+        "0000079879-26-000326",
+        "0000079879-26-000327"
       ]
     },
     "PROP": {
@@ -13754,6 +13776,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 49269.0
+        },
+        {
+          "conviction": 58,
+          "date": "2026-11-10",
+          "owner": "Malady Kyle",
+          "role": "EVP and Group CEO-VZ Business",
+          "signal": "sell",
+          "type": "sell",
+          "value": 50721.0
         }
       ],
       "last_checked": "2026-08-15T22:36:37.521542+00:00",
@@ -13776,7 +13807,8 @@
         "0001760581-26-000069",
         "0001760581-26-000071",
         "0001760581-26-000075",
-        "0001760581-26-000077"
+        "0001760581-26-000077",
+        "0001760581-26-000081"
       ]
     },
     "VZLA": {
@@ -14276,5 +14308,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-12T16:02:11.624828+00:00"
+  "updated_at": "2026-11-12T20:54:23.677541+00:00"
 }
