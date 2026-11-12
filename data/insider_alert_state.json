@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 4,
     "baselined": 0,
     "detail_failures": 52,
     "lookback_days": 10,
-    "new_filings": 70,
+    "new_filings": 57,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 298
@@ -3499,7 +3499,8 @@
       "last_checked": "2026-08-15T22:36:03.100389+00:00",
       "seen_accessions": [
         "0001225208-26-008122",
-        "0001225208-26-008639"
+        "0001225208-26-008639",
+        "0001225208-26-008822"
       ]
     },
     "CE": {
@@ -8164,11 +8165,51 @@
       ]
     },
     "MP": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 67,
+          "date": "2026-11-10",
+          "owner": "WEISENBURGER RANDALL J",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 1980000.0
+        },
+        {
+          "conviction": 75,
+          "date": "2026-11-10",
+          "owner": "Corbett Ryan",
+          "role": "Chief Financial Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 198515.68
+        },
+        {
+          "conviction": 68,
+          "date": "2026-11-10",
+          "owner": "Rosenthal Michael Stuart",
+          "role": "Chief Operating Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 988590.0
+        },
+        {
+          "conviction": 62,
+          "date": "2026-11-11",
+          "owner": "Rosenthal Michael Stuart",
+          "role": "Chief Operating Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 186500.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:20.437587+00:00",
       "seen_accessions": [
         "0001801368-26-000052",
-        "0002059140-26-000010"
+        "0002059140-26-000010",
+        "0001031609-26-000009",
+        "0001831686-26-000010",
+        "0001832050-26-000010"
       ]
     },
     "MPT": {
@@ -13534,6 +13575,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 4178.075
+        },
+        {
+          "conviction": 38,
+          "date": "2026-11-10",
+          "owner": "Chairman David",
+          "role": "SVP, R&D",
+          "signal": "sell",
+          "type": "sell",
+          "value": 5381.4225
+        },
+        {
+          "conviction": 38,
+          "date": "2026-11-11",
+          "owner": "Chairman David",
+          "role": "SVP, R&D",
+          "signal": "sell",
+          "type": "sell",
+          "value": 461.47999999999996
         }
       ],
       "last_checked": "2026-08-15T22:36:37.493875+00:00",
@@ -13542,7 +13601,8 @@
         "0001976408-26-000891",
         "0001976408-26-000892",
         "0001976408-26-000898",
-        "0001976408-26-000900"
+        "0001976408-26-000900",
+        "0001976408-26-000939"
       ]
     },
     "VZ": {
@@ -14176,5 +14236,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-11T06:38:46.632422+00:00"
+  "updated_at": "2026-11-12T12:52:17.667754+00:00"
 }
