@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 2,
     "baselined": 0,
     "detail_failures": 52,
     "lookback_days": 10,
-    "new_filings": 57,
+    "new_filings": 56,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 298
@@ -1178,6 +1178,24 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 13465866.47
+        },
+        {
+          "conviction": 58,
+          "date": "2026-11-09",
+          "owner": "MOSKOWITZ JOSEPH L",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 74994.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-11-10",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1649594.68
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -1229,7 +1247,9 @@
         "0001104659-26-115764",
         "0001104659-26-116015",
         "0001104659-26-116445",
-        "0001104659-26-116752"
+        "0001104659-26-116752",
+        "0000004977-26-000107",
+        "0001104659-26-125899"
       ]
     },
     "AGNC": {
@@ -6238,13 +6258,23 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 86264.37
+        },
+        {
+          "conviction": 49,
+          "date": "2026-11-09",
+          "owner": "Beckhorn Jay",
+          "role": "Treasurer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 2573.75
         }
       ],
       "last_checked": "2026-08-15T22:36:11.342591+00:00",
       "seen_accessions": [
         "0002127924-26-000015",
         "0001873961-26-000002",
-        "0001359579-26-000006"
+        "0001359579-26-000006",
+        "0001636435-26-000004"
       ]
     },
     "GOOG": {
@@ -13593,6 +13623,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 461.47999999999996
+        },
+        {
+          "conviction": 31,
+          "date": "2026-11-09",
+          "owner": "Rozenberg Haine Yael",
+          "role": "VP Finance",
+          "signal": "sell",
+          "type": "sell",
+          "value": 937.5
         }
       ],
       "last_checked": "2026-08-15T22:36:37.493875+00:00",
@@ -13602,7 +13641,8 @@
         "0001976408-26-000892",
         "0001976408-26-000898",
         "0001976408-26-000900",
-        "0001976408-26-000939"
+        "0001976408-26-000939",
+        "0001976408-26-000940"
       ]
     },
     "VZ": {
@@ -14236,5 +14276,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-12T12:52:17.667754+00:00"
+  "updated_at": "2026-11-12T16:02:11.624828+00:00"
 }
