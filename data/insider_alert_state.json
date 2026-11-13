@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 3,
     "baselined": 0,
     "detail_failures": 53,
     "lookback_days": 10,
-    "new_filings": 57,
+    "new_filings": 55,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 298
@@ -5399,6 +5399,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 100000.0
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-12",
+          "owner": "DIMITRIEF ALEXANDER",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 46500.0
         }
       ],
       "last_checked": "2026-08-15T22:36:08.202776+00:00",
@@ -5417,7 +5426,8 @@
         "0001628280-26-061975",
         "0001628280-26-062270",
         "0001628280-26-062273",
-        "0001628280-26-068288"
+        "0001628280-26-068288",
+        "0001628280-26-073597"
       ]
     },
     "ES": {
@@ -11621,13 +11631,32 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 1727313.9408
+        },
+        {
+          "conviction": 88,
+          "date": "2026-11-09",
+          "owner": "Barry John F",
+          "role": "Director, CHIEF EXECUTIVE OFFICER, 10% owner",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 3927747.9484
+        },
+        {
+          "conviction": 88,
+          "date": "2026-11-10",
+          "owner": "Barry John F",
+          "role": "Director, CHIEF EXECUTIVE OFFICER, 10% owner",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 2126811.3741
         }
       ],
       "last_checked": "2026-08-15T22:36:28.004659+00:00",
       "seen_accessions": [
         "0001294357-26-000015",
         "0001315319-26-000002",
-        "0001294357-26-000018"
+        "0001294357-26-000018",
+        "0001294357-26-000020"
       ]
     },
     "PSKY": {
@@ -14501,5 +14530,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-13T09:40:15.556370+00:00"
+  "updated_at": "2026-11-13T15:29:03.744853+00:00"
 }
