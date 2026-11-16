@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 40,
+    "detail_failures": 35,
     "lookback_days": 10,
-    "new_filings": 41,
+    "new_filings": 37,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -1331,9 +1331,21 @@
       ]
     },
     "AGRO": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 44,
+          "date": "2026-11-12",
+          "owner": "Deprati Christian Ferdinando Emilio",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 23862.9
+        }
+      ],
       "last_checked": "2026-08-15T22:35:56.042985+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001499505-26-000092"
+      ]
     },
     "AGX": {
       "event_history": [],
@@ -6454,6 +6466,15 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 2573.75
+        },
+        {
+          "conviction": 69,
+          "date": "2026-11-13",
+          "owner": "Cooper Arthur S.",
+          "role": "CEO & President",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 99999.99946199999
         }
       ],
       "last_checked": "2026-08-15T22:36:11.342591+00:00",
@@ -6461,7 +6482,8 @@
         "0002127924-26-000015",
         "0001873961-26-000002",
         "0001359579-26-000006",
-        "0001636435-26-000004"
+        "0001636435-26-000004",
+        "0001873961-26-000004"
       ]
     },
     "GOOG": {
@@ -14716,5 +14738,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-14T14:16:12.552473+00:00"
+  "updated_at": "2026-11-16T17:09:11.596771+00:00"
 }
