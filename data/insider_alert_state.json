@@ -4,7 +4,7 @@
     "baselined": 0,
     "detail_failures": 38,
     "lookback_days": 10,
-    "new_filings": 40,
+    "new_filings": 39,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -7914,9 +7914,21 @@
       ]
     },
     "LAND": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 44,
+          "date": "2026-11-17",
+          "owner": "Parrish Lewis",
+          "role": "Chief Financial Officer",
+          "signal": "buy",
+          "type": "buy",
+          "value": 6470.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:17.287192+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001566732-26-000002"
+      ]
     },
     "LASR": {
       "event_history": [
@@ -14982,5 +14994,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-17T16:56:55.482604+00:00"
+  "updated_at": "2026-11-17T21:02:02.791486+00:00"
 }
