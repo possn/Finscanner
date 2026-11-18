@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 44,
+    "detail_failures": 46,
     "lookback_days": 10,
-    "new_filings": 47,
+    "new_filings": 52,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -3083,6 +3083,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 217341.0
+        },
+        {
+          "conviction": 48,
+          "date": "2026-11-17",
+          "owner": "Lieser Brian",
+          "role": "EVP - Chief Comm. Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 189620.0
         }
       ],
       "last_checked": "2026-08-15T22:36:00.442093+00:00",
@@ -3090,7 +3099,8 @@
         "0001193125-26-335658",
         "0001193125-26-342275",
         "0001193125-26-348759",
-        "0001193125-26-393292"
+        "0001193125-26-393292",
+        "0001193125-26-466844"
       ]
     },
     "BEN": {
@@ -3196,7 +3206,8 @@
         "0001130464-26-000105",
         "0001130464-26-000106",
         "0001130464-26-000103",
-        "0001130464-26-000104"
+        "0001130464-26-000104",
+        "0001130464-26-000102"
       ]
     },
     "BKR": {
@@ -7941,6 +7952,24 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1470000.0
+        },
+        {
+          "conviction": 70,
+          "date": "2026-11-16",
+          "owner": "Douglas Monica Howard",
+          "role": "Executive Vice President",
+          "signal": "sell",
+          "type": "sell",
+          "value": 907668.96
+        },
+        {
+          "conviction": 77,
+          "date": "2026-11-17",
+          "owner": "ARROYO MANUEL",
+          "role": "Executive Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5723833.5468999995
         }
       ],
       "last_checked": "2026-08-15T22:36:16.086389+00:00",
@@ -7951,7 +7980,9 @@
         "0000021344-26-000167",
         "0000021344-26-000169",
         "0000021344-26-000171",
-        "0000021344-26-000173"
+        "0000021344-26-000173",
+        "0000021344-26-000175",
+        "0000021344-26-000177"
       ]
     },
     "KOS": {
@@ -8202,11 +8233,21 @@
           "signal": "buy",
           "type": "buy",
           "value": 6470.0
+        },
+        {
+          "conviction": 62,
+          "date": "2026-11-18",
+          "owner": "Reiman William L",
+          "role": "Executive Vice President",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 3184.5
         }
       ],
       "last_checked": "2026-08-15T22:36:17.287192+00:00",
       "seen_accessions": [
-        "0001566732-26-000002"
+        "0001566732-26-000002",
+        "0002127991-26-000004"
       ]
     },
     "LASR": {
@@ -12905,6 +12946,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 140059.99980000002
+        },
+        {
+          "conviction": 54,
+          "date": "2026-11-16",
+          "owner": "Halverson Kenneth",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 26608.95
         }
       ],
       "last_checked": "2026-08-15T22:36:29.701964+00:00",
@@ -12919,7 +12969,8 @@
         "0001193125-26-440960",
         "0001193125-26-443094",
         "0001193125-26-455292",
-        "0001193125-26-463361"
+        "0001193125-26-463361",
+        "0001193125-26-466912"
       ]
     },
     "REXR": {
@@ -15470,5 +15521,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-18T16:32:11.944942+00:00"
+  "updated_at": "2026-11-18T20:39:53.662289+00:00"
 }
