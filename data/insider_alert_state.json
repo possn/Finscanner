@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 6,
+    "alerts_sent": 1,
     "baselined": 0,
-    "detail_failures": 57,
+    "detail_failures": 58,
     "lookback_days": 10,
-    "new_filings": 92,
+    "new_filings": 59,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -11899,6 +11899,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 99128.8779
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-18",
+          "owner": "Wolff Benjamin G",
+          "role": "Director, PRESIDENT & CEO",
+          "signal": "buy",
+          "type": "buy",
+          "value": 42250.5
         }
       ],
       "last_checked": "2026-08-15T22:36:25.709082+00:00",
@@ -11906,7 +11915,8 @@
         "0001920634-26-000020",
         "0001998996-26-000020",
         "0002014215-26-000020",
-        "0001368618-26-000015"
+        "0001368618-26-000015",
+        "0001368618-26-000016"
       ]
     },
     "PEP": {
@@ -15978,5 +15988,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-20T02:23:51.188397+00:00"
+  "updated_at": "2026-11-20T11:51:40.974193+00:00"
 }
