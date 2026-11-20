@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 5,
     "baselined": 0,
-    "detail_failures": 58,
+    "detail_failures": 63,
     "lookback_days": 10,
-    "new_filings": 59,
+    "new_filings": 69,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -3128,6 +3128,96 @@
           "signal": "sell_reversal",
           "type": "sell",
           "value": 76192.4246
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 3827.835
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 3797.0436
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 4610.645
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 4554.855
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 2630.88
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 2623.68
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 400.44
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 399.1381
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 1953.5800000000002
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-18",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 1945.82
         }
       ],
       "last_checked": "2026-08-15T22:35:59.858874+00:00",
@@ -3162,7 +3252,12 @@
         "0000070858-26-000571",
         "0000070858-26-000572",
         "0000070858-26-000584",
-        "0000070858-26-000593"
+        "0000070858-26-000593",
+        "0000070858-26-000600",
+        "0000070858-26-000601",
+        "0000070858-26-000602",
+        "0000070858-26-000603",
+        "0000070858-26-000604"
       ]
     },
     "BAM": {
@@ -5015,6 +5110,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 2370.0
+        },
+        {
+          "conviction": 31,
+          "date": "2026-11-18",
+          "owner": "Bentley Sheldon Richard",
+          "role": "Other",
+          "signal": "sell",
+          "type": "sell",
+          "value": 1080.0
         }
       ],
       "last_checked": "2026-08-15T22:36:05.491199+00:00",
@@ -5023,7 +5127,8 @@
         "0001683168-26-008022",
         "0001683168-26-008149",
         "0001683168-26-008330",
-        "0001683168-26-008684"
+        "0001683168-26-008684",
+        "0001683168-26-008989"
       ]
     },
     "CSCO": {
@@ -15998,5 +16103,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-20T16:15:06.456634+00:00"
+  "updated_at": "2026-11-20T20:29:57.041557+00:00"
 }
