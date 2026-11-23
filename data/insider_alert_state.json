@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 4,
+    "alerts_sent": 2,
     "baselined": 0,
     "detail_failures": 55,
     "lookback_days": 10,
-    "new_filings": 59,
+    "new_filings": 58,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -3887,6 +3887,24 @@
           "signal": "sell",
           "type": "sell",
           "value": 290192.2478
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-23",
+          "owner": "James Benjamin Worthy",
+          "role": "Director, General Counsel",
+          "signal": "buy",
+          "type": "buy",
+          "value": 21950.0
+        },
+        {
+          "conviction": 78,
+          "date": "2026-11-23",
+          "owner": "Wang Haichen",
+          "role": "Director, Chief Financial Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 90000.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.682402+00:00",
@@ -3901,7 +3919,9 @@
         "0002093121-26-000008",
         "0002093121-26-000009",
         "0002092820-26-000003",
-        "0002093135-26-000005"
+        "0002093135-26-000005",
+        "0002092820-26-000004",
+        "0002093135-26-000006"
       ]
     },
     "BWXT": {
@@ -13655,7 +13675,8 @@
         "0001193125-26-443094",
         "0001193125-26-455292",
         "0001193125-26-463361",
-        "0001193125-26-466912"
+        "0001193125-26-466912",
+        "0001193125-26-471762"
       ]
     },
     "REXR": {
@@ -16366,5 +16387,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-23T14:50:15.290972+00:00"
+  "updated_at": "2026-11-23T19:19:08.096965+00:00"
 }
