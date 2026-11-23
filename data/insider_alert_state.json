@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 14,
+    "alerts_sent": 4,
     "baselined": 0,
-    "detail_failures": 63,
+    "detail_failures": 55,
     "lookback_days": 10,
-    "new_filings": 97,
+    "new_filings": 59,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -1334,6 +1334,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1884234.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-11-19",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1945873.7200000002
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -1393,7 +1402,8 @@
         "0001104659-26-128854",
         "0001104659-26-129390",
         "0001104659-26-129961",
-        "0001104659-26-130427"
+        "0001104659-26-130427",
+        "0001104659-26-130860"
       ]
     },
     "AGNC": {
@@ -3719,6 +3729,15 @@
           "signal": "sell_reversal",
           "type": "sell",
           "value": 1473000.0
+        },
+        {
+          "conviction": 70,
+          "date": "2026-11-20",
+          "owner": "Troim Tor Olav",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 30451500.0
         }
       ],
       "last_checked": "2026-08-15T22:36:02.150700+00:00",
@@ -3745,7 +3764,8 @@
         "0001628280-26-065849",
         "0001628280-26-065947",
         "0001628280-26-066045",
-        "0001628280-26-066061"
+        "0001628280-26-066061",
+        "0001628280-26-075382"
       ]
     },
     "BSX": {
@@ -12204,6 +12224,15 @@
           "signal": "buy",
           "type": "buy",
           "value": 42250.5
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-19",
+          "owner": "Wolff Benjamin G",
+          "role": "Director, PRESIDENT & CEO",
+          "signal": "buy",
+          "type": "buy",
+          "value": 13750.0
         }
       ],
       "last_checked": "2026-08-15T22:36:25.709082+00:00",
@@ -12212,7 +12241,8 @@
         "0001998996-26-000020",
         "0002014215-26-000020",
         "0001368618-26-000015",
-        "0001368618-26-000016"
+        "0001368618-26-000016",
+        "0001368618-26-000017"
       ]
     },
     "PEP": {
@@ -15188,13 +15218,23 @@
           "signal": "cluster_buy",
           "type": "buy",
           "value": 38997.5
+        },
+        {
+          "conviction": 62,
+          "date": "2026-11-20",
+          "owner": "Srivisal John",
+          "role": "SVP, Chief Financial Officer",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 48516.99
         }
       ],
       "last_checked": "2026-08-15T22:36:35.133171+00:00",
       "seen_accessions": [
         "0001140361-26-042118",
         "0001140361-26-042891",
-        "0001140361-26-044904"
+        "0001140361-26-044904",
+        "0001140361-26-045172"
       ]
     },
     "TSLA": {
@@ -16326,5 +16366,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-21T02:26:01.033083+00:00"
+  "updated_at": "2026-11-23T14:50:15.290972+00:00"
 }
