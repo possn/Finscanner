@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 17,
+    "alerts_sent": 3,
     "baselined": 0,
-    "detail_failures": 53,
+    "detail_failures": 57,
     "lookback_days": 10,
-    "new_filings": 96,
+    "new_filings": 58,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -6631,6 +6631,33 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1993830.3499999999
+        },
+        {
+          "conviction": 52,
+          "date": "2026-09-08",
+          "owner": "Wentz George R. Jr.",
+          "role": "General Counsel",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 34511146.0104
+        },
+        {
+          "conviction": 62,
+          "date": "2026-10-28",
+          "owner": "Wentz George R. Jr.",
+          "role": "General Counsel",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 6448509.6
+        },
+        {
+          "conviction": 63,
+          "date": "2026-11-19",
+          "owner": "Wentz George R. Jr.",
+          "role": "General Counsel",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 1465810.3199999998
         }
       ],
       "last_checked": "2026-08-15T22:36:09.802016+00:00",
@@ -6646,7 +6673,8 @@
         "0001213900-26-123308",
         "0001213900-26-123310",
         "0001213900-26-123316",
-        "0001213900-26-123339"
+        "0001213900-26-123339",
+        "0001213900-26-123347"
       ]
     },
     "FTNT": {
@@ -16619,5 +16647,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-24T02:17:18.612300+00:00"
+  "updated_at": "2026-11-24T12:40:19.986895+00:00"
 }
