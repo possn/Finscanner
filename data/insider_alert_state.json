@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 9,
+    "alerts_sent": 29,
     "baselined": 0,
     "detail_failures": 59,
     "lookback_days": 10,
-    "new_filings": 91,
+    "new_filings": 88,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -2116,9 +2116,21 @@
       ]
     },
     "AMPY": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 63,
+          "date": "2026-11-20",
+          "owner": "COGHILL CLINT D",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 925649.373
+        }
+      ],
       "last_checked": "2026-08-15T22:35:57.615793+00:00",
-      "seen_accessions": []
+      "seen_accessions": [
+        "0001235155-26-000004"
+      ]
     },
     "AMZN": {
       "event_history": [
@@ -2238,6 +2250,69 @@
           "signal": "sell",
           "type": "sell",
           "value": 203290.29
+        },
+        {
+          "conviction": 73,
+          "date": "2026-11-23",
+          "owner": "Reynolds Shelley",
+          "role": "Vice President",
+          "signal": "sell",
+          "type": "sell",
+          "value": 597863.281
+        },
+        {
+          "conviction": 80,
+          "date": "2026-11-23",
+          "owner": "Jassy Andrew R",
+          "role": "Director, President and CEO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5126830.772500001
+        },
+        {
+          "conviction": 77,
+          "date": "2026-11-23",
+          "owner": "Zapolsky David",
+          "role": "Senior Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1582682.0994000002
+        },
+        {
+          "conviction": 80,
+          "date": "2026-11-24",
+          "owner": "Zapolsky David",
+          "role": "Senior Vice President",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2335145.34
+        },
+        {
+          "conviction": 77,
+          "date": "2026-11-23",
+          "owner": "Olsavsky Brian T",
+          "role": "Senior Vice President and CFO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1604720.0
+        },
+        {
+          "conviction": 77,
+          "date": "2026-11-23",
+          "owner": "Herrington Douglas J",
+          "role": "CEO Worldwide Amazon Stores",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1623657.9524
+        },
+        {
+          "conviction": 80,
+          "date": "2026-11-23",
+          "owner": "Garman Matthew S",
+          "role": "CEO Amazon Web Services",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3729331.8764000004
         }
       ],
       "last_checked": "2026-08-15T22:35:57.707382+00:00",
@@ -2263,7 +2338,13 @@
         "0001018724-26-000052",
         "0001018724-26-000054",
         "0001936006-26-000030",
-        "0001018724-26-000056"
+        "0001018724-26-000056",
+        "0001018724-26-000058",
+        "0001374545-26-000012",
+        "0001557979-26-000010",
+        "0001639902-26-000010",
+        "0001936006-26-000032",
+        "0002024813-26-000012"
       ]
     },
     "APH": {
@@ -3589,7 +3670,17 @@
       ]
     },
     "BN": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 57,
+          "date": "2026-11-20",
+          "owner": "BROOKFIELD Corp /ON/",
+          "role": "10% owner",
+          "signal": "buy",
+          "type": "buy",
+          "value": 4299980.2221
+        }
+      ],
       "last_checked": "2026-08-15T22:36:01.797318+00:00",
       "seen_accessions": [
         "0001193125-26-362969",
@@ -3597,7 +3688,8 @@
         "0001193125-26-412127",
         "0001193125-26-412131",
         "0001193125-26-428770",
-        "0001193125-26-473371"
+        "0001193125-26-473371",
+        "0000950142-26-003149"
       ]
     },
     "BNS": {
@@ -4369,7 +4461,8 @@
         "0001225208-26-009140",
         "0001225208-26-009141",
         "0001225208-26-009142",
-        "0001225208-26-009143"
+        "0001225208-26-009143",
+        "0001225208-26-009135"
       ]
     },
     "CMP": {
@@ -5141,6 +5234,78 @@
           "signal": "sell",
           "type": "sell",
           "value": 629236.5299999999
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-20",
+          "owner": "Agrawal Nitin",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 446089.87
+        },
+        {
+          "conviction": 38,
+          "date": "2026-11-20",
+          "owner": "Baker Jeff",
+          "role": "Principal Accounting Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 55729.5212
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-20",
+          "owner": "Goldberg Chen",
+          "role": "EVP, Product & Engineering",
+          "signal": "sell",
+          "type": "sell",
+          "value": 382794.3361
+        },
+        {
+          "conviction": 63,
+          "date": "2026-11-20",
+          "owner": "Intrator Michael N",
+          "role": "Director, CEO and President, 10% owner",
+          "signal": "sell",
+          "type": "sell",
+          "value": 581513.9731
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-20",
+          "owner": "Jain Sachin",
+          "role": "Chief Operating Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 323679.427
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-20",
+          "owner": "McBee Brannin",
+          "role": "Chief Development Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 163378.0344
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-20",
+          "owner": "McVeety Kristen J",
+          "role": "GC and Secretary",
+          "signal": "sell",
+          "type": "sell",
+          "value": 176449.8801
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-20",
+          "owner": "Venturo Brian M",
+          "role": "Director, Chief Strategy Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 261611.72670000003
         }
       ],
       "last_checked": "2026-08-15T22:36:05.243985+00:00",
@@ -5213,7 +5378,15 @@
         "0001769628-26-000452",
         "0001769628-26-000453",
         "0001769628-26-000462",
-        "0001769628-26-000466"
+        "0001769628-26-000466",
+        "0001769628-26-000468",
+        "0001769628-26-000470",
+        "0001769628-26-000472",
+        "0001769628-26-000474",
+        "0001769628-26-000476",
+        "0001769628-26-000478",
+        "0001769628-26-000480",
+        "0001769628-26-000482"
       ]
     },
     "CSAI": {
@@ -8353,7 +8526,8 @@
         "0001012975-26-000796",
         "0001012975-26-000818",
         "0001628280-26-070304",
-        "0001628280-26-074569"
+        "0001628280-26-074569",
+        "0001628280-26-075844"
       ]
     },
     "INTC": {
@@ -13285,6 +13459,114 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 47957400.3543
+        },
+        {
+          "conviction": 70,
+          "date": "2026-11-20",
+          "owner": "THIEL PETER",
+          "role": "Director",
+          "signal": "strong_buy",
+          "type": "buy",
+          "value": 122253519.3377
+        },
+        {
+          "conviction": 48,
+          "date": "2026-11-20",
+          "owner": "Buckley Jeffrey",
+          "role": "See Remarks",
+          "signal": "sell",
+          "type": "sell",
+          "value": 132447.321
+        },
+        {
+          "conviction": 51,
+          "date": "2026-11-23",
+          "owner": "Buckley Jeffrey",
+          "role": "See Remarks",
+          "signal": "sell",
+          "type": "sell",
+          "value": 209648.3766
+        },
+        {
+          "conviction": 51,
+          "date": "2026-11-24",
+          "owner": "Buckley Jeffrey",
+          "role": "See Remarks",
+          "signal": "sell",
+          "type": "sell",
+          "value": 197625.0
+        },
+        {
+          "conviction": 61,
+          "date": "2026-11-20",
+          "owner": "Taylor Ryan D.",
+          "role": "See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2814015.4967
+        },
+        {
+          "conviction": 64,
+          "date": "2026-11-23",
+          "owner": "Taylor Ryan D.",
+          "role": "See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4451421.2092
+        },
+        {
+          "conviction": 61,
+          "date": "2026-11-20",
+          "owner": "Glazer David A.",
+          "role": "See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 2419606.7739999997
+        },
+        {
+          "conviction": 64,
+          "date": "2026-11-23",
+          "owner": "Glazer David A.",
+          "role": "See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3827541.7813000004
+        },
+        {
+          "conviction": 74,
+          "date": "2026-11-20",
+          "owner": "Karp Alexander C.",
+          "role": "Director, See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 37180170.5554
+        },
+        {
+          "conviction": 77,
+          "date": "2026-11-23",
+          "owner": "Karp Alexander C.",
+          "role": "Director, See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 37936132.3135
+        },
+        {
+          "conviction": 61,
+          "date": "2026-11-20",
+          "owner": "Sankar Shyam",
+          "role": "See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 3708116.6224
+        },
+        {
+          "conviction": 64,
+          "date": "2026-11-23",
+          "owner": "Sankar Shyam",
+          "role": "See Remarks",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5865975.094699999
         }
       ],
       "last_checked": "2026-08-15T22:36:26.743842+00:00",
@@ -13310,7 +13592,14 @@
         "0001840244-26-000023",
         "0001824159-26-000017",
         "0001823952-26-000026",
-        "0001824159-26-000019"
+        "0001824159-26-000019",
+        "0001211060-26-000012",
+        "0001705189-26-000019",
+        "0001823923-26-000017",
+        "0001823940-26-000014",
+        "0001823951-26-000011",
+        "0001823951-26-000013",
+        "0001824159-26-000021"
       ]
     },
     "PNR": {
@@ -15007,6 +15296,42 @@
           "signal": "sell",
           "type": "sell",
           "value": 3000.0
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-20",
+          "owner": "Platzer Peter",
+          "role": "Director, Executive Chairman",
+          "signal": "sell",
+          "type": "sell",
+          "value": 38895.066
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-20",
+          "owner": "Condor Theresa",
+          "role": "Director, Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 171632.196
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-20",
+          "owner": "ENGEL ALISON K",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 32690.757999999998
+        },
+        {
+          "conviction": 38,
+          "date": "2026-11-20",
+          "owner": "Oehme Johann Gabriel",
+          "role": "Chief Technology Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 68399.828
         }
       ],
       "last_checked": "2026-08-15T22:36:32.943743+00:00",
@@ -15020,7 +15345,11 @@
         "0001856304-26-000005",
         "0001193125-26-414689",
         "0001193125-26-414690",
-        "0001856366-26-000004"
+        "0001856366-26-000004",
+        "0001628280-26-075834",
+        "0001628280-26-075835",
+        "0001628280-26-075836",
+        "0001628280-26-075837"
       ]
     },
     "SRTS": {
@@ -16780,5 +17109,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-24T23:04:20.002226+00:00"
+  "updated_at": "2026-11-25T05:28:37.286705+00:00"
 }
