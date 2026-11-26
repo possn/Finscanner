@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 0,
+    "alerts_sent": 14,
     "baselined": 0,
-    "detail_failures": 59,
+    "detail_failures": 62,
     "lookback_days": 10,
-    "new_filings": 62,
+    "new_filings": 82,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -349,6 +349,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 845942.46
+        },
+        {
+          "conviction": 54,
+          "date": "2026-11-24",
+          "owner": "Newstead Jennifer",
+          "role": "SVP, GC and Government Affairs",
+          "signal": "sell",
+          "type": "sell",
+          "value": 833448.88
         }
       ],
       "last_checked": "2026-08-15T22:35:54.232345+00:00",
@@ -374,7 +383,8 @@
         "0001140361-26-042149",
         "0001140361-26-043484",
         "0001140361-26-044773",
-        "0001140361-26-044952"
+        "0001140361-26-044952",
+        "0001140361-26-045775"
       ]
     },
     "ABEV": {
@@ -858,7 +868,8 @@
         "0001225208-26-008871",
         "0001225208-26-008872",
         "0001225208-26-008969",
-        "0001225208-26-009120"
+        "0001225208-26-009120",
+        "0001225208-26-009164"
       ]
     },
     "AES": {
@@ -1362,6 +1373,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1962288.99
+        },
+        {
+          "conviction": 61,
+          "date": "2026-11-23",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1962734.4
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -1423,7 +1443,8 @@
         "0001104659-26-129961",
         "0001104659-26-130427",
         "0001104659-26-130860",
-        "0001104659-26-131642"
+        "0001104659-26-131642",
+        "0001104659-26-132138"
       ]
     },
     "AGNC": {
@@ -3381,6 +3402,24 @@
           "signal": "sell_reversal",
           "type": "sell",
           "value": 1945.82
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-23",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "buy_reversal",
+          "type": "buy",
+          "value": 121.9332
+        },
+        {
+          "conviction": 40,
+          "date": "2026-11-23",
+          "owner": "BANK OF AMERICA CORP /DE/",
+          "role": "10% owner",
+          "signal": "sell_reversal",
+          "type": "sell",
+          "value": 120.72
         }
       ],
       "last_checked": "2026-08-15T22:35:59.858874+00:00",
@@ -3420,7 +3459,8 @@
         "0000070858-26-000601",
         "0000070858-26-000602",
         "0000070858-26-000603",
-        "0000070858-26-000604"
+        "0000070858-26-000604",
+        "0000070858-26-000609"
       ]
     },
     "BAM": {
@@ -5851,6 +5891,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1272822.0
+        },
+        {
+          "conviction": 60,
+          "date": "2026-11-23",
+          "owner": "Pate R. Hewitt",
+          "role": "Chief Legal Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 985350.9
         }
       ],
       "last_checked": "2026-08-15T22:36:06.063980+00:00",
@@ -5865,7 +5914,8 @@
         "0000093410-26-000194",
         "0000093410-26-000198",
         "0000093410-26-000202",
-        "0000093410-26-000204"
+        "0000093410-26-000204",
+        "0000093410-26-000206"
       ]
     },
     "DG": {
@@ -6210,7 +6260,8 @@
         "0002151431-26-000010",
         "0001363092-26-000006",
         "0001686963-26-000012",
-        "0001754881-26-000014"
+        "0001754881-26-000014",
+        "0001847946-26-000016"
       ]
     },
     "ENB": {
@@ -6219,7 +6270,17 @@
       "seen_accessions": []
     },
     "ENS": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 44,
+          "date": "2026-11-25",
+          "owner": "Funk Andrea J.",
+          "role": "EVP and CFO",
+          "signal": "buy",
+          "type": "buy",
+          "value": 24970.0
+        }
+      ],
       "last_checked": "2026-08-15T22:36:07.768163+00:00",
       "seen_accessions": [
         "0001437749-26-027035",
@@ -6265,7 +6326,8 @@
         "0001437749-26-032937",
         "0001437749-26-032938",
         "0001437749-26-033017",
-        "0001437749-26-036172"
+        "0001437749-26-036172",
+        "0001437749-26-038304"
       ]
     },
     "EOG": {
@@ -7846,6 +7908,33 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 6550555.499999999
+        },
+        {
+          "conviction": 64,
+          "date": "2026-11-23",
+          "owner": "Roseborough Teresa Wynn",
+          "role": "EVP, Gen. Counsel & Corp. Sec.",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1040040.0
+        },
+        {
+          "conviction": 80,
+          "date": "2026-11-23",
+          "owner": "Campbell Ann Marie",
+          "role": "President & COO",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4277584.6
+        },
+        {
+          "conviction": 54,
+          "date": "2026-11-25",
+          "owner": "Campbell Ann Marie",
+          "role": "President & COO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 34815.479999999996
         }
       ],
       "last_checked": "2026-08-15T22:36:12.049331+00:00",
@@ -7863,7 +7952,9 @@
         "0000354950-26-000176",
         "0000354950-26-000177",
         "0000354950-26-000187",
-        "0000354950-26-000188"
+        "0000354950-26-000188",
+        "0000354950-26-000191",
+        "0000354950-26-000192"
       ]
     },
     "HIMS": {
@@ -8123,7 +8214,8 @@
         "0001062993-26-005986",
         "0001062993-26-005987",
         "0001062993-26-006153",
-        "0001062993-26-006159"
+        "0001062993-26-006159",
+        "0001062993-26-006280"
       ]
     },
     "HLLY": {
@@ -8529,6 +8621,24 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 2146008.48
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-24",
+          "owner": "MAVERICK CAPITAL LTD",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 491736.7998
+        },
+        {
+          "conviction": 67,
+          "date": "2026-11-25",
+          "owner": "MAVERICK CAPITAL LTD",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1277441.2475
         }
       ],
       "last_checked": "2026-08-15T22:36:14.296361+00:00",
@@ -8537,7 +8647,8 @@
         "0001012975-26-000818",
         "0001628280-26-070304",
         "0001628280-26-074569",
-        "0001628280-26-075844"
+        "0001628280-26-075844",
+        "0001012975-26-001118"
       ]
     },
     "INTC": {
@@ -9710,6 +9821,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 309715.83999999997
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-23",
+          "owner": "Bjornholt James Eric",
+          "role": "SENIOR CORPORATE VP AND CFO",
+          "signal": "sell",
+          "type": "sell",
+          "value": 187829.0
         }
       ],
       "last_checked": "2026-08-15T22:36:19.250414+00:00",
@@ -9743,7 +9863,8 @@
         "0002035446-26-000032",
         "0002035754-26-000030",
         "0002152018-26-000013",
-        "0001181928-26-000042"
+        "0001181928-26-000042",
+        "0001452681-26-000049"
       ]
     },
     "MDLZ": {
@@ -11003,12 +11124,22 @@
           "signal": "sell",
           "type": "sell",
           "value": 97858.8
+        },
+        {
+          "conviction": 51,
+          "date": "2026-11-24",
+          "owner": "Wilson Frank Anders",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 52200.0
         }
       ],
       "last_checked": "2026-08-15T22:36:22.367071+00:00",
       "seen_accessions": [
         "0001076930-26-000086",
-        "0001076930-26-000088"
+        "0001076930-26-000088",
+        "0001076930-26-000090"
       ]
     },
     "NOW": {
@@ -12750,6 +12881,60 @@
           "signal": "buy",
           "type": "buy",
           "value": 13750.0
+        },
+        {
+          "conviction": 31,
+          "date": "2026-11-23",
+          "owner": "GARAGIC DENIS",
+          "role": "CHIEF TECHNOLOGY OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 18329.9324
+        },
+        {
+          "conviction": 31,
+          "date": "2026-11-24",
+          "owner": "GARAGIC DENIS",
+          "role": "CHIEF TECHNOLOGY OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 23161.8933
+        },
+        {
+          "conviction": 31,
+          "date": "2026-11-23",
+          "owner": "SONNE STEPHEN",
+          "role": "CHIEF LEGAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 5673.6732
+        },
+        {
+          "conviction": 31,
+          "date": "2026-11-24",
+          "owner": "SONNE STEPHEN",
+          "role": "CHIEF LEGAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 7167.9816
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-23",
+          "owner": "THATCHER TREVOR",
+          "role": "CHIEF FINANCIAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 4921.306
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-24",
+          "owner": "THATCHER TREVOR",
+          "role": "CHIEF FINANCIAL OFFICER",
+          "signal": "sell",
+          "type": "sell",
+          "value": 6220.2465
         }
       ],
       "last_checked": "2026-08-15T22:36:25.709082+00:00",
@@ -12759,7 +12944,10 @@
         "0002014215-26-000020",
         "0001368618-26-000015",
         "0001368618-26-000016",
-        "0001368618-26-000017"
+        "0001368618-26-000017",
+        "0001920634-26-000024",
+        "0001998996-26-000024",
+        "0002014215-26-000024"
       ]
     },
     "PEP": {
@@ -14496,6 +14684,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 19699895.660000004
+        },
+        {
+          "conviction": 74,
+          "date": "2026-11-24",
+          "owner": "Conley Jason",
+          "role": "EVP, Chief Financial Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4750900.0
         }
       ],
       "last_checked": "2026-08-15T22:36:30.391045+00:00",
@@ -14509,7 +14706,8 @@
         "0001193125-26-445340",
         "0001193125-26-449793",
         "0001193125-26-451912",
-        "0001193125-26-460551"
+        "0001193125-26-460551",
+        "0001193125-26-478412"
       ]
     },
     "RR": {
@@ -15222,7 +15420,8 @@
         "0001248294-26-000008",
         "0001588852-26-000016",
         "0001917995-26-000017",
-        "0001920484-26-000014"
+        "0001920484-26-000014",
+        "0002087198-26-000005"
       ]
     },
     "SPGI": {
@@ -15824,6 +16023,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 325258.2
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-24",
+          "owner": "Thurmond Mark C.",
+          "role": "Director, Co-Chief Executive Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 149287.32
         }
       ],
       "last_checked": "2026-08-15T22:36:34.540956+00:00",
@@ -15844,7 +16052,8 @@
         "0001309403-26-000015",
         "0001345943-26-000016",
         "0001651579-26-000012",
-        "0001766979-26-000016"
+        "0001766979-26-000016",
+        "0001651579-26-000014"
       ]
     },
     "TGT": {
@@ -15884,6 +16093,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 2890629.7586
+        },
+        {
+          "conviction": 77,
+          "date": "2026-11-24",
+          "owner": "Cornell Brian C",
+          "role": "Director, Executive Officer",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 4387735.0
         }
       ],
       "last_checked": "2026-08-15T22:36:34.638151+00:00",
@@ -15894,7 +16112,8 @@
         "0001941816-26-000005",
         "0002153131-26-000007",
         "0001854365-26-000010",
-        "0001941816-26-000007"
+        "0001941816-26-000007",
+        "0001288709-26-000016"
       ]
     },
     "TMC": {
@@ -17173,5 +17392,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-25T18:01:16.081114+00:00"
+  "updated_at": "2026-11-26T01:49:25.620511+00:00"
 }
