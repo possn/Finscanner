@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 14,
+    "alerts_sent": 1,
     "baselined": 0,
     "detail_failures": 62,
     "lookback_days": 10,
-    "new_filings": 82,
+    "new_filings": 63,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -17361,6 +17361,15 @@
           "signal": "sell",
           "type": "sell",
           "value": 247758.0
+        },
+        {
+          "conviction": 57,
+          "date": "2026-11-25",
+          "owner": "RUBIN KEVIN",
+          "role": "Chief Financial Officer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 114506.08539999998
         }
       ],
       "last_checked": "2026-08-15T22:36:39.173337+00:00",
@@ -17380,7 +17389,8 @@
         "0001713683-26-000206",
         "0001713683-26-000208",
         "0001713683-26-000210",
-        "0001713683-26-000212"
+        "0001713683-26-000212",
+        "0001713683-26-000241"
       ]
     },
     "ZTS": {
@@ -17392,5 +17402,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-26T01:49:25.620511+00:00"
+  "updated_at": "2026-11-26T11:00:48.790825+00:00"
 }
