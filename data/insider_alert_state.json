@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 2,
+    "alerts_sent": 5,
     "baselined": 0,
-    "detail_failures": 49,
+    "detail_failures": 48,
     "lookback_days": 10,
-    "new_filings": 51,
+    "new_filings": 57,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -1382,6 +1382,15 @@
           "signal": "large_sale",
           "type": "sell",
           "value": 1962734.4
+        },
+        {
+          "conviction": 61,
+          "date": "2026-11-24",
+          "owner": "Japan Post Holdings Co., Ltd.",
+          "role": "10% owner",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 1613671.94
         }
       ],
       "last_checked": "2026-08-15T22:35:55.760878+00:00",
@@ -1444,7 +1453,8 @@
         "0001104659-26-130427",
         "0001104659-26-130860",
         "0001104659-26-131642",
-        "0001104659-26-132138"
+        "0001104659-26-132138",
+        "0001104659-26-132480"
       ]
     },
     "AGNC": {
@@ -4527,7 +4537,11 @@
         "0001227654-26-000078",
         "0001227654-26-000079",
         "0001227654-26-000080",
-        "0001227654-26-000081"
+        "0001227654-26-000081",
+        "0002015089-26-000008",
+        "0002054940-26-000005",
+        "0002090688-26-000003",
+        "0002149827-26-000005"
       ]
     },
     "CMPS": {
@@ -6501,12 +6515,32 @@
           "signal": "sell",
           "type": "sell",
           "value": 107250.0
+        },
+        {
+          "conviction": 67,
+          "date": "2026-11-24",
+          "owner": "Moreira John M.",
+          "role": "EVP, CFO and Treasurer",
+          "signal": "sell",
+          "type": "sell",
+          "value": 196421.5
+        },
+        {
+          "conviction": 54,
+          "date": "2026-11-25",
+          "owner": "Hunt James W III",
+          "role": "EVP-Corp Rel & Sustainability",
+          "signal": "sell",
+          "type": "sell",
+          "value": 312053.625
         }
       ],
       "last_checked": "2026-08-15T22:36:08.264502+00:00",
       "seen_accessions": [
         "0000072741-26-000093",
-        "0000072741-26-000095"
+        "0000072741-26-000095",
+        "0000072741-26-000098",
+        "0000072741-26-000099"
       ]
     },
     "ETN": {
@@ -6710,7 +6744,8 @@
         "0001048911-26-000156",
         "0001048911-26-000144",
         "0001048911-26-000145",
-        "0001048911-26-000158"
+        "0001048911-26-000158",
+        "0001048911-26-000164"
       ]
     },
     "FLNC": {
@@ -9492,12 +9527,31 @@
           "signal": "buy",
           "type": "buy",
           "value": 33946.24
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-24",
+          "owner": "Elsztain Alejandro Gustavo",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 18102.127999999997
+        },
+        {
+          "conviction": 44,
+          "date": "2026-11-25",
+          "owner": "Elsztain Alejandro Gustavo",
+          "role": "Director",
+          "signal": "buy",
+          "type": "buy",
+          "value": 12294.24
         }
       ],
       "last_checked": "2026-08-15T22:36:17.674515+00:00",
       "seen_accessions": [
         "0002119764-26-000030",
-        "0002119764-26-000040"
+        "0002119764-26-000040",
+        "0002119764-26-000041"
       ]
     },
     "LPTH": {
@@ -17423,5 +17477,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-27T17:31:30.649786+00:00"
+  "updated_at": "2026-11-27T22:04:27.154457+00:00"
 }
