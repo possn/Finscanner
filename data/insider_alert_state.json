@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 1,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 62,
+    "detail_failures": 49,
     "lookback_days": 10,
-    "new_filings": 63,
+    "new_filings": 51,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -8893,14 +8893,25 @@
       "seen_accessions": []
     },
     "KMB": {
-      "event_history": [],
+      "event_history": [
+        {
+          "conviction": 80,
+          "date": "2026-11-24",
+          "owner": "Perry Kirk",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 5240352.1850000005
+        }
+      ],
       "last_checked": "2026-08-15T22:36:16.010411+00:00",
       "seen_accessions": [
         "0001225208-26-008583",
         "0001225208-26-008584",
         "0001225208-26-008611",
         "0001225208-26-008612",
-        "0001225208-26-008613"
+        "0001225208-26-008613",
+        "0001225208-26-009172"
       ]
     },
     "KO": {
@@ -16126,13 +16137,23 @@
           "signal": "strong_buy",
           "type": "buy",
           "value": 805000.0
+        },
+        {
+          "conviction": 62,
+          "date": "2026-11-25",
+          "owner": "Barron Gerard",
+          "role": "Director, Chairman & CEO",
+          "signal": "cluster_buy",
+          "type": "buy",
+          "value": 33400.0
         }
       ],
       "last_checked": "2026-08-15T22:36:34.870757+00:00",
       "seen_accessions": [
         "0001104659-26-108361",
         "0001104659-26-115124",
-        "0001104659-26-131894"
+        "0001104659-26-131894",
+        "0001104659-26-132347"
       ]
     },
     "TROW": {
@@ -17402,5 +17423,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-26T11:00:48.790825+00:00"
+  "updated_at": "2026-11-27T17:31:30.649786+00:00"
 }
