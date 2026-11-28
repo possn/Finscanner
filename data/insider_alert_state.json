@@ -1,10 +1,10 @@
 {
   "last_change": {
-    "alerts_sent": 5,
+    "alerts_sent": 2,
     "baselined": 0,
-    "detail_failures": 48,
+    "detail_failures": 41,
     "lookback_days": 10,
-    "new_filings": 57,
+    "new_filings": 44,
     "price_alerts_sent": 0,
     "requested": 479,
     "sec_issuers": 297
@@ -397,11 +397,30 @@
           "signal": "sell",
           "type": "sell",
           "value": 187739.13
+        },
+        {
+          "conviction": 70,
+          "date": "2026-11-23",
+          "owner": "Moreira Ricardo Manuel Frangatos Pires",
+          "role": "Director",
+          "signal": "sell",
+          "type": "sell",
+          "value": 536000.0
+        },
+        {
+          "conviction": 77,
+          "date": "2026-11-24",
+          "owner": "Moreira Ricardo Manuel Frangatos Pires",
+          "role": "Director",
+          "signal": "large_sale",
+          "type": "sell",
+          "value": 7644000.0
         }
       ],
       "last_checked": "2026-08-15T22:35:54.535871+00:00",
       "seen_accessions": [
-        "0001193125-26-418085"
+        "0001193125-26-418085",
+        "0001193125-26-480350"
       ]
     },
     "ABR": {
@@ -4541,7 +4560,8 @@
         "0002015089-26-000008",
         "0002054940-26-000005",
         "0002090688-26-000003",
-        "0002149827-26-000005"
+        "0002149827-26-000005",
+        "0001210454-26-000006"
       ]
     },
     "CMPS": {
@@ -6799,7 +6819,8 @@
         "0001193125-26-467386",
         "0001193125-26-467387",
         "0001193125-26-467403",
-        "0001193125-26-469022"
+        "0001193125-26-469022",
+        "0001193125-26-480351"
       ]
     },
     "FMC": {
@@ -17477,5 +17498,5 @@
       ]
     }
   },
-  "updated_at": "2026-11-27T22:04:27.154457+00:00"
+  "updated_at": "2026-11-28T03:58:43.709923+00:00"
 }
